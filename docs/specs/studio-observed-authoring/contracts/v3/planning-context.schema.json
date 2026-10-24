@@ -227,6 +227,18 @@
             "minLength": 1,
             "maxLength": 500
           },
+          "scopeIntent": {
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "referenceIndex": {
             "oneOf": [
               {
@@ -333,6 +345,7 @@
           "occurrence",
           "operationKind",
           "targetIntent",
+          "scopeIntent",
           "referenceIndex",
           "needId",
           "predicate"
