@@ -1,0 +1,112 @@
+{
+  "id": "c12-red01",
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs009-recovery-20261020-benchmark-report-proof02-c12-red01",
+    "pnpm",
+    "--dir=/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner",
+    "--config.package-manager-strict=false",
+    "exec",
+    "/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "test/evaluation/benchmarkScoring.test.ts",
+    "test/evaluation/corpusManifest.test.ts",
+    "test/evaluation/harnessSelfTest.test.ts",
+    "test/evaluation/budgetAdmission.test.ts",
+    "--coverage.enabled=false",
+    "--minWorkers=1",
+    "--maxWorkers=1",
+    "--no-file-parallelism",
+    "--testTimeout=5000",
+    "--hookTimeout=5000",
+    "--testNamePattern",
+    "^(?:reviewed\\ cause\\ accounting:\\ groups\\ 1,\\ 2,\\ 3\\ and\\ 6\\ \\(synthetic\\ inputs\\ only\\)\\ group1:\\ an\\ unreviewed\\ generic\\ budget\\ failure\\ is\\ UNKNOWN\\ rather\\ than\\ an\\ observed\\ zero|reviewed\\ cause\\ accounting:\\ groups\\ 1,\\ 2,\\ 3\\ and\\ 6\\ \\(synthetic\\ inputs\\ only\\)\\ group2:\\ 'rs1NonScalarReadGaps'\\ binds\\ real\\ event\\ references\\ and\\ preserves\\ a\\ failed\\ class\\-P\\ run|reviewed\\ cause\\ accounting:\\ groups\\ 1,\\ 2,\\ 3\\ and\\ 6\\ \\(synthetic\\ inputs\\ only\\)\\ group3:\\ final\\-P,\\ credited\\-all\\ and\\ every\\ supplied\\ attempt\\ have\\ separate\\ cause\\ denominators|reviewed\\ cause\\ accounting:\\ groups\\ 1,\\ 2,\\ 3\\ and\\ 6\\ \\(synthetic\\ inputs\\ only\\)\\ group6:\\ immutable\\ originals\\ defeat\\ hard\\-fact\\ laundering\\ and\\ the\\ offline\\ branch\\ writes\\ fresh\\ files\\ without\\ a\\ client|inspection\\ scope\\ and\\ source\\ pins:\\ groups\\ 4\\ and\\ 6\\ group4:\\ explicitly\\ blocked\\ staging\\ UNKNOWN\\ is\\ valid\\ and\\ never\\ a\\ known\\ local\\ zero|group5:\\ pure\\ two\\-session\\ and\\ missing\\-charge\\ controls\\ sums\\ base10/100/20\\ plus\\ suffix3/40/5\\ and\\ charges\\ each\\ real\\ learn\\ once\\ in\\ order|group5:\\ pure\\ two\\-session\\ and\\ missing\\-charge\\ controls\\ starts\\ no\\ suffix\\ after\\ 'budget',\\ retaining\\ one\\ truthful\\ partial\\ session\\ without\\ a\\ fabricated\\ false\\ pass|group5:\\ later\\ hard\\ facts\\ share\\ the\\ existing\\ protective\\ stop\\ latch\\ retains\\ a\\ budget\\ stop\\ plus\\ a\\ later\\ hard\\ fact\\ without\\ charging\\ a\\ session\\ twice)$"
+  ],
+  "composition": "red",
+  "startedAtUtc": "2026-10-21T02:28:48.192295+00:00",
+  "rootConditionalSha256": "566c5361edfa0b33311db40a4da39e3a5d5d4258e0751bf631ec5d80ee671472",
+  "correctedProofTask": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/benchmark-report-lint-corrected-proof04-task.txt",
+  "collectorPid": 95196,
+  "ownedProcessGroup": 95196,
+  "rawOuterExit": 1,
+  "endedAtUtc": "2026-10-21T02:28:49.664699+00:00",
+  "actualCollectorResult": {
+    "command": [
+      "pnpm",
+      "--dir=/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "test/evaluation/benchmarkScoring.test.ts",
+      "test/evaluation/corpusManifest.test.ts",
+      "test/evaluation/harnessSelfTest.test.ts",
+      "test/evaluation/budgetAdmission.test.ts",
+      "--coverage.enabled=false",
+      "--minWorkers=1",
+      "--maxWorkers=1",
+      "--no-file-parallelism",
+      "--testTimeout=5000",
+      "--hookTimeout=5000",
+      "--testNamePattern",
+      "^(?:reviewed\\ cause\\ accounting:\\ groups\\ 1,\\ 2,\\ 3\\ and\\ 6\\ \\(synthetic\\ inputs\\ only\\)\\ group1:\\ an\\ unreviewed\\ generic\\ budget\\ failure\\ is\\ UNKNOWN\\ rather\\ than\\ an\\ observed\\ zero|reviewed\\ cause\\ accounting:\\ groups\\ 1,\\ 2,\\ 3\\ and\\ 6\\ \\(synthetic\\ inputs\\ only\\)\\ group2:\\ 'rs1NonScalarReadGaps'\\ binds\\ real\\ event\\ references\\ and\\ preserves\\ a\\ failed\\ class\\-P\\ run|reviewed\\ cause\\ accounting:\\ groups\\ 1,\\ 2,\\ 3\\ and\\ 6\\ \\(synthetic\\ inputs\\ only\\)\\ group3:\\ final\\-P,\\ credited\\-all\\ and\\ every\\ supplied\\ attempt\\ have\\ separate\\ cause\\ denominators|reviewed\\ cause\\ accounting:\\ groups\\ 1,\\ 2,\\ 3\\ and\\ 6\\ \\(synthetic\\ inputs\\ only\\)\\ group6:\\ immutable\\ originals\\ defeat\\ hard\\-fact\\ laundering\\ and\\ the\\ offline\\ branch\\ writes\\ fresh\\ files\\ without\\ a\\ client|inspection\\ scope\\ and\\ source\\ pins:\\ groups\\ 4\\ and\\ 6\\ group4:\\ explicitly\\ blocked\\ staging\\ UNKNOWN\\ is\\ valid\\ and\\ never\\ a\\ known\\ local\\ zero|group5:\\ pure\\ two\\-session\\ and\\ missing\\-charge\\ controls\\ sums\\ base10/100/20\\ plus\\ suffix3/40/5\\ and\\ charges\\ each\\ real\\ learn\\ once\\ in\\ order|group5:\\ pure\\ two\\-session\\ and\\ missing\\-charge\\ controls\\ starts\\ no\\ suffix\\ after\\ 'budget',\\ retaining\\ one\\ truthful\\ partial\\ session\\ without\\ a\\ fabricated\\ false\\ pass|group5:\\ later\\ hard\\ facts\\ share\\ the\\ existing\\ protective\\ stop\\ latch\\ retains\\ a\\ budget\\ stop\\ plus\\ a\\ later\\ hard\\ fact\\ without\\ charging\\ a\\ session\\ twice)$",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-benchmark-report-proof02-c12-red01-vitest.json"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-21T02:28:48.489138+00:00",
+    "elapsedSeconds": 1.14,
+    "exit": 1,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "0c058cd884cc09aeea540b018b56a182f423902c0749a33e9da014f817df1172",
+    "testInputStable": true,
+    "testInputDigestBefore": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f",
+    "testInputDigestAfter": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f",
+    "vitest": {
+      "success": false,
+      "numPassedTests": 0,
+      "numFailedTests": 8,
+      "numPendingTests": 97,
+      "numTotalTests": 105,
+      "numPassedTestSuites": 13,
+      "numFailedTestSuites": 8
+    },
+    "vitestReportSha256": "48d7442aa23a1ea0e63186922f5bd5a11992b6fdb4e8e13432eff13ec39c1c14"
+  },
+  "resultSha256": "345f097b4060ccf2139cd7a7508718b1e0a3764d713443ade3c72f7dfd9ccd29",
+  "logSha256": "0c058cd884cc09aeea540b018b56a182f423902c0749a33e9da014f817df1172",
+  "privateInputDelta": [
+    {
+      "path": "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+      "before": {
+        "path": "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+        "sha256": "40cdb9bb1d34637e64126bd517e5a5d31d5ddcdaad84f31f2ced723b7762a4da",
+        "bytes": 16160
+      },
+      "after": {
+        "path": "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+        "sha256": "b0dd05a02723507fc907c568c1ece377935be417aad057524baaca0289e8e0e9",
+        "bytes": 16215
+      }
+    }
+  ],
+  "cacheChangedKeys": [
+    ":test/evaluation/corpusManifest.test.ts",
+    ":test/evaluation/budgetAdmission.test.ts",
+    ":test/evaluation/benchmarkScoring.test.ts",
+    ":test/evaluation/harnessSelfTest.test.ts"
+  ],
+  "cacheOther187ValuesExact": true,
+  "actualAndOwnPrivateSourcesStable": true,
+  "oldBorrowedNamespaceRead": false,
+  "privateProduct238Stable": true,
+  "ownedProcessGroupSignal0Observation": "ESRCH/GONE",
+  "noSignalsGT0": true
+}

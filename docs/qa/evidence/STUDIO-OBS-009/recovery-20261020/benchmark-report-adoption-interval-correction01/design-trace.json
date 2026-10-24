@@ -1,0 +1,57 @@
+{
+  "kind": "V1_TO_V2_CLAUSE_CONTROL_TRACE_UNEXECUTED",
+  "authority": "BR-C2-01 review2c1f4e3a/findings2faca909/QAmanifest7a2e24f0 and intervaladdendummanifest037ff619",
+  "C2interval": [
+    {
+      "clause": "complete original interval, not sampled endpoints",
+      "implementation": "projectReviewedInput originalIntervalVerified full interval scan, chain/prefix/end checks",
+      "control": "same existinggroup6 tail STOP/refusal/ADMITTED/STOPthenreadmit variants"
+    },
+    {
+      "clause": "actual original end/history missing remainsUNKNOWN",
+      "implementation": "optional receipt fields+bound interval document+independent originalIntervalHistoryReviewed/hash; no fallback",
+      "control": "sameexistinggroup6 incompletebindings and missingrawend"
+    },
+    {
+      "clause": "start snapshot preserved, no false terminalproof",
+      "implementation": "input.ledger/execution.ledgerSha unchanged; separate input.intervalLedger/execution.intervalLedgerSha; CLI separate admission-ledger-interval.json and actual futureclosure sample before read",
+      "control": "unchanged start snapshot SHA across alltailvariants; fullyboundpositive"
+    },
+    {
+      "clause": "wrong purpose/outside interval distinct",
+      "implementation": "samepurpose, newer seq, inclusive actual start/end boundedscan",
+      "control": "OTHER_PURPOSE and AFTER_ORIGINAL_END remainadoptable"
+    }
+  ],
+  "untouchedClauses": [
+    {
+      "name": "causeEventValidation",
+      "sha256": "b18507900462a1f3999643d971ccb28e57735a3dc4f9e2768d5675bb00879017",
+      "unchanged": true
+    },
+    {
+      "name": "C4AndRawRecordValidation",
+      "sha256": "efe1bc67062d2df1a22eabe37bf5e0c1d2993c9707e8a13909bff506294c43cd",
+      "unchanged": true
+    },
+    {
+      "name": "completionSelectionC12GatesAndReportScopes",
+      "sha256": "3256f15ceef7ef46046cf11272d06ab68acbd31855661a0a62f9f75d7674a6b7",
+      "unchanged": true
+    },
+    {
+      "name": "C3StopRuleDriversAndRunLoop",
+      "sha256": "691d50add25e047592eb601c6a0a4132e051758eebe91747106b3365b1991e2d",
+      "unchanged": true
+    },
+    {
+      "name": "exactModePGuard",
+      "sha256": "ae5869310519d09f7f5946d34249d4a18a293aa159d7c86087b49e99e5852e30",
+      "unchanged": true
+    }
+  ],
+  "testIdentityBinding": "original-case-projection.json + expected-cases.json, all original86 and prior19 newnames/order unchanged",
+  "minimalBoundary": "7necessary existing files changed; other3existing tests identical, all10bound. No module/service/backend/API/producerframework/limitsidentity/newgroup/newworkflow.",
+  "futureActualFactLimit": "CLI future timestamp/history read is actual measurement only if performed under future authorization; it cannot authenticate authority/completeness or repair legacymissing facts. Current originals/provenance/prices/config/headroom/provider/S&C/human UNKNOWN; processdeath/receiptnotemitted UNKNOWN, no durablejournal.",
+  "status": "STOP_FOR_INDEPENDENT_DELTA_SOURCE_QA"
+}

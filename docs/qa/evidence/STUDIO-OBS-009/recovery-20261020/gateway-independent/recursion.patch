@@ -1,0 +1,14 @@
+--- a/helm-chart/put-checks/templates/_helpers.tpl
++++ b/helm-chart/put-checks/templates/_helpers.tpl
+@@ -731,7 +731,7 @@
+ {{- fail (printf "configOverrides property %s is managed by the chart; use its dedicated values or Secret references" $path) -}}
+ {{- end -}}
+ {{- if kindIs "map" $value -}}
+-{{- include "put-checks.springConfig.validateProperties" (dict "values" $value "path" $path) -}}
+-{{- end -}}
+-{{- end -}}
+-{{- end -}}
++
++{{- end -}}
++{{- end -}}
++{{- end -}}

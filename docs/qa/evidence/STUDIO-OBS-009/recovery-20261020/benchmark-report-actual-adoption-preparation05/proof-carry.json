@@ -1,0 +1,103 @@
+{
+  "status": "PRIVATE_PROOF_CARRY_CONDITIONAL_NOT_ACTUAL_ADOPTION",
+  "stageSourceEquivalence": [
+    {
+      "id": "types-green01",
+      "composition": "green",
+      "sameExecutedGreenTen": true
+    },
+    {
+      "id": "lint-green01",
+      "composition": "green",
+      "sameExecutedGreenTen": true
+    },
+    {
+      "id": "v1-c2-red01",
+      "composition": "v1-delta-red",
+      "sameExecutedGreenTen": false
+    },
+    {
+      "id": "c12-red01",
+      "composition": "red",
+      "sameExecutedGreenTen": false
+    },
+    {
+      "id": "green105-01",
+      "composition": "green",
+      "sameExecutedGreenTen": true
+    },
+    {
+      "id": "validate-unfrozen01",
+      "composition": "green",
+      "sameExecutedGreenTen": true
+    },
+    {
+      "id": "freeze-copy01",
+      "composition": "green",
+      "sameExecutedGreenTen": true
+    },
+    {
+      "id": "validate-frozen01",
+      "composition": "green",
+      "sameExecutedGreenTen": true
+    }
+  ],
+  "qualified105": {
+    "passed": 105,
+    "failed": 0,
+    "skipped": 0,
+    "physicalFiles": 4,
+    "groups": 21,
+    "original86Plus19": true,
+    "perFileCounts": {
+      "benchmarkScoring.test.ts": 31,
+      "budgetAdmission.test.ts": 23,
+      "corpusManifest.test.ts": 30,
+      "harnessSelfTest.test.ts": 21
+    }
+  },
+  "originalCommandsRawExits": [
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0
+  ],
+  "redQualifications": "v1oneintendedassertion/c12eightintendedassertions retained; no rerun",
+  "candidateAndExecutedTenExact": true,
+  "capturedAllTenA1PreimagesMatch": true,
+  "privateProductE19": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+  "capturedActualProductE19": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+  "capturedActualConfiguredBuildQualification": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application02/configured-build-final-assessment.json",
+    "sha256": "33131a0d750db82908c436f55456fc7dc80152ccee33dfced5b54702fcc4a6fd"
+  },
+  "separateCapturedInputEquivalenceScope": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application02/actual-qualified-private-input-output-equivalence.json",
+    "sha256": "65d530046d1683c93ada405c4246f700c5e6e5b6a94a3c8e69faee4a41f5a33e",
+    "qualification": "Native02qualifiedprivatebase/actualA1,13756noncacheinputs exact,238E19exact. Doesnotbyitselfestablisha newcurrentbenchmarkSDK/inputcomparison."
+  },
+  "carryConditions": [
+    "Freshactual10mode/SHA preguard andallpostapplicationhashes exact.",
+    "ActualrelevantNode24/pnpm/canonicalSDK/config/importedpublicsourceinputs andproductE19 equivalent toexecutedproof asqualifiedbyexistingacceptedcapturedmetadata plusseparatelyreleasedfreshminimalguard. No forcedoldcache or broadSDKexemption.",
+    "Exactbusinessmanifestinput/pinreadmembership remainsopaqueandroot-bound; no evaluator/pricing/seed/schema/oracle/assertionchange.",
+    "Fixtureimportandactualrouting limits explicit; synthetic105andmetadataCLIs are not livebackend/provider/nativefixture proof.",
+    "Onlyconcreteinput/sourcechange invalidatinganexistingproof warrantsnewboundedcheck undernewrootrelease; no105repeatsolelyforcountrepetition."
+  ],
+  "unbound": [
+    "Freshactualmodes/currentSDKorprofilebindingafter011closure",
+    "Publicfixturemodule/transitiveimportsideeffectreview and anyactual import outcome",
+    "Actualpublic-route applicability against current pinnedOpenAPI/backendroute evidence; no live endpointproof",
+    "Legitimateactualcorpusfreeze timestamp/fullfilehash/canonicalmanifestdigest/sourcecapture"
+  ],
+  "historicalNotCurrent": {
+    "actualAtPrivateProof": "3e1801b4/1812/D698238",
+    "privateFrozenAt": "2026-10-21T02:40:57.969Z",
+    "privateManifestDigest": "b49f6d8ad81b156f61f4e7d3330edf17ad764f2fd4b4412c480764888d7e2506",
+    "notActualD_C_T4PricingHeadroomOrPilot": true
+  },
+  "runtimeApproval": false
+}

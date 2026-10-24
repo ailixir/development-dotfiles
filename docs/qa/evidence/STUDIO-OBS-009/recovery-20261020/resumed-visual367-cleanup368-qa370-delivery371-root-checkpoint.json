@@ -1,0 +1,427 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-10-22T11:32:18.082292+00:00",
+  "statusOnlyNotAuthority": true,
+  "phase": "ACTUAL367_STOPPED_CLEANUP368_ALL_GONE_369_NOT_ADMITTED_QA370_ACCEPTED_DELIVERY371",
+  "actual329": {
+    "receiptSHA256": "ea239d6cb89831e5f530a89831114a7813a9a561ac54ad5fb9415511e8c8bda7",
+    "manifestSHA256": "73a71d572f96bab50bde4d2555dbed17fae6bdc0c4ca1a9fb6ae8dc328e1bb82",
+    "observerSHA256": "6fc4d61be1ff7d9d13d70a4297cecd22f10aade4fbca7fbba6040c4a3c5dcb25",
+    "outcome": "GUIDED_PUBLICATION_FAILED_INCREMENTAL",
+    "observer": {
+      "availability": "OBSERVED",
+      "lastCompletedBeforeLimit": {
+        "state": "FAILED",
+        "stepZone": "NO_ACTIVE_STEP",
+        "requestBracket": "BEFORE_LIMIT"
+      },
+      "terminalObservedBeforeLimit": "FAILED",
+      "pendingReadAtStop": "NONE",
+      "exactCutoffState": "UNKNOWN",
+      "providerPredicate": "UNKNOWN"
+    },
+    "firstPublication": true,
+    "firstLearnAttemptsReservations": 7,
+    "secondPublicationReplay": false,
+    "postincrementalLedger": "UNRUN",
+    "mutations": {
+      "starts": 2,
+      "clarify": 1,
+      "finalize": 1,
+      "replay": 0
+    },
+    "images": {
+      "planned": 17,
+      "attempted": 11,
+      "released": 11,
+      "withheld": 0,
+      "unresolved": 0,
+      "notAttempted": 6,
+      "actualExpertViews": 11
+    },
+    "visual": "PARTIAL",
+    "stopSettled": true,
+    "retries": 0
+  },
+  "cleanup330": {
+    "receiptSHA256": "1627393acab111c6c562830a797b5fadfad0918459737e685445d8392a1f674c",
+    "onceSeconds": 22.972,
+    "originalCleanupConfirmed": false,
+    "initialReason": "18196probe",
+    "laterReadOnlyAllGone": true,
+    "positiveJavaExit": true,
+    "positiveExitSHA256": "e590ee0263f9172ec02a9602e55bec23cec474ad48a462b526c54fb295b9fb6c",
+    "guardedExportSHA256": "7cc74e2350cb51079cd0ebc6637390e2f59e31b47d4fc0430af18dd82ff3c7a4",
+    "additionalCancels": 0,
+    "revokeHttp": 204
+  },
+  "collector331": {
+    "receiptSHA256": "8c151b5694d1319498a5705e3bb889f8b5e9e88f92b800244545472854085bda",
+    "result": "UNAVAILABLE",
+    "gates": [],
+    "invocations": 1,
+    "exitCode": 0,
+    "noCountPurposePhaseCauseInference": true
+  },
+  "docs333334": {
+    "qa333ReceiptSHA256": "64aeffc306b84f1c3922084e65e02e65deb6d5180ab3e22b5e5a8525c16b402e",
+    "application334SealSHA256": "6383e390795db547575f9254c2aa849ed3a6df77f9965a94b1b5ca05dd7b7096",
+    "localChildContentBoxesCompleted": 2,
+    "actualDelivery": "2026-10-20",
+    "reviewDate": "2026-10-22",
+    "parentT2": "OPEN_PRE_T0_CHRONOLOGY_UNMET",
+    "fullStoryDone": false,
+    "independent336": "ACCEPT_BOUNDED_DOC_BOOKKEEPING_OPEN_PARENT_GATES",
+    "qa336ReceiptSHA256": "583c525bebbd91490f54e87eb00be230ebed2460ceee01e0ab327987d6175480"
+  },
+  "next": "No ownedruntime remains and no paid/model/UI retry or identicalfreshunit is authorized by this statuscheckpoint. Review owner-supplied timing/failure evidence for current367firstlearntimeout and/or original329rejectingguard ifavailable, plus approvedstaging/security/companyD-C/humanC17/pilot records needed for009/010closure. Gateway/budgetadmin remains with existingowners; do not assign usernewadmin duties or contact anyone without explicitinstruction.010latecontenttimingdecision remains unanswered/unapplied. Currentturn achieved implementation/tests/sourceQA/actualexpertvisual/oncecleanup/evidence delivery, so goal staysactive with a first external-input impasse audit; do not markDone. If exact same impasse recurs for3consecutivegoalturns and no meaningfulwork remains, setgoalblocked, neverpause withoutuserrequest. Do not generate new documentation/diagnostics/runs merely to avoid that audit.",
+  "noProgressAuditCount": 0,
+  "fullAcceptance": false,
+  "masking": "INCONCLUSIVE",
+  "C17": "UNRUN",
+  "stories": {
+    "011": "Done",
+    "009": "InProgress",
+    "010": "InProgress"
+  },
+  "qa332": {
+    "receiptSHA256": "5b91aa531a4fbcd3bace1d01babedf0799277085f557624e82555102a31ce608",
+    "verdict": "ACCEPT_BOUNDED_EVIDENCE_ONLY_WORKFLOW_STOPPED"
+  },
+  "projection339": {
+    "collection": "VERIFIED",
+    "basis": "POST_STOP_EXPORT",
+    "cutoff": "UNKNOWN",
+    "exportSessionState": "FAILED",
+    "durableSwitch": "BOUNDARY",
+    "retainedPrefixActions": "ALL_EXPECTED_SUCCEEDED_ONCE",
+    "retainedAttemptsByKind": {
+      "SOURCE_PLAN": {
+        "presence": "PRESENT",
+        "statuses": [
+          "APPLIED"
+        ]
+      },
+      "NEXT_ACTION": {
+        "presence": "NONE",
+        "statuses": []
+      },
+      "VERIFY_STEP": {
+        "presence": "NONE",
+        "statuses": []
+      }
+    },
+    "publishedRevision": "NONE_BY_EXPORT",
+    "cutoffContinuationBootstrapAuthorityFinalization": "UNKNOWN",
+    "deliveryDisposition": "UNKNOWN",
+    "providerActivityLatency": "UNKNOWN",
+    "originalPlanPayloadApplicationPredicate": "UNKNOWN",
+    "retainedFailureCode": "BUDGET_EXCEEDED"
+  },
+  "projection339RootReceiptSHA256": "fbdf4068c70ab1f0b550949cd9c34480a544a8715fcefe9a73d86059b6d86214",
+  "implementation337SealSHA256": "3ebc6db38331f998ab6b05dfddf747615ba4c934f683a40fb40a07c32f686632",
+  "review338ReceiptSHA256": "56de044c68fd4bd51b9ad571e7bd023c809b5a775815895034624a5af97eef6e",
+  "product340": {
+    "ruling": "Late content bookkeeping supported; original before-T0 deadline not waived. Narrow prospective exception proposal pending and unapplied; parentT2 remains open under either option until final measurement/PM acceptance.",
+    "proposal": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/product340-review/PROPOSAL.md",
+    "receiptSHA256": "73c1a9c5d94cd9c3ef264efb3d36f307a9a4aad6420d1294b004d3a766a8f683"
+  },
+  "source341": {
+    "reportSHA256": "6ea9db6d5dc559802afc080ed4e95a8818742dc02ff72024aa31b51698f8767d",
+    "receiptSHA256": "23c3d913ddfecf2db6d2912717a31167e708d2ffe7bb1cecc978d4308a93312d",
+    "actionableDefectDemonstrated": false,
+    "budgetSubtype": "UNKNOWN",
+    "possibleFamilies": [
+      "pre-attempt request-size/reservation/CSI refusal",
+      "passive source acquisition limits",
+      "later usage reconciliation"
+    ],
+    "neededExistingFact": "Original owned incremental failed guard plus already-recorded comparison or acquisition timeout/interruption disposition.",
+    "additionalInstrumentationOrBudgetChangeRecommended": false
+  },
+  "originalApp": {
+    "url": "http://127.0.0.1:5177",
+    "lastRootReadOnlyHeadStatus": 200,
+    "servicesNotAdoptedOrReconfigured": true
+  },
+  "unfinishedAcceptance": [
+    "009 second publication/replay and full real visual journey",
+    "009 company D-C benchmark and approved staging/security/operational evidence",
+    "009 genuine human C17 masking review",
+    "010 final Live surface remeasurement and PM acceptance after009Done",
+    "010 genuine five-participant consented pilot after009Done andD-Cpass"
+  ],
+  "previousGoalTurnClassification": "MEANINGFUL_SOURCE_IMPLEMENTATION_AND_ACTUAL_EXPERT_VISUAL_WITH_FAILED_WORKFLOW_NOW_EXTERNAL_INPUT_IMPASSE",
+  "previousCheckpoint": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/resumed-pair364-runtime366-actual-ui367-root-checkpoint.json",
+    "sha256": "7be711238a8479e29882630a8227924154738a707e3689b6cb7d473a5b43e745"
+  },
+  "localVariablesCarry": {
+    "task": "C-OBS008-4",
+    "completed": true,
+    "scope": "Local save-time ambiguity preflight plus existing accepted C9 contract/mirror/control; no full story or realVertex fix",
+    "design344SHA256": "6613ead7ac526601e959250021f22c093a299037598eff0fa1a13e4cf67417d2",
+    "implementation345SealSHA256": "a828cb424a9cf859b9d9d9d13765b0ee47ed1d4bbeaa040cbe30890cd86b903a",
+    "sourceQA347SHA256": "0636c6ad7c54cf1e6056f83a23a9c3ff9e2ed56daa9288230ff08357f59525a0",
+    "sourcePins": {
+      "frontend/src/pages/ChecksStudioPage/secretDeclaration.ts": "768b4e58817b3d535b3342083cd73379f317ba1a658ada873191c1035cf5bcbd",
+      "frontend/src/pages/ChecksStudioPage/secretDeclaration.test.ts": "eefbb91ca8bed1581b002135585c9b9c68ae816b0c096e686a12ddcca1b16edf",
+      "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx": "a6efe806461c16c1422e4f0cdb5e9a976e8f7dac16021d281e3718a47f3f1192",
+      "frontend/src/pages/ChecksStudioPage/pageReplayAndReferences.test.tsx": "83d0bbb26365fcc75fe9b6045bd0bac821a20fba72314231ed90884fbc2c1b66"
+    },
+    "unitAndComponentTests": {
+      "invocations": 1,
+      "passed": 44,
+      "failed": 0,
+      "pure": 28,
+      "page": 16,
+      "frontendTypesExitCode": 0,
+      "targetedLintErrors": 0,
+      "unchangedLegacyLintWarnings": 9
+    },
+    "currentE2ESpecSHA256": "fa5a26d208bda71078321c47721e93525aa7916fe02f5bb02bd7eb3ec1d082df",
+    "e2eTypeCheckExitCode": 0,
+    "visual354": {
+      "receiptSHA256": "985cfcb1e2c27c4eb1cd3a06ea69001cb8c947388f82d79567d7b959d6e7429e",
+      "manifestSHA256": "095e953ca6bb50d0861ec7845035b6b5dbc354a5ea4adb1b5690b648bc2ff02d",
+      "casesPassed": 2,
+      "casesFailed": 0,
+      "skipped": 0,
+      "retries": 0,
+      "separateFixtureSeedPUTs": 2,
+      "blockedAppPUTs": 0,
+      "correctedWholeDraftAppPUTs": 2,
+      "plannedAttemptedReleasedActuallyViewedImages": 4,
+      "unresolvedWithheldUnattempted": 0,
+      "visualAssessment": "ASSESSED_WITH_MASK_LIMITATIONS",
+      "fullCorrectiveCopyPixelReadability": "NOT_ESTABLISHED_MASKED_PARTS",
+      "fonts": "LOCAL_OR_SYSTEM_FALLBACK_GOOGLE_LINKS_NEUTRALIZED",
+      "mobileColumns": "HORIZONTALLY_SCROLLED_PARTIAL_REGION_IN_IMAGES",
+      "ownedPorts19477And19478": "BIND_FREE",
+      "realBackendModelSecretProvisioningCalls": 0
+    },
+    "actualQA349SHA256": "2f36d771a9c2bea39a627993e2b0653746ea086a06df63c5755557703bef8367",
+    "actualQAVerdict": "ACCEPT_C_OBS008_4_MSW_VISUAL_AND_TASK_EVIDENCE",
+    "PO348ApplicationSealSHA256": "64d23413989c007db2d057b206e90b6cf0626ac2fed23588c2e193e5793b9a46",
+    "PO348ReceiptSHA256": "7f5327d994e1bd6837aa86ae9854aa9b420cd4955aeb998099b37b573ee62a41",
+    "rootInversePrefixAndSingleMarkerVerified": true,
+    "publicEvidence": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261022/variables-save-ui354",
+    "publicPromotionProvenanceSHA256": "77bf1a3ffed4b2cfb532208044af85d142496c4e4f44e07bdc642d44119bfe66"
+  },
+  "priorMockHarnessOutcomes": {
+    "346": "FAILED_UNLISTED_FIXTURE_BEFORE_AUTHOR_EDITS_0_IMAGES",
+    "350": "FAILED_HEADING_SELECTOR_BEFORE_AUTHOR_EDITS_0_IMAGES",
+    "351": "UNRUN_PRELAUNCH_HIDDEN_BACKGROUND_ROLE_FINDING",
+    "352": "PARTIAL_REFUSAL_THEN_SECRET_ROLE_NAME_MISMATCH_0_IMAGES",
+    "353": "PARTIAL_FULL_DESKTOP_REFUSAL_AND_OBSERVED_CORRECTION_THEN_CANONICAL_DTO_ASSERTION_1_VIEW_FINAL_EXACT_ONE_TALLY_NOT_REACHED",
+    "354": "CURRENT_TWO_CASE_PASS_FOUR_EXPERT_VIEWS"
+  },
+  "storyState": {
+    "009": {
+      "status": "InProgress",
+      "open": 16,
+      "complete": 21,
+      "sha256": "fd4319ebf36c0b11778132e1ca1384bf485817929b0e7c9855cd1371148acf69"
+    },
+    "010": {
+      "status": "InProgress",
+      "open": 10,
+      "complete": 2,
+      "sha256": "00df030a03d805e80f490829a49c50a1940f826170b02f3675d58c24d7862a5f"
+    },
+    "011": {
+      "status": "Done",
+      "open": 0,
+      "complete": 18,
+      "sha256": "67b0c439a20e00b83ef572aa549c27c96d8c8301cd0de65b975aadd9f862bdc8"
+    }
+  },
+  "goalComplete": false,
+  "newExecutionAuthority": false,
+  "fileListPreparation": {
+    "publicFileList": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261022/story-file-list357/FILE-LIST.md",
+    "implementationSealSHA256": "1e1c6de1f6f0eb7ebbd5017c3fadec5e3d649f9987e732accbb6f6e465b7276b",
+    "publicManifestSHA256": "54f59a419e375ce6d2ebcdbd25465ce981eb776e83a9f0c1d592f1e23d68b6c8",
+    "inventorySHA256": "4c24ac8421421db88f4778397fde956540578e3819029307e050631b99537025",
+    "fileListSHA256": "117476edb4cbd47ca48de06648d55695dc24e89614ffef7cae7a79c0f8a60481",
+    "review358SHA256": "f142a5d061de2b149cb32233fabb49c6a15d2df2e98b11f6e7123c22f6ecde9f",
+    "reviewVerdict": "ACCEPT_BOUNDED_CONSOLIDATED_FILE_LIST",
+    "rows": 535,
+    "recordedChangeApplicationPathsNotExclusive009": 171,
+    "sourceRelatedFootprint": 404,
+    "evidenceAnchors": 131,
+    "originalGroups": 22,
+    "coverageGroups": 33,
+    "safePresent": 477,
+    "declaredAbsent": 16,
+    "referenceOnlyNoMetadataAccess": 42,
+    "uniqueSyntheticAdmissionControls": 79,
+    "original355Accepted": false,
+    "blocked356Finding": "F356-01 raw runtime row admitted under broad backend prefix; fresh target hash by355 and initial opaque356comparison disclosed; no body displayed; no later target access357/358",
+    "correctedRuntimeRow": "EVIDENCE_REFERENCE_ONLY_NO_CURRENT_HASH_SIZE_MODE",
+    "generationStoryHash": "c7ff24c581eae892070e5bc24584b70e8fdb0c7c6bbd5b13ad3492d3e5f85bb3",
+    "snapshotHashBasis": "Capture time before subsequent authorized story-link append; no self-hash re-seal",
+    "appendApplicationSealSHA256": "90b7d72f26e0dac156af2aec91f02a27f949a5adda3c99d67b47d21c250e5386",
+    "appendReceiptSHA256": "c141f3b7f1cac6385538a0cde27db410e9763bf4a106b68c450eca31838318af",
+    "rootExactPrefixAndAllMarkersVerified": true,
+    "fullT6Acceptance": false
+  },
+  "newSourceFinding": {
+    "coordinator": "continueRuns uses BodyHandlers.discarding for continuation response",
+    "planningFailureHandler": "returns generic exception.response; no structured rejecting-guard field in reviewed path",
+    "reviewedExistingProvenance": "No source-bound original rejecting guard field demonstrated; no claim about every owner system.",
+    "hypothesesNotDemonstrated": "Acquisition selects current step/lowest incomplete occurrence; current prompt already requires bare exact targetIntent. No actionable defect or old329 cause inferred."
+  },
+  "diagnosticDesign359": {
+    "designSHA256": "e969686f5d70766d16d0a82ace105f4ce4263c421fdfd16f206d06cfbb619d78",
+    "sourcePinsSHA256": "38f5c66b8051e8f56751dac584bcf9160d5ad97bf0e89dffb50a9bfad6be3f97",
+    "receiptSHA256": "268ce71b043c05903d93596b79c6664c795005fabfe93e202fa2a0f73c442cd8",
+    "guardFamilies": 17,
+    "recommendation": "B_DEFAULT_OFF_SEPARATE_PRIVATE_GUARD_OBSERVATION",
+    "historicalCause": "UNKNOWN"
+  },
+  "review360": {
+    "verdict": "ACCEPT_DESIGN_WITH_CONDITIONS",
+    "receiptSHA256": "fcd45717381859dd2d50b2a6596755e6182bfe8dc8192aab9b3d5899ba03f878"
+  },
+  "scope361": {
+    "verdict": "ACCEPT_BOUNDED_PRIVATE_GUARD_DIAGNOSIS_BUSINESS_ALIGNMENT",
+    "receiptSHA256": "e1bd16415912bf4dea25770121147b4cf407507be6113d4be4fb3e279d4b0c06"
+  },
+  "currentAuthorizedWork": {
+    "developer362": "Exact17-site implementation and scoped direct JDK/Jupiter/native synthetic controls only; no broad/Gradle checks",
+    "devops363": "Parallel fresh offline setup scaffold only; final source binding waits FINAL362",
+    "newLiveOrModelRunAuthorized": false,
+    "subagentModel": "gpt-6.1-sol",
+    "subagentReasoning": "high"
+  },
+  "implementation362": {
+    "sealSHA256": "004b61ff86ac72aedf067926dd1730231cb9df35fe04acd2d78438860edba441",
+    "rootAll79ArtifactAndSourceHashesMatch": true,
+    "focusedJupiter": 17,
+    "nativeCollectorSynthetic": 8,
+    "mainClasses": 38,
+    "runtimeGO": false,
+    "historicalCause": "UNKNOWN"
+  },
+  "preparation363": {
+    "receiptSHA256": "dbd3d6c520320a4fd0d7641a3f1245e77443d8c358ef912ca326e39c8cae5322",
+    "sealSHA256": "94d92896f1389f9c652aae8a7f5c818a6674d2ac30103f5e53a5ac2632d546cc",
+    "runId": "eaec371c-210a-411e-b0e7-2322bb980e92",
+    "finalA": null,
+    "runtime": false
+  },
+  "qa364Source": {
+    "verdict": "ACCEPT_IMPLEMENTATION_SOURCE_ONLY_PENDING_FINAL_CONFIGURATION",
+    "assessmentSHA256": "2c461c01e3f3a7f5e1c1d296929ac9a650930d2cf64aeba44e630e85387aac5a",
+    "pinsSHA256": "5fe1be9dfa0601186bb6c723dd8db9e2423702534c81bddb8d18b6f6bea76fc0"
+  },
+  "qa364Pair": {
+    "verdict": "ACCEPT_FINAL_PAIR_FOR_ONE_BOUNDED_UNIT",
+    "receiptSHA256": "17cb09d7170eb1adaf39f4bbcfdcb686b84ad31bc19cee92853fe5d61a08544e"
+  },
+  "final363": {
+    "A": "ff9fa638ae29e16a577326df86c50b45f9b1238a54b7cdc746b78d063f06b844",
+    "B": "714e2cd119a6558e9ba648a038876993f8a839d37c8dca0b0e4c134243321aa9",
+    "runId": "eaec371c-210a-411e-b0e7-2322bb980e92",
+    "receiptSHA256": "b170247b7a0b99de0b485e2adb7320ef7879929e55a7c28fef1828863983b2d7",
+    "sourceManifestSHA256": "47e6d9eecb986e69c9fe729f9c7a8111810bd39bb39c39c301258a075506667e"
+  },
+  "actual366": {
+    "runtimeReady": true,
+    "controlReady": true,
+    "9InertProofs": true,
+    "receiptSHA256": "bd33bf60fb8655751c1231bf0ad7ed4c83a73b9c003e1cbc777554cc89320b9d",
+    "contextSHA256": "ef0ad42555e0fd36b338c8abad749007e273b7c1da15dd156cb86b45af25d283",
+    "rootSetupGoSHA256": "750fe0d638d435464bb6ce136967b625808d6fbdd36995f58b65ba509bec2c28",
+    "setupDeadline": "2026-10-22T11:45:02.052Z"
+  },
+  "actual367": {
+    "state": "STOPPED",
+    "workflowCode": "GUIDED_COMPLETION_TIMEOUT",
+    "failedStage": "full-learn",
+    "receiptSHA256": "b68f0f732b8c84e55598eb781a611aa1e7c635f3a6c53d9eaf88f78c60ccc5ef",
+    "sealSHA256": "c338b69ea8d53efb57857587e1d19d42d4d181ea25ffddb0c795bceaede92dcb",
+    "start": 1,
+    "clarify": 1,
+    "finalize": 0,
+    "execute": 0,
+    "publication": "NOT_ESTABLISHED",
+    "incrementalReplay": "UNRUN",
+    "screenshotPlanned": 17,
+    "attempted": 6,
+    "released": 5,
+    "withheld": 1,
+    "unresolved": 0,
+    "unattempted": 11,
+    "actuallyViewed": 5,
+    "visual": "PARTIAL",
+    "stopSettlement": true,
+    "underlyingCause": "UNKNOWN",
+    "newUIRunAuthorized": false
+  },
+  "cleanup368": {
+    "receiptSHA256": "93e99ce8dcc9d90c098cc699c8b3f7e468f6ed07c44f16f2c26a909b0f61039c",
+    "once": true,
+    "originalExitCode": 1,
+    "originalCleanupConfirmed": false,
+    "laterReadOnlySHA256": "c4cc4747602dff08e67b5052bf84258f37153f54363adb628f8201e422609da1",
+    "laterAllOwnedGone": true,
+    "positiveOriginalJavaIdentity": "ABSENT",
+    "rolesGone": 9,
+    "portsFree": 7,
+    "descendantsGone": 28,
+    "embeddedPgGone": true,
+    "containerAbsent": true,
+    "extraSignalsOrCancels": 0,
+    "exportTables": 14,
+    "exportRows": 18,
+    "rawExportReadByModel": false
+  },
+  "guard369": {
+    "receiptSHA256": "46a13082cec8c6aaac74f36fba43b80195486d9238551dc1b2a0fa86251ef399",
+    "disposition": "NOT_RUN_NO_ADMITTED_INCREMENTAL_SESSION",
+    "collectorInvocations": 0,
+    "guardStreamRead": false,
+    "guardRecordCount": "UNKNOWN",
+    "writerReadiness": "UNKNOWN"
+  },
+  "qa370": {
+    "verdict": "ACCEPT_BOUNDED_FAILED_RUN_EVIDENCE_ONLY_WORKFLOW_STOPPED",
+    "receiptSHA256": "ddae4c6b73604afd70a02e0f249b3cf0c43a392daa98c2788526ed7e2fae2e06",
+    "reportSHA256": "40548e75741bb6121868276cf16c0be6681248a15ce3bd01ef23b20c9ae48c97"
+  },
+  "delivery371": {
+    "schemaVersion": 1,
+    "phase": 371,
+    "atUtc": "2026-10-22T11:30:32.804762+00:00",
+    "sourceFilesListed": 10,
+    "safePNGExactCopies": 5,
+    "withheldOrNativeCopied": 0,
+    "gallery": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261022/real-vertex-login-ui367/GALLERY.md",
+    "galleryProvenanceSHA256": "33aac8ce842952751015a2b1576f8df410d10a0a96e3052effa6d60f8fcbd754",
+    "fileListAddendum": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261022/diagnostic362-file-list-addendum/FILE-LIST.md",
+    "fileListAddendumSHA256": "d02935098d8b7979e4e8fb8ed0a8800add7dec4397359cdfef18721303a189fc",
+    "storyBeforeSHA256": "6b0f272395c2ac52a2ad9943b9f6c6cf3e02679ffad2e19ab7c48686aac607b8",
+    "storyAfterSHA256": "fd4319ebf36c0b11778132e1ca1384bf485817929b0e7c9855cd1371148acf69",
+    "appendSHA256": "247c26828e9f6a7a6ed40c76008d662a703e8722d61f9fda1c4f36f7f0cc71c8",
+    "allTaskMarkersAndStatusUnchanged": true,
+    "story010011Unchanged": true,
+    "sealedOriginalVisualReportUnchanged": true,
+    "fullAcceptance": false,
+    "goalComplete": false
+  },
+  "externalInputImpasseConsecutiveGoalTurns": 1,
+  "localAuthorizedWorkCompletedForCurrentEvidence": true,
+  "currentOriginalApp": {
+    "url": "http://127.0.0.1:5177",
+    "lastReadOnlyHEAD": 200,
+    "protectedUnmodified": true
+  },
+  "subagentPolicy": {
+    "model": "gpt-6.1-sol",
+    "reasoningEffort": "high",
+    "parallelExpertsUsed": true
+  },
+  "currentRuntimeState": "ALL_OWNED_RESOURCES_STOPPED_NO_PENDING_COMMANDS"
+}

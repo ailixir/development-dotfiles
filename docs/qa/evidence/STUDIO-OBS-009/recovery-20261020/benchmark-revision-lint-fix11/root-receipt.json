@@ -1,0 +1,53 @@
+{
+  "kind": "ROOT_MINIMAL_UNIT_ADAPTER_LINT_CORRECTION11",
+  "atUtc": "2026-10-21T11:37:48.851988+00:00",
+  "originalProof10Stop": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-revision-actual-proof10/root-stop.json",
+    "sha256": "c0fd582138bd975c096fb537404ef9b036a52b282028d583ebe3fd6886c6e69d",
+    "bytes": 5705
+  },
+  "originalRawExits": [
+    0,
+    0,
+    1
+  ],
+  "actualFocused31PassedBeforeFix": true,
+  "terminalMetadata": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-revision-lint-fix11/terminal-before-fix-full-inputs.json",
+    "sha256": "1cfcc98a0ae62a2a1b5ed9861f347f139305bd53d931641af40a55cffb298024",
+    "bytes": 5740239
+  },
+  "terminalCacheDisposition": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-revision-lint-fix11/proof10-terminal-cache-disposition.json",
+    "sha256": "80445a8e4492817558a29b2222f58465f212b92ebffe0b92ca714a644cbe8515",
+    "bytes": 241
+  },
+  "beforeHarnessSha256": "216a8bc78e4971ccad67222c447b1239b7936bd7ed13ff9b8f4602392cbba0b2",
+  "afterHarness": {
+    "path": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+    "sha256": "a0fe522ce619b1e33a8b3a8db22b8cd9f50a9cb2f9066388f5c13ff8fe2d34e3",
+    "bytes": 42158
+  },
+  "sourceBuffer": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-revision-lint-fix11/harnessSelfTest.test.ts",
+    "sha256": "a0fe522ce619b1e33a8b3a8db22b8cd9f50a9cb2f9066388f5c13ff8fe2d34e3",
+    "bytes": 42158
+  },
+  "patch": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-revision-lint-fix11/source.patch",
+    "sha256": "4cbee8c22b32ad8505caaae355b00d09a9884ab5a496fa4b149d1e89f9a95b45",
+    "bytes": 736
+  },
+  "onlyUnitAdapterForwardingArrowsChanged": true,
+  "productionEvaluatorDeclarationsAndFrozenManifestUnchanged": true,
+  "afterSource": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-revision-lint-fix11/after-fix-source.json",
+    "sha256": "a04b6c2bd87792fd94c9951e781f9bc4df3e1505df6073c8f350826086a22b76",
+    "bytes": 360050
+  },
+  "sourceDigest": "0c59568e8e686c69703f650006edd70e8033db2906db7e434943735beebaff2d",
+  "distUnchanged": true,
+  "futureAffectedSuccessorRequired": true,
+  "testsRetriedHere": false,
+  "oldCorpusGateStillAppliesNoPinChanged": true
+}

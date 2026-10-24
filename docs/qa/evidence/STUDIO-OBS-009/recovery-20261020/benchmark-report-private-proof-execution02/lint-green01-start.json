@@ -1,0 +1,27 @@
+{
+  "id": "lint-green01",
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs009-recovery-20261020-benchmark-report-proof01-lint-green01",
+    "pnpm",
+    "--dir=/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner",
+    "--config.package-manager-strict=false",
+    "exec",
+    "/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner/node_modules/eslint/bin/eslint.js",
+    "evaluation/observed-authoring/evaluate.mjs",
+    "evaluation/observed-authoring/evaluate.d.mts",
+    "evaluation/cli.mjs",
+    "test/evaluation/benchmarkScoring.test.ts",
+    "test/evaluation/corpusManifest.test.ts",
+    "test/evaluation/harnessSelfTest.test.ts",
+    "test/evaluation/budgetAdmission.test.ts",
+    "test/evaluation/observedCorpus.ts"
+  ],
+  "composition": "green",
+  "startedAtUtc": "2026-10-21T01:46:01.152621+00:00",
+  "rootConditionalSha256": "f10481f8d7ec9672c56ae9fab9f232880019e74ad972e276836d53242a10aa98",
+  "formatContinuationTask": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/benchmark-report-cache-reader-continuation02-task.txt",
+  "collectorPid": 22576,
+  "ownedProcessGroup": 22576
+}

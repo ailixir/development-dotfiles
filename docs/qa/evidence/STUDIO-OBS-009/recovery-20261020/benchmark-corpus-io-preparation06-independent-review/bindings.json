@@ -1,0 +1,56 @@
+{
+  "preparationManifest": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-preparation06/manifest.json",
+    "sha256": "19f249bb4a1efa09a78af04fdc649376c7f62fd481b2b47230ceb41701befa3f"
+  },
+  "preparationFiles": [
+    {
+      "path": "closed-cli-output.py.txt",
+      "sha256": "3e9bfe3d738bf9b366128274d9bc481de8636f36dd26cbd14e2235fa29ed628a",
+      "bytes": 3315
+    },
+    {
+      "path": "commands.json",
+      "sha256": "8be3af47358c20cbc1a16d9573ed97cfec7a66e4a128cd891d7503a89cbf197e",
+      "bytes": 25021
+    },
+    {
+      "path": "io-membership-and-delta.mjs.txt",
+      "sha256": "38174684723a7941812407027f2571d411f338fa1d3c08734cde1cf2bb0b256d",
+      "bytes": 9832
+    },
+    {
+      "path": "io-plan.json",
+      "sha256": "1c488c6506f7bd2fcb91d910f211ea603096d4f5daf2eee122e486f9b8241e80",
+      "bytes": 6359
+    },
+    {
+      "path": "plan.md",
+      "sha256": "2e15fa6f9344287f7f5c83a111e0bcfc8465f3ecfbc25e981818cd11bffd5e55",
+      "bytes": 3391
+    },
+    {
+      "path": "source-fragments-and-bindings.json",
+      "sha256": "c5e5a221ef609cab80529eecf7e81e0310a200f83ef9cf1a5a2b2f580f179b9f",
+      "bytes": 14512
+    }
+  ],
+  "publicOriginalCode": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-private-proof-execution04/executed-green-buffers/studio-runner/evaluation/cli.mjs",
+      "sha256": "8a119c26eb16ed19cd5f1a5a46ed07a9d13eeb2f6e2a951dd2dc3d854795bcad"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-private-proof-execution04/executed-green-buffers/studio-runner/evaluation/observed-authoring/evaluate.mjs",
+      "sha256": "d55dbbe9b7f9ca791ec1322abe3ef67d5bb4ac58ec1f717ab56a73dcfe046e28"
+    }
+  ],
+  "contextRef": {
+    "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/obs009-corpus-io06-independent-review-context.txt",
+    "sha256": "419a6921a88ed89c2c42ec3608bed6b1b951b60b0617601d1392995e01b14dbd"
+  },
+  "reviewer": "/root/corpus_io06_independent_qa",
+  "method": "Public source text and metadata hashing only; no code under review parsed/imported/executed",
+  "privacyScope": "No private manifest/catalogue/SDK/pin/raw-output bodies read",
+  "noRuntimeAuthority": true
+}

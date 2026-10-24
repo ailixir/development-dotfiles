@@ -1,0 +1,754 @@
+--- a/studio-runner/evaluation/observed-authoring/evaluate.mjs
++++ b/studio-runner/evaluation/observed-authoring/evaluate.mjs
+@@ -759,6 +759,10 @@
+   // An excluded earlier attempt can still hit a hard gate; retries never erase observed facts.
+   const falsePasses = runs.filter((r) => r?.oracle?.falseSuccess === true);
+   const leaks = runs.filter((r) => (r?.secretOrPiiLeak ?? 0) > 0);
++  const unknownCanaryRuns = runs.filter((run) => !completeCanaryObservation(run));
++  const canaryObservation = { scope: 'LOCAL_CONSUMED_PUBLIC_HTTP_AND_DECLARED_TEXTS_ONLY', complete: runs.length > 0 && unknownCanaryRuns.length === 0,
++    knownLeakRuns: leaks.length, totalLeakRuns: runs.length > 0 && unknownCanaryRuns.length === 0 ? leaks.length : null,
++    unknownRuns: unknownCanaryRuns.map(identity), globalWireComplete: null };
+   const scopes = { gateP: pRuns, creditedAllClasses: credited, allAttempts: runs };
+   const accounting = Object.fromEntries(ZERO_FIELDS.map((field) => [field, Object.fromEntries(
+     Object.entries(scopes).map(([scope, population]) => [scope, { ...causeSummary(population, field),
+@@ -770,6 +774,7 @@
+   if (mode !== 'D_C') { verdict = 'NOT_EVIDENCE'; reasons.push('mode is HARNESS_SELF_TEST: a scripted provider is never D-C evidence'); }
+   else if (problems.length > 0) { verdict = 'INVALID'; reasons.push('run records failed validation'); }
+   else if (falsePasses.length > 0 || leaks.length > 0) { verdict = 'GATE_FAIL'; reasons.push('hard gate hit (false pass or secret/PII leak)'); }
++  else if (unknownCanaryRuns.length > 0) { verdict = 'INCOMPLETE'; reasons.push('local canary observation is unavailable'); for (const run of unknownCanaryRuns) problems.push({ caseId: run?.caseId ?? null, rep: run?.rep ?? null, code: 'RUN_CANARY_OBSERVATION_UNAVAILABLE' }); }
+   else if (missing.length > 0 || pRuns.length < arithmeticRunnable.plannedRuns) { verdict = 'INCOMPLETE'; reasons.push('planned runs are missing'); }
+   else if (completions < arithmeticRunnable.minCompletions) { verdict = 'GATE_FAIL'; reasons.push(`completions ${String(completions)} < ${String(arithmeticRunnable.minCompletions)}`); }
+   else if (blockedUnrun.length > 0) { verdict = 'PARTIAL'; reasons.push(`externally blocked cases unrun: ${blockedUnrun.join(', ')}`); }
+@@ -816,6 +821,7 @@
+     },
+     denominatorLedger: { plannedRuns: planned.size, creditedRuns: credited.length, infrastructureFailures: infraLedger, missingRuns: missing, blockedUnrunCases: blockedUnrun, problems },
+     accounting,
++    canaryObservation,
+     charges,
+     latency: { basis: 'known-valid-duration-samples', missingSamples: credited.length - durations.length, p50Ms: nearestRank(durations, 0.5), p95Ms: nearestRank(durations, 0.95), samples: durations.length, denominator: credited.length },
+     modelCalls: { total: null, p50: null, p95: null, samples: 0, denominator: credited.length, basis: 'UNAVAILABLE: proposals are not actual provider wire calls', proposals: charges.creditedAllClasses.proposals },
+@@ -1054,28 +1060,58 @@
+   return { id, ...checkedDraftRevisions(value) };
+ }
+ 
++const publicClientFactories = new WeakMap();
++const publicErrorCodes = new Map([
++  'INVALID_CONTRACT', 'UNAUTHENTICATED', 'FORBIDDEN_SCOPE', 'REVISION_CONFLICT', 'STALE_GENERATION',
++  'TARGET_MISMATCH', 'AMBIGUOUS_TARGET', 'MISSING_SOURCE', 'BINDING_ORDER', 'SENSITIVE_SOURCE',
++  'ORIGIN_NOT_ALLOWED', 'UNSUPPORTED_SURFACE', 'BUDGET_EXCEEDED', 'STALE_FENCE', 'IDEMPOTENCY_CONFLICT',
++  'UNKNOWN_OUTCOME', 'PUBLICATION_CONFLICT', 'RUNTIME_INCOMPATIBLE', 'ASSERTION_FAILED', 'CANCELLED',
++  'EXPIRED', 'SECRET_UNAVAILABLE', 'SECRET_USE_NOT_AUTHORIZED', 'SECRET_USE_REVOKED', 'VAULT_UNAVAILABLE',
++  'LOGIN_REQUIRED', 'SECRET_TOO_LONG', 'POLICY_NOT_APPROVED', 'STALE_REVISION', 'CSI_IMMUTABLE',
++  'LEARN_REQUIRED', 'TEST_DELETED', 'TEST_QUARANTINED', 'INVALID_AUTHORING', 'INVALID_STEPS',
++  'INVALID_CONFIGURATION', 'SOURCE_TOO_MANY_STEPS', 'SOURCE_LINE_TOO_LONG', 'STUDIO_FORBIDDEN',
++  'IDEMPOTENCY_KEY_REQUIRED', 'INVALID_IDEMPOTENCY_KEY', 'IDEMPOTENCY_KEY_REUSED',
++  'AUTHORIZATION_REVOKED', 'RUN_ERROR', 'TARGET_DRIFT', 'TIMEOUT', 'START_TIMEOUT', 'CONTEXT_LOST',
++].map((code) => [code, code]));
++const publicErrorCode = (body) => {
++  const code = isRecord(body) ? body.code ?? (isRecord(body.error) ? body.error.code : body.error) : null;
++  return publicErrorCodes.get(code) ?? null;
++};
++
+ /**
+  * HTTP binding of the public routes in docs/specs/studio/openapi.yaml. [I] It was written from the OpenAPI
+- * text only and has not been run against a live backend: the stub client in test/evaluation covers the driver,
+- * not these routes. Tokens are read by the caller, never logged, and never part of a run record.
++ * text only and has not been run against a live backend. In-memory transport tests exercise the adapter;
++ * tokens are read by the caller, never logged, and never part of a run record.
+  */
+-export function createPublicApiClient({ baseUrl, token, transport = fetch, csiId, environmentId, applicationId }) {
++export function createPublicApiClient(options) { return boundPublicApiClient(options, null); }
++
++function boundPublicApiClient({ baseUrl, token, transport = fetch, csiId, environmentId, applicationId }, observation) {
+   const root = new URL(baseUrl);
+   if (root.username || root.password || root.search || root.hash || (root.protocol !== 'https:' && !['127.0.0.1', 'localhost', '[::1]'].includes(root.hostname))) throw new Error('Invalid API base URL');
+   const call = async (method, path, body, extra = {}) => {
+-    const response = await transport(new URL(`${root.toString().replace(/\/$/u, '')}${path}`), {
+-      method, redirect: 'error', signal: AbortSignal.timeout(30_000),
+-      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json', ...extra },
+-      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+-    });
+-    const text = await response.text();
++    observation?.attempt();
++    let response;
++    try {
++      response = await transport(new URL(`${root.toString().replace(/\/$/u, '')}${path}`), {
++        method, redirect: 'error', signal: AbortSignal.timeout(30_000),
++        headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json', ...extra },
++        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
++      });
++    } catch { observation?.unavailable(); throw new Error('Studio API unavailable'); }
++    let text;
++    try { text = await response.text(); }
++    catch { observation?.unavailable(); throw new Error('Studio API response unavailable'); }
++    observation?.body(text);
++    // response.text already allocated the string; inspection adds no retained oversized body.
+     if (text.length > 2_000_000) throw new Error('response exceeds bound');
+-    const parsed = text === '' ? null : JSON.parse(text);
+-    if (!response.ok) throw Object.assign(new Error('Studio API refused the request'), { status: response.status, code: parsed?.code ?? parsed?.error ?? null });
++    let parsed;
++    try { parsed = text === '' ? null : JSON.parse(text); }
++    catch { throw new Error('Studio API returned invalid JSON'); }
++    if (!response.ok) throw Object.assign(new Error('Studio API refused the request'), { status: response.status, code: publicErrorCode(parsed) });
+     return { status: response.status, body: parsed };
+   };
+   const idem = () => ({ 'idempotency-key': randomUUID() });
+-  return {
++  const client = {
+     createDraft: async (name, authoring) => (await call('POST', '/tests', { name, csiId, environment: environmentId, ...authoring.request })).body,
+     readDraft: async (id) => (await call('GET', `/tests/${id}`)).body,
+     updateDraft: async (id, name, authoring, revisions) => (await call('PUT', `/tests/${id}`, { name, csiId, environment: environmentId, ...authoring.request, ...checkedDraftRevisions(revisions) })).body,
+@@ -1092,6 +1128,11 @@
+     execute: async (testId) => (await call('POST', `/tests/${testId}/execute`, undefined, idem())).body,
+     readExecution: async (id) => (await call('GET', `/executions/${id}`)).body,
+   };
++  publicClientFactories.set(client, {
++    methods: Object.getOwnPropertyDescriptors(client),
++    bind: (observer) => boundPublicApiClient({ baseUrl, token, transport, csiId, environmentId, applicationId }, observer),
++  });
++  return client;
+ }
+ 
+ /** Builds the v2 authoring request from a case's step-text file, substituting `${fixtureOrigin}`. */
+@@ -1107,24 +1148,134 @@
+   };
+ }
+ 
+-/** Wraps a client so every response body it returns is kept as text for the canary scan (AC-10, local traffic). */
+-function withTextCapture(client) {
+-  const texts = {};
+-  let n = 0;
++function copiedCanaryEntries(value, optional = false) {
++  if (optional && value === undefined) return [];
++  try {
++    // An optional operator union must preserve an invalid original container, plus any inspectable value.
++    if (!Array.isArray(value)) return optional ? [value, undefined] : [value];
++    return Array.from({ length: value.length }, (_entry, index) => { try { return value[index]; } catch { return undefined; } });
++  } catch { return [undefined]; }
++}
++
++/** Run-owned transient capture. Raw HTTP strings are scanned synchronously and never queued. */
++function withTextCapture(original, { secretCanaries, extraTexts }) {
++  const texts = {}; const rawFindings = new Map(); const findings = new Map(); const prepared = [];
++  let configuration = 'COMPLETE'; let values = [];
++  try { if (!Array.isArray(secretCanaries)) configuration = 'UNAVAILABLE'; values = copiedCanaryEntries(secretCanaries); }
++  catch { configuration = 'UNAVAILABLE'; }
++  if (values.length === 0) configuration = 'UNAVAILABLE';
++  values.forEach((value, index) => {
++    try {
++      if (typeof value !== 'string' || value.length === 0) { configuration = 'UNAVAILABLE'; return; }
++      prepared.push({ variants: variantsOf(value), index, prefix: sha256Hex(value).slice(0, 12) });
++    } catch { configuration = 'UNAVAILABLE'; }
++  });
++  let n = 0; let callSerial = 0; let lastExtraSerial = -1; let attempts = 0; let consumed = 0; let scanned = 0; let httpFailed = false; let valuesFailed = false;
++  let extraAttempts = 0; let extraCompleted = 0; let extraFailed = extraTexts !== null && typeof extraTexts !== 'function';
++  let disposed = false;
++  const inspect = (text, label, target, cumulative = false) => {
++    for (const canary of prepared) {
++      let hits = 0;
++      for (const variant of canary.variants) {
++        let offset = 0;
++        for (;;) { const at = text.indexOf(variant, offset); if (at === -1) break; hits += 1; offset = at + variant.length; }
++      }
++      if (hits === 0) continue;
++      const key = `${label}#${String(canary.index)}#${canary.prefix}`; const previous = target.get(key)?.hits ?? 0;
++      target.set(key, { label, canaryIndex: canary.index, canarySha256Prefix: canary.prefix, hits: cumulative ? previous + hits : Math.max(previous, hits) });
++    }
++  };
++  const factory = publicClientFactories.get(original);
++  const canRebind = () => {
++    const descriptors = Object.getOwnPropertyDescriptors(original);
++    return factory !== undefined && Reflect.ownKeys(descriptors).length === Reflect.ownKeys(factory.methods).length
++      && Reflect.ownKeys(factory.methods).every((key) => descriptors[key]?.value === factory.methods[key].value && !descriptors[key]?.get && !descriptors[key]?.set);
++  };
++  let faithful = canRebind();
++  const bound = faithful ? factory.bind({
++    attempt: () => { attempts += 1; }, unavailable: () => { httpFailed = true; },
++    body: (text) => { consumed += 1; try { if (disposed) { httpFailed = true; return; } inspect(text, 'publicHttp', rawFindings, true); scanned += 1; } catch { httpFailed = true; } },
++  }) : original;
+   const wrapped = {};
+-  for (const name of Object.keys(client)) {
++  for (const name of Object.keys(bound)) {
+     wrapped[name] = async (...args) => {
+-      const result = await client[name](...args);
+-      texts[`${name}#${String((n += 1))}`] = result === undefined ? '' : JSON.stringify(result);
++      callSerial += 1;
++      // Preserve mutable caller overrides, including a change while an earlier call awaited.
++      if (faithful && !canRebind()) faithful = false;
++      const receiver = faithful ? bound : original;
++      const result = await receiver[name](...args);
++      try { const text = result === undefined ? '' : JSON.stringify(result); if (typeof text !== 'string') valuesFailed = true; else texts[`${name}#${String((n += 1))}`] = text; }
++      catch { valuesFailed = true; }
+       return result;
+     };
+   }
+-  return { client: wrapped, texts };
+-}
+-
+-async function leakScan({ captured, phases, secretCanaries, extraTexts }) {
+-  const texts = { ...captured, receipts: JSON.stringify(phases), ...(extraTexts === null ? {} : await extraTexts()) };
+-  return scanCanaries({ texts, secretCanaries });
++  const row = () => ({
++    scope: 'LOCAL_CONSUMED_PUBLIC_HTTP_AND_DECLARED_TEXTS_ONLY', inspectionConfiguration: configuration,
++    publicHttp: !faithful ? 'UNOBSERVABLE' : httpFailed ? 'UNAVAILABLE' : 'COMPLETE',
++    httpAttempts: faithful ? attempts : null, httpBodiesConsumed: faithful ? consumed : null, httpBodiesScanned: faithful ? scanned : null,
++    fulfilledValues: valuesFailed ? 'UNAVAILABLE' : 'COMPLETE',
++    extraTexts: extraTexts === null ? 'NOT_CONFIGURED' : extraFailed || extraAttempts === 0 ? 'UNAVAILABLE' : 'COMPLETE', extraAttempts, extraCompleted,
++  });
++  const snapshotFindings = () => {
++    const all = new Map(findings);
++    for (const [key, value] of rawFindings) all.set(key, { ...value });
++    return [...all.values()].map((value) => ({ ...value }));
++  };
++  const observation = {
++    async scan(phases, interrupt) {
++      try { for (const [label, text] of Object.entries(texts)) inspect(text, label, findings); inspect(JSON.stringify(phases), 'receipts', findings); }
++      catch { valuesFailed = true; }
++      // A collector that caused interruption is not retried by catch recovery.
++      if (typeof extraTexts === 'function' && !extraFailed && (!interrupt || lastExtraSerial !== callSerial)) {
++        lastExtraSerial = callSerial; extraAttempts += 1;
++        try {
++          const supplied = await extraTexts();
++          if (!isRecord(supplied)) extraFailed = true;
++          else {
++            let ordinal = 0;
++            for (const label of Object.keys(supplied)) {
++              ordinal += 1;
++              let text;
++              try { text = supplied[label]; } catch { extraFailed = true; continue; }
++              if (typeof text !== 'string') { extraFailed = true; continue; }
++              const safeLabel = ['backendLog', 'gateway', 'sse', 'audit', 'journal', 'rawOutput', 'manifest', 'closedUnit'].includes(label) ? label : `extraText#${String(ordinal)}`;
++              inspect(text, safeLabel, findings);
++            }
++          }
++          if (!extraFailed) extraCompleted += 1;
++        } catch { extraFailed = true; }
++      }
++      const result = snapshotFindings();
++      if (!interrupt && (httpFailed || valuesFailed || extraFailed)) throw new Error('Local observation unavailable');
++      return { leaks: result.length, findings: result };
++    },
++    finish(run) {
++      const fact = row();
++      const unknown = configuration !== 'COMPLETE' || httpFailed || valuesFailed || extraFailed;
++      run.details = { ...run.details, canaryObservation: [fact] };
++      if (unknown && !(run.details.driverObservations ?? []).some((entry) => entry.code === 'OBSERVATION_UNAVAILABLE')) {
++        run.details.driverObservations = [...(run.details.driverObservations ?? []), { phase: 'local-capture', code: 'OBSERVATION_UNAVAILABLE' }];
++      }
++      return run;
++    },
++    dispose() { disposed = true; prepared.length = 0; values.length = 0; rawFindings.clear(); findings.clear(); for (const key of Object.keys(texts)) delete texts[key]; },
++  };
++  return { client: wrapped, texts, observation };
++}
++
++async function leakScan({ phases, observation, interrupt = false }) { return observation.scan(phases, interrupt); }
++
++function completeCanaryObservation(run) {
++  const rows = run?.details?.canaryObservation;
++  if (!Array.isArray(rows) || rows.length !== 1 || !isRecord(rows[0])) return false;
++  const value = rows[0];
++  const keys = ['scope', 'inspectionConfiguration', 'publicHttp', 'httpAttempts', 'httpBodiesConsumed', 'httpBodiesScanned', 'fulfilledValues', 'extraTexts', 'extraAttempts', 'extraCompleted'];
++  if (Object.keys(value).length !== keys.length || Object.keys(value).some((key) => !keys.includes(key))) return false;
++  return value.scope === 'LOCAL_CONSUMED_PUBLIC_HTTP_AND_DECLARED_TEXTS_ONLY' && value.inspectionConfiguration === 'COMPLETE'
++    && value.publicHttp === 'COMPLETE' && value.fulfilledValues === 'COMPLETE'
++    && Number.isSafeInteger(value.httpAttempts) && value.httpAttempts >= 0 && value.httpAttempts === value.httpBodiesConsumed && value.httpAttempts === value.httpBodiesScanned
++    && Number.isSafeInteger(value.extraAttempts) && value.extraAttempts >= 0 && value.extraAttempts === value.extraCompleted
++    && (value.extraTexts === 'NOT_CONFIGURED' && value.extraAttempts === 0 || value.extraTexts === 'COMPLETE' && value.extraAttempts > 0);
+ }
+ 
+ /** One guided session through the public API: start, poll, clarify only by script, cancel on timeout. */
+@@ -1162,7 +1313,7 @@
+   if (!isRecord(learned.view?.session) || typeof learned.view.session.state !== 'string') return undefined;
+   return {
+     terminal: learned.view.session.state, observedStates: learned.states, published, clarifications: learned.clarifications,
+-    failureCode: learned.result?.failure?.code ?? learned.result?.errorCode ?? null, failedStepNumber: learned.result?.failure?.stepNumber ?? null,
++    failureCode: publicErrorCode({ code: learned.result?.failure?.code ?? learned.result?.errorCode }), failedStepNumber: learned.result?.failure?.stepNumber ?? null,
+   };
+ }
+ 
+@@ -1197,7 +1348,7 @@
+ 
+ /** Recover only public fields already held by the existing transient API capture. No new request/observer. */
+ async function interruptedRun({ entry, rep, attempt, mode, manifest, startedAt, captured, phases, knownSessions, attemptedStarts,
+-  chargedAtStart, spentAtStart, stopRule, now, secretCanaries, incremental = undefined, priorFindings = [], priorStopObservations = [] }) {
++  chargedAtStart, spentAtStart, stopRule, now, secretCanaries, observation, incremental = undefined, priorFindings = [], priorStopObservations = [] }) {
+   const rows = Object.entries(captured).map(([label, text]) => {
+     try { return { label, n: Number(label.split('#')[1]), body: JSON.parse(text) }; } catch { return { label, n: Number(label.split('#')[1]), body: null }; }
+   });
+@@ -1231,7 +1382,7 @@
+       unresolvedSessionCharges.push({ phase: attemptedStarts > 1 ? 'incremental' : 'base', amountUsd: charge.spentUsd - before, basis: charge.costBasis });
+     }
+   }
+-  const scan = await leakScan({ captured, phases, secretCanaries, extraTexts: null });
++  const scan = await leakScan({ phases, observation, interrupt: true });
+   const retainedFindings = new Map();
+   for (const finding of [...priorFindings, ...scan.findings]) retainedFindings.set(`${finding.label}#${String(finding.canaryIndex)}#${finding.canarySha256Prefix}`, finding);
+   const leaks = Math.max(retainedFindings.size, ...sessions.map((session) => session.hardGates.secretOrPiiLeak), 0);
+@@ -1249,7 +1400,7 @@
+     unresolvedSessionCharges, protectiveChargeScope: [{ chargedSessionOrPotentialStartCount: stopRule === null ? 0 : stopRule.state().sessions - chargedAtStart,
+       knownProtectiveSpendUsd: stopRule === null ? null : stopRule.state().spentUsd - spentAtStart }],
+     stopObservations: [...priorStopObservations, ...(stopRule?.state().observedReasons ?? []).filter((reason) => !priorStopObservations.some((row) => row.reason === reason)).map((reason) => ({ phase: reason === 'STOPPED_BUDGET_80' ? attemptedStarts > 1 ? 'incremental' : 'base' : 'final-oracle', reason }))] };
+-  return run;
++  return observation.finish(run);
+ }
+ 
+ /**
+@@ -1260,7 +1411,7 @@
+  */
+ export async function driveCase({ client: rawClient, entry, stepText, expected, vars, receipts, mode, manifest, rep = 1, attempt = 1, pollMs = 500, timeoutMs = 600_000, stopRule = null, now = () => new Date(), pause = sleep, replays = 2, secretCanaries = [], extraTexts = null }) {
+   if (stopRule !== null && !stopRule.nextSessionAllowed()) throw new AdmissionError('SESSION_AFTER_STOP');
+-  const { client, texts: captured } = withTextCapture(rawClient);
++  const { client, texts: captured, observation } = withTextCapture(rawClient, { secretCanaries, extraTexts });
+   const startedAt = now();
+   const phases = {}; const knownSessions = []; let attemptedStarts = 0; let priorFindings = [];
+   const chargedAtStart = stopRule?.state().sessions ?? 0; const spentAtStart = stopRule?.state().spentUsd ?? 0;
+@@ -1293,7 +1444,7 @@
+     const observed = { session: sessionObservation({ ...learned, result }, published), receipts: { phases } };
+     const oracle = evaluateOutcome(expected, observed, vars);
+     knownSessions[0].session = observed.session; knownSessions[0].oracle = oracle; knownSessions[0].hardGates.falsePass = oracle.falseSuccess;
+-    const scan = await leakScan({ captured, phases, secretCanaries, extraTexts });
++    const scan = await leakScan({ phases, observation });
+     priorFindings = scan.findings; knownSessions[0].hardGates.secretOrPiiLeak = scan.leaks;
+     const run = newRun({ entry, rep, attempt, mode, manifest, startedAt, finishedAt: now(), observed, oracle, counters: learned.view.session.counters ?? {}, sessionId: learned.id });
+     run.secretOrPiiLeak = scan.leaks;
+@@ -1303,10 +1454,10 @@
+       chargeLearn(stopRule, run.learnSessions[0]);
+       run.details.stopObservations = stopRule.state().observedReasons.map((reason) => ({ phase: 'base', reason }));
+     }
+-    return run;
++    return observation.finish(run);
+   } catch {
+-    return interruptedRun({ entry, rep, attempt, mode, manifest, startedAt, captured, phases, knownSessions, attemptedStarts, chargedAtStart, spentAtStart, stopRule, now, secretCanaries, priorFindings });
+-  }
++    return await interruptedRun({ entry, rep, attempt, mode, manifest, startedAt, captured, phases, knownSessions, attemptedStarts, chargedAtStart, spentAtStart, stopRule, now, secretCanaries, observation, priorFindings });
++  } finally { observation.dispose(); }
+ }
+ 
+ /**
+@@ -1318,11 +1469,11 @@
+  */
+ export async function driveIncremental({ client: rawClient, entry, caseFile, expected, vars, receipts, switchSourceValue, mode, manifest, rep = 1, attempt = 1, pollMs = 500, timeoutMs = 900_000, stopRule = null, now = () => new Date(), pause = sleep, secretCanaries = [], extraTexts = null }) {
+   if (stopRule !== null && !stopRule.nextSessionAllowed()) throw new AdmissionError('SESSION_AFTER_STOP');
+-  const { client, texts: captured } = withTextCapture(rawClient);
++  const { client, texts: captured, observation } = withTextCapture(rawClient, { secretCanaries, extraTexts });
+   const startedAt = now();
+   const findings = new Map();
+   const scanPhase = async (observedPhases) => {
+-    const scan = await leakScan({ captured, phases: observedPhases, secretCanaries, extraTexts });
++    const scan = await leakScan({ phases: observedPhases, observation });
+     for (const finding of scan.findings) {
+       const key = `${finding.label}#${String(finding.canaryIndex)}#${finding.canarySha256Prefix}`;
+       const prior = findings.get(key);
+@@ -1438,10 +1589,10 @@
+     const run = newRun({ entry, rep, attempt, mode, manifest, startedAt, finishedAt: now(), observed, oracle, counters: {}, sessionId: last.id, incremental, learnSessions: sessions });
+     run.secretOrPiiLeak = leaks;
+     run.details = { ...run.details, canaryFindings: [...findings.values()], stopObservations };
+-    return run;
++    return observation.finish(run);
+   } catch {
+-    return interruptedRun({ entry, rep, attempt, mode, manifest, startedAt, captured, phases, knownSessions: sessions, attemptedStarts, chargedAtStart, spentAtStart, stopRule, now, secretCanaries, incremental: {}, priorFindings: [...findings.values()], priorStopObservations: stopObservations });
+-  }
++    return await interruptedRun({ entry, rep, attempt, mode, manifest, startedAt, captured, phases, knownSessions: sessions, attemptedStarts, chargedAtStart, spentAtStart, stopRule, now, secretCanaries, observation, incremental: {}, priorFindings: [...findings.values()], priorStopObservations: stopObservations });
++  } finally { observation.dispose(); }
+ }
+ 
+ /** A receipts channel over the corpus page host (`pages/server.mjs`) for one namespace. */
+@@ -1500,7 +1651,8 @@
+  * ADMITTED ledger entry for exactly this manifest and refuses to start without one; HARNESS_SELF_TEST takes a
+  * scripted `client` and is labelled as such everywhere. `select` narrows to case ids (never for a D_C gate run).
+  */
+-export async function runBenchmark({ manifest, mode, client, ledger = null, price = null, root = HERE, repoRoot = repoRootFrom(root), select = null, plantedSecrets = { c05: `planted-${randomUUID()}` }, driveOptions = {}, scripts = {} }) {
++export async function runBenchmark({ manifest, mode, client, ledger = null, price = null, root = HERE, repoRoot = repoRootFrom(root), select = null, plantedSecrets = { c05: `planted-${randomUUID()}` }, driveOptions = {}, scripts = {}, selfTestHosts = null }) {
++  if (selfTestHosts !== null && mode !== 'HARNESS_SELF_TEST') throw new AdmissionError('SELF_TEST_HOSTS_FORBIDDEN');
+   const check = validateCorpusManifest(manifest, { root, repoRoot });
+   if (check.errors.length > 0) throw new Error(`MANIFEST_INVALID:${check.errors.slice(0, 5).join(' | ')}`);
+   let guard = null;
+@@ -1515,7 +1667,8 @@
+       perCallCeiling: Number.isInteger(recordedCaps.maxInputBytesPerCall) && Number.isInteger(recordedCaps.maxOutputTokensPerCall) ? { input: recordedCaps.maxInputBytesPerCall, output: recordedCaps.maxOutputTokensPerCall } : null,
+     });
+   } else if (mode !== 'HARNESS_SELF_TEST') throw new Error('mode');
+-  const host = await startCorpusPages({ plantedSecrets });
++  const host = await (selfTestHosts?.startCorpusPages ?? startCorpusPages)({ plantedSecrets });
++  const fixtureFactory = selfTestHosts?.hostExistingFixture ?? hostExistingFixture;
+   const runs = [];
+   try {
+     corpus: for (const entry of manifest.cases) {
+@@ -1527,23 +1680,29 @@
+         if (stopRule !== null && !stopRule.nextSessionAllowed()) break;
+         const ns = `${entry.fixture.namespaceBase?.split('/').at(-1) ?? 'x'}.r${String(rep)}-${randomUUID().slice(0, 8)}`;
+         let fixture = null;
++        const requiredCanaries = [...Object.values(plantedSecrets)];
+         let receipts;
+         let vars;
+         if (entry.fixture.kind === 'corpus-pages') {
+           receipts = pageReceipts(host, ns);
+           vars = { fixtureOrigin: host.fixtureOrigin(ns) };
+         } else if (entry.block === 'incremental' || entry.id.startsWith('D3')) {
+-          fixture = await hostExistingFixture('guided-dataflow', { mode: entry.fixture.mode });
++          fixture = await fixtureFactory('guided-dataflow', { mode: entry.fixture.mode });
+           receipts = fixture.receipts;
+           vars = { fixtureOrigin: fixture.origin, sourceValue: 'base-reference-value' };
+         } else {
+           const password = plantedSecrets.d1 ?? `planted-${randomUUID()}`;
+-          fixture = await hostExistingFixture('secret-login', { password });
++          fixture = await fixtureFactory('secret-login', { password });
++          requiredCanaries.push(password);
+           receipts = fixture.receipts;
+           vars = { fixtureOrigin: fixture.origin };
+         }
+         try {
+-          const common = { client: script?.client ?? client, entry, expected: script?.expected ?? expected, vars, receipts, mode, manifest, rep, stopRule, secretCanaries: Object.values(plantedSecrets), ...driveOptions };
++          const requestedCanaries = driveOptions.secretCanaries;
++          const operatorCanaries = copiedCanaryEntries(requestedCanaries, true);
++          const common = { client: script?.client ?? client, entry, expected: script?.expected ?? expected, vars, receipts, mode, manifest, rep, stopRule, ...driveOptions,
++            secretCanaries: [...new Set([...requiredCanaries, ...operatorCanaries])],
++          };
+           if (entry.block === 'incremental') {
+             const caseFile = readJson(resolveInside(root, entry.stepText.path));
+             runs.push(await driveIncremental({ ...common, caseFile, switchSourceValue: () => { vars.sourceValue = 'fresh-current-session-reference'; fixture.setSourceValue('fresh-current-session-reference'); } }));
+--- a/studio-runner/evaluation/observed-authoring/evaluate.d.mts
++++ b/studio-runner/evaluation/observed-authoring/evaluate.d.mts
+@@ -99,6 +99,7 @@
+   learnSessionsComplete?: boolean; learnSessions?: LearnSession[];
+   usage?: { basis?: 'PUBLIC_BUDGET_COUNTERS'; modelProposals: number | null; inputTokens: number | null; outputTokens: number | null };
+   secretOrPiiLeak?: number; rs1NonScalarReadGaps: number; authoredEchoUnobservableTargets: number; focusMutationRefusedFills: number;
++  /** canaryObservation is one closed local-scope row; absent/invalid coverage never establishes zero. */
+   details?: Record<string, JsonObject[]>; incremental?: JsonObject;
+ }
+ export declare function validateRunRecord(run: unknown, manifest: CorpusManifest): string[];
+@@ -108,6 +109,7 @@
+   gate: { scope: string; verdict: string; reasons: string[]; classP: { casesPlanned: number; casesRunnable: number; runsCredited: number; completions: number; failedRuns: number; rate: number | null; thresholdPct: number; fullArithmetic: GateArithmetic; runnableArithmetic: GateArithmetic }; blockedUnrun: string[] };
+   hardGates: { falsePasses: number; secretOrPiiLeaks: number; falsePassRuns: RunIdentity[]; leakRuns: RunIdentity[] };
+   reviewProvenance: JsonObject; evidenceStatus: string; requiredActualEvidence: string[];
++  canaryObservation?: { scope: 'LOCAL_CONSUMED_PUBLIC_HTTP_AND_DECLARED_TEXTS_ONLY'; complete: boolean; knownLeakRuns: number; totalLeakRuns: number | null; unknownRuns: RunIdentity[]; globalWireComplete: null };
+   corpusInspection: { knownLocalCaseIds: string[]; confirmedRs1CaseIds: string[]; unknownStagingCaseIds: string[]; knownLocalCount: number; confirmedRs1CaseCount: number; unknownStagingCount: number; globalRs1Total: number | null; disclosure: string };
+   classFN: { runs: number; correct: number };
+   denominatorLedger: { plannedRuns: number; creditedRuns: number; infrastructureFailures: JsonObject[]; missingRuns: string[]; blockedUnrunCases: string[]; problems: { caseId: string | null; rep: number | null; code: string }[] };
+@@ -196,6 +198,8 @@
+ export declare function runBenchmark(input: {
+   manifest: CorpusManifest; mode: RunMode; client: StudioApiClient; ledger?: AdmissionLedger | null; price?: Price | null; root?: string; repoRoot?: string;
+   select?: string[] | null; plantedSecrets?: Record<string, string>; driveOptions?: DriveOptions; scripts?: Record<string, { client?: StudioApiClient; expected?: ExpectedOutcome }>;
++  /** Test dependencies are accepted only in HARNESS_SELF_TEST; defaults remain the production hosts. */
++  selfTestHosts?: Partial<{ startCorpusPages: typeof startCorpusPages; hostExistingFixture: typeof hostExistingFixture }> | null;
+ }): Promise<{ runs: RunRecord[]; benchmark: Benchmark }>;
+ export declare function repoRootFrom(root?: string): string;
+ 
+--- a/studio-runner/test/evaluation/harnessSelfTest.test.ts
++++ b/studio-runner/test/evaluation/harnessSelfTest.test.ts
+@@ -7,10 +7,10 @@
+  */
+ import { describe, expect, it } from 'vitest';
+ import {
+-  runBenchmark, driveIncremental, createPublicApiClient, createStopRule, buildBenchmark, mutateObservation, idealObservation, SELF_TEST_LABEL,
++  runBenchmark, driveIncremental, createPublicApiClient, createStopRule, buildBenchmark, mutateObservation, idealObservation, gateArithmetic, sessionPlan, manifestDigest, validateCorpusManifest, repoRootFrom, sha256Hex, SELF_TEST_LABEL,
+   type CorpusManifest, type ExpectedOutcome, type JsonObject, type StudioApiClient, type RunRecord,
+ } from '../../evaluation/observed-authoring/evaluate.mjs';
+-import { expectedOf, frozenManifest, readJson } from './observedCorpus.js';
++import { expectedOf, frozenManifest, readJson, syntheticRuns, reviewedInput, must } from './observedCorpus.js';
+ 
+ const manifest = frozenManifest();
+ const PASSWORD = 'planted-selftest-password-5521';
+@@ -365,6 +365,290 @@
+   });
+ });
+ 
++
++interface WireOptions {
++  failureAt?: 'get' | 'put' | 'start'; failStartNumber?: 1 | 2; response?: (owner: number) => Response | Promise<Response>;
++  resultCode?: string;
++  echo?: () => string; terminal?: 'SUCCEEDED' | 'FAILED'; onFinalize?: () => void;
++}
++
++/** Actual shared public-client identity; every transport request is handled in memory. */
++function wireHarness(options: WireOptions = {}) {
++  const requests: { method: string; path: string }[] = [];
++  const states = new Map<number, { starts: number; finalized: Set<string>; events: JsonObject[] }>();
++  const state = (owner: number) => {
++    let value = states.get(owner);
++    if (value === undefined) { value = { starts: 0, finalized: new Set(), events: [] }; states.set(owner, value); }
++    return value;
++  };
++  const json = (body: unknown) => new Response(JSON.stringify(body), { headers: { 'content-type': 'application/json' } });
++  const client = createPublicApiClient({
++    baseUrl: 'http://127.0.0.1/api/v1/studio', token: 'unit-wire-token', csiId: '60406', environmentId: 'dev', applicationId: 'unit-wire-app',
++    transport: async (url, init) => {
++      const method = init.method ?? 'GET'; const path = url.pathname.replace('/api/v1/studio', '');
++      requests.push({ method, path });
++      const body: unknown = typeof init.body === 'string' ? JSON.parse(init.body) : null;
++      const fields: JsonObject = body !== null && typeof body === 'object' ? Object.fromEntries(Object.entries(body)) : {};
++      if (path === '/tests' && method === 'POST') {
++        const owner = Number(/r([123])$/u.exec(String(fields.name))?.[1] ?? '1');
++        state(owner); return json({ id: `wire-${String(owner)}`, sourceRevision: 1, configurationRevision: 1 });
++      }
++      if (path === '/guided-sessions' && method === 'POST') {
++        const owner = Number(String(fields.testId).split('-')[1]); const current = state(owner); current.starts += 1;
++        current.events.push({ type: 'receipt.post', body: current.starts === 1 ? 'base-reference-value' : 'fresh-current-session-reference' });
++        if (options.failureAt === 'start' && current.starts === (options.failStartNumber ?? 1)) return await options.response?.(owner) ?? json(null);
++        return json({ session: { sessionId: `ws-${String(owner)}-${String(current.starts)}`, state: 'PREPARING' } });
++      }
++      const draft = /^\/tests\/wire-(\d)$/u.exec(path);
++      if (draft) {
++        const owner = Number(draft[1]);
++        if (method === 'GET') return options.failureAt === 'get' ? await options.response?.(owner) ?? json(null) : json({ id: `wire-${String(owner)}`, sourceRevision: 7, configurationRevision: 11 });
++        if (method === 'PUT') return options.failureAt === 'put' ? await options.response?.(owner) ?? json(null) : json({ id: `wire-${String(owner)}`, sourceRevision: 17, configurationRevision: 19 });
++      }
++      const guided = /^\/guided-sessions\/(ws-(\d)-(\d))(?:\/(result|finalize))?$/u.exec(path);
++      if (guided) {
++        const id = guided[1] ?? ''; const owner = Number(guided[2]); const number = Number(guided[3]); const current = state(owner);
++        if (guided[4] === 'finalize') { current.finalized.add(id); options.onFinalize?.(); return json({}); }
++        if (guided[4] === 'result') return json({ publication: { status: current.finalized.has(id) ? 'PUBLISHED' : 'PENDING', receipt: current.finalized.has(id) ? { revisionId: 'wire-revision' } : null },
++          failure: options.resultCode === undefined ? null : { code: options.resultCode }, explanation: { steps: Array.from({ length: 10 }, (_v, i) => ({ number: i + 1, learnedFromThisRun: i >= 3, reusedFrom: i < 3 ? { revisionId: 'wire-revision', stepId: String(i) } : null })) } });
++        return json({ session: { sessionId: id, state: options.terminal ?? 'SUCCEEDED', counters: { modelProposals: number === 1 ? 10 : 3, modelInputTokens: number === 1 ? 100 : 40, modelOutputTokens: number === 1 ? 20 : 5 } }, ...(options.echo ? { diagnostics: options.echo() } : {}) });
++      }
++      throw new Error('Unexpected in-memory wire route');
++    },
++  });
++  const run = async (owner = 1, canaries: string[] = ['unit-wire-canary'], extraTexts: (() => Promise<Record<string, string>>) | null = null) => {
++    const entry = entryOf(manifest, 'incremental-edit-step-4'); const current = state(owner);
++    const stop = createStopRule({ allocationUsd: 1_000_000_000, price: { pInPerMTok: 1_000_000, pOutPerMTok: 0 }, reservedCeiling: { input: 1000, output: 1000 } });
++    const record = await driveIncremental({ manifest, entry, expected: expectedOf(entry), caseFile: readJson(entry.stepText?.path ?? '') as JsonObject,
++      client, rep: owner, receipts: { mark: () => current.events.length, since: (cursor) => ({ actions: current.events.slice(cursor), views: [] }) },
++      switchSourceValue: () => undefined, vars: {}, mode: 'HARNESS_SELF_TEST', stopRule: stop, ...FAST, secretCanaries: canaries, extraTexts });
++    return { run: record, stop, starts: current.starts };
++  };
++  return { client, requests, run };
++}
++
++function deferred<T>() {
++  let release: (value: T) => void = () => { throw new Error('Unit gate not initialized'); };
++  const promise = new Promise<T>((resolve) => { release = resolve; });
++  return { promise, release };
++}
++
++function allLocalUnitManifest() {
++  const local = structuredClone(manifest); local.cases = local.cases.filter((entry) => entry.status === 'READY_LOCAL');
++  local.gate = { ...local.gate, ...gateArithmetic(local.cases.filter((entry) => entry.class === 'P').length, 3, local.gate.completionThresholdPct) };
++  local.sessionPlan = sessionPlan(local); local.manifestSha256 = manifestDigest(local);
++  return local;
++}
++
++describe('WIRE-OBS18: consumed response coverage without raw retention', () => {
++  it.each([
++    { label: 'HTTP non2xx JSON', response: () => new Response(JSON.stringify({ code: 'STALE_REVISION', diagnostics: 'unit-wire-canary' }), { status: 409 }) },
++    { label: 'malformed JSON', response: () => new Response('{invalid unit-wire-canary') },
++    { label: 'over-bound tail', response: () => new Response('x'.repeat(2_000_001) + 'unit-wire-canary') },
++  ])('WIRE-OBS18 inspects $label before rejection without suffix or a second base charge', async ({ response }) => {
++    const api = wireHarness({ failureAt: 'get', response }); const { run, stop, starts } = await api.run();
++    expect(run.secretOrPiiLeak).toBeGreaterThan(0);
++    expect(run.details?.canaryObservation?.[0]).toMatchObject({ publicHttp: 'COMPLETE', inspectionConfiguration: 'COMPLETE' });
++    expect(run.details?.canaryFindings).toContainEqual(expect.objectContaining({ label: 'publicHttp' }));
++    expect(starts).toBe(1); expect(stop.state()).toMatchObject({ sessions: 1, stopped: 'STOPPED_HARD_GATE' });
++    expect(api.requests.filter((r) => r.method === 'GET' && r.path === '/tests/wire-1')).toHaveLength(1);
++    expect(api.requests.filter((r) => r.method === 'PUT')).toHaveLength(0);
++    expect(run.incremental).toMatchObject({ logicalStatus: 'INCOMPLETE', suffixStarted: false });
++    expect(run.usage).toMatchObject({ modelProposals: 10, inputTokens: 100, outputTokens: 20 });
++    expect(JSON.stringify(run)).not.toContain('unit-wire-canary');
++  });
++
++  it('WIRE-OBS18 keeps the exact UTF16 size boundary and successful current-draft flow', async () => {
++    const seed = JSON.stringify({ id: 'wire-1', sourceRevision: 7, configurationRevision: 11, padding: '' });
++    const text = seed.replace('"padding":""', `"padding":"${'x'.repeat(2_000_000 - seed.length)}"`);
++    expect(text.length).toBe(2_000_000);
++    const api = wireHarness({ failureAt: 'get', response: () => new Response(text) }); const { run, starts, stop } = await api.run();
++    expect(starts).toBe(2); expect(stop.state().sessions).toBe(2); expect(run.oracle?.correct).toBe(true);
++    expect(run.details?.canaryObservation?.[0]).toMatchObject({ publicHttp: 'COMPLETE', inspectionConfiguration: 'COMPLETE' });
++  });
++
++  it.each([
++    { body: JSON.stringify({ code: { detail: 'unit-wire-canary' }, error: 'unit-wire-canary' }), message: 'Studio API refused the request', status: 400 },
++    { body: '{invalid unit-wire-canary', message: 'Studio API returned invalid JSON', status: 200 },
++  ])('WIRE-OBS18 standalone errors keep only fixed diagnostics for $status', async ({ body, message, status }) => {
++    const api = wireHarness({ failureAt: 'get', response: () => new Response(body, { status }) });
++    try { await api.client.readDraft('wire-1'); throw new Error('Expected unit refusal'); }
++    catch (failure) {
++      expect(failure).toBeInstanceOf(Error);
++      if (!(failure instanceof Error)) throw new Error('Expected fixed error');
++      expect(failure.message).toBe(message); expect(failure.stack).not.toContain('unit-wire-canary');
++      expect(JSON.stringify(failure)).not.toContain('unit-wire-canary'); expect(Object.hasOwn(failure, 'cause')).toBe(false);
++    }
++  });
++
++  it('WIRE-OBS18 never serializes an unknown successful failure-code value', async () => {
++    const api = wireHarness({ terminal: 'FAILED', resultCode: 'unit-wire-canary' }); const { run } = await api.run();
++    expect(run.secretOrPiiLeak).toBeGreaterThan(0); expect(run.session?.failureCode).toBeNull();
++    expect(JSON.stringify(run)).not.toContain('unit-wire-canary');
++  });
++
++  it('WIRE-OBS18 body-read failure stays unknown and sanitizes its error', async () => {
++    const api = wireHarness({ failureAt: 'get', response: () => { const response = new Response('unused'); response.text = () => Promise.reject(new Error('unit-wire-canary')); return response; } });
++    const { run, starts, stop } = await api.run();
++    expect(starts).toBe(1); expect(stop.state().sessions).toBe(1);
++    expect(run.details?.canaryObservation?.[0]).toMatchObject({ publicHttp: 'UNAVAILABLE' });
++    const report = buildBenchmark({ manifest, runs: [run], mode: 'HARNESS_SELF_TEST' });
++    expect(report.canaryObservation).toMatchObject({ complete: false, totalLeakRuns: null, globalWireComplete: null });
++    expect(JSON.stringify(run)).not.toContain('unit-wire-canary');
++  });
++
++  it('WIRE-OBS18 interruption collects the configured text hook once for the new failed stage', async () => {
++    let failed = false; let collections = 0;
++    const api = wireHarness({ failureAt: 'get', response: () => { failed = true; return new Response('{}', { status: 409 }); } });
++    const { run, stop } = await api.run(1, ['unit-wire-canary'], () => { collections += 1; return Promise.resolve(failed ? { backendLog: 'unit-wire-canary' } : {}); });
++    expect(collections).toBe(3); expect(stop.state().sessions).toBe(1);
++    expect(run.secretOrPiiLeak).toBeGreaterThan(0); expect(run.details?.canaryFindings).toContainEqual(expect.objectContaining({ label: 'backendLog' }));
++    expect(JSON.stringify(run)).not.toContain('unit-wire-canary');
++  });
++
++  it('WIRE-OBS18 collector failure keeps prior hits, unknown scope and one existing charge without retry', async () => {
++    let collections = 0; const api = wireHarness();
++    const { run, stop, starts } = await api.run(1, ['unit-wire-canary'], () => { collections += 1; if (collections > 1) return Promise.reject(new Error('unit-wire-canary')); return Promise.resolve({ backendLog: 'unit-wire-canary' }); });
++    expect(collections).toBe(2); expect(starts).toBe(1); expect(stop.state().sessions).toBe(1);
++    expect(run.secretOrPiiLeak).toBeGreaterThan(0); expect(run.details?.canaryObservation?.[0]).toMatchObject({ extraTexts: 'UNAVAILABLE' });
++    expect(buildBenchmark({ manifest, runs: [run], mode: 'HARNESS_SELF_TEST' }).canaryObservation?.totalLeakRuns).toBeNull();
++    expect(JSON.stringify(run)).not.toContain('unit-wire-canary');
++  });
++
++  it('WIRE-OBS18 scans valid supplied strings even when another field is invalid', async () => {
++    let collections = 0; const api = wireHarness();
++    const { run, stop } = await api.run(1, ['unit-wire-canary'], () => {
++      collections += 1; const texts: Record<string, string> = { backendLog: 'unit-wire-canary' };
++      Object.defineProperty(texts, 'invalid', { enumerable: true, value: 42 }); return Promise.resolve(texts);
++    });
++    expect(collections).toBe(1); expect(stop.state().sessions).toBe(1); expect(run.secretOrPiiLeak).toBeGreaterThan(0);
++    expect(run.details?.canaryObservation?.[0]).toMatchObject({ extraTexts: 'UNAVAILABLE' });
++    expect(JSON.stringify(run)).not.toContain('unit-wire-canary');
++  });
++
++  it.each([1, 2] as const)('WIRE-OBS18 charges unacknowledged start $0 before latching the hard stop', async (start) => {
++    const api = wireHarness({ failureAt: 'start', failStartNumber: start, response: () => new Response('{unit-wire-canary') }); const { run, stop } = await api.run();
++    expect(stop.state()).toMatchObject({ sessions: start, stopped: 'STOPPED_HARD_GATE' });
++    expect(run.learnSessions).toHaveLength(start - 1); expect(run.learnSessionsComplete).toBe(false);
++    expect(run.usage).toMatchObject({ modelProposals: null, inputTokens: null, outputTokens: null });
++    if (start === 2) expect(run.incremental?.suffixStarted).toBeUndefined(); else expect(run.incremental?.suffixStarted).toBe(false);
++    expect(run.details?.unresolvedSessionCharges).toHaveLength(1); expect(run.secretOrPiiLeak).toBeGreaterThan(0);
++    expect(JSON.stringify(run)).not.toContain('unit-wire-canary');
++  });
++
++  it('WIRE-OBS18 isolates interleaved drivers sharing one actual public client through cleanup', async () => {
++    const enteredA = deferred<void>(); const enteredB = deferred<void>(); const releaseA = deferred<void>(); const releaseB = deferred<void>();
++    const api = wireHarness({ failureAt: 'get', response: async (owner) => {
++      if (owner === 1) { enteredA.release(); await releaseA.promise; return new Response(JSON.stringify({ diagnostic: 'owned-A-canary' }), { status: 409 }); }
++      enteredB.release(); await releaseB.promise; return new Response(JSON.stringify({ diagnostic: 'owned-A-canary owned-B-canary' }), { status: 409 });
++    } });
++    const a = api.run(1, ['owned-A-canary']); const b = api.run(2, ['owned-B-canary']);
++    await Promise.all([enteredA.promise, enteredB.promise]); releaseA.release(); const first = await a;
++    releaseB.release(); const second = await b;
++    expect(first.run.details?.canaryFindings).toContainEqual(expect.objectContaining({ label: 'publicHttp', canarySha256Prefix: sha256Hex('owned-A-canary').slice(0, 12) }));
++    expect(second.run.details?.canaryFindings).toContainEqual(expect.objectContaining({ label: 'publicHttp', canarySha256Prefix: sha256Hex('owned-B-canary').slice(0, 12) }));
++    expect(second.run.details?.canaryFindings?.some((finding) => finding.canarySha256Prefix === sha256Hex('owned-A-canary').slice(0, 12))).toBe(false);
++    expect(JSON.stringify([first.run, second.run])).not.toContain('owned-A-canary'); expect(JSON.stringify([first.run, second.run])).not.toContain('owned-B-canary');
++  });
++
++  it('WIRE-OBS18 preserves a mutable generated-client override instead of silently rebinding it away', async () => {
++    const api = wireHarness(); let overrides = 0;
++    api.client.readDraft = () => { overrides += 1; return Promise.resolve({ id: 'wrong', sourceRevision: 7, configurationRevision: 11 }); };
++    const { run, starts } = await api.run(); expect(overrides).toBe(1); expect(starts).toBe(1);
++    expect(api.requests.some((request) => request.method === 'GET' && request.path.startsWith('/tests/'))).toBe(false);
++    expect(run.details?.canaryObservation?.[0]).toMatchObject({ publicHttp: 'UNOBSERVABLE' });
++  });
++
++  it('WIRE-OBS18 preserves an override installed while an observed run is awaiting publication', async () => {
++    let change: () => void = () => undefined; let overrides = 0;
++    const api = wireHarness({ onFinalize: () => { change(); } });
++    change = () => { api.client.readDraft = () => { overrides += 1; return Promise.resolve({ id: 'wrong', sourceRevision: 7, configurationRevision: 11 }); }; };
++    const { run } = await api.run(); expect(overrides).toBe(1);
++    expect(api.requests.some((request) => request.method === 'GET' && request.path.startsWith('/tests/'))).toBe(false);
++    expect(run.details?.canaryObservation?.[0]).toMatchObject({ publicHttp: 'UNOBSERVABLE' });
++  });
++
++  it.each([{ label: 'empty', values: [] }, { label: 'empty string', values: [''] }, { label: 'uninspectable', values: ['\ud800'] }])(
++    'WIRE-OBS18 marks $label inspection unavailable without a known absence claim', async ({ values }) => {
++      const api = wireHarness({ failureAt: 'get', response: () => new Response('{}', { status: 409 }) }); const { run } = await api.run(1, values);
++      expect(run.details?.canaryObservation?.[0]).toMatchObject({ inspectionConfiguration: 'UNAVAILABLE' });
++      expect(buildBenchmark({ manifest, runs: [run], mode: 'HARNESS_SELF_TEST' }).canaryObservation?.totalLeakRuns).toBeNull();
++    },
++  );
++
++  it('WIRE-OBS18 keeps known valid hits when another operator entry is invalid', async () => {
++    const values = ['unit-wire-canary', 'invalid']; Object.defineProperty(values, '1', { value: 42 });
++    const api = wireHarness({ failureAt: 'get', response: () => new Response(JSON.stringify({ diagnostic: 'unit-wire-canary' }), { status: 409 }) }); const { run } = await api.run(1, values);
++    expect(run.secretOrPiiLeak).toBeGreaterThan(0); expect(run.details?.canaryObservation?.[0]).toMatchObject({ inspectionConfiguration: 'UNAVAILABLE' });
++    expect(JSON.stringify(run)).not.toContain('unit-wire-canary');
++  });
++
++  it.each(['missing row', 'unavailable body', 'unavailable configuration', 'earlier excluded attempt'])(
++    'WIRE-OBS18 prevents an otherwise passing full population from laundering $0', (variant) => {
++      const local = allLocalUnitManifest(); expect(validateCorpusManifest(local, { repoRoot: repoRootFrom() }).errors).toEqual([]);
++      const clean = syntheticRuns(local, { mode: 'D_C' });
++      const score = (runs: RunRecord[]) => buildBenchmark({ manifest: local, runs, mode: 'D_C', reviewInput: reviewedInput(local, runs) });
++      expect(score(clean).gate.verdict).toBe('GATE_PASS');
++      const runs = structuredClone(clean); const target = must(runs[0]);
++      if (variant === 'missing row') delete target.details?.canaryObservation;
++      else if (variant === 'earlier excluded attempt') {
++        const prior = structuredClone(target); prior.infrastructureFailure = 'HOST_PORT_COLLISION'; must(prior.details?.canaryObservation?.[0]).publicHttp = 'UNAVAILABLE';
++        target.attempt = 2; runs.unshift(prior);
++      } else must(target.details?.canaryObservation?.[0])[variant === 'unavailable body' ? 'publicHttp' : 'inspectionConfiguration'] = 'UNAVAILABLE';
++      const reported = score(runs); expect(reported.gate.classP.completions).toBeGreaterThanOrEqual(reported.gate.classP.runnableArithmetic.minCompletions);
++      expect(reported.gate.verdict).not.toBe('GATE_PASS'); expect(reported.canaryObservation).toMatchObject({ complete: false, totalLeakRuns: null, globalWireComplete: null });
++      expect(reported.denominatorLedger.problems).toContainEqual(expect.objectContaining({ code: 'RUN_CANARY_OBSERVATION_UNAVAILABLE' }));
++    },
++  );
++
++  it.each(['default-generated', 'replacement-list', 'selected-password', 'invalid-operator', 'scalar-operator'])(
++    'WIRE-OBS18 binds the actual secret-login password in the real loop with $0 and closes fake hosts', async (variant) => {
++      let currentPassword = ''; let fixtureCloses = 0; let pageCloses = 0; const passwords: string[] = [];
++      const scalarOperator = 'scalar-operator-unit-canary';
++      const api = wireHarness({ terminal: 'FAILED', echo: () => `${currentPassword} ${variant === 'selected-password' ? '' : passwords.at(-2) ?? ''} ${variant === 'scalar-operator' ? scalarOperator : ''}` });
++      const hosts: NonNullable<Parameters<typeof runBenchmark>[0]['selfTestHosts']> = {
++        startCorpusPages: () => Promise.resolve({ pagesVersion: 'unit', origin: 'http://127.0.0.1:1', fixtureOrigin: () => 'http://127.0.0.1:1', pageKeys: () => [], receipts: () => [], reset: () => undefined, close: () => { pageCloses += 1; return Promise.resolve(); } }),
++        hostExistingFixture: (kind, options) => {
++          if (kind !== 'secret-login' || typeof options?.password !== 'string') throw new Error('Unexpected unit fixture');
++          currentPassword = options.password; passwords.push(currentPassword);
++          return Promise.resolve({ origin: 'http://127.0.0.1:1', receipts: { mark: () => 0, since: () => ({ actions: [], views: [] }) }, close: () => { fixtureCloses += 1; return Promise.resolve(); } });
++        },
++      };
++      const operators = ['operator-only']; if (variant === 'invalid-operator') Object.defineProperty(operators, '0', { value: 42 });
++      const planted = { d1: 'selected-unit-password' }; const prior = structuredClone(planted);
++      const driveOptions = { ...FAST, ...(variant === 'default-generated' ? {} : { secretCanaries: operators }) };
++      // Deliberately invalid runtime input while retaining the declared public option type.
++      if (variant === 'scalar-operator') Object.defineProperty(driveOptions, 'secretCanaries', { value: scalarOperator });
++      const { runs, benchmark } = await runBenchmark({ manifest, mode: 'HARNESS_SELF_TEST', client: api.client, select: ['D1-login-secret-fixture'], selfTestHosts: hosts,
++        ...(variant === 'selected-password' ? { plantedSecrets: planted } : {}), driveOptions });
++      expect(runs.length).toBeGreaterThan(0); expect(passwords).toHaveLength(runs.length); expect(fixtureCloses).toBe(runs.length); expect(pageCloses).toBe(1);
++      expect(runs.every((run) => (run.secretOrPiiLeak ?? 0) > 0)).toBe(true); expect(runs.every((run) => run.learnSessions?.length === 1)).toBe(true);
++      for (const password of passwords) expect(JSON.stringify({ runs, benchmark })).not.toContain(password);
++      if (variant !== 'selected-password') for (const [index, run] of runs.entries()) {
++        for (const earlier of passwords.slice(0, index)) expect(run.details?.canaryFindings?.some((finding) => finding.canarySha256Prefix === sha256Hex(earlier).slice(0, 12))).toBe(false);
++      }
++      if (variant !== 'selected-password') expect(new Set(passwords).size).toBe(passwords.length); else expect(passwords.every((password) => password === planted.d1)).toBe(true);
++      expect(planted).toEqual(prior); expect(benchmark.gate.verdict).toBe('NOT_EVIDENCE'); expect(benchmark.modelCalls.total).toBeNull();
++      if (variant === 'invalid-operator' || variant === 'scalar-operator') {
++        expect(runs[0]?.details?.canaryObservation?.[0]).toMatchObject({ inspectionConfiguration: 'UNAVAILABLE' });
++        expect(benchmark.canaryObservation).toMatchObject({ complete: false, totalLeakRuns: null, globalWireComplete: null });
++        expect(benchmark.gate.verdict).not.toBe('GATE_PASS');
++      }
++      if (variant === 'scalar-operator') {
++        expect(runs[0]?.details?.canaryFindings).toContainEqual(expect.objectContaining({ canarySha256Prefix: sha256Hex(must(passwords[0])).slice(0, 12) }));
++        expect(runs[0]?.details?.canaryFindings).toContainEqual(expect.objectContaining({ canarySha256Prefix: sha256Hex(scalarOperator).slice(0, 12) }));
++        expect(JSON.stringify({ runs, benchmark })).not.toContain(scalarOperator);
++      }
++    },
++  );
++
++  it('WIRE-OBS18 refuses self-test host overrides in D_C before ledger, host or API work', async () => {
++    let hosts = 0; const api = wireHarness();
++    await expect(runBenchmark({ manifest, mode: 'D_C', client: api.client, selfTestHosts: { startCorpusPages: () => { hosts += 1; return Promise.reject(new Error('Unexpected host')); } } })).rejects.toMatchObject({ code: 'SELF_TEST_HOSTS_FORBIDDEN' });
++    expect(hosts).toBe(0); expect(api.requests).toHaveLength(0);
++  });
++});
++
+ const entryOf = (m: CorpusManifest, id: string) => m.cases.find((c) => c.id === id) ?? (() => { throw new Error(id); })();
+ const FAST = { pollMs: 0, pause: () => Promise.resolve() };
+ 
+--- a/studio-runner/test/evaluation/observedCorpus.ts
++++ b/studio-runner/test/evaluation/observedCorpus.ts
+@@ -108,6 +108,9 @@
+         oracle: { correct: good && !falsePass, falseSuccess: falsePass, failures: good && !falsePass ? [] : ['synthetic'] },
+         usage: { modelProposals: 4 + (tick % 5), inputTokens: 1000 * tick, outputTokens: 100 * tick },
+         secretOrPiiLeak: options.leakCase === entry.id && rep === 1 ? 1 : 0,
++        // Explicit UNIT-ONLY premise for scoring inputs, never actual response/collector evidence.
++        details: { canaryObservation: [{ scope: 'LOCAL_CONSUMED_PUBLIC_HTTP_AND_DECLARED_TEXTS_ONLY', inspectionConfiguration: 'COMPLETE', publicHttp: 'COMPLETE',
++          httpAttempts: 0, httpBodiesConsumed: 0, httpBodiesScanned: 0, fulfilledValues: 'COMPLETE', extraTexts: 'NOT_CONFIGURED', extraAttempts: 0, extraCompleted: 0 }] },
+         rs1NonScalarReadGaps: 0, authoredEchoUnobservableTargets: 0, focusMutationRefusedFills: 0,
+       });
+     }

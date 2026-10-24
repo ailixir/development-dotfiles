@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-10-22T06:43:05.411219+00:00",
+  "statusOnlyNotAuthority": true,
+  "phase": "303_ACCEPTS_BOUNDED_STOPPED_EVIDENCE_310_SOURCE_GAP_311_HELPER_312_PREPARATION",
+  "previousActualCheckpoint": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/resumed-ui300-timeout-cleanup301-root-checkpoint.json",
+  "previousActualCheckpointSHA256": "ae614545f5e979c01d67083e301b83d86935e57e77e1aea240eeb8364b3bf07e",
+  "qa303": {
+    "verdict": "ACCEPT_BOUNDED_EVIDENCE_ONLY_WORKFLOW_STOPPED",
+    "receiptSHA256": "c357b32ffdc9d4a980de47b8d49b2aa48d66f372b7e79a58bc2471aacf7ed968",
+    "actualViews": 10,
+    "storyAcceptance": false
+  },
+  "collector302": {
+    "collection": "UNAVAILABLE",
+    "gates": [],
+    "receiptSHA256": "c24544197da964fa4e4a37ef7bfba9b2867b4c1b77f8a7bb2b698ca37440c8a7",
+    "noCauseCountPurposeInference": true
+  },
+  "design310": {
+    "sealSHA256": "ec55045ebb54b7ed66ba9fd89ae9e4157c53a9e164b3def2ae7aa2f7dcab1d17",
+    "cause": "UNKNOWN",
+    "SQLJavaDefectDemonstrated": false,
+    "partialDurableProgressWitnessFeasible": true,
+    "cutoffAndProviderState": "UNKNOWN"
+  },
+  "next": "311offlinehelper/publicsynthetics; independent312source review before root313 once existingexport projection. No actualprivateinput access authorized in311/312, no new runtime or sourcefix. Minimal future inputs existingexport+currentclosedmetadata+historicalRootRunGO; exactprivateallowlist/review/rootauthorization required.",
+  "noProgressAuditCount": 0,
+  "fullAcceptance": false,
+  "stories": {
+    "011": "Done",
+    "009": "InProgress",
+    "010": "InProgress"
+  }
+}

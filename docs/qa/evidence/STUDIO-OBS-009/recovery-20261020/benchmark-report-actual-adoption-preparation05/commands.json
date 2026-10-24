@@ -1,0 +1,148 @@
+{
+  "allUnexecuted": true,
+  "release": false,
+  "executionAuthority": false,
+  "cwdRepository": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "cwdMetadataCli": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner",
+  "env": {
+    "PATHPrefix": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+    "pnpmOnly": true
+  },
+  "sequence": [
+    {
+      "id": "fresh-before",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-actual-adoption-preflight05/before-source.json"
+      ],
+      "authority": "AFTER011CLOSURE_AND_SEPARATE_ROOT_RELEASE_ONLY; beforecapture uses fresh separate preflight05 namespace so application execution05 remains absent; no currentreadnow"
+    },
+    {
+      "id": "exact-ten-application",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-actual-adoption-preparation05/apply-reviewed-ten.py.txt",
+        "UNBOUND_ROOT_ADMISSION_ABSOLUTE_PATH",
+        "UNBOUND_ROOT_ADMISSION_SHA256"
+      ],
+      "authority": "Root bindsactualclosure/freeze release/freshcapture/freshmodes/relevantSDKqualification; all10guards precedewrites"
+    },
+    {
+      "id": "honest-after-ten-capture",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-actual-adoption-execution05/after-ten-source.json"
+      ],
+      "authority": "Compare EVERY row tobefore: tenexactpredicted changes only, membershipsame/non-targetbyteexact/distE19; recordnewdigestneverforceA1orMFb49f"
+    },
+    {
+      "id": "actual-validate-unfrozen",
+      "argv": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "node",
+        "evaluation/cli.mjs",
+        "validate-corpus",
+        "evaluation/observed-authoring/manifest.json"
+      ],
+      "authority": "Separate program-only declared corpusreadset/rootoutputcustody required; raw0/errors[] not assumed; STOPonfailure"
+    },
+    {
+      "id": "actual-freeze",
+      "argv": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "node",
+        "evaluation/cli.mjs",
+        "freeze-corpus",
+        "evaluation/observed-authoring/manifest.json"
+      ],
+      "authority": "Explicit actualmanifest+absent.next authorization; originalCLIonly. NOT privateMFcopy; exactactualpin-membership/business-seed preservation review required; STOPonfailure"
+    },
+    {
+      "id": "actual-validate-frozen",
+      "argv": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "node",
+        "evaluation/cli.mjs",
+        "validate-corpus",
+        "evaluation/observed-authoring/manifest.json"
+      ],
+      "authority": "OriginalcheckFiles=true/no unsupportedflags; sameprogram-onlyreadscope; STOPonfailure"
+    },
+    {
+      "id": "honest-final-capture",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-actual-adoption-execution05/after-actual-freeze-source.json"
+      ],
+      "authority": "Recordlegitimatefinalsource/manifestafterSHA/digest; preserveactualrealdate, declaredpinchanges andallnon-targetsource+dist"
+    }
+  ],
+  "fixtureImportProspectOnly": {
+    "argv": [
+      "pnpm",
+      "--config.package-manager-strict=false",
+      "exec",
+      "node",
+      "--input-type=module",
+      "-e",
+      "await import('./test/fixtures/guided-dataflow/server.ts'); await import('./test/fixtures/secret-login/server.ts'); process.stdout.write(JSON.stringify({importsCompleted:true,fixtureStartFunctionsInvokedByThisCommand:false}));"
+    ],
+    "derivedFrom": "Approved hostExistingFixture literal importpaths at evaluate.mjs1453/1466",
+    "executionHeld": "UNBOUND until exactexistingfixture/transitivepublicCODE reviewed in separatelyreleasedminimalread; no claim top-level import has no sideeffects withoutthatread",
+    "explicitInvocations": "Onlyimports, no fixturestart/hostExistingFixture/runBenchmark/client/browser/backend/model call",
+    "networkProviderBounds": "No explicitnetwork/provideroperation; top-level sideeffect review requiredbeforeanyexecution. No imported fixture server starts authorized."
+  },
+  "no105RepeatOldRedNativeOrBackendCommand": true,
+  "opaqueCliOutputPolicy": "Retain originalrawexit andopaque stdout/stderr hashes/files; only separatelyreviewedclosedmetadata projection may exportfields; no manifest/case/oracle/businesspayload dump.",
+  "strictSdkSnapshotProspects": {
+    "originalHelper": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution01/input-snapshot.py",
+      "sha256": "b6d962a6aaba1c0135e3cee63cb66341bfd42dba3238deef8a7187992ba01849"
+    },
+    "sameOriginalCopyProfileReference": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution01/fresh-copy-catalog.json",
+      "sha256": "2624360a76136f37b4e1bc267734eb1954aff16fbd54e56984356ed192eb33a2"
+    },
+    "commands": [
+      {
+        "when": "FreshrootreleasedpreflightBEFOREactualapplication",
+        "argv": [
+          "python3",
+          "-c",
+          "from pathlib import Path; import runpy,json,hashlib; r=Path.cwd(); p=r/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution01/input-snapshot.py'; assert hashlib.sha256(p.read_bytes()).hexdigest()=='b6d962a6aaba1c0135e3cee63cb66341bfd42dba3238deef8a7187992ba01849'; value=runpy.run_path(str(p))['snapshot'](r); output=Path(__import__('sys').argv[1]); handle=output.open('x'); handle.write(json.dumps(value,indent=2)+'\\n'); handle.close()",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-actual-adoption-preflight05/before-full-inputs.json"
+        ]
+      },
+      {
+        "when": "AfterexacttenapplicationBEFOREmetadataCLI",
+        "argv": [
+          "python3",
+          "-c",
+          "from pathlib import Path; import runpy,json,hashlib; r=Path.cwd(); p=r/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution01/input-snapshot.py'; assert hashlib.sha256(p.read_bytes()).hexdigest()=='b6d962a6aaba1c0135e3cee63cb66341bfd42dba3238deef8a7187992ba01849'; value=runpy.run_path(str(p))['snapshot'](r); output=Path(__import__('sys').argv[1]); handle=output.open('x'); handle.write(json.dumps(value,indent=2)+'\\n'); handle.close()",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-actual-adoption-execution05/after-ten-full-inputs.json"
+        ]
+      },
+      {
+        "when": "AfteractualfreezeandvalidationBEFOREreadwindowrelease",
+        "argv": [
+          "python3",
+          "-c",
+          "from pathlib import Path; import runpy,json,hashlib; r=Path.cwd(); p=r/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution01/input-snapshot.py'; assert hashlib.sha256(p.read_bytes()).hexdigest()=='b6d962a6aaba1c0135e3cee63cb66341bfd42dba3238deef8a7187992ba01849'; value=runpy.run_path(str(p))['snapshot'](r); output=Path(__import__('sys').argv[1]); handle=output.open('x'); handle.write(json.dumps(value,indent=2)+'\\n'); handle.close()",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-actual-adoption-execution05/after-freeze-full-inputs.json"
+        ]
+      }
+    ],
+    "unexecuted": true,
+    "futureFullMetadataWalkRequiresExplicitRootRelease": true,
+    "qualification": "Use unchanged existing snapshot(profile) only. Bind genuine fresh rows/modes/membership and238product; compare allauthorized-targetpredictions/everyotherinput. Never represent a snapshot as a COPY receipt, force privateS/MF/cache, change profile/exclusions, or invent currentSDK equivalence. Root/QA must adjudicate existing generated cache provenance explicitly without blanket exemptions."
+  }
+}

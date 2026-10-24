@@ -1,0 +1,233 @@
+{
+  "reportPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-rt-current-unit01-vitest.json",
+  "reportSha256": "c3c3465272a9c6fd494b2f12432ba27757628f6a5eabe22df1a7c2cfe79b123e",
+  "fileResult": {
+    "assertionResults": [
+      {
+        "ancestorTitles": [
+          "gate arithmetic on the corpus with the two staging cases unrun"
+        ],
+        "fullName": "gate arithmetic on the corpus with the two staging cases unrun is PARTIAL (never a pass) at 51 runs when every run completes: the denominator drops to 17 x 3 and the floor to 46",
+        "status": "passed",
+        "title": "is PARTIAL (never a pass) at 51 runs when every run completes: the denominator drops to 17 x 3 and the floor to 46",
+        "duration": 2.333167000000003,
+        "failureMessages": [],
+        "meta": {}
+      },
+      {
+        "ancestorTitles": [
+          "gate arithmetic on the corpus with the two staging cases unrun"
+        ],
+        "fullName": "gate arithmetic on the corpus with the two staging cases unrun still reports PARTIAL at exactly 46 of 51 (90.2 percent) and GATE_FAIL at 45 of 51",
+        "status": "passed",
+        "title": "still reports PARTIAL at exactly 46 of 51 (90.2 percent) and GATE_FAIL at 45 of 51",
+        "duration": 0.9698329999999942,
+        "failureMessages": [],
+        "meta": {}
+      },
+      {
+        "ancestorTitles": [
+          "gate arithmetic on the corpus with the two staging cases unrun"
+        ],
+        "fullName": "gate arithmetic on the corpus with the two staging cases unrun reports INCOMPLETE when planned runs are missing instead of dividing by what ran",
+        "status": "passed",
+        "title": "reports INCOMPLETE when planned runs are missing instead of dividing by what ran",
+        "duration": 0.7534169999999989,
+        "failureMessages": [],
+        "meta": {}
+      },
+      {
+        "ancestorTitles": [
+          "gate arithmetic on the corpus with the two staging cases unrun"
+        ],
+        "fullName": "gate arithmetic on the corpus with the two staging cases unrun the full 57-run arithmetic is 52 of 57 = 91.2 percent passing and 51 of 57 = 89.5 percent failing",
+        "status": "passed",
+        "title": "the full 57-run arithmetic is 52 of 57 = 91.2 percent passing and 51 of 57 = 89.5 percent failing",
+        "duration": 0.4206669999999946,
+        "failureMessages": [],
+        "meta": {}
+      },
+      {
+        "ancestorTitles": [
+          "completion without clarification"
+        ],
+        "fullName": "completion without clarification does not credit a class P run that needed a clarification, even when the oracle is satisfied (no reclassification as ambiguous)",
+        "status": "passed",
+        "title": "does not credit a class P run that needed a clarification, even when the oracle is satisfied (no reclassification as ambiguous)",
+        "duration": 0.4274170000000055,
+        "failureMessages": [],
+        "meta": {}
+      },
+      {
+        "ancestorTitles": [
+          "hard gates"
+        ],
+        "fullName": "hard gates a false pass fails the gate even with every other run completing",
+        "status": "passed",
+        "title": "a false pass fails the gate even with every other run completing",
+        "duration": 0.41816599999999937,
+        "failureMessages": [],
+        "meta": {}
+      },
+      {
+        "ancestorTitles": [
+          "hard gates"
+        ],
+        "fullName": "hard gates a secret or PII leak fails the gate",
+        "status": "passed",
+        "title": "a secret or PII leak fails the gate",
+        "duration": 0.4200000000000017,
+        "failureMessages": [],
+        "meta": {}
+      },
+      {
+        "ancestorTitles": [
+          "labels and honesty rules"
+        ],
+        "fullName": "labels and honesty rules a HARNESS_SELF_TEST run is labelled and its verdict is NOT_EVIDENCE whatever it scores",
+        "status": "passed",
+        "title": "a HARNESS_SELF_TEST run is labelled and its verdict is NOT_EVIDENCE whatever it scores",
+        "duration": 0.3685419999999908,
+        "failureMessages": [],
+        "meta": {}
+      },
+      {
+        "ancestorTitles": [
+          "labels and honesty rules"
+        ],
+        "fullName": "labels and honesty rules never reports a pass when a record mixes modes",
+        "status": "passed",
+        "title": "never reports a pass when a record mixes modes",
+        "duration": 0.37079200000000867,
+        "failureMessages": [],
+        "meta": {}
+      },
+      {
+        "ancestorTitles": [
+          "labels and honesty rules"
+        ],
+        "fullName": "labels and honesty rules refuses a run that started before the manifest freeze, and one that names another manifest",
+        "status": "passed",
+        "title": "refuses a run that started before the manifest freeze, and one that names another manifest",
+        "duration": 0.3850000000000051,
+        "failureMessages": [],
+        "meta": {}
+      },
+      {
+        "ancestorTitles": [
+          "labels and honesty rules"
+        ],
+        "fullName": "labels and honesty rules refuses a run record that omits rs1NonScalarReadGaps (written as 0 when none, never omitted)",
+        "status": "passed",
+        "title": "refuses a run record that omits rs1NonScalarReadGaps (written as 0 when none, never omitted)",
+        "duration": 0.16016700000000128,
+        "failureMessages": [],
+        "meta": {}
+      },
+      {
+        "ancestorTitles": [
+          "labels and honesty rules"
+        ],
+        "fullName": "labels and honesty rules refuses a run record that omits authoredEchoUnobservableTargets (written as 0 when none, never omitted)",
+        "status": "passed",
+        "title": "refuses a run record that omits authoredEchoUnobservableTargets (written as 0 when none, never omitted)",
+        "duration": 0.13445899999999256,
+        "failureMessages": [],
+        "meta": {}
+      },
+      {
+        "ancestorTitles": [
+          "labels and honesty rules"
+        ],
+        "fullName": "labels and honesty rules refuses a run record that omits focusMutationRefusedFills (written as 0 when none, never omitted)",
+        "status": "passed",
+        "title": "refuses a run record that omits focusMutationRefusedFills (written as 0 when none, never omitted)",
+        "duration": 0.1267920000000089,
+        "failureMessages": [],
+        "meta": {}
+      },
+      {
+        "ancestorTitles": [
+          "labels and honesty rules"
+        ],
+        "fullName": "labels and honesty rules writes the three accounting fields as explicit zeros with their denominators",
+        "status": "passed",
+        "title": "writes the three accounting fields as explicit zeros with their denominators",
+        "duration": 0.5207910000000027,
+        "failureMessages": [],
+        "meta": {}
+      },
+      {
+        "ancestorTitles": [
+          "labels and honesty rules"
+        ],
+        "fullName": "labels and honesty rules counts RS-1 gaps inside the gate denominator and lists them with case, element kind and run number",
+        "status": "passed",
+        "title": "counts RS-1 gaps inside the gate denominator and lists them with case, element kind and run number",
+        "duration": 0.5725410000000011,
+        "failureMessages": [],
+        "meta": {}
+      },
+      {
+        "ancestorTitles": [
+          "labels and honesty rules"
+        ],
+        "fullName": "labels and honesty rules keeps an infrastructure-failed run visible and credits only its re-run; an unreported retry is a problem",
+        "status": "passed",
+        "title": "keeps an infrastructure-failed run visible and credits only its re-run; an unreported retry is a problem",
+        "duration": 0.8632080000000002,
+        "failureMessages": [],
+        "meta": {}
+      },
+      {
+        "ancestorTitles": [
+          "labels and honesty rules"
+        ],
+        "fullName": "labels and honesty rules publishes p50/p95 latency, model calls, tokens and cost with denominators; cost stays unavailable without a price",
+        "status": "passed",
+        "title": "publishes p50/p95 latency, model calls, tokens and cost with denominators; cost stays unavailable without a price",
+        "duration": 0.7680830000000043,
+        "failureMessages": [],
+        "meta": {}
+      },
+      {
+        "ancestorTitles": [
+          "labels and honesty rules"
+        ],
+        "fullName": "labels and honesty rules reports class F and N separately, outside the completion denominator",
+        "status": "passed",
+        "title": "reports class F and N separately, outside the completion denominator",
+        "duration": 0.3666249999999991,
+        "failureMessages": [],
+        "meta": {}
+      },
+      {
+        "ancestorTitles": [
+          "replay stability (consensus plan s11): >= 98 percent over 100 replays with one artifact hash"
+        ],
+        "fullName": "replay stability (consensus plan s11): >= 98 percent over 100 replays with one artifact hash passes at 98 of 100 with one hash, fails at 97, fails when the hash drifts, fails when fewer than 100 replays ran",
+        "status": "passed",
+        "title": "passes at 98 of 100 with one hash, fails at 97, fails when the hash drifts, fails when fewer than 100 replays ran",
+        "duration": 0.2394170000000031,
+        "failureMessages": [],
+        "meta": {}
+      },
+      {
+        "ancestorTitles": [
+          "replay stability (consensus plan s11): >= 98 percent over 100 replays with one artifact hash"
+        ],
+        "fullName": "replay stability (consensus plan s11): >= 98 percent over 100 replays with one artifact hash labels a self-test run NOT_EVIDENCE even when it passes",
+        "status": "passed",
+        "title": "labels a self-test run NOT_EVIDENCE even when it passes",
+        "duration": 0.0503750000000025,
+        "failureMessages": [],
+        "meta": {}
+      }
+    ],
+    "startTime": 1792534440476,
+    "endTime": 1792534440487.3667,
+    "status": "passed",
+    "message": "",
+    "name": "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/test/evaluation/benchmarkScoring.test.ts"
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "reviewer": "sol61_high_ae_review65",
+  "atUtc": "2026-10-21T19:05:36.645139+00:00",
+  "verdict": "ACCEPT_LOCAL_PROMPT77_CANDIDATE",
+  "blockingFindings": [],
+  "source": "backend/src/main/resources/studio/guided-output-contract.md",
+  "sourceSha256": "5b5db46024ad350e82b71bb9589f11aba57d3980cf715e123beca8803c980253",
+  "beforeSha256": "ea1d0b6fe32a335a3fbef155d0a3e9e5857e3d9b22fbc2e1996be7aec506d55f",
+  "builtResourceSha256": "5b5db46024ad350e82b71bb9589f11aba57d3980cf715e123beca8803c980253",
+  "builtResourceMatchesSource": true,
+  "incrementalPatchSha256": "6bc3f86dd397231261c7a88e6660fa2fcd9dc8dc94eefb99953c7083e4cf0b91",
+  "candidateOnlyChangesTwoResourceParagraphs": true,
+  "allPriorInstructionBytesPreserved": true,
+  "pureNodeCodeUnitChecks": "code-unit-check.json",
+  "focusedXml": [
+    {
+      "name": "com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidatorTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.translation.GuidedGatewayPrivacyTest",
+      "tests": "7",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.translation.GuidedProviderSchemaCompatibilityTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.translation.GuidedSourceInputResolverTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.translation.GuidedTranslationTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ],
+  "focusedTestsPassed": 22,
+  "focusedTestsRerunByReviewer": 0,
+  "cloudOrAuthenticationCallsByReviewer": 0,
+  "gradleCompileProcessResourcesBuildRunsByReviewer": 0,
+  "providerRetryByReviewer": 0,
+  "actualFailedAttemptDisposition": "Retained original74 FAILED/BUDGET_EXCEEDED, truncated own URL and full-instruction targetIntent; not repaired or relabeled as pass. Old live ephemeral DB reset by owner processResources; immutable closed evidence remains.",
+  "noWeakening": [
+    "Exact source slices and Unicode boundaries",
+    "Current observed locatorHint authority",
+    "Bare-label exact acquisition/proposal comparison",
+    "Secret and classified source rules",
+    "Policy/schema/runtime/model/budget/oracle behavior"
+  ],
+  "evidenceSha256": {
+    "prompt77-context.json": "76234d40fe33c9cecdc6996e8e747a5ff554a98f6c7fc871a847d6680ea578a1",
+    "prompt77/design.md": "60e292410ac29afb229e7255271ca7e0e269af9d63433edb9a5b7dd5d126ea0a",
+    "prompt77/receipt.json": "03bbe1dfb3341394eaa0f7eaf9706f151e5cf55f6d57b5b9c63fec2b8dac9e05",
+    "prompt77/before-guided-output-contract.md": "ea1d0b6fe32a335a3fbef155d0a3e9e5857e3d9b22fbc2e1996be7aec506d55f",
+    "prompt77/after-guided-output-contract.md": "5b5db46024ad350e82b71bb9589f11aba57d3980cf715e123beca8803c980253",
+    "prompt77/incremental.patch": "6bc3f86dd397231261c7a88e6660fa2fcd9dc8dc94eefb99953c7083e4cf0b91",
+    "prompt77/focused.gradle": "ca0363d1f7bbc87bdbda0b0bb0aae48fdafdb94487944928de71a6c207c4001e",
+    "prompt77/focused.log": "36193c198752b7668415d8a745eef4ef06870c9e99bbcad505691a6671fc493d",
+    "diagnosis76/closed-acquisition-ledger.json": "fa9c0fdf19e5998f794a18313242f3333abab26bc39bbe76a27df6fb7a408f95",
+    "diagnosis76/synthetic-url-target-projection.json": "5702eb656914e63c8ffe1a0c621677f6b050cbbd0bce776b8dc688214223a4b3",
+    "diagnosis76/synthetic-resolved-navigation.json": "de0b25577ff235234bf3df14e5463be52c4146025f39d17d7a2fffaab5f18a66",
+    "independent-prompt78/code-unit-check.mjs": "8a9da96672f0ba8d59dfe3eacc6f84a6cf56b04ff6d084b2f0f1e1972314d805",
+    "independent-prompt78/code-unit-check.json": "870fc8bb71badfd99c60b52f48d9acd6cf3cf54bcda399024c35055f1d43c63f",
+    "prompt77/results/TEST-com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidatorTest.xml": "9a2ec529e4abd1c2ce1d980c619a0befc247b7932e1def4e0c011e2fdcfd9e9a",
+    "prompt77/results/TEST-com.citi.put.checks.studio.guided.translation.GuidedGatewayPrivacyTest.xml": "96e94e1ce481d294a2474f82feb55fc0226c5a2a7ab44dd8d9219b7bce41e802",
+    "prompt77/results/TEST-com.citi.put.checks.studio.guided.translation.GuidedProviderSchemaCompatibilityTest.xml": "04d3c78b4ed69e34e7f81246f5d53340333a5004fbd4b26e618502d5cc0fdaf8",
+    "prompt77/results/TEST-com.citi.put.checks.studio.guided.translation.GuidedSourceInputResolverTest.xml": "be5212f3d1b16c89e12d587184e4f28cf35e957bba869932323de750748cd41f",
+    "prompt77/results/TEST-com.citi.put.checks.studio.guided.translation.GuidedTranslationTest.xml": "f5a904f13d672e22eb9c95176cf38cb29d12298a573e9129d55a48a473dfae1b"
+  },
+  "reviewerActions": "Source/design/closed failed-attempt metadata and actual XML/log inspection; pure Node24 string/code-unit arithmetic and exact byte preservation check. No production edits, Gradle, providers, auth calls, browser or DB actions. Wrote owned review directory only.",
+  "limits": [
+    "Prompt wording and local22case compatibility do not prove model accuracy or fix74livefailure",
+    "Previous8case/VERIFY_STEP live results retain their historical prompt pins; new prompt has new identity",
+    "Root-owned separately bounded actual UI successor is required for current joint-path outcome",
+    "No full009/010 completion, D-C, company approval, U13, human or shared rollout evidence"
+  ]
+}

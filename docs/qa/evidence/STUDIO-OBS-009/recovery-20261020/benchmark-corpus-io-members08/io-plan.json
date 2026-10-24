@@ -1,0 +1,109 @@
+{
+  "scope": "SOURCE_ONLY_CORPUS_IO08_FINITE_MEMBER_METADATA_MEASUREMENT",
+  "release": false,
+  "executionAuthority": false,
+  "actualManifest": "studio-runner/evaluation/observed-authoring/manifest.json",
+  "corpusRoot": "studio-runner/evaluation/observed-authoring",
+  "repoRootDerivation": "repoRootFrom(HERE): lexical resolve(HERE, ../.. /..), exactly repository root; manifest argument does not change HERE/root.",
+  "successfulValidationReads": [
+    "Explicit actualmanifest JSON is loaded by freezeManifest before original freeze, and by the final validate-corpus command; internal validation receives the returned object, not another manifest file load.",
+    "Every manifest.sources pin through checkPin; every nonnull stepText/expectedOutcome/page and declared fixture.serverPin pin. Hash base is repo only when pin.base===repo, otherwise corpus.",
+    "For each truthy expectedOutcome of a non-EXTERNAL_BLOCKED case, semantic expected JSON is corpus-root relative regardless pin.base. Do not combine this with the hash-base route.",
+    "Imported CLI/evaluator/oracle/report/pages modules and their transitives are code-load I/O, separate from corpus pin reads; root must bind exact public source/module applicability before calls."
+  ],
+  "freezeReadsAndWrites": [
+    "Actualmanifest read once; all declared source and truthy stepText/expected/page/fixture pins read for SHA. Port results pin is an in-manifest update, not an additional payload file read.",
+    "Original freeze-corpus then invokes original validateCorpusManifest on the returned object, so pin/oracle reads recur; there is no extra loadManifest of the newly written file in that internal call.",
+    "Only write ${actualManifest}.next then rename onto exact actualManifest. Require .next absent beforehand; do not clean or overwrite a stale one automatically.",
+    "One later validate-corpus reloads actualmanifest and repeats strict validation; no preliminary validate-corpus. Logical multiplicities remain conditional source-derived memberships, not syscall observations."
+  ],
+  "catalogueBinding": "Root separately admits fresh source.files/fullSnapshot.copyProfileFiles/manifest refs and finite-member metadata authority, without asserting unmeasured regular/no-symlink membership. Inventory checks original resolver/path catalogue membership before lstat of each exact member and ancestor throughR; only regular/no-symlink complete checks produce measuredtrue. Unknown/unadmitted paths or metadata errors are HELD. No pin payload read/hash walk or corpus validity check is added.",
+  "programOnlyMembershipArtifact": "Fresh mode0600 exact output path under benchmark-corpus-io-execution06; includes confined paths/pin hashes/logical phase records; never send its body or businessmanifest/case/oracle content to the model. Closed stdout exposes only category counts/file counts/opaque hashes/.next absence at that observation.",
+  "freezeDerivedMask": {
+    "sources": "Each existing sources[*].sha256",
+    "cases": [
+      "truthy stepText.sha256",
+      "truthy expectedOutcome.sha256",
+      "each pages[*].sha256",
+      "truthy fixture.serverPin.sha256",
+      "truthy portRecord.knownFromRecord.resultsJsonl.sha256"
+    ],
+    "gate": [
+      "classPCases",
+      "repetitions",
+      "plannedRuns",
+      "thresholdPct",
+      "minCompletions",
+      "maxFailedRuns"
+    ],
+    "sessionPlan": [
+      "runs",
+      "sessions",
+      "contingencySessions"
+    ],
+    "top": [
+      "manifestFrozenAt",
+      "manifestSha256"
+    ],
+    "allOtherFields": "Strict unchanged nonderived JSON.stringify value/key/array order; includes business/seed/oracle/schema/rates/status, completionThresholdPct and case order. Unknown extra fields are retained in comparison. No broad wildcard/ignore mask.",
+    "sourceSemantics": "Original CLI only recomputes these fields; delta helper reports scope only, not validity/scoring/digest acceptance. Original manifestDigest/checkFiles semantics remain untouched."
+  },
+  "closedOutputPolicy": {
+    "raw": "Original raw child exit plus opaque stdout/stderr byte counts/SHA; raw bodies mode0600 or memory-only and never model-visible.",
+    "validate": "Exact bool valid/frozen, errorCount, fixed8 integer counts; gate/sessionPlan/errors bodies opaque SHA only.",
+    "freeze": "Actual ISO frozenAt/64hex manifestSha256/errorCount and opaque errors SHA only.",
+    "unavailable": "Null typedFields/projectionCompletefalse and fixed reason; raw exit retained; no defaultzero on missing facts.",
+    "noExceptionStrings": "CLI catch may emit declared closed errors, but projector never decodes stderr and exports no arbitrary messages."
+  },
+  "held": [
+    "Actualmanifest/body/pin membership/metadata catalogue and nonderived delta",
+    "Actual .next absence and real timestamp/fullhash/digest",
+    "CLI exact raw outputs/exits and source/module/fixture/routing applicability",
+    "Independent source review and explicit per-operation root preflight/read/write/CLI release"
+  ],
+  "notProofOf": [
+    "Corpus validity beyond originalCLI",
+    "real>=20x3/100replay/model/provider/headroom/security/humanvideo/pilot/U13",
+    "actual routing or live fixture outcomes"
+  ],
+  "allSixBackendCallsAndTwelveDiagnosticPayloadsNotRepeated": true,
+  "rootRouteFindingSteering": {
+    "finding": "FR06-01",
+    "oldAdoption05Status": "HELD; updateDraft lacks mandatory integer source/config revisions; root architecture correction design07 pending",
+    "correctedCandidateAndPins": "UNBOUND_NOT_READ_OR_INVENTED",
+    "unchangedFreezeSupportsRepinningBeforeStrictValidation": true,
+    "sourceSequence": "freeze-corpus calls freezeManifest without preliminary validation; repins declared sources/case/page/fixture/port hashes, stamps/writes actual; then strict validateCorpusManifest runs with checkFiles defaulttrue.",
+    "staleInitialValidate": "validate-corpus against stale old source pins cannot pass; do not bypass/relax/checkFiles:false/relabel it.",
+    "futureOrder": "Supported source-only two-command recipe is original freeze-corpus then original validate-corpus, with strict internal and final validation/checkFiles true. Corrected source/pins and actual memberships still UNBOUND pending independent source/data review and separate root admission.",
+    "otherFreezeErrors": "Freeze may mutate before its strict post-validation fails. Stop all consumers/dependent operations; preserve exact before/after owned bytes/modes, raw exits and opaque outputs. No automatic retry/cleanup/rollback; recovery requires separately bound owned-state policy.",
+    "phaseInventoryQualification": "VALIDATE_BEFORE is removed from logical events and manifestReadPhases; original FREEZE/FREEZE_INTERNAL_VALIDATE/VALIDATE_AFTER order is now bound. No phase or command has executed."
+  },
+  "originalCliInvocationOrder": [
+    "freeze-corpus",
+    "validate-corpus"
+  ],
+  "logicalReadPhaseOrder": [
+    "FREEZE",
+    "FREEZE_INTERNAL_VALIDATE",
+    "VALIDATE_AFTER"
+  ],
+  "manifestReadPhases": [
+    "FREEZE_READ_BEFORE_WRITE",
+    "VALIDATE_AFTER"
+  ],
+  "successPathCountsStillUnmeasured": true,
+  "nextPolicy": "No-follow lstat only: ENOENT absent; any directory entry including dangling symlink present/HELD; any other error unavailable/fixed closed failure. Preserve no-symlink parent and sole-writer window through original freeze. Never delete or auto-clean .next.",
+  "pythonOptimizationGuard": "Unchanged assertion-based Python projector requires no -O/-OO, absent/ineffective PYTHONOPTIMIZE and actual sys.flags.optimize==0; this is a future owner-bound prerequisite, not a measured fact.",
+  "memberMetadataMeasurement": {
+    "rootAuthorityField": "authorizeFiniteMemberMetadataChecks",
+    "notRootMeasuredAssertion": true,
+    "member": "lstatSync resolved admitted path, isFile true and isSymbolicLink false",
+    "ancestors": "lstatSync each ancestor throughR, isSymbolicLink false",
+    "catalogueBeforeMetadata": true,
+    "completeResultField": "allAdmittedPinMembersRegularNoSymlinks:true",
+    "unavailableResultField": "allAdmittedPinMembersRegularNoSymlinks:null with fixed closed failure",
+    "pinBodyReadOrHashByThisMeasurement": false,
+    "existingDerivedMasksRoutesMultiplicitiesAndPhaseOrderUnchanged": true
+  },
+  "metadataCommandWrapper": "Fixed verified Node24binary direct for original CLI and inline metadata only; no new stdout-normalization code. Package tools remain pnpm."
+}

@@ -1,0 +1,255 @@
+{
+  "kind": "ROOT_METADATA_ONLY_OBS009_FRESH_PREFLIGHT08",
+  "startedAt": "2026-10-21T11:11:15.735501+00:00",
+  "actualAdoptionGo": false,
+  "sourceOrSdkMutation": false,
+  "privateBodyDisclosed": false,
+  "commands": [
+    {
+      "ordinal": 1,
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-actual-adoption-preflight05/before-source.json"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 182,
+      "stdoutSha256": "61e371f0837d39a61b1a7eb94a9e23ef4bbe9fc645b07a74cc15d0424d4ee6e0",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "ordinal": 2,
+      "argv": [
+        "python3",
+        "-c",
+        "from pathlib import Path; import runpy,json,hashlib; r=Path.cwd(); p=r/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution01/input-snapshot.py'; assert hashlib.sha256(p.read_bytes()).hexdigest()=='b6d962a6aaba1c0135e3cee63cb66341bfd42dba3238deef8a7187992ba01849'; value=runpy.run_path(str(p))['snapshot'](r); output=Path(__import__('sys').argv[1]); handle=output.open('x'); handle.write(json.dumps(value,indent=2)+'\\n'); handle.close()",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-actual-adoption-preflight05/before-full-inputs.json"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "finishedAt": "2026-10-21T11:11:18.629551+00:00",
+  "checks": {
+    "sourceRowsExact": true,
+    "sourceDigestExact": true,
+    "sourceDistExact": true,
+    "fullSnapshotExact": true,
+    "sourceRows": 1814,
+    "distRows": 238,
+    "fullRows": 13995,
+    "inputRows": 13757,
+    "allTenPreimagesMatch": true,
+    "canonical5Match": true,
+    "protected11Match": true,
+    "bin21Exact": true,
+    "environmentExact": true,
+    "nodeBinaryMatch": true
+  },
+  "targetFacts": [
+    {
+      "path": "studio-runner/evaluation/README.md",
+      "sha256": "fcf738f8899d59255a13fea0b55e1919c0d7337d06321a4020d47137e9d9c207",
+      "bytes": 6771,
+      "mode": "0o644",
+      "capturedBeforeMatches": true
+    },
+    {
+      "path": "studio-runner/evaluation/cli.mjs",
+      "sha256": "ec074937ae648792143b44b9013d8b17f13b105bb206caa9250ca2843d65f524",
+      "bytes": 10461,
+      "mode": "0o644",
+      "capturedBeforeMatches": true
+    },
+    {
+      "path": "studio-runner/evaluation/observed-authoring/evaluate.d.mts",
+      "sha256": "e202c36be92007fd22e4bb01636e23b95028471b732a47d369ac569a04c2b2de",
+      "bytes": 17116,
+      "mode": "0o644",
+      "capturedBeforeMatches": true
+    },
+    {
+      "path": "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+      "sha256": "c12fad22b810b92b0ce8dbc9f8f54da4540d6ad1de56d027b226acb3d047be56",
+      "bytes": 73346,
+      "mode": "0o644",
+      "capturedBeforeMatches": true
+    },
+    {
+      "path": "studio-runner/evaluation/observed-authoring/manifest.json",
+      "sha256": "9858fc11b2086a50762c7334b5fa0e88f2a3370ffc166a62075b771d7bc70f16",
+      "bytes": 76292,
+      "mode": "0o644",
+      "capturedBeforeMatches": true
+    },
+    {
+      "path": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "sha256": "5769819380217737448766661d62e52445b6f166ef8cf6b8f0c05e9e631ce7be",
+      "bytes": 11685,
+      "mode": "0o644",
+      "capturedBeforeMatches": true
+    },
+    {
+      "path": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+      "sha256": "0217f2b5230ad5a81d22ec90bc229ee54fa1550868a0f933c2bce736e580d549",
+      "bytes": 17824,
+      "mode": "0o644",
+      "capturedBeforeMatches": true
+    },
+    {
+      "path": "studio-runner/test/evaluation/corpusManifest.test.ts",
+      "sha256": "db7189d40e751949ef8714a880a5e9ff8d743f51c0e34637e37e2b44a541da6a",
+      "bytes": 12144,
+      "mode": "0o644",
+      "capturedBeforeMatches": true
+    },
+    {
+      "path": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+      "sha256": "4e6b86e4bf1a09eee46570eca97a8f2e8504a1756a1c91636459e9d77884e7dd",
+      "bytes": 19422,
+      "mode": "0o644",
+      "capturedBeforeMatches": true
+    },
+    {
+      "path": "studio-runner/test/evaluation/observedCorpus.ts",
+      "sha256": "be1a3630ac7a466f86542977890c7410197830350e7599ff28e436ae2865a746",
+      "bytes": 3670,
+      "mode": "0o644",
+      "capturedBeforeMatches": true
+    }
+  ],
+  "environmentHashedFacts": {
+    "HOME": {
+      "expected": {
+        "present": true,
+        "valueSha256": "6958a4bb3316e998038fc5dab074ab85f6bdd3263c975c32f9543e240c8b3a8a"
+      },
+      "actual": {
+        "present": true,
+        "valueSha256": "6958a4bb3316e998038fc5dab074ab85f6bdd3263c975c32f9543e240c8b3a8a"
+      },
+      "equal": true
+    },
+    "TMPDIR": {
+      "expected": {
+        "present": true,
+        "valueSha256": "cb5886e4ce4b01487e374b730319694231aa677bcd455750f37e03dd36ead031"
+      },
+      "actual": {
+        "present": true,
+        "valueSha256": "cb5886e4ce4b01487e374b730319694231aa677bcd455750f37e03dd36ead031"
+      },
+      "equal": true
+    },
+    "PLAYWRIGHT_BROWSERS_PATH": {
+      "expected": {
+        "present": false,
+        "valueSha256": null
+      },
+      "actual": {
+        "present": false,
+        "valueSha256": null
+      },
+      "equal": true
+    },
+    "NODE_OPTIONS": {
+      "expected": {
+        "present": false,
+        "valueSha256": null
+      },
+      "actual": {
+        "present": false,
+        "valueSha256": null
+      },
+      "equal": true
+    },
+    "NODE_DEBUG": {
+      "expected": {
+        "present": false,
+        "valueSha256": null
+      },
+      "actual": {
+        "present": false,
+        "valueSha256": null
+      },
+      "equal": true
+    },
+    "DEBUG": {
+      "expected": {
+        "present": false,
+        "valueSha256": null
+      },
+      "actual": {
+        "present": false,
+        "valueSha256": null
+      },
+      "equal": true
+    },
+    "PWDEBUG": {
+      "expected": {
+        "present": false,
+        "valueSha256": null
+      },
+      "actual": {
+        "present": false,
+        "valueSha256": null
+      },
+      "equal": true
+    },
+    "GUIDED_CLOSE_BOUND_OUT": {
+      "expected": {
+        "present": false,
+        "valueSha256": null
+      },
+      "actual": {
+        "present": false,
+        "valueSha256": null
+      },
+      "equal": true
+    },
+    "R13_DIAGNOSTICS": {
+      "expected": {
+        "present": false,
+        "valueSha256": null
+      },
+      "actual": {
+        "present": false,
+        "valueSha256": null
+      },
+      "equal": true
+    },
+    "GUIDED_DIAGNOSTICS": {
+      "expected": {
+        "present": false,
+        "valueSha256": null
+      },
+      "actual": {
+        "present": false,
+        "valueSha256": null
+      },
+      "equal": true
+    },
+    "IMAGE_TAG": {
+      "expected": {
+        "present": false,
+        "valueSha256": null
+      },
+      "actual": {
+        "present": false,
+        "valueSha256": null
+      },
+      "equal": true
+    }
+  },
+  "sourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+  "distDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+  "beforeSourceSha256": "620ad4ae0cbfdc330c17f927e88374eaefc5dfb9e73d23c3141adac496262ede",
+  "beforeFullInputsSha256": "1c032f45fa57f754083a5c4793c641d1b9df499f34d87a0c1e51eedbbae8cc85",
+  "freshRelevantInputQualificationAccepted": true,
+  "nodeVersionRecordedNotReinvoked": "v24.20.0",
+  "pnpmVersionRecordedNotReinvoked": "10.33.0"
+}

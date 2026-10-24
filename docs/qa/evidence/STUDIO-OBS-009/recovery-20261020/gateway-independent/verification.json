@@ -1,0 +1,799 @@
+{
+  "kind": "INDEPENDENT_GATEWAY_RETAINED_CONTROLS_QA",
+  "atUtc": "2026-10-20T14:35:45.963856+00:00",
+  "decision": "RETAINED_RECURSION_AND_NORMALIZATION_CONTROLS_SUPPORTED",
+  "rootExplicitGoReceived": true,
+  "preparationSha256": "941b61de23f3686972167d5e803ae6814ac9920022cb47a69a7c31100293a806",
+  "runs": [
+    {
+      "id": "recursion",
+      "rawExit": 1,
+      "terminal": true,
+      "total": 95,
+      "selected": 48,
+      "passed": 32,
+      "failed": 16,
+      "filteredOmissions": 47,
+      "filterOmissionsAreNotApprovedGateSkips": true,
+      "rawReporterSuiteCounts": {
+        "numFailedTestSuites": 2,
+        "numPassedTestSuites": 1,
+        "numTotalTestSuites": 3
+      },
+      "actualReportFiles": 1,
+      "expectedSelectedIdentitiesExact": true,
+      "allFailuresAtOriginalRefusalAssertion": true,
+      "assertion": "expect(outcome.ok).toBe(false)",
+      "sourceLine": 310,
+      "column": 28,
+      "nativeInfrastructureErrors": 0,
+      "nativeInfrastructureErrorBasis": "Every selected failure is the single intended AssertionError at copied integrations.test.ts:310:28; complete48selected/47filtered identities reconcile, file-level message empty, no unhandled/load-error log banner.",
+      "cases": [
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.provider",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.endpoint",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.project",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.location",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.model",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.credentials.mode",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.credentials.service-account-key-file",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.provider",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.endpoint",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.project",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.location",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.model",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.credentials.mode",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.credentials.service-account-key-file",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.provider",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.endpoint",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.project",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.location",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.model",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.credentials.mode",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.credentials.service-account-key-file",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.provider",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.endpoint",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.project",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.location",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.model",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.credentials.mode",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.credentials.service-account-key-file",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.provider",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.endpoint",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.project",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.location",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.model",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.credentials.mode",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.credentials.service-account-key-file",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.provider",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.endpoint",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.project",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.location",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.model",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.credentials.mode",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.credentials.service-account-key-file",
+          "status": "passed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+          "status": "passed"
+        }
+      ],
+      "commandResult": "recursion-command-result.json",
+      "reportSha256": "9b5674f3754a0e1d83f1c357f6461f77c59a8deae05e5f4fdd13ce7d6d8befd9",
+      "logSha256": "bb42d6894744f108a17a021db3410cd01a410dd8bb495c0dbf84d18cc45d00d8",
+      "copyPostRunInputs": [
+        {
+          "path": "helm-chart/put-checks/.helmignore",
+          "actualSha256": "78de72013f6064b5b01e524a172af3ecf800bea996f63d3751ad3472d0ed73a6",
+          "copiedPostRunSha256": "78de72013f6064b5b01e524a172af3ecf800bea996f63d3751ad3472d0ed73a6"
+        },
+        {
+          "path": "helm-chart/put-checks/Chart.yaml",
+          "actualSha256": "529d7115a0a5c72d032948fcdf845a355bc619ae3d9030a96207fddc9a5dcdd4",
+          "copiedPostRunSha256": "529d7115a0a5c72d032948fcdf845a355bc619ae3d9030a96207fddc9a5dcdd4"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/NOTES.txt",
+          "actualSha256": "68d0da5e190ab3fd2ce9de7738a7c8920ed5461f806945050197f1e34714013b",
+          "copiedPostRunSha256": "68d0da5e190ab3fd2ce9de7738a7c8920ed5461f806945050197f1e34714013b"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/_helpers.tpl",
+          "actualSha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+          "copiedPostRunSha256": "f444f16f59e8ae0abbe6494eb30ee204939e07c8b520ebd9299a1e4f6638a305"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/api-guided-tls-networkpolicy.yaml",
+          "actualSha256": "d34344cc3a264f2de71cc65693a31a606f3f14e7cd2a85279267a799587c76e9",
+          "copiedPostRunSha256": "d34344cc3a264f2de71cc65693a31a606f3f14e7cd2a85279267a799587c76e9"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/configmap.yaml",
+          "actualSha256": "6ea290fb3b98d582748cf0c9ac2000e8e30c32a099c6cbede8a89348f19fd260",
+          "copiedPostRunSha256": "6ea290fb3b98d582748cf0c9ac2000e8e30c32a099c6cbede8a89348f19fd260"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/deployment.yaml",
+          "actualSha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977",
+          "copiedPostRunSha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/hpa.yaml",
+          "actualSha256": "3bb66fff3c03bc515e4b878313d0038d4cd185a0fab6fe5a9b7bcc53773be958",
+          "copiedPostRunSha256": "3bb66fff3c03bc515e4b878313d0038d4cd185a0fab6fe5a9b7bcc53773be958"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/ingress.yaml",
+          "actualSha256": "27f7db6543703347fdeb0c5a82cab2ec2774c217a88b6f422c2622b48877aabe",
+          "copiedPostRunSha256": "27f7db6543703347fdeb0c5a82cab2ec2774c217a88b6f422c2622b48877aabe"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/pdb.yaml",
+          "actualSha256": "3d5e77c81eccbbf90e181c852b498644bd623fea1968d0de9112b8ec910aac26",
+          "copiedPostRunSha256": "3d5e77c81eccbbf90e181c852b498644bd623fea1968d0de9112b8ec910aac26"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/service.yaml",
+          "actualSha256": "3b80e6c53136e530bbcc49e6b284246bf807dda529b639e4428f914b3e8171bc",
+          "copiedPostRunSha256": "3b80e6c53136e530bbcc49e6b284246bf807dda529b639e4428f914b3e8171bc"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/serviceaccount.yaml",
+          "actualSha256": "3182a386e41fae23bd69d1749bb1cf1dc5de5c985dabc549974e2888e2fc2f95",
+          "copiedPostRunSha256": "3182a386e41fae23bd69d1749bb1cf1dc5de5c985dabc549974e2888e2fc2f95"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/studio-object-store-pvc.yaml",
+          "actualSha256": "46c3ea74c9abe70342e859b200e9e6ad6bc389c2fa709b70d4de7bfad0ebd114",
+          "copiedPostRunSha256": "46c3ea74c9abe70342e859b200e9e6ad6bc389c2fa709b70d4de7bfad0ebd114"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/studio-runner-deployment.yaml",
+          "actualSha256": "aa4a96d5922f6a01558c3785712e56c9017b1b62139bd20e812e777d1190c0c7",
+          "copiedPostRunSha256": "aa4a96d5922f6a01558c3785712e56c9017b1b62139bd20e812e777d1190c0c7"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/studio-runner-networkpolicy.yaml",
+          "actualSha256": "c3bc1ac53c224ffb88448a9015f5d77d8e141c268c804efe28310149191ec59e",
+          "copiedPostRunSha256": "c3bc1ac53c224ffb88448a9015f5d77d8e141c268c804efe28310149191ec59e"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/studio-runner-scaledobject.yaml",
+          "actualSha256": "11bd0472999a2adfe5fc70629514254688b6c5bee95911f6f8e6208dad769172",
+          "copiedPostRunSha256": "11bd0472999a2adfe5fc70629514254688b6c5bee95911f6f8e6208dad769172"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/studio-runner-service.yaml",
+          "actualSha256": "945fb9dacff1e99c418a3d7f82ebe83f5a4320495718dbe41b6f01a019f49dd9",
+          "copiedPostRunSha256": "945fb9dacff1e99c418a3d7f82ebe83f5a4320495718dbe41b6f01a019f49dd9"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/studio-sse-ingress.yaml",
+          "actualSha256": "df2be610db0ca3984236810773299041aa3f10728609ed84f2ad19007f882d06",
+          "copiedPostRunSha256": "df2be610db0ca3984236810773299041aa3f10728609ed84f2ad19007f882d06"
+        },
+        {
+          "path": "helm-chart/put-checks/values-dev.yaml",
+          "actualSha256": "cc241dc9394885234c426fa9bf73564d4b69ebdea65cce14c508318c8af78fb1",
+          "copiedPostRunSha256": "cc241dc9394885234c426fa9bf73564d4b69ebdea65cce14c508318c8af78fb1"
+        },
+        {
+          "path": "helm-chart/put-checks/values-prod.yaml",
+          "actualSha256": "9a330dc518420bc06ab8f63804efff04855ea9a49081dad1502332c0dcda60f9",
+          "copiedPostRunSha256": "9a330dc518420bc06ab8f63804efff04855ea9a49081dad1502332c0dcda60f9"
+        },
+        {
+          "path": "helm-chart/put-checks/values-uat.yaml",
+          "actualSha256": "7cb2ef4aaa5a61f3c4599acdcfef4bb757e397e06a922c42cef46beb537cce33",
+          "copiedPostRunSha256": "7cb2ef4aaa5a61f3c4599acdcfef4bb757e397e06a922c42cef46beb537cce33"
+        },
+        {
+          "path": "helm-chart/put-checks/values.yaml",
+          "actualSha256": "51c680d4ff1863c43d5138cc10e3a696ae78ba32cb4dbf72b9ab60c3bc9a1a80",
+          "copiedPostRunSha256": "51c680d4ff1863c43d5138cc10e3a696ae78ba32cb4dbf72b9ab60c3bc9a1a80"
+        },
+        {
+          "path": "package.json",
+          "actualSha256": "c3c3bcc1b29673be14836815dbedc2404220353da80164d953d51bdd898934e1",
+          "copiedPostRunSha256": "c3c3bcc1b29673be14836815dbedc2404220353da80164d953d51bdd898934e1"
+        },
+        {
+          "path": "studio-runner/package.json",
+          "actualSha256": "2a7926800745772854c8bcecb9eba8d0136103c4a281e21afa598b347524f19e",
+          "copiedPostRunSha256": "2a7926800745772854c8bcecb9eba8d0136103c4a281e21afa598b347524f19e"
+        },
+        {
+          "path": "studio-runner/package-lock.json",
+          "actualSha256": "71d287538cf4659d75b965f57937b41bbe7540bb81a3a8c40a66edbb76e13613",
+          "copiedPostRunSha256": "71d287538cf4659d75b965f57937b41bbe7540bb81a3a8c40a66edbb76e13613"
+        },
+        {
+          "path": "studio-runner/.npmrc",
+          "actualSha256": "ef226ebbcd0001fe1be85367b791411e5bc20a58551c9809be9885ea5bc37d6d",
+          "copiedPostRunSha256": "ef226ebbcd0001fe1be85367b791411e5bc20a58551c9809be9885ea5bc37d6d"
+        },
+        {
+          "path": "studio-runner/.nvmrc",
+          "actualSha256": "68ca3fba3b7e864770cb61aeb306d4bd4354b68ab4dd38450860c5d823e42a53",
+          "copiedPostRunSha256": "68ca3fba3b7e864770cb61aeb306d4bd4354b68ab4dd38450860c5d823e42a53"
+        },
+        {
+          "path": "studio-runner/tsconfig.json",
+          "actualSha256": "723196d470e796a3638c23d794004b30053e0e334a0bb3f1fa270a0a75075046",
+          "copiedPostRunSha256": "723196d470e796a3638c23d794004b30053e0e334a0bb3f1fa270a0a75075046"
+        },
+        {
+          "path": "studio-runner/vitest.deployment.config.ts",
+          "actualSha256": "8e629004020797f3058aa376960125d99bd35ea1f576fb449ffd57bd8e41870b",
+          "copiedPostRunSha256": "8e629004020797f3058aa376960125d99bd35ea1f576fb449ffd57bd8e41870b"
+        },
+        {
+          "path": "studio-runner/test/deployment/integrations.test.ts",
+          "actualSha256": "38c101be9a0d466d12ac7fc6c08b4614b4e918e189feabce7059ac6ca7d29907",
+          "copiedPostRunSha256": "38c101be9a0d466d12ac7fc6c08b4614b4e918e189feabce7059ac6ca7d29907"
+        },
+        {
+          "path": "studio-runner/test/deployment/helm.ts",
+          "actualSha256": "0a3a32b68b4276bc7da20a1c37d08026d8f9696d1030b479cf93228be13aa3b0",
+          "copiedPostRunSha256": "0a3a32b68b4276bc7da20a1c37d08026d8f9696d1030b479cf93228be13aa3b0"
+        },
+        {
+          "path": "studio-runner/test/helpers/corpus.ts",
+          "actualSha256": "63c091d87319035db1673bfbca75d31a02206697ed454f52b3e8f21093dfab79",
+          "copiedPostRunSha256": "63c091d87319035db1673bfbca75d31a02206697ed454f52b3e8f21093dfab79"
+        }
+      ],
+      "mutantHelperUnchangedDuringRun": true,
+      "privateHelperRestoredSha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+      "all32PrivateCopyInputsRestoredExact": true,
+      "originalHelperNeverModified": true
+    },
+    {
+      "id": "normalization",
+      "rawExit": 1,
+      "terminal": true,
+      "total": 95,
+      "selected": 48,
+      "passed": 0,
+      "failed": 48,
+      "filteredOmissions": 47,
+      "filterOmissionsAreNotApprovedGateSkips": true,
+      "rawReporterSuiteCounts": {
+        "numFailedTestSuites": 2,
+        "numPassedTestSuites": 1,
+        "numTotalTestSuites": 3
+      },
+      "actualReportFiles": 1,
+      "expectedSelectedIdentitiesExact": true,
+      "allFailuresAtOriginalRefusalAssertion": true,
+      "assertion": "expect(outcome.ok).toBe(false)",
+      "sourceLine": 310,
+      "column": 28,
+      "nativeInfrastructureErrors": 0,
+      "nativeInfrastructureErrorBasis": "Every selected failure is the single intended AssertionError at copied integrations.test.ts:310:28; complete48selected/47filtered identities reconcile, file-level message empty, no unhandled/load-error log banner.",
+      "cases": [
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.provider",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.endpoint",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.project",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.location",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.model",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.credentials.mode",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.credentials.service-account-key-file",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.provider",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.endpoint",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.project",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.location",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.model",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.credentials.mode",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.credentials.service-account-key-file",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.provider",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.endpoint",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.project",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.location",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.model",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.credentials.mode",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.credentials.service-account-key-file",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.provider",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.endpoint",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.project",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.location",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.model",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.credentials.mode",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.credentials.service-account-key-file",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.provider",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.endpoint",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.project",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.location",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.model",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.credentials.mode",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.credentials.service-account-key-file",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.provider",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.endpoint",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.project",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.location",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.model",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.credentials.mode",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.credentials.service-account-key-file",
+          "status": "failed"
+        },
+        {
+          "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+          "status": "failed"
+        }
+      ],
+      "commandResult": "normalization-command-result.json",
+      "reportSha256": "b3e57e79aff4826ed6196459b3b270b8d781a9157a93dde7829152f35f5fef9e",
+      "logSha256": "902ec8207deb0c2b1ea19a9f51bc1f30bd0998bfe81eabf4063f34d1098c2d7d",
+      "copyPostRunInputs": [
+        {
+          "path": "helm-chart/put-checks/.helmignore",
+          "actualSha256": "78de72013f6064b5b01e524a172af3ecf800bea996f63d3751ad3472d0ed73a6",
+          "copiedPostRunSha256": "78de72013f6064b5b01e524a172af3ecf800bea996f63d3751ad3472d0ed73a6"
+        },
+        {
+          "path": "helm-chart/put-checks/Chart.yaml",
+          "actualSha256": "529d7115a0a5c72d032948fcdf845a355bc619ae3d9030a96207fddc9a5dcdd4",
+          "copiedPostRunSha256": "529d7115a0a5c72d032948fcdf845a355bc619ae3d9030a96207fddc9a5dcdd4"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/NOTES.txt",
+          "actualSha256": "68d0da5e190ab3fd2ce9de7738a7c8920ed5461f806945050197f1e34714013b",
+          "copiedPostRunSha256": "68d0da5e190ab3fd2ce9de7738a7c8920ed5461f806945050197f1e34714013b"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/_helpers.tpl",
+          "actualSha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+          "copiedPostRunSha256": "602614d7c463ae5db21505cd6deee22c330aaf502a691c715a6bc575dd418fe3"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/api-guided-tls-networkpolicy.yaml",
+          "actualSha256": "d34344cc3a264f2de71cc65693a31a606f3f14e7cd2a85279267a799587c76e9",
+          "copiedPostRunSha256": "d34344cc3a264f2de71cc65693a31a606f3f14e7cd2a85279267a799587c76e9"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/configmap.yaml",
+          "actualSha256": "6ea290fb3b98d582748cf0c9ac2000e8e30c32a099c6cbede8a89348f19fd260",
+          "copiedPostRunSha256": "6ea290fb3b98d582748cf0c9ac2000e8e30c32a099c6cbede8a89348f19fd260"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/deployment.yaml",
+          "actualSha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977",
+          "copiedPostRunSha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/hpa.yaml",
+          "actualSha256": "3bb66fff3c03bc515e4b878313d0038d4cd185a0fab6fe5a9b7bcc53773be958",
+          "copiedPostRunSha256": "3bb66fff3c03bc515e4b878313d0038d4cd185a0fab6fe5a9b7bcc53773be958"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/ingress.yaml",
+          "actualSha256": "27f7db6543703347fdeb0c5a82cab2ec2774c217a88b6f422c2622b48877aabe",
+          "copiedPostRunSha256": "27f7db6543703347fdeb0c5a82cab2ec2774c217a88b6f422c2622b48877aabe"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/pdb.yaml",
+          "actualSha256": "3d5e77c81eccbbf90e181c852b498644bd623fea1968d0de9112b8ec910aac26",
+          "copiedPostRunSha256": "3d5e77c81eccbbf90e181c852b498644bd623fea1968d0de9112b8ec910aac26"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/service.yaml",
+          "actualSha256": "3b80e6c53136e530bbcc49e6b284246bf807dda529b639e4428f914b3e8171bc",
+          "copiedPostRunSha256": "3b80e6c53136e530bbcc49e6b284246bf807dda529b639e4428f914b3e8171bc"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/serviceaccount.yaml",
+          "actualSha256": "3182a386e41fae23bd69d1749bb1cf1dc5de5c985dabc549974e2888e2fc2f95",
+          "copiedPostRunSha256": "3182a386e41fae23bd69d1749bb1cf1dc5de5c985dabc549974e2888e2fc2f95"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/studio-object-store-pvc.yaml",
+          "actualSha256": "46c3ea74c9abe70342e859b200e9e6ad6bc389c2fa709b70d4de7bfad0ebd114",
+          "copiedPostRunSha256": "46c3ea74c9abe70342e859b200e9e6ad6bc389c2fa709b70d4de7bfad0ebd114"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/studio-runner-deployment.yaml",
+          "actualSha256": "aa4a96d5922f6a01558c3785712e56c9017b1b62139bd20e812e777d1190c0c7",
+          "copiedPostRunSha256": "aa4a96d5922f6a01558c3785712e56c9017b1b62139bd20e812e777d1190c0c7"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/studio-runner-networkpolicy.yaml",
+          "actualSha256": "c3bc1ac53c224ffb88448a9015f5d77d8e141c268c804efe28310149191ec59e",
+          "copiedPostRunSha256": "c3bc1ac53c224ffb88448a9015f5d77d8e141c268c804efe28310149191ec59e"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/studio-runner-scaledobject.yaml",
+          "actualSha256": "11bd0472999a2adfe5fc70629514254688b6c5bee95911f6f8e6208dad769172",
+          "copiedPostRunSha256": "11bd0472999a2adfe5fc70629514254688b6c5bee95911f6f8e6208dad769172"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/studio-runner-service.yaml",
+          "actualSha256": "945fb9dacff1e99c418a3d7f82ebe83f5a4320495718dbe41b6f01a019f49dd9",
+          "copiedPostRunSha256": "945fb9dacff1e99c418a3d7f82ebe83f5a4320495718dbe41b6f01a019f49dd9"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/studio-sse-ingress.yaml",
+          "actualSha256": "df2be610db0ca3984236810773299041aa3f10728609ed84f2ad19007f882d06",
+          "copiedPostRunSha256": "df2be610db0ca3984236810773299041aa3f10728609ed84f2ad19007f882d06"
+        },
+        {
+          "path": "helm-chart/put-checks/values-dev.yaml",
+          "actualSha256": "cc241dc9394885234c426fa9bf73564d4b69ebdea65cce14c508318c8af78fb1",
+          "copiedPostRunSha256": "cc241dc9394885234c426fa9bf73564d4b69ebdea65cce14c508318c8af78fb1"
+        },
+        {
+          "path": "helm-chart/put-checks/values-prod.yaml",
+          "actualSha256": "9a330dc518420bc06ab8f63804efff04855ea9a49081dad1502332c0dcda60f9",
+          "copiedPostRunSha256": "9a330dc518420bc06ab8f63804efff04855ea9a49081dad1502332c0dcda60f9"
+        },
+        {
+          "path": "helm-chart/put-checks/values-uat.yaml",
+          "actualSha256": "7cb2ef4aaa5a61f3c4599acdcfef4bb757e397e06a922c42cef46beb537cce33",
+          "copiedPostRunSha256": "7cb2ef4aaa5a61f3c4599acdcfef4bb757e397e06a922c42cef46beb537cce33"
+        },
+        {
+          "path": "helm-chart/put-checks/values.yaml",
+          "actualSha256": "51c680d4ff1863c43d5138cc10e3a696ae78ba32cb4dbf72b9ab60c3bc9a1a80",
+          "copiedPostRunSha256": "51c680d4ff1863c43d5138cc10e3a696ae78ba32cb4dbf72b9ab60c3bc9a1a80"
+        },
+        {
+          "path": "package.json",
+          "actualSha256": "c3c3bcc1b29673be14836815dbedc2404220353da80164d953d51bdd898934e1",
+          "copiedPostRunSha256": "c3c3bcc1b29673be14836815dbedc2404220353da80164d953d51bdd898934e1"
+        },
+        {
+          "path": "studio-runner/package.json",
+          "actualSha256": "2a7926800745772854c8bcecb9eba8d0136103c4a281e21afa598b347524f19e",
+          "copiedPostRunSha256": "2a7926800745772854c8bcecb9eba8d0136103c4a281e21afa598b347524f19e"
+        },
+        {
+          "path": "studio-runner/package-lock.json",
+          "actualSha256": "71d287538cf4659d75b965f57937b41bbe7540bb81a3a8c40a66edbb76e13613",
+          "copiedPostRunSha256": "71d287538cf4659d75b965f57937b41bbe7540bb81a3a8c40a66edbb76e13613"
+        },
+        {
+          "path": "studio-runner/.npmrc",
+          "actualSha256": "ef226ebbcd0001fe1be85367b791411e5bc20a58551c9809be9885ea5bc37d6d",
+          "copiedPostRunSha256": "ef226ebbcd0001fe1be85367b791411e5bc20a58551c9809be9885ea5bc37d6d"
+        },
+        {
+          "path": "studio-runner/.nvmrc",
+          "actualSha256": "68ca3fba3b7e864770cb61aeb306d4bd4354b68ab4dd38450860c5d823e42a53",
+          "copiedPostRunSha256": "68ca3fba3b7e864770cb61aeb306d4bd4354b68ab4dd38450860c5d823e42a53"
+        },
+        {
+          "path": "studio-runner/tsconfig.json",
+          "actualSha256": "723196d470e796a3638c23d794004b30053e0e334a0bb3f1fa270a0a75075046",
+          "copiedPostRunSha256": "723196d470e796a3638c23d794004b30053e0e334a0bb3f1fa270a0a75075046"
+        },
+        {
+          "path": "studio-runner/vitest.deployment.config.ts",
+          "actualSha256": "8e629004020797f3058aa376960125d99bd35ea1f576fb449ffd57bd8e41870b",
+          "copiedPostRunSha256": "8e629004020797f3058aa376960125d99bd35ea1f576fb449ffd57bd8e41870b"
+        },
+        {
+          "path": "studio-runner/test/deployment/integrations.test.ts",
+          "actualSha256": "38c101be9a0d466d12ac7fc6c08b4614b4e918e189feabce7059ac6ca7d29907",
+          "copiedPostRunSha256": "38c101be9a0d466d12ac7fc6c08b4614b4e918e189feabce7059ac6ca7d29907"
+        },
+        {
+          "path": "studio-runner/test/deployment/helm.ts",
+          "actualSha256": "0a3a32b68b4276bc7da20a1c37d08026d8f9696d1030b479cf93228be13aa3b0",
+          "copiedPostRunSha256": "0a3a32b68b4276bc7da20a1c37d08026d8f9696d1030b479cf93228be13aa3b0"
+        },
+        {
+          "path": "studio-runner/test/helpers/corpus.ts",
+          "actualSha256": "63c091d87319035db1673bfbca75d31a02206697ed454f52b3e8f21093dfab79",
+          "copiedPostRunSha256": "63c091d87319035db1673bfbca75d31a02206697ed454f52b3e8f21093dfab79"
+        }
+      ],
+      "mutantHelperUnchangedDuringRun": true,
+      "privateHelperRestoredSha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+      "all32PrivateCopyInputsRestoredExact": true,
+      "originalHelperNeverModified": true
+    }
+  ],
+  "bothToolSessionsTerminal": true,
+  "noOtherNativeJobStarted": true,
+  "actual32InputsUnchanged": true,
+  "privateCopiesRestored": true,
+  "fullDeploymentTierRepeated": false,
+  "eightPermanentTokenControlsRepeated": false,
+  "testAssertionsOrConfigsChanged": false,
+  "sourceDistOrPackagesChanged": false,
+  "sourceStabilityScope": "32 named actual/copied inputfiles only; no global capture invented",
+  "limits": [
+    "Local copied-chart Helm refusal-matrix controls only; not runtime Spring binding, image or deployed/provider/security approval.",
+    "Filter omissions are diagnostic only; no gate skips approved.",
+    "Original abandoned run remains failed/uncredited; no lifecycle/release credit."
+  ],
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN"
+}

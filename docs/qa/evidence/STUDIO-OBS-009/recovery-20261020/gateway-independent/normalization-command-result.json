@@ -1,0 +1,27 @@
+{
+  "kind": "RAW_DIRECT_COMMAND_EXIT",
+  "atUtc": "2026-10-20T14:35:45.962278+00:00",
+  "command": [
+    "pnpm",
+    "--config.package-manager-strict=false",
+    "exec",
+    "vitest",
+    "run",
+    "--config",
+    "vitest.deployment.config.ts",
+    "test/deployment/integrations.test.ts",
+    "--testNamePattern=(backend|worker) rejects (flat|nested|relaxed)",
+    "--minWorkers=1",
+    "--maxWorkers=1",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/gateway-independent/normalization-vitest.json"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/gateway-independent/private/normalization/repo/studio-runner",
+  "nodePathPrefix": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+  "exit": 1,
+  "toolSession": 93875,
+  "terminal": true,
+  "reportSha256": "b3e57e79aff4826ed6196459b3b270b8d781a9157a93dde7829152f35f5fef9e",
+  "logSha256": "902ec8207deb0c2b1ea19a9f51bc1f30bd0998bfe81eabf4063f34d1098c2d7d"
+}

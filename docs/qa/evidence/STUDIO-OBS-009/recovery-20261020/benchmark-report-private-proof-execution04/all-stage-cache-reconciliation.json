@@ -1,0 +1,222 @@
+{
+  "version": "3.2.7",
+  "uniqueOrderedKeys": 191,
+  "mutableKeys": [
+    ":test/evaluation/benchmarkScoring.test.ts",
+    ":test/evaluation/budgetAdmission.test.ts",
+    ":test/evaluation/corpusManifest.test.ts",
+    ":test/evaluation/harnessSelfTest.test.ts"
+  ],
+  "stages": [
+    {
+      "id": "types-green01",
+      "cacheSha256": "90ef9b3046e90699b8789605069d92a5e0d855b20744f657c54792ae43413acf",
+      "values": {
+        ":test/evaluation/benchmarkScoring.test.ts": {
+          "duration": 12.668374999999997,
+          "failed": false
+        },
+        ":test/evaluation/budgetAdmission.test.ts": {
+          "duration": 28.355374999999995,
+          "failed": false
+        },
+        ":test/evaluation/corpusManifest.test.ts": {
+          "duration": 40.91362500000001,
+          "failed": false
+        },
+        ":test/evaluation/harnessSelfTest.test.ts": {
+          "duration": 327.008208,
+          "failed": false
+        }
+      },
+      "all187OtherValuesExactSeed": true,
+      "oldNativeFailedFlagRetained": true,
+      "fullCatalogDeltaPaths": []
+    },
+    {
+      "id": "lint-green01",
+      "cacheSha256": "90ef9b3046e90699b8789605069d92a5e0d855b20744f657c54792ae43413acf",
+      "values": {
+        ":test/evaluation/benchmarkScoring.test.ts": {
+          "duration": 12.668374999999997,
+          "failed": false
+        },
+        ":test/evaluation/budgetAdmission.test.ts": {
+          "duration": 28.355374999999995,
+          "failed": false
+        },
+        ":test/evaluation/corpusManifest.test.ts": {
+          "duration": 40.91362500000001,
+          "failed": false
+        },
+        ":test/evaluation/harnessSelfTest.test.ts": {
+          "duration": 327.008208,
+          "failed": false
+        }
+      },
+      "all187OtherValuesExactSeed": true,
+      "oldNativeFailedFlagRetained": true,
+      "fullCatalogDeltaPaths": []
+    },
+    {
+      "id": "v1-c2-red01",
+      "cacheSha256": "40cdb9bb1d34637e64126bd517e5a5d31d5ddcdaad84f31f2ced723b7762a4da",
+      "values": {
+        ":test/evaluation/benchmarkScoring.test.ts": {
+          "duration": 124.99875,
+          "failed": true
+        },
+        ":test/evaluation/budgetAdmission.test.ts": {
+          "duration": 0,
+          "failed": false
+        },
+        ":test/evaluation/corpusManifest.test.ts": {
+          "duration": 0,
+          "failed": false
+        },
+        ":test/evaluation/harnessSelfTest.test.ts": {
+          "duration": 0,
+          "failed": false
+        }
+      },
+      "all187OtherValuesExactSeed": true,
+      "oldNativeFailedFlagRetained": true,
+      "fullCatalogDeltaPaths": [
+        "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json"
+      ]
+    },
+    {
+      "id": "c12-red01",
+      "cacheSha256": "b0dd05a02723507fc907c568c1ece377935be417aad057524baaca0289e8e0e9",
+      "values": {
+        ":test/evaluation/benchmarkScoring.test.ts": {
+          "duration": 21.896916000000004,
+          "failed": true
+        },
+        ":test/evaluation/budgetAdmission.test.ts": {
+          "duration": 5.608958999999999,
+          "failed": true
+        },
+        ":test/evaluation/corpusManifest.test.ts": {
+          "duration": 7.295041999999995,
+          "failed": true
+        },
+        ":test/evaluation/harnessSelfTest.test.ts": {
+          "duration": 7.1905419999999935,
+          "failed": true
+        }
+      },
+      "all187OtherValuesExactSeed": true,
+      "oldNativeFailedFlagRetained": true,
+      "fullCatalogDeltaPaths": [
+        "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json"
+      ]
+    },
+    {
+      "id": "green105-01",
+      "cacheSha256": "f570ef8f055e6e3eab70953865c4eb32e1c157c45bc1931defcf44e3349c2753",
+      "values": {
+        ":test/evaluation/benchmarkScoring.test.ts": {
+          "duration": 1316.643292,
+          "failed": false
+        },
+        ":test/evaluation/budgetAdmission.test.ts": {
+          "duration": 23.560374999999993,
+          "failed": false
+        },
+        ":test/evaluation/corpusManifest.test.ts": {
+          "duration": 67.025,
+          "failed": false
+        },
+        ":test/evaluation/harnessSelfTest.test.ts": {
+          "duration": 293.202917,
+          "failed": false
+        }
+      },
+      "all187OtherValuesExactSeed": true,
+      "oldNativeFailedFlagRetained": true,
+      "fullCatalogDeltaPaths": [
+        "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json"
+      ]
+    },
+    {
+      "id": "validate-unfrozen01",
+      "cacheSha256": "f570ef8f055e6e3eab70953865c4eb32e1c157c45bc1931defcf44e3349c2753",
+      "values": {
+        ":test/evaluation/benchmarkScoring.test.ts": {
+          "duration": 1316.643292,
+          "failed": false
+        },
+        ":test/evaluation/budgetAdmission.test.ts": {
+          "duration": 23.560374999999993,
+          "failed": false
+        },
+        ":test/evaluation/corpusManifest.test.ts": {
+          "duration": 67.025,
+          "failed": false
+        },
+        ":test/evaluation/harnessSelfTest.test.ts": {
+          "duration": 293.202917,
+          "failed": false
+        }
+      },
+      "all187OtherValuesExactSeed": true,
+      "oldNativeFailedFlagRetained": true,
+      "fullCatalogDeltaPaths": []
+    },
+    {
+      "id": "freeze-copy01",
+      "cacheSha256": "f570ef8f055e6e3eab70953865c4eb32e1c157c45bc1931defcf44e3349c2753",
+      "values": {
+        ":test/evaluation/benchmarkScoring.test.ts": {
+          "duration": 1316.643292,
+          "failed": false
+        },
+        ":test/evaluation/budgetAdmission.test.ts": {
+          "duration": 23.560374999999993,
+          "failed": false
+        },
+        ":test/evaluation/corpusManifest.test.ts": {
+          "duration": 67.025,
+          "failed": false
+        },
+        ":test/evaluation/harnessSelfTest.test.ts": {
+          "duration": 293.202917,
+          "failed": false
+        }
+      },
+      "all187OtherValuesExactSeed": true,
+      "oldNativeFailedFlagRetained": true,
+      "fullCatalogDeltaPaths": []
+    },
+    {
+      "id": "validate-frozen01",
+      "cacheSha256": "f570ef8f055e6e3eab70953865c4eb32e1c157c45bc1931defcf44e3349c2753",
+      "values": {
+        ":test/evaluation/benchmarkScoring.test.ts": {
+          "duration": 1316.643292,
+          "failed": false
+        },
+        ":test/evaluation/budgetAdmission.test.ts": {
+          "duration": 23.560374999999993,
+          "failed": false
+        },
+        ":test/evaluation/corpusManifest.test.ts": {
+          "duration": 67.025,
+          "failed": false
+        },
+        ":test/evaluation/harnessSelfTest.test.ts": {
+          "duration": 293.202917,
+          "failed": false
+        }
+      },
+      "all187OtherValuesExactSeed": true,
+      "oldNativeFailedFlagRetained": true,
+      "fullCatalogDeltaPaths": []
+    }
+  ],
+  "other187ExactThroughout": true,
+  "failedHistoricalNativeRetained": true,
+  "finalCacheSha256": "f570ef8f055e6e3eab70953865c4eb32e1c157c45bc1931defcf44e3349c2753",
+  "fullCatalogUnchangedClaimed": false
+}

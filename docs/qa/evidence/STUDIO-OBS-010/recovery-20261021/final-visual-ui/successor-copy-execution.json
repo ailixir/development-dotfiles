@@ -1,0 +1,116 @@
+{
+  "started": "2026-10-21T17:45:27.015Z",
+  "node": "v24.20.0",
+  "mode": "Vite standalone + Node MSW demo proxy (5173 -> 5174)",
+  "app": "http://127.0.0.1:5173",
+  "syntheticOnly": true,
+  "actions": [
+    {
+      "name": "One-string successor empty Logs copy through actual UI; no Run",
+      "status": "PASS",
+      "detail": {
+        "logs": "Live execution logs\nNo logs are available.",
+        "scope": "Fresh context; prior completed result pointer lost on earlier context cleanup. No third Run."
+      },
+      "time": "2026-10-21T17:45:28.629Z"
+    }
+  ],
+  "testIds": [],
+  "screenshots": [
+    "23-successor-logs-neutral-copy.png"
+  ],
+  "runtimeErrors": [],
+  "failedRequests": [],
+  "http": [
+    {
+      "method": "GET",
+      "path": "/api/v1/checks/sources",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/features",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/schedule/capabilities",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/capabilities",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f",
+      "status": 200
+    }
+  ],
+  "servedModules": [
+    {
+      "path": "/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+      "sha256": "017eb97695248c1490f6927a0371c1103c9b77de09158d3a464533bf9395d481"
+    },
+    {
+      "path": "/src/components/studio/SecretInput.tsx",
+      "sha256": "7221e784540c0cb2668903991e7d2b54fae493b54e37ca920cffc1486cc1620f"
+    },
+    {
+      "path": "/src/components/studio/evidence/VideoEvidencePanel.tsx",
+      "sha256": "a494d5da41a1c26a8004b79e77c7221993769cb15b63d147a3358399bdac4c46"
+    },
+    {
+      "path": "/src/components/studio/guided/guidedNarratives.ts",
+      "sha256": "c333fcf0db8baf0e130d11b6edda9d87a5aa191ec7d41cbde0fbc540e82ec390"
+    },
+    {
+      "path": "/src/components/studio/run/RunControl.tsx",
+      "sha256": "265d79d302504813319f56dfcc164568b1fa446f82b06188df530bc2ea2b5252"
+    },
+    {
+      "path": "/src/components/studio/references/ReferencePicker.tsx",
+      "sha256": "400cd0649a0b9a9a2ac524db94e0f45b9c4d61a3f064c18dbc42ffb8e8bed8b9"
+    }
+  ],
+  "sourceBefore": {
+    "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx": "0fb142d2559efbb3ccbe0a773830d6c1591ff1ed5ae4bd8b72f30b946d436a2d",
+    "frontend/src/components/studio/SecretInput.tsx": "1c8dc829c04adcdfe44868ac96bb9359e5be76b8fcb2e139634b394a9ba08ad6",
+    "frontend/src/components/studio/references/ReferencePicker.tsx": "e2d54d9e22aeb833fab6295fddfc90646450f521b38a74cfa6948062d0f8fd7d",
+    "frontend/src/components/studio/run/RunControl.tsx": "b4f28ce2a0efffb469a304e19d2869c7c8410805e5658a071887b857e5abc176",
+    "frontend/src/components/studio/guided/guidedNarratives.ts": "36aafba385644d20737d172072b01702095810441f781422c6992e987ee67ffa",
+    "frontend/src/components/studio/evidence/VideoEvidencePanel.tsx": "2ccd0fd4e3ffa032a028ad87feefde163001e5091c3a33eb2ba88915e25a1a86"
+  },
+  "browser": "153.0.8010.12",
+  "finished": "2026-10-21T17:45:28.629Z",
+  "sourceAfter": {
+    "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx": "0fb142d2559efbb3ccbe0a773830d6c1591ff1ed5ae4bd8b72f30b946d436a2d",
+    "frontend/src/components/studio/SecretInput.tsx": "1c8dc829c04adcdfe44868ac96bb9359e5be76b8fcb2e139634b394a9ba08ad6",
+    "frontend/src/components/studio/references/ReferencePicker.tsx": "e2d54d9e22aeb833fab6295fddfc90646450f521b38a74cfa6948062d0f8fd7d",
+    "frontend/src/components/studio/run/RunControl.tsx": "b4f28ce2a0efffb469a304e19d2869c7c8410805e5658a071887b857e5abc176",
+    "frontend/src/components/studio/guided/guidedNarratives.ts": "36aafba385644d20737d172072b01702095810441f781422c6992e987ee67ffa",
+    "frontend/src/components/studio/evidence/VideoEvidencePanel.tsx": "2ccd0fd4e3ffa032a028ad87feefde163001e5091c3a33eb2ba88915e25a1a86"
+  },
+  "sourceStable": true
+}

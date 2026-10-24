@@ -1,0 +1,35 @@
+{
+  "verdict": "READY_FOR_EXACT_GUARDED_TWO_FILE_INTEGRATION",
+  "sourceExecutionBindingSha256": "4d8d984747b8001f484829309f8dcc4de64dea954a05b1a442a893f29329559a",
+  "executionManifestSha256": "e8951ec6cd52e1f47157052770a76ec2ea97a3ad3bbc984c6a3d27f9b757109b",
+  "receiptSha256": "496fa7f70d37a618edc718eb070970cdabbcb116f3b8d5c7b456db27914676f7",
+  "reviewSha256": "e90d95d56fbb2f2aff30a3511628f78ecd38da6a4238b214c1abf72f07f67496",
+  "paths": [
+    {
+      "path": "studio-runner/src/guided/ownership.ts",
+      "requiredActualBeforeSha256": "c76696f0c74359ee5dab8b57f9feb843b743ff24af2884b2642744f8ead3a32d",
+      "validatedCandidateSha256": "87b661946b0819aac38e130f3b4a8467222f70789416b188236b9345d4a96387",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/green/studio-runner/src/guided/ownership.ts",
+      "executedBufferArchivePath": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-execution01/runtime-matched-green-buffers/studio-runner/src/guided/ownership.ts",
+      "archiveSource": "Immutable sealed candidate bytes, independently SHA-matched inside private tree before and after unit/native runtime; private runtime files now intentionally restored",
+      "privateTestedPathNowRestoredToOld": true
+    },
+    {
+      "path": "studio-runner/test/guided/ownership.test.ts",
+      "requiredActualBeforeSha256": "436b45e61faab72efd9ec5d801f7e720ae8801872702c80286c31af37f5d8e19",
+      "validatedCandidateSha256": "956104377c8e1458b3fb9b73e86df72429b24f0bafe161e33124cb563b300112",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/green/studio-runner/test/guided/ownership.test.ts",
+      "executedBufferArchivePath": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-execution01/runtime-matched-green-buffers/studio-runner/test/guided/ownership.test.ts",
+      "archiveSource": "Immutable sealed candidate bytes, independently SHA-matched inside private tree before and after unit/native runtime; private runtime files now intentionally restored",
+      "privateTestedPathNowRestoredToOld": true
+    }
+  ],
+  "preimagesRecheckedAtReview": true,
+  "rootMustRecheckImmediatelyBeforeApply": true,
+  "actualApplicationPerformed": false,
+  "copyPrivateDistToActual": false,
+  "fullTierGo": false,
+  "rtCopybackGo": false,
+  "lifecycleApproval": false,
+  "findings": []
+}

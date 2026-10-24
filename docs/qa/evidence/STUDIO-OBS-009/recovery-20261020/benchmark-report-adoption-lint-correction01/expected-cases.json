@@ -1,0 +1,1314 @@
+{
+  "kind": "UNEXECUTED_REAL_BASELINE_PLUS_EXPLICIT_ADDITION_FORECAST",
+  "sourceProjection": "original-case-projection.json",
+  "countsAreFromExecutedReportsNotSourceDeclarations": true,
+  "originalCases": 86,
+  "addedPredictedCases": 19,
+  "expectedGreen": {
+    "passed": 105,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "todo": 0,
+    "physicalFiles": 4
+  },
+  "files": [
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "originalRealCases": 22,
+      "addedPredictedCases": 9,
+      "expectedGreenCases": 31,
+      "cases": [
+        {
+          "order": 1,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "gate arithmetic on the corpus with the two staging cases unrun"
+          ],
+          "title": "is PARTIAL (never a pass) at 51 runs when every run completes: the denominator drops to 17 x 3 and the floor to 46",
+          "fullName": "gate arithmetic on the corpus with the two staging cases unrun is PARTIAL (never a pass) at 51 runs when every run completes: the denominator drops to 17 x 3 and the floor to 46",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 2,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "gate arithmetic on the corpus with the two staging cases unrun"
+          ],
+          "title": "still reports PARTIAL at exactly 46 of 51 (90.2 percent) and GATE_FAIL at 45 of 51",
+          "fullName": "gate arithmetic on the corpus with the two staging cases unrun still reports PARTIAL at exactly 46 of 51 (90.2 percent) and GATE_FAIL at 45 of 51",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 3,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "gate arithmetic on the corpus with the two staging cases unrun"
+          ],
+          "title": "reports INCOMPLETE when planned runs are missing instead of dividing by what ran",
+          "fullName": "gate arithmetic on the corpus with the two staging cases unrun reports INCOMPLETE when planned runs are missing instead of dividing by what ran",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 4,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "gate arithmetic on the corpus with the two staging cases unrun"
+          ],
+          "title": "the full 57-run arithmetic is 52 of 57 = 91.2 percent passing and 51 of 57 = 89.5 percent failing",
+          "fullName": "gate arithmetic on the corpus with the two staging cases unrun the full 57-run arithmetic is 52 of 57 = 91.2 percent passing and 51 of 57 = 89.5 percent failing",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 5,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "completion without clarification"
+          ],
+          "title": "does not credit a class P run that needed a clarification, even when the oracle is satisfied (no reclassification as ambiguous)",
+          "fullName": "completion without clarification does not credit a class P run that needed a clarification, even when the oracle is satisfied (no reclassification as ambiguous)",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 6,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "hard gates"
+          ],
+          "title": "a false pass fails the gate even with every other run completing",
+          "fullName": "hard gates a false pass fails the gate even with every other run completing",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 7,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "hard gates"
+          ],
+          "title": "a secret or PII leak fails the gate",
+          "fullName": "hard gates a secret or PII leak fails the gate",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 8,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "hard gates"
+          ],
+          "title": "retains an earlier 'false pass' after a clean final attempt is credited",
+          "fullName": "hard gates retains an earlier 'false pass' after a clean final attempt is credited",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 9,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "hard gates"
+          ],
+          "title": "retains an earlier 'secret or PII leak' after a clean final attempt is credited",
+          "fullName": "hard gates retains an earlier 'secret or PII leak' after a clean final attempt is credited",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 10,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "labels and honesty rules"
+          ],
+          "title": "a HARNESS_SELF_TEST run is labelled and its verdict is NOT_EVIDENCE whatever it scores",
+          "fullName": "labels and honesty rules a HARNESS_SELF_TEST run is labelled and its verdict is NOT_EVIDENCE whatever it scores",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 11,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "labels and honesty rules"
+          ],
+          "title": "never reports a pass when a record mixes modes",
+          "fullName": "labels and honesty rules never reports a pass when a record mixes modes",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 12,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "labels and honesty rules"
+          ],
+          "title": "refuses a run that started before the manifest freeze, and one that names another manifest",
+          "fullName": "labels and honesty rules refuses a run that started before the manifest freeze, and one that names another manifest",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 13,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "labels and honesty rules"
+          ],
+          "title": "refuses a run record that omits rs1NonScalarReadGaps (written as 0 when none, never omitted)",
+          "fullName": "labels and honesty rules refuses a run record that omits rs1NonScalarReadGaps (written as 0 when none, never omitted)",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 14,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "labels and honesty rules"
+          ],
+          "title": "refuses a run record that omits authoredEchoUnobservableTargets (written as 0 when none, never omitted)",
+          "fullName": "labels and honesty rules refuses a run record that omits authoredEchoUnobservableTargets (written as 0 when none, never omitted)",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 15,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "labels and honesty rules"
+          ],
+          "title": "refuses a run record that omits focusMutationRefusedFills (written as 0 when none, never omitted)",
+          "fullName": "labels and honesty rules refuses a run record that omits focusMutationRefusedFills (written as 0 when none, never omitted)",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 16,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "labels and honesty rules"
+          ],
+          "title": "writes the three accounting fields as explicit zeros with their denominators",
+          "fullName": "labels and honesty rules writes the three accounting fields as explicit zeros with their denominators",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 17,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "labels and honesty rules"
+          ],
+          "title": "counts RS-1 gaps inside the gate denominator and lists them with case, element kind and run number",
+          "fullName": "labels and honesty rules counts RS-1 gaps inside the gate denominator and lists them with case, element kind and run number",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 18,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "labels and honesty rules"
+          ],
+          "title": "keeps an infrastructure-failed run visible and credits only its re-run; an unreported retry is a problem",
+          "fullName": "labels and honesty rules keeps an infrastructure-failed run visible and credits only its re-run; an unreported retry is a problem",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 19,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "labels and honesty rules"
+          ],
+          "title": "publishes p50/p95 latency, model calls, tokens and cost with denominators; cost stays unavailable without a price",
+          "fullName": "labels and honesty rules publishes p50/p95 latency, model calls, tokens and cost with denominators; cost stays unavailable without a price",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 20,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "labels and honesty rules"
+          ],
+          "title": "reports class F and N separately, outside the completion denominator",
+          "fullName": "labels and honesty rules reports class F and N separately, outside the completion denominator",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 21,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "replay stability (consensus plan s11): >= 98 percent over 100 replays with one artifact hash"
+          ],
+          "title": "passes at 98 of 100 with one hash, fails at 97, fails when the hash drifts, fails when fewer than 100 replays ran",
+          "fullName": "replay stability (consensus plan s11): >= 98 percent over 100 replays with one artifact hash passes at 98 of 100 with one hash, fails at 97, fails when the hash drifts, fails when fewer than 100 replays ran",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 22,
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "replay stability (consensus plan s11): >= 98 percent over 100 replays with one artifact hash"
+          ],
+          "title": "labels a self-test run NOT_EVIDENCE even when it passes",
+          "fullName": "replay stability (consensus plan s11): >= 98 percent over 100 replays with one artifact hash labels a self-test run NOT_EVIDENCE even when it passes",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+          ],
+          "title": "group1: an unreviewed generic budget failure is UNKNOWN rather than an observed zero",
+          "fullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group1: an unreviewed generic budget failure is UNKNOWN rather than an observed zero",
+          "origin": "EXPLICIT_NEW_PREDICTED_CASE",
+          "order": 23,
+          "status": "passed"
+        },
+        {
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+          ],
+          "title": "group1: plausible VERIFIED hashes cannot replace actual bound independent adoption",
+          "fullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group1: plausible VERIFIED hashes cannot replace actual bound independent adoption",
+          "origin": "EXPLICIT_NEW_PREDICTED_CASE",
+          "order": 24,
+          "status": "passed"
+        },
+        {
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+          ],
+          "title": "group2: 'rs1NonScalarReadGaps' binds real event references and preserves a failed class-P run",
+          "fullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group2: 'rs1NonScalarReadGaps' binds real event references and preserves a failed class-P run",
+          "origin": "EXPLICIT_NEW_PREDICTED_CASE",
+          "order": 25,
+          "status": "passed"
+        },
+        {
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+          ],
+          "title": "group2: 'authoredEchoUnobservableTargets' binds real event references and preserves a failed class-P run",
+          "fullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group2: 'authoredEchoUnobservableTargets' binds real event references and preserves a failed class-P run",
+          "origin": "EXPLICIT_NEW_PREDICTED_CASE",
+          "order": 26,
+          "status": "passed"
+        },
+        {
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+          ],
+          "title": "group2: 'focusMutationRefusedFills' binds real event references and preserves a failed class-P run",
+          "fullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group2: 'focusMutationRefusedFills' binds real event references and preserves a failed class-P run",
+          "origin": "EXPLICIT_NEW_PREDICTED_CASE",
+          "order": 27,
+          "status": "passed"
+        },
+        {
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+          ],
+          "title": "group2: distinct same-element events survive incomplete scope while count/ref inconsistencies are refused",
+          "fullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group2: distinct same-element events survive incomplete scope while count/ref inconsistencies are refused",
+          "origin": "EXPLICIT_NEW_PREDICTED_CASE",
+          "order": 28,
+          "status": "passed"
+        },
+        {
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+          ],
+          "title": "group3: final-P, credited-all and every supplied attempt have separate cause denominators",
+          "fullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group3: final-P, credited-all and every supplied attempt have separate cause denominators",
+          "origin": "EXPLICIT_NEW_PREDICTED_CASE",
+          "order": 29,
+          "status": "passed"
+        },
+        {
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+          ],
+          "title": "group6: immutable originals defeat hard-fact laundering and the offline branch writes fresh files without a client",
+          "fullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group6: immutable originals defeat hard-fact laundering and the offline branch writes fresh files without a client",
+          "origin": "EXPLICIT_NEW_PREDICTED_CASE",
+          "order": 30,
+          "status": "passed"
+        },
+        {
+          "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+          "ancestorTitles": [
+            "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+          ],
+          "title": "group6: later admission cannot retroactively authorize original execution or promote a self-test",
+          "fullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group6: later admission cannot retroactively authorize original execution or promote a self-test",
+          "origin": "EXPLICIT_NEW_PREDICTED_CASE",
+          "order": 31,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+      "originalRealCases": 27,
+      "addedPredictedCases": 3,
+      "expectedGreenCases": 30,
+      "cases": [
+        {
+          "order": 1,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "frozen corpus manifest"
+          ],
+          "title": "validates with every pin re-read from disk",
+          "fullName": "frozen corpus manifest validates with every pin re-read from disk",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 2,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "frozen corpus manifest"
+          ],
+          "title": "has 25 workflows: 19 class P, 1 class F, 5 class N, 2 externally blocked",
+          "fullName": "frozen corpus manifest has 25 workflows: 19 class P, 1 class F, 5 class N, 2 externally blocked",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 3,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "frozen corpus manifest"
+          ],
+          "title": "computes the gate from the classes: 19 x 3 = 57 runs, >= 52 completions, <= 5 failed",
+          "fullName": "frozen corpus manifest computes the gate from the classes: 19 x 3 = 57 runs, >= 52 completions, <= 5 failed",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 4,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "frozen corpus manifest"
+          ],
+          "title": "plans 75 runs, 81 model sessions (two incremental bases per repetition) and 122 with the x1.5 contingency",
+          "fullName": "frozen corpus manifest plans 75 runs, 81 model sessions (two incremental bases per repetition) and 122 with the x1.5 contingency",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 5,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "frozen corpus manifest"
+          ],
+          "title": "is frozen: the digest covers the canonical manifest with the digest field blanked",
+          "fullName": "frozen corpus manifest is frozen: the digest covers the canonical manifest with the digest field blanked",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 6,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "frozen corpus manifest"
+          ],
+          "title": "pins the two STUDIO-OBS-015 case files unchanged and declares the incremental cases as consumed, not recreated",
+          "fullName": "frozen corpus manifest pins the two STUDIO-OBS-015 case files unchanged and declares the incremental cases as consumed, not recreated",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 7,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "frozen corpus manifest"
+          ],
+          "title": "declares mixedVisible for D3 and both incremental cases and puts no exact-mode case in class P (B5)",
+          "fullName": "frozen corpus manifest declares mixedVisible for D3 and both incremental cases and puts no exact-mode case in class P (B5)",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 8,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "frozen corpus manifest"
+          ],
+          "title": "marks RS-1 on every case, [] written explicitly, with the value location and reachability for the three dataflow cases",
+          "fullName": "frozen corpus manifest marks RS-1 on every case, [] written explicitly, with the value location and reachability for the three dataflow cases",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 9,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "frozen corpus manifest"
+          ],
+          "title": "gives every ported case a fidelity record: pinned to results.jsonl, nothing invented, no 2026-10-04 comparison",
+          "fullName": "frozen corpus manifest gives every ported case a fidelity record: pinned to results.jsonl, nothing invented, no 2026-10-04 comparison",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 10,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "frozen corpus manifest"
+          ],
+          "title": "names an owner for each externally blocked case and never admits it without a step text and outcome",
+          "fullName": "frozen corpus manifest names an owner for each externally blocked case and never admits it without a step text and outcome",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 11,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "frozen corpus manifest"
+          ],
+          "title": "has an expected outcome per admitted case that expects no side effect for classes F and N",
+          "fullName": "frozen corpus manifest has an expected outcome per admitted case that expects no side effect for classes F and N",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 12,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "frozen corpus manifest"
+          ],
+          "title": "records the unratified rulings as RECOMMENDED_NOT_RULED rather than as decided",
+          "fullName": "frozen corpus manifest records the unratified rulings as RECOMMENDED_NOT_RULED rather than as decided",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "inspection scope and source pins: groups 4 and 6"
+          ],
+          "title": "group4: explicitly blocked staging UNKNOWN is valid and never a known local zero",
+          "fullName": "inspection scope and source pins: groups 4 and 6 group4: explicitly blocked staging UNKNOWN is valid and never a known local zero",
+          "origin": "EXPLICIT_NEW_PREDICTED_CASE",
+          "order": 13,
+          "status": "passed"
+        },
+        {
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "inspection scope and source pins: groups 4 and 6"
+          ],
+          "title": "group4: READY unknown and an inconsistent blocked unknown inspection are refused",
+          "fullName": "inspection scope and source pins: groups 4 and 6 group4: READY unknown and an inconsistent blocked unknown inspection are refused",
+          "origin": "EXPLICIT_NEW_PREDICTED_CASE",
+          "order": 14,
+          "status": "passed"
+        },
+        {
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "inspection scope and source pins: groups 4 and 6"
+          ],
+          "title": "group6: missing or stale evaluator code pins refuse the existing validator before any client use",
+          "fullName": "inspection scope and source pins: groups 4 and 6 group6: missing or stale evaluator code pins refuse the existing validator before any client use",
+          "origin": "EXPLICIT_NEW_PREDICTED_CASE",
+          "order": 15,
+          "status": "passed"
+        },
+        {
+          "order": 16,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "manifest validator negative fixtures"
+          ],
+          "title": "refuses a guided-dataflow case that does not declare its fixture mode",
+          "fullName": "manifest validator negative fixtures refuses a guided-dataflow case that does not declare its fixture mode",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 17,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "manifest validator negative fixtures"
+          ],
+          "title": "refuses an exact-mode case in class P (the exact mode is the RS-1 shape)",
+          "fullName": "manifest validator negative fixtures refuses an exact-mode case in class P (the exact mode is the RS-1 shape)",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 18,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "manifest validator negative fixtures"
+          ],
+          "title": "refuses a case without a declared independent oracle, or with a DOM-through-the-runner oracle",
+          "fullName": "manifest validator negative fixtures refuses a case without a declared independent oracle, or with a DOM-through-the-runner oracle",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 19,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "manifest validator negative fixtures"
+          ],
+          "title": "refuses an oracle that omits one of the four mutation controls",
+          "fullName": "manifest validator negative fixtures refuses an oracle that omits one of the four mutation controls",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 20,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "manifest validator negative fixtures"
+          ],
+          "title": "refuses a case that has no RS-1 mark (the zero must be written, not omitted)",
+          "fullName": "manifest validator negative fixtures refuses a case that has no RS-1 mark (the zero must be written, not omitted)",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 21,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "manifest validator negative fixtures"
+          ],
+          "title": "refuses an RS-1 mark that contradicts its value locations",
+          "fullName": "manifest validator negative fixtures refuses an RS-1 mark that contradicts its value locations",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 22,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "manifest validator negative fixtures"
+          ],
+          "title": "refuses a ported case whose fidelity record has anything invented, or claims a comparison",
+          "fullName": "manifest validator negative fixtures refuses a ported case whose fidelity record has anything invented, or claims a comparison",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 23,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "manifest validator negative fixtures"
+          ],
+          "title": "refuses a manifest whose comparison claim is not NONE_NO_COMPARISON_TO_20261004",
+          "fullName": "manifest validator negative fixtures refuses a manifest whose comparison claim is not NONE_NO_COMPARISON_TO_20261004",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 24,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "manifest validator negative fixtures"
+          ],
+          "title": "refuses fewer than 20 workflows, a duplicate id and a repetition count other than 3",
+          "fullName": "manifest validator negative fixtures refuses fewer than 20 workflows, a duplicate id and a repetition count other than 3",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 25,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "manifest validator negative fixtures"
+          ],
+          "title": "refuses gate arithmetic that is not computed from the classes",
+          "fullName": "manifest validator negative fixtures refuses gate arithmetic that is not computed from the classes",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 26,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "manifest validator negative fixtures"
+          ],
+          "title": "refuses an edit made after the freeze (digest mismatch) and a digest without a freeze",
+          "fullName": "manifest validator negative fixtures refuses an edit made after the freeze (digest mismatch) and a digest without a freeze",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 27,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "manifest validator negative fixtures"
+          ],
+          "title": "refuses a tampered page, step text or expected outcome (pinned sha256 differs from the file)",
+          "fullName": "manifest validator negative fixtures refuses a tampered page, step text or expected outcome (pinned sha256 differs from the file)",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 28,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "manifest validator negative fixtures"
+          ],
+          "title": "refuses a class F or N case whose oracle does not expect no side effect",
+          "fullName": "manifest validator negative fixtures refuses a class F or N case whose oracle does not expect no side effect",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 29,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "manifest validator negative fixtures"
+          ],
+          "title": "refuses an externally blocked case that names no owner",
+          "fullName": "manifest validator negative fixtures refuses an externally blocked case that names no owner",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 30,
+          "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+          "ancestorTitles": [
+            "manifest validator negative fixtures"
+          ],
+          "title": "leaves the committed manifest file untouched by these fixtures",
+          "fullName": "manifest validator negative fixtures leaves the committed manifest file untouched by these fixtures",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        }
+      ]
+    },
+    {
+      "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+      "originalRealCases": 15,
+      "addedPredictedCases": 6,
+      "expectedGreenCases": 21,
+      "cases": [
+        {
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "group5: pure two-session and missing-charge controls"
+          ],
+          "title": "sums base10/100/20 plus suffix3/40/5 and charges each real learn once in order",
+          "fullName": "group5: pure two-session and missing-charge controls sums base10/100/20 plus suffix3/40/5 and charges each real learn once in order",
+          "origin": "EXPLICIT_NEW_PREDICTED_CASE",
+          "order": 1,
+          "status": "passed"
+        },
+        {
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "group5: pure two-session and missing-charge controls"
+          ],
+          "title": "starts no suffix after 'budget', retaining one truthful partial session without a fabricated false pass",
+          "fullName": "group5: pure two-session and missing-charge controls starts no suffix after 'budget', retaining one truthful partial session without a fabricated false pass",
+          "origin": "EXPLICIT_NEW_PREDICTED_CASE",
+          "order": 2,
+          "status": "passed"
+        },
+        {
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "group5: pure two-session and missing-charge controls"
+          ],
+          "title": "starts no suffix after 'failed base', retaining one truthful partial session without a fabricated false pass",
+          "fullName": "group5: pure two-session and missing-charge controls starts no suffix after 'failed base', retaining one truthful partial session without a fabricated false pass",
+          "origin": "EXPLICIT_NEW_PREDICTED_CASE",
+          "order": 3,
+          "status": "passed"
+        },
+        {
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "group5: pure two-session and missing-charge controls"
+          ],
+          "title": "starts no suffix after 'base leak', retaining one truthful partial session without a fabricated false pass",
+          "fullName": "group5: pure two-session and missing-charge controls starts no suffix after 'base leak', retaining one truthful partial session without a fabricated false pass",
+          "origin": "EXPLICIT_NEW_PREDICTED_CASE",
+          "order": 4,
+          "status": "passed"
+        },
+        {
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "group5: pure two-session and missing-charge controls"
+          ],
+          "title": "keeps missing base/suffix counters, unknown histories and empty populations incomplete",
+          "fullName": "group5: pure two-session and missing-charge controls keeps missing base/suffix counters, unknown histories and empty populations incomplete",
+          "origin": "EXPLICIT_NEW_PREDICTED_CASE",
+          "order": 5,
+          "status": "passed"
+        },
+        {
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "group5: pure two-session and missing-charge controls"
+          ],
+          "title": "latches a late update leak after the base charge without a suffix or a second charge",
+          "fullName": "group5: pure two-session and missing-charge controls latches a late update leak after the base charge without a suffix or a second charge",
+          "origin": "EXPLICIT_NEW_PREDICTED_CASE",
+          "order": 6,
+          "status": "passed"
+        },
+        {
+          "order": 7,
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST)"
+          ],
+          "title": "runs class P cases three times each, finalizes exactly once per completed session, and scores them correct",
+          "fullName": "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST) runs class P cases three times each, finalizes exactly once per completed session, and scores them correct",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 8,
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST)"
+          ],
+          "title": "stamps every run after the manifest freeze, with the frozen digest and the three accounting fields as 0",
+          "fullName": "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST) stamps every run after the manifest freeze, with the frozen digest and the three accounting fields as 0",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 9,
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST)"
+          ],
+          "title": "scores a mutated system as incorrect and a false success when it claims SUCCEEDED (wrong target on C04)",
+          "fullName": "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST) scores a mutated system as incorrect and a false success when it claims SUCCEEDED (wrong target on C04)",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 10,
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST)"
+          ],
+          "title": "rejects the droppedSubmit defect on C06 through the receipts, not through the system's own PASSED",
+          "fullName": "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST) rejects the droppedSubmit defect on C06 through the receipts, not through the system's own PASSED",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 11,
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST)"
+          ],
+          "title": "rejects the literalSubstitution defect on C06 through the receipts, not through the system's own PASSED",
+          "fullName": "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST) rejects the literalSubstitution defect on C06 through the receipts, not through the system's own PASSED",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 12,
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST)"
+          ],
+          "title": "class F: an honest FAILED at step 2 is correct; the same page scored against a system that PASSES is a false pass",
+          "fullName": "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST) class F: an honest FAILED at step 2 is correct; the same page scored against a system that PASSES is a false pass",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 13,
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST)"
+          ],
+          "title": "class N with a clarification: counts it, never answers it (the case script names no choice), cancels, and scores the refusal correct",
+          "fullName": "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST) class N with a clarification: counts it, never answers it (the case script names no choice), cancels, and scores the refusal correct",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 14,
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST)"
+          ],
+          "title": "class N: a system that acts on the Delete button despite the negation is a false pass even when the session then fails",
+          "fullName": "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST) class N: a system that acts on the Delete button despite the negation is a false pass even when the session then fails",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 15,
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST)"
+          ],
+          "title": "login with a secretRef on the existing secret-login fixture: the receipt carries accepted only, never the password",
+          "fullName": "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST) login with a secretRef on the existing secret-login fixture: the receipt carries accepted only, never the password",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 16,
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST)"
+          ],
+          "title": "AC-10 local half: a secret echoed in any API response is a leak, counted per run, without the run record carrying the secret",
+          "fullName": "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST) AC-10 local half: a secret echoed in any API response is a leak, counted per run, without the run record carrying the secret",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 17,
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST)"
+          ],
+          "title": "scans operator-supplied text outputs (logs, SSE, audit) through the extraTexts hook",
+          "fullName": "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST) scans operator-supplied text outputs (logs, SSE, audit) through the extraTexts hook",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 18,
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST)"
+          ],
+          "title": "dataflow protocol on the existing guided-dataflow fixture: one submit, finalize adds none, two replays one each",
+          "fullName": "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST) dataflow protocol on the existing guided-dataflow fixture: one submit, finalize adds none, two replays one each",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 19,
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST)"
+          ],
+          "title": "incremental edit of step 4: base learned and published, source value changed, steps 4..10 learned, 1..3 reused, finalize adds no model call",
+          "fullName": "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST) incremental edit of step 4: base learned and published, source value changed, steps 4..10 learned, 1..3 reused, finalize adds no model call",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 20,
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST)"
+          ],
+          "title": "incremental: a system that relearns the prefix is scored incorrect",
+          "fullName": "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST) incremental: a system that relearns the prefix is scored incorrect",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 21,
+          "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+          "ancestorTitles": [
+            "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST)"
+          ],
+          "title": "skips the two externally blocked cases and says so in the ledger instead of faking a run",
+          "fullName": "harness self-test: the driver and the oracle against the real fixture hosts (HARNESS_SELF_TEST) skips the two externally blocked cases and says so in the ledger instead of faking a run",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        }
+      ]
+    },
+    {
+      "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+      "originalRealCases": 22,
+      "addedPredictedCases": 1,
+      "expectedGreenCases": 23,
+      "cases": [
+        {
+          "order": 1,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "computeAdmission"
+          ],
+          "title": "derives sessions from the manifest and the token caps from the proposal plan, not from sessions x session totals",
+          "fullName": "computeAdmission derives sessions from the manifest and the token caps from the proposal plan, not from sessions x session totals",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 2,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "computeAdmission"
+          ],
+          "title": "takes an explicit input cap instead of a per-call assumption, and refuses a plan that names neither or both",
+          "fullName": "computeAdmission takes an explicit input cap instead of a per-call assumption, and refuses a plan that names neither or both",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 3,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "computeAdmission"
+          ],
+          "title": "reads ADMISSION_REFUSED_PRICE_UNKNOWN when the price is unknown, whatever the headroom",
+          "fullName": "computeAdmission reads ADMISSION_REFUSED_PRICE_UNKNOWN when the price is unknown, whatever the headroom",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 4,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "computeAdmission"
+          ],
+          "title": "reads ADMISSION_REFUSED_HEADROOM_UNKNOWN when only the headroom is unknown",
+          "fullName": "computeAdmission reads ADMISSION_REFUSED_HEADROOM_UNKNOWN when only the headroom is unknown",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 5,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "computeAdmission"
+          ],
+          "title": "refuses a cost bound above the allocation, an allocation above the headroom, and one above the 500 ceiling",
+          "fullName": "computeAdmission refuses a cost bound above the allocation, an allocation above the headroom, and one above the 500 ceiling",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 6,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "computeAdmission"
+          ],
+          "title": "admits only a complete, in-bounds record, and then names the stop threshold at 80 percent of the allocation",
+          "fullName": "computeAdmission admits only a complete, in-bounds record, and then names the stop threshold at 80 percent of the allocation",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 7,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "computeAdmission"
+          ],
+          "title": "never converts the 2026-10-04 call count into dollars and states the unknowns",
+          "fullName": "computeAdmission never converts the 2026-10-04 call count into dollars and states the unknowns",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 8,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "append-only ledger"
+          ],
+          "title": "appends dated decisions with a digest chain and refuses a rewritten earlier entry",
+          "fullName": "append-only ledger appends dated decisions with a digest chain and refuses a rewritten earlier entry",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 9,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "append-only ledger"
+          ],
+          "title": "refuses to create a ledger implicitly and refuses a decision dated before the previous one",
+          "fullName": "append-only ledger refuses to create a ledger implicitly and refuses a decision dated before the previous one",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 10,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "start guard and the counting stub"
+          ],
+          "title": "refuses with no ledger entry, a refused entry, another manifest, another purpose and a future admission",
+          "fullName": "start guard and the counting stub refuses with no ledger entry, a refused entry, another manifest, another purpose and a future admission",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 11,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "start guard and the counting stub"
+          ],
+          "title": "with the price unknown a D_C run makes zero provider calls and stops before the first session",
+          "fullName": "start guard and the counting stub with the price unknown a D_C run makes zero provider calls and stops before the first session",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 12,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "start guard and the counting stub"
+          ],
+          "title": "with the headroom unknown a D_C run makes zero provider calls",
+          "fullName": "start guard and the counting stub with the headroom unknown a D_C run makes zero provider calls",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 13,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "start guard and the counting stub"
+          ],
+          "title": "refuses a D_C run with no ledger at all, and refuses a narrowed D_C run",
+          "fullName": "start guard and the counting stub refuses a D_C run with no ledger at all, and refuses a narrowed D_C run",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 14,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "start guard and the counting stub"
+          ],
+          "title": "refuses a frozen-manifest digest that differs from the admitted one",
+          "fullName": "start guard and the counting stub refuses a frozen-manifest digest that differs from the admitted one",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 15,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "stop rule (80 percent of the allocation, or the first hard-gate hit)"
+          ],
+          "title": "lets the session that crosses 80 percent finish and never starts the next one",
+          "fullName": "stop rule (80 percent of the allocation, or the first hard-gate hit) lets the session that crosses 80 percent finish and never starts the next one",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 16,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "stop rule (80 percent of the allocation, or the first hard-gate hit)"
+          ],
+          "title": "stops at the first false pass or leak",
+          "fullName": "stop rule (80 percent of the allocation, or the first hard-gate hit) stops at the first false pass or leak",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 17,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "stop rule (80 percent of the allocation, or the first hard-gate hit)"
+          ],
+          "title": "charges the reserved ceiling when a session reports no usage (conservative)",
+          "fullName": "stop rule (80 percent of the allocation, or the first hard-gate hit) charges the reserved ceiling when a session reports no usage (conservative)",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 18,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "stop rule (80 percent of the allocation, or the first hard-gate hit)"
+          ],
+          "title": "charges what the session recorded as reserved (proposals x per-call ceilings, capped at the session totals) before the session totals",
+          "fullName": "stop rule (80 percent of the allocation, or the first hard-gate hit) charges what the session recorded as reserved (proposals x per-call ceilings, capped at the session totals) before the session totals",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 19,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "stop rule (80 percent of the allocation, or the first hard-gate hit)"
+          ],
+          "title": "resuming needs a new dated ledger entry: a STOPPED latest entry keeps the guard shut",
+          "fullName": "stop rule (80 percent of the allocation, or the first hard-gate hit) resuming needs a new dated ledger entry: a STOPPED latest entry keeps the guard shut",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 20,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "B7 proposal measurement (a local fixture run can refute, never confirm)"
+          ],
+          "title": "reproduces the B7 reading at the earlier totals: a 10-step learn needing 13 proposals refutes 7 at a 2048 fixture ceiling",
+          "fullName": "B7 proposal measurement (a local fixture run can refute, never confirm) reproduces the B7 reading at the earlier totals: a 10-step learn needing 13 proposals refutes 7 at a 2048 fixture ceiling",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 21,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "B7 proposal measurement (a local fixture run can refute, never confirm)"
+          ],
+          "title": "at the production defaults 13 proposals fit (24 is the floor) and 25 refute it",
+          "fullName": "B7 proposal measurement (a local fixture run can refute, never confirm) at the production defaults 13 proposals fit (24 is the floor) and 25 refute it",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "order": 22,
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "B7 proposal measurement (a local fixture run can refute, never confirm)"
+          ],
+          "title": "does not confirm anything when the fixture needs the floor or fewer",
+          "fullName": "B7 proposal measurement (a local fixture run can refute, never confirm) does not confirm anything when the fixture needs the floor or fewer",
+          "status": "passed",
+          "origin": "ORIGINAL_EXECUTED_CASE"
+        },
+        {
+          "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+          "ancestorTitles": [
+            "group5: later hard facts share the existing protective stop latch"
+          ],
+          "title": "retains a budget stop plus a later hard fact without charging a session twice",
+          "fullName": "group5: later hard facts share the existing protective stop latch retains a budget stop plus a later hard fact without charging a session twice",
+          "origin": "EXPLICIT_NEW_PREDICTED_CASE",
+          "order": 23,
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "expectedRed": {
+    "selectedCases": 8,
+    "passed": 0,
+    "intendedAssertionFailures": 8,
+    "errors": 0,
+    "intentionalNameFilterOmissions": 97,
+    "selected": [
+      {
+        "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+        "ancestorTitles": [
+          "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+        ],
+        "title": "group1: an unreviewed generic budget failure is UNKNOWN rather than an observed zero",
+        "fullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group1: an unreviewed generic budget failure is UNKNOWN rather than an observed zero",
+        "group": 1,
+        "expectedStatus": "failed",
+        "definingOldSemanticFailure": "PARTIAL versus INVALID"
+      },
+      {
+        "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+        "ancestorTitles": [
+          "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+        ],
+        "title": "group2: 'rs1NonScalarReadGaps' binds real event references and preserves a failed class-P run",
+        "fullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group2: 'rs1NonScalarReadGaps' binds real event references and preserves a failed class-P run",
+        "group": 2,
+        "expectedStatus": "failed",
+        "definingOldSemanticFailure": "validator lacks RUN_CAUSE_EVENT_rs1NonScalarReadGaps"
+      },
+      {
+        "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+        "ancestorTitles": [
+          "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+        ],
+        "title": "group3: final-P, credited-all and every supplied attempt have separate cause denominators",
+        "fullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group3: final-P, credited-all and every supplied attempt have separate cause denominators",
+        "group": 3,
+        "expectedStatus": "failed",
+        "definingOldSemanticFailure": "one final-only item versus two supplied-attempt items"
+      },
+      {
+        "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+        "ancestorTitles": [
+          "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+        ],
+        "title": "group6: immutable originals defeat hard-fact laundering and the offline branch writes fresh files without a client",
+        "fullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group6: immutable originals defeat hard-fact laundering and the offline branch writes fresh files without a client",
+        "group": 6,
+        "expectedStatus": "failed",
+        "definingOldSemanticFailure": "falsePasses0 versus preserved original1 before any offline CLI operation"
+      },
+      {
+        "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+        "ancestorTitles": [
+          "inspection scope and source pins: groups 4 and 6"
+        ],
+        "title": "group4: explicitly blocked staging UNKNOWN is valid and never a known local zero",
+        "fullName": "inspection scope and source pins: groups 4 and 6 group4: explicitly blocked staging UNKNOWN is valid and never a known local zero",
+        "group": 4,
+        "expectedStatus": "failed",
+        "definingOldSemanticFailure": "RS1_MARK_MISSING incorrectly rejects valid blocked null"
+      },
+      {
+        "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+        "ancestorTitles": [
+          "group5: pure two-session and missing-charge controls"
+        ],
+        "title": "sums base10/100/20 plus suffix3/40/5 and charges each real learn once in order",
+        "fullName": "group5: pure two-session and missing-charge controls sums base10/100/20 plus suffix3/40/5 and charges each real learn once in order",
+        "group": 5,
+        "expectedStatus": "failed",
+        "definingOldSemanticFailure": "suffix-only proposals3 versus required13"
+      },
+      {
+        "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+        "ancestorTitles": [
+          "group5: pure two-session and missing-charge controls"
+        ],
+        "title": "starts no suffix after 'budget', retaining one truthful partial session without a fabricated false pass",
+        "fullName": "group5: pure two-session and missing-charge controls starts no suffix after 'budget', retaining one truthful partial session without a fabricated false pass",
+        "group": 5,
+        "expectedStatus": "failed",
+        "definingOldSemanticFailure": "two starts versus required one after base80percent crossing"
+      },
+      {
+        "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+        "ancestorTitles": [
+          "group5: later hard facts share the existing protective stop latch"
+        ],
+        "title": "retains a budget stop plus a later hard fact without charging a session twice",
+        "fullName": "group5: later hard facts share the existing protective stop latch retains a budget stop plus a later hard fact without charging a session twice",
+        "group": 5,
+        "expectedStatus": "failed",
+        "definingOldSemanticFailure": "STOPPED_BUDGET_80 versus STOPPED_HARD_GATE after optional call; no missing-method error"
+      }
+    ],
+    "testNamePattern": "^(?:reviewed\\ cause\\ accounting:\\ groups\\ 1,\\ 2,\\ 3\\ and\\ 6\\ \\(synthetic\\ inputs\\ only\\)\\ group1:\\ an\\ unreviewed\\ generic\\ budget\\ failure\\ is\\ UNKNOWN\\ rather\\ than\\ an\\ observed\\ zero|reviewed\\ cause\\ accounting:\\ groups\\ 1,\\ 2,\\ 3\\ and\\ 6\\ \\(synthetic\\ inputs\\ only\\)\\ group2:\\ 'rs1NonScalarReadGaps'\\ binds\\ real\\ event\\ references\\ and\\ preserves\\ a\\ failed\\ class\\-P\\ run|reviewed\\ cause\\ accounting:\\ groups\\ 1,\\ 2,\\ 3\\ and\\ 6\\ \\(synthetic\\ inputs\\ only\\)\\ group3:\\ final\\-P,\\ credited\\-all\\ and\\ every\\ supplied\\ attempt\\ have\\ separate\\ cause\\ denominators|reviewed\\ cause\\ accounting:\\ groups\\ 1,\\ 2,\\ 3\\ and\\ 6\\ \\(synthetic\\ inputs\\ only\\)\\ group6:\\ immutable\\ originals\\ defeat\\ hard\\-fact\\ laundering\\ and\\ the\\ offline\\ branch\\ writes\\ fresh\\ files\\ without\\ a\\ client|inspection\\ scope\\ and\\ source\\ pins:\\ groups\\ 4\\ and\\ 6\\ group4:\\ explicitly\\ blocked\\ staging\\ UNKNOWN\\ is\\ valid\\ and\\ never\\ a\\ known\\ local\\ zero|group5:\\ pure\\ two\\-session\\ and\\ missing\\-charge\\ controls\\ sums\\ base10/100/20\\ plus\\ suffix3/40/5\\ and\\ charges\\ each\\ real\\ learn\\ once\\ in\\ order|group5:\\ pure\\ two\\-session\\ and\\ missing\\-charge\\ controls\\ starts\\ no\\ suffix\\ after\\ 'budget',\\ retaining\\ one\\ truthful\\ partial\\ session\\ without\\ a\\ fabricated\\ false\\ pass|group5:\\ later\\ hard\\ facts\\ share\\ the\\ existing\\ protective\\ stop\\ latch\\ retains\\ a\\ budget\\ stop\\ plus\\ a\\ later\\ hard\\ fact\\ without\\ charging\\ a\\ session\\ twice)$"
+  },
+  "reconciliation": "Exact per-file file/ancestor/title/fullName/status/order records and Counter; preserve original subsequence/order. Cross-file scheduling is not assumed. Vitest suite-group counts are not physical file counts. Table strings use single-quote rendering confirmed by the original c12 actual report; renderer mismatch requires explicit diagnosis, never a passing proof claim. No assertions or oracle loosened to get RED.",
+  "revision": "v2_BR-C2-01_samecaseextended_zero_newcase_names",
+  "caseForecastChanged": false,
+  "existingExtendedCase": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group6: later admission cannot retroactively authorize original execution or promote a self-test",
+  "v1C2DeltaRedOptionalFutureProposal": {
+    "selectedCases": 1,
+    "intendedSemanticFailures": 1,
+    "filterOmissions": 104,
+    "firstFailure": "boundIndependentAdoption true versus false at first final-run STOP variant; new fields are not first failure",
+    "notPartOfOriginal8OldC12Red": "Originalc12 lacks review schema; never count missing-schema/positivefixture setup as C2RED",
+    "execution": "UNEXECUTED; independentdeltaQA+newrootGO and safe outputroute required"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "rootProgramReadReleased": true,
+  "executionAuthority": true,
+  "operation": "membership",
+  "manifestRef": {
+    "path": "studio-runner/evaluation/observed-authoring/manifest.json",
+    "sha256": "6bc320ac60eebb2dda423ab8e44e66462a5765877991f9bc9000e46d940a9b7b",
+    "bytes": 79287
+  },
+  "sourceCatalogueRef": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-actual-adoption47/after-source.json",
+    "sha256": "1891d705e280e2178616ae8e7400decdd57496dfd28f99d4ea0c779b652239ff",
+    "bytes": 360050
+  },
+  "fullCatalogueRef": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-actual-adoption47/after-full-inputs.json",
+    "sha256": "b3d9b75da96e8316c50e938ea094b06fef5cd894c82861345ed27945b78f8ac5",
+    "bytes": 5740238
+  },
+  "importedCodeRefs": [
+    {
+      "path": "studio-runner/evaluation/cli.mjs",
+      "sha256": "8a119c26eb16ed19cd5f1a5a46ed07a9d13eeb2f6e2a951dd2dc3d854795bcad",
+      "bytes": 15633
+    },
+    {
+      "path": "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+      "sha256": "b9c95ddcee770fe1b88ea56587627f7bb5c6dc461c9687df08229a786244a518",
+      "bytes": 125913
+    },
+    {
+      "path": "studio-runner/evaluation/oracle.mjs",
+      "sha256": "7ad08d2bc19b84dd17cb2cac2d9edb57bb1e86a38b360f401f6a13da7b2de233",
+      "bytes": 6174
+    },
+    {
+      "path": "studio-runner/evaluation/report.mjs",
+      "sha256": "70d41a8fb146d23b2fedd566a762dd115db23dbe8d45b59ce0e14de5197b84c0",
+      "bytes": 18338
+    },
+    {
+      "path": "studio-runner/evaluation/observed-authoring/pages/server.mjs",
+      "sha256": "81d1673989f20ba236b5fb6a774ba33da87192983dd87956157227e1b3936d30",
+      "bytes": 7273
+    }
+  ],
+  "authorizeFiniteMemberMetadataChecks": true,
+  "membershipOutput": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-execution06/lint-successor48/declared-io-membership.private.json",
+  "actualSourceAdoptionReceipt": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-actual-adoption47/receipt.json",
+    "sha256": "9d0c2a99c7f464e873054cb9113f71186a38fbde8aa6093b91799725f114ed5c",
+    "bytes": 11483
+  },
+  "rootSoleActualWriterWindow": true,
+  "pinPayloadReadsAuthorized": false,
+  "modelPrivateBodyDisclosureAuthorized": false
+}

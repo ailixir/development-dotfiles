@@ -1,0 +1,30 @@
+{
+  "verdict": "NOT_READY",
+  "scope": "Independent source-only review; not formal story QA or runtime admission",
+  "candidateManifestSha256": "f408307cb9ed73cdf901a4f6c94dd1fce7eda38675e5ce2217369d377b895ab4",
+  "findings": [
+    {
+      "id": "BR-C2-01",
+      "priority": "P1",
+      "title": "Single-history adoption does not check admission changes inside the final included run interval",
+      "source": "green/studio-runner/evaluation/observed-authoring/evaluate.mjs",
+      "lines": [
+        506,
+        507,
+        510,
+        522,
+        523,
+        524
+      ],
+      "relatedSource": "green/studio-runner/evaluation/cli.mjs:159-180",
+      "requirement": "Exact delegated task: admission effective at original execution AND relevant per-run interval; intervening same-purpose STOP/refusal/changed admission must prevent single-history adoption. C2 addendum supplies the original-time provenance boundary.",
+      "counterexample": "Use the existing fully bound group6 synthetic original/review/adoption composition. Let admission1 precede execution start and every raw run start. Append a valid hash-chained same-purpose STOPPED_HARD_GATE entry with decidedAt after the last included runStartedAt but before that runFinishedAt, keeping admission1 as the receipt admission and resealing the ledger/execution/adoption references. Every effectiveAdmission lookup receives a time before the STOP; all identities, hashes, timestamps, review and cause coverage can remain valid. originalAdmissionVerified and boundIndependentAdoption can therefore stay true, although the original included interval contains the STOP. Replace STOP with a same-purpose refusal or changed admission for the same structural gap. This is a source-derived reachable counterexample, NOT an executed result.",
+      "impact": "The offline report can label the original history BOUND_INDEPENDENT_QA_ADOPTION despite the task-required original-time interval not being established. Existing group6 intervening tests put the change after execution start but before run starts; they do not cover the last-start/finish interval.",
+      "minimalCorrection": "In the existing original-time reconstruction, qualify the relevant included execution/run interval against the actual bound original admission history, rather than only sampling start instants. Reject or explicitly retain UNKNOWN/non-adoptable when that history does not establish the required interval or a same-purpose STOP/refusal/changed admission intervenes. The live CLI currently captures ledgerText before execution and writes that same start snapshot after execution, so that snapshot alone must not be presented as proving an otherwise unobserved later interval; preserve it, and bind existing authoritative interval evidence or retain UNKNOWN. No new admission service, limits identity, producer recovery or generic framework is needed.",
+      "minimalControl": "Extend the existing group6 admission control with one coherently bound STOP inside the final run start/finish interval, asserting non-adoption/INVALID while original hard facts and attempts remain intact. Keep the existing legitimate and before-start controls. Source-review the bounded correction before the already proposed private proof."
+    }
+  ],
+  "execution": "NONE",
+  "actualSourceChange": false,
+  "nativeProviderOrLifecycleGo": false
+}

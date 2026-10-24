@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 3,
+  "session": {
+    "schemaVersion": 3,
+    "sessionId": "3c11022e-5e32-4bbf-a419-12e2cf6debbc",
+    "testId": "91f9e0c4-83ab-4f0f-b11f-8ad95d903bd2",
+    "state": "SUCCEEDED",
+    "expiresAt": "2026-10-21T19:53:59.765580Z",
+    "counters": {
+      "actions": 3,
+      "observations": 5,
+      "modelProposals": 4,
+      "modelInputTokens": 62238,
+      "modelOutputTokens": 16384,
+      "sanitizedEvidenceBytes": 7809
+    },
+    "progress": {
+      "stepCount": 3,
+      "activeStep": null
+    }
+  },
+  "result": {
+    "schemaVersion": 3,
+    "sessionId": "3c11022e-5e32-4bbf-a419-12e2cf6debbc",
+    "executionId": "3c11022e-5e32-4bbf-a419-12e2cf6debbc",
+    "scopeHash": "0d34116e371660d7c67bd2290aaf628d602b66759e647fc2ffa7d273be29fabb",
+    "mode": "guided",
+    "outcome": "SUCCEEDED",
+    "learnedFromThisRun": true,
+    "replayVerified": false,
+    "scheduleActivated": false,
+    "assertionsPassed": true,
+    "relearnedFrom": null,
+    "actionTimings": [],
+    "evidence": {
+      "kind": "guidedLedger",
+      "ref": "3c11022e-5e32-4bbf-a419-12e2cf6debbc",
+      "video": {
+        "status": "PROCESSING",
+        "error": null,
+        "expiresAt": null,
+        "partial": false
+      }
+    },
+    "progress": {
+      "stepCount": 3,
+      "activeStep": null
+    },
+    "explanation": {
+      "sessionId": "3c11022e-5e32-4bbf-a419-12e2cf6debbc",
+      "sourceRevision": "2",
+      "configurationRevision": "1",
+      "steps": [
+        {
+          "stepId": "6a3e5927-230d-4aeb-9a6a-5e472a0528da",
+          "number": 1,
+          "completed": true,
+          "learnedFromThisRun": true,
+          "reusedFrom": null,
+          "relearnedAfterDrift": false,
+          "actions": [
+            {
+              "admissionId": "9638de2d-b311-4dda-b9bc-fe7ccdd0a8cf",
+              "ordinal": 0,
+              "attemptOrdinal": 0,
+              "operationKind": "navigate",
+              "safeLabel": "Open page",
+              "outcome": "SUCCEEDED",
+              "referenceIds": [
+                "16ddc60f-cbcb-4b49-b9a0-6a8b7e6d6b86"
+              ]
+            }
+          ]
+        },
+        {
+          "stepId": "e0e22954-2b38-418c-afb2-54b96ddf9af7",
+          "number": 2,
+          "completed": true,
+          "learnedFromThisRun": true,
+          "reusedFrom": null,
+          "relearnedAfterDrift": false,
+          "actions": [
+            {
+              "admissionId": "b346e0d5-4eb5-47d3-a543-19a8b6b24cfe",
+              "ordinal": 0,
+              "attemptOrdinal": 0,
+              "operationKind": "click",
+              "safeLabel": "Click control",
+              "outcome": "SUCCEEDED",
+              "referenceIds": []
+            }
+          ]
+        },
+        {
+          "stepId": "c1f7f2aa-7488-4b7f-8f0d-dad1770d617e",
+          "number": 3,
+          "completed": true,
+          "learnedFromThisRun": true,
+          "reusedFrom": null,
+          "relearnedAfterDrift": false,
+          "actions": [
+            {
+              "admissionId": "890f7145-f8f5-4d1a-80cb-fa3c5f906e8d",
+              "ordinal": 0,
+              "attemptOrdinal": 0,
+              "operationKind": "assert",
+              "safeLabel": "Check expected result",
+              "outcome": "SUCCEEDED",
+              "referenceIds": []
+            }
+          ]
+        }
+      ],
+      "referenceFlows": []
+    },
+    "errorCode": null,
+    "publication": {
+      "status": "PUBLISHED",
+      "receipt": {
+        "sessionId": "3c11022e-5e32-4bbf-a419-12e2cf6debbc",
+        "revisionId": "d6aa753f-980b-45de-b5ac-5db5b068e622",
+        "publishedAt": "2026-10-21T19:44:23.359Z",
+        "artifactHash": "eaffc41211d980496da157155dabdd6358df61a8fe007e1c3e88c2137b1d8a88",
+        "relearnedFrom": null,
+        "schemaVersion": 3,
+        "replayVerified": false,
+        "revisionDigest": "0faf6f2f9080eb5cc99c7528258d3ea3082da9fe3f575edf5d0d13b85ee2d15f",
+        "learnedPlanHash": "d319ca52d61c89fa89d187dad2e570bb1acd89e8107573dd7c6e9ec6f0398793",
+        "learnedFromThisRun": true,
+        "publicationEvidenceHash": "afd0d676cdc9953ea0e55b7cd7ee14ef498b4fae452e37279d1677a6dbf4d2ab"
+      }
+    },
+    "currentReadiness": {
+      "revisionId": "d6aa753f-980b-45de-b5ac-5db5b068e622",
+      "ready": true,
+      "code": "READY"
+    }
+  }
+}

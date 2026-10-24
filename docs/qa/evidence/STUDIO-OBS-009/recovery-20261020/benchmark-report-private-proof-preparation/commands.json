@@ -1,0 +1,471 @@
+{
+  "kind": "FUTURE_EXACT_ARGV_NOT_EXECUTION_PERMISSION",
+  "sequence": [
+    {
+      "id": "types-green01",
+      "optionalRootDecision": false,
+      "composition": "green",
+      "label": "obs009-recovery-20261020-benchmark-report-proof01-types-green01",
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "environment": {
+        "prependPATH": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+        "STUDIO_EVAL_API_TOKEN": "UNSET/empty; no livebenchmark commands"
+      },
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-benchmark-report-proof01-types-green01",
+        "pnpm",
+        "--dir=/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner/node_modules/typescript/bin/tsc",
+        "-p",
+        "tsconfig.json",
+        "--noEmit"
+      ],
+      "outerTimeoutSeconds": 120,
+      "expectedRawCollectorAndChildExit": 0,
+      "expected": null,
+      "externalOriginalOutputs": {
+        "directory": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution",
+        "paths": [
+          "obs009-recovery-20261020-benchmark-report-proof01-types-green01-before.json",
+          "obs009-recovery-20261020-benchmark-report-proof01-types-green01-after.json",
+          "obs009-recovery-20261020-benchmark-report-proof01-types-green01.log",
+          "obs009-recovery-20261020-benchmark-report-proof01-types-green01-results.json"
+        ]
+      },
+      "observer": "unmodifiedexistingcollector, noexclusions/collectorcopy/customobserver",
+      "status": "UNEXECUTED_REQUIRES_NEW_ROOT_GO"
+    },
+    {
+      "id": "lint-green01",
+      "optionalRootDecision": false,
+      "composition": "green",
+      "label": "obs009-recovery-20261020-benchmark-report-proof01-lint-green01",
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "environment": {
+        "prependPATH": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+        "STUDIO_EVAL_API_TOKEN": "UNSET/empty; no livebenchmark commands"
+      },
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-benchmark-report-proof01-lint-green01",
+        "pnpm",
+        "--dir=/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner/node_modules/eslint/bin/eslint.js",
+        "evaluation/observed-authoring/evaluate.mjs",
+        "evaluation/observed-authoring/evaluate.d.mts",
+        "evaluation/cli.mjs",
+        "test/evaluation/benchmarkScoring.test.ts",
+        "test/evaluation/corpusManifest.test.ts",
+        "test/evaluation/harnessSelfTest.test.ts",
+        "test/evaluation/budgetAdmission.test.ts",
+        "test/evaluation/observedCorpus.ts"
+      ],
+      "outerTimeoutSeconds": 120,
+      "expectedRawCollectorAndChildExit": 0,
+      "expected": null,
+      "externalOriginalOutputs": {
+        "directory": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution",
+        "paths": [
+          "obs009-recovery-20261020-benchmark-report-proof01-lint-green01-before.json",
+          "obs009-recovery-20261020-benchmark-report-proof01-lint-green01-after.json",
+          "obs009-recovery-20261020-benchmark-report-proof01-lint-green01.log",
+          "obs009-recovery-20261020-benchmark-report-proof01-lint-green01-results.json"
+        ]
+      },
+      "observer": "unmodifiedexistingcollector, noexclusions/collectorcopy/customobserver",
+      "status": "UNEXECUTED_REQUIRES_NEW_ROOT_GO"
+    },
+    {
+      "id": "v1-c2-red01",
+      "optionalRootDecision": true,
+      "composition": "v1-delta-red",
+      "label": "obs009-recovery-20261020-benchmark-report-proof01-v1-c2-red01",
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "environment": {
+        "prependPATH": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+        "STUDIO_EVAL_API_TOKEN": "UNSET/empty; no livebenchmark commands"
+      },
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-benchmark-report-proof01-v1-c2-red01",
+        "pnpm",
+        "--dir=/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "test/evaluation/benchmarkScoring.test.ts",
+        "test/evaluation/corpusManifest.test.ts",
+        "test/evaluation/harnessSelfTest.test.ts",
+        "test/evaluation/budgetAdmission.test.ts",
+        "--coverage.enabled=false",
+        "--minWorkers=1",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "--testTimeout=5000",
+        "--hookTimeout=5000",
+        "--testNamePattern",
+        "^(?:reviewed\\ cause\\ accounting:\\ groups\\ 1,\\ 2,\\ 3\\ and\\ 6\\ \\(synthetic\\ inputs\\ only\\)\\ group6:\\ later\\ admission\\ cannot\\ retroactively\\ authorize\\ original\\ execution\\ or\\ promote\\ a\\ self\\-test)$"
+      ],
+      "outerTimeoutSeconds": 120,
+      "expectedRawCollectorAndChildExit": 1,
+      "expected": {
+        "selected": 1,
+        "intendedAssertionFailures": 1,
+        "passed": 0,
+        "errors": 0,
+        "intentionalNameFilterOmissions": 104,
+        "firstFailure": "first final-run STOP variant: boundIndependentAdoption receivedtrue expectedfalse; legitimateBOUND/PARTIAL and priorstartcontrols pass first",
+        "absentAPIOrSchemaFailureNotRed": true
+      },
+      "externalOriginalOutputs": {
+        "directory": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution",
+        "paths": [
+          "obs009-recovery-20261020-benchmark-report-proof01-v1-c2-red01-before.json",
+          "obs009-recovery-20261020-benchmark-report-proof01-v1-c2-red01-after.json",
+          "obs009-recovery-20261020-benchmark-report-proof01-v1-c2-red01.log",
+          "obs009-recovery-20261020-benchmark-report-proof01-v1-c2-red01-results.json",
+          "obs009-recovery-20261020-benchmark-report-proof01-v1-c2-red01-vitest.json"
+        ]
+      },
+      "observer": "unmodifiedexistingcollector, noexclusions/collectorcopy/customobserver",
+      "status": "UNEXECUTED_REQUIRES_NEW_ROOT_GO"
+    },
+    {
+      "id": "c12-red01",
+      "optionalRootDecision": false,
+      "composition": "red",
+      "label": "obs009-recovery-20261020-benchmark-report-proof01-c12-red01",
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "environment": {
+        "prependPATH": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+        "STUDIO_EVAL_API_TOKEN": "UNSET/empty; no livebenchmark commands"
+      },
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-benchmark-report-proof01-c12-red01",
+        "pnpm",
+        "--dir=/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "test/evaluation/benchmarkScoring.test.ts",
+        "test/evaluation/corpusManifest.test.ts",
+        "test/evaluation/harnessSelfTest.test.ts",
+        "test/evaluation/budgetAdmission.test.ts",
+        "--coverage.enabled=false",
+        "--minWorkers=1",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "--testTimeout=5000",
+        "--hookTimeout=5000",
+        "--testNamePattern",
+        "^(?:reviewed\\ cause\\ accounting:\\ groups\\ 1,\\ 2,\\ 3\\ and\\ 6\\ \\(synthetic\\ inputs\\ only\\)\\ group1:\\ an\\ unreviewed\\ generic\\ budget\\ failure\\ is\\ UNKNOWN\\ rather\\ than\\ an\\ observed\\ zero|reviewed\\ cause\\ accounting:\\ groups\\ 1,\\ 2,\\ 3\\ and\\ 6\\ \\(synthetic\\ inputs\\ only\\)\\ group2:\\ 'rs1NonScalarReadGaps'\\ binds\\ real\\ event\\ references\\ and\\ preserves\\ a\\ failed\\ class\\-P\\ run|reviewed\\ cause\\ accounting:\\ groups\\ 1,\\ 2,\\ 3\\ and\\ 6\\ \\(synthetic\\ inputs\\ only\\)\\ group3:\\ final\\-P,\\ credited\\-all\\ and\\ every\\ supplied\\ attempt\\ have\\ separate\\ cause\\ denominators|reviewed\\ cause\\ accounting:\\ groups\\ 1,\\ 2,\\ 3\\ and\\ 6\\ \\(synthetic\\ inputs\\ only\\)\\ group6:\\ immutable\\ originals\\ defeat\\ hard\\-fact\\ laundering\\ and\\ the\\ offline\\ branch\\ writes\\ fresh\\ files\\ without\\ a\\ client|inspection\\ scope\\ and\\ source\\ pins:\\ groups\\ 4\\ and\\ 6\\ group4:\\ explicitly\\ blocked\\ staging\\ UNKNOWN\\ is\\ valid\\ and\\ never\\ a\\ known\\ local\\ zero|group5:\\ pure\\ two\\-session\\ and\\ missing\\-charge\\ controls\\ sums\\ base10/100/20\\ plus\\ suffix3/40/5\\ and\\ charges\\ each\\ real\\ learn\\ once\\ in\\ order|group5:\\ pure\\ two\\-session\\ and\\ missing\\-charge\\ controls\\ starts\\ no\\ suffix\\ after\\ 'budget',\\ retaining\\ one\\ truthful\\ partial\\ session\\ without\\ a\\ fabricated\\ false\\ pass|group5:\\ later\\ hard\\ facts\\ share\\ the\\ existing\\ protective\\ stop\\ latch\\ retains\\ a\\ budget\\ stop\\ plus\\ a\\ later\\ hard\\ fact\\ without\\ charging\\ a\\ session\\ twice)$"
+      ],
+      "outerTimeoutSeconds": 120,
+      "expectedRawCollectorAndChildExit": 1,
+      "expected": {
+        "selected": 8,
+        "intendedAssertionFailures": 8,
+        "passed": 0,
+        "errors": 0,
+        "intentionalNameFilterOmissions": 97,
+        "identities": [
+          {
+            "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+            "ancestorTitles": [
+              "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+            ],
+            "title": "group1: an unreviewed generic budget failure is UNKNOWN rather than an observed zero",
+            "fullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group1: an unreviewed generic budget failure is UNKNOWN rather than an observed zero",
+            "group": 1,
+            "expectedStatus": "failed",
+            "definingOldSemanticFailure": "PARTIAL versus INVALID"
+          },
+          {
+            "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+            "ancestorTitles": [
+              "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+            ],
+            "title": "group2: 'rs1NonScalarReadGaps' binds real event references and preserves a failed class-P run",
+            "fullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group2: 'rs1NonScalarReadGaps' binds real event references and preserves a failed class-P run",
+            "group": 2,
+            "expectedStatus": "failed",
+            "definingOldSemanticFailure": "validator lacks RUN_CAUSE_EVENT_rs1NonScalarReadGaps"
+          },
+          {
+            "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+            "ancestorTitles": [
+              "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+            ],
+            "title": "group3: final-P, credited-all and every supplied attempt have separate cause denominators",
+            "fullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group3: final-P, credited-all and every supplied attempt have separate cause denominators",
+            "group": 3,
+            "expectedStatus": "failed",
+            "definingOldSemanticFailure": "one final-only item versus two supplied-attempt items"
+          },
+          {
+            "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+            "ancestorTitles": [
+              "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+            ],
+            "title": "group6: immutable originals defeat hard-fact laundering and the offline branch writes fresh files without a client",
+            "fullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group6: immutable originals defeat hard-fact laundering and the offline branch writes fresh files without a client",
+            "group": 6,
+            "expectedStatus": "failed",
+            "definingOldSemanticFailure": "falsePasses0 versus preserved original1 before any offline CLI operation"
+          },
+          {
+            "file": "studio-runner/test/evaluation/corpusManifest.test.ts",
+            "ancestorTitles": [
+              "inspection scope and source pins: groups 4 and 6"
+            ],
+            "title": "group4: explicitly blocked staging UNKNOWN is valid and never a known local zero",
+            "fullName": "inspection scope and source pins: groups 4 and 6 group4: explicitly blocked staging UNKNOWN is valid and never a known local zero",
+            "group": 4,
+            "expectedStatus": "failed",
+            "definingOldSemanticFailure": "RS1_MARK_MISSING incorrectly rejects valid blocked null"
+          },
+          {
+            "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+            "ancestorTitles": [
+              "group5: pure two-session and missing-charge controls"
+            ],
+            "title": "sums base10/100/20 plus suffix3/40/5 and charges each real learn once in order",
+            "fullName": "group5: pure two-session and missing-charge controls sums base10/100/20 plus suffix3/40/5 and charges each real learn once in order",
+            "group": 5,
+            "expectedStatus": "failed",
+            "definingOldSemanticFailure": "suffix-only proposals3 versus required13"
+          },
+          {
+            "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+            "ancestorTitles": [
+              "group5: pure two-session and missing-charge controls"
+            ],
+            "title": "starts no suffix after 'budget', retaining one truthful partial session without a fabricated false pass",
+            "fullName": "group5: pure two-session and missing-charge controls starts no suffix after 'budget', retaining one truthful partial session without a fabricated false pass",
+            "group": 5,
+            "expectedStatus": "failed",
+            "definingOldSemanticFailure": "two starts versus required one after base80percent crossing"
+          },
+          {
+            "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+            "ancestorTitles": [
+              "group5: later hard facts share the existing protective stop latch"
+            ],
+            "title": "retains a budget stop plus a later hard fact without charging a session twice",
+            "fullName": "group5: later hard facts share the existing protective stop latch retains a budget stop plus a later hard fact without charging a session twice",
+            "group": 5,
+            "expectedStatus": "failed",
+            "definingOldSemanticFailure": "STOPPED_BUDGET_80 versus STOPPED_HARD_GATE after optional call; no missing-method error"
+          }
+        ],
+        "sameSixGroups": true
+      },
+      "externalOriginalOutputs": {
+        "directory": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution",
+        "paths": [
+          "obs009-recovery-20261020-benchmark-report-proof01-c12-red01-before.json",
+          "obs009-recovery-20261020-benchmark-report-proof01-c12-red01-after.json",
+          "obs009-recovery-20261020-benchmark-report-proof01-c12-red01.log",
+          "obs009-recovery-20261020-benchmark-report-proof01-c12-red01-results.json",
+          "obs009-recovery-20261020-benchmark-report-proof01-c12-red01-vitest.json"
+        ]
+      },
+      "observer": "unmodifiedexistingcollector, noexclusions/collectorcopy/customobserver",
+      "status": "UNEXECUTED_REQUIRES_NEW_ROOT_GO"
+    },
+    {
+      "id": "green105-01",
+      "optionalRootDecision": false,
+      "composition": "green",
+      "label": "obs009-recovery-20261020-benchmark-report-proof01-green105-01",
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "environment": {
+        "prependPATH": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+        "STUDIO_EVAL_API_TOKEN": "UNSET/empty; no livebenchmark commands"
+      },
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-benchmark-report-proof01-green105-01",
+        "pnpm",
+        "--dir=/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "test/evaluation/benchmarkScoring.test.ts",
+        "test/evaluation/corpusManifest.test.ts",
+        "test/evaluation/harnessSelfTest.test.ts",
+        "test/evaluation/budgetAdmission.test.ts",
+        "--coverage.enabled=false",
+        "--minWorkers=1",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "--testTimeout=5000",
+        "--hookTimeout=5000"
+      ],
+      "outerTimeoutSeconds": 120,
+      "expectedRawCollectorAndChildExit": 0,
+      "expected": {
+        "passed": 105,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "todo": 0,
+        "physicalFiles": 4
+      },
+      "externalOriginalOutputs": {
+        "directory": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution",
+        "paths": [
+          "obs009-recovery-20261020-benchmark-report-proof01-green105-01-before.json",
+          "obs009-recovery-20261020-benchmark-report-proof01-green105-01-after.json",
+          "obs009-recovery-20261020-benchmark-report-proof01-green105-01.log",
+          "obs009-recovery-20261020-benchmark-report-proof01-green105-01-results.json",
+          "obs009-recovery-20261020-benchmark-report-proof01-green105-01-vitest.json"
+        ]
+      },
+      "observer": "unmodifiedexistingcollector, noexclusions/collectorcopy/customobserver",
+      "status": "UNEXECUTED_REQUIRES_NEW_ROOT_GO"
+    },
+    {
+      "id": "validate-unfrozen01",
+      "optionalRootDecision": false,
+      "composition": "green",
+      "label": "obs009-recovery-20261020-benchmark-report-proof01-validate-unfrozen01",
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "environment": {
+        "prependPATH": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+        "STUDIO_EVAL_API_TOKEN": "UNSET/empty; no livebenchmark commands"
+      },
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-benchmark-report-proof01-validate-unfrozen01",
+        "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+        "/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner/evaluation/cli.mjs",
+        "validate-corpus",
+        "/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/metadata-freeze/manifest.json"
+      ],
+      "outerTimeoutSeconds": 60,
+      "expectedRawCollectorAndChildExit": 0,
+      "expected": {
+        "valid": true,
+        "frozen": false,
+        "sourcePinReadFromCorrectPrivateRepo": true
+      },
+      "externalOriginalOutputs": {
+        "directory": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution",
+        "paths": [
+          "obs009-recovery-20261020-benchmark-report-proof01-validate-unfrozen01-before.json",
+          "obs009-recovery-20261020-benchmark-report-proof01-validate-unfrozen01-after.json",
+          "obs009-recovery-20261020-benchmark-report-proof01-validate-unfrozen01.log",
+          "obs009-recovery-20261020-benchmark-report-proof01-validate-unfrozen01-results.json"
+        ]
+      },
+      "observer": "unmodifiedexistingcollector, noexclusions/collectorcopy/customobserver",
+      "status": "UNEXECUTED_REQUIRES_NEW_ROOT_GO"
+    },
+    {
+      "id": "freeze-copy01",
+      "optionalRootDecision": false,
+      "composition": "green",
+      "label": "obs009-recovery-20261020-benchmark-report-proof01-freeze-copy01",
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "environment": {
+        "prependPATH": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+        "STUDIO_EVAL_API_TOKEN": "UNSET/empty; no livebenchmark commands"
+      },
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-benchmark-report-proof01-freeze-copy01",
+        "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+        "/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner/evaluation/cli.mjs",
+        "freeze-corpus",
+        "/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/metadata-freeze/manifest.json"
+      ],
+      "outerTimeoutSeconds": 60,
+      "expectedRawCollectorAndChildExit": 0,
+      "expected": {
+        "privateCopyOnly": true,
+        "all25caseidentitiesandprotocolpinbytesunchanged": true,
+        "privateProofGeneratedTimestampAndDigest": "actual observed future values, not realD_Coractualmetadataadoption"
+      },
+      "externalOriginalOutputs": {
+        "directory": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution",
+        "paths": [
+          "obs009-recovery-20261020-benchmark-report-proof01-freeze-copy01-before.json",
+          "obs009-recovery-20261020-benchmark-report-proof01-freeze-copy01-after.json",
+          "obs009-recovery-20261020-benchmark-report-proof01-freeze-copy01.log",
+          "obs009-recovery-20261020-benchmark-report-proof01-freeze-copy01-results.json"
+        ]
+      },
+      "observer": "unmodifiedexistingcollector, noexclusions/collectorcopy/customobserver",
+      "status": "UNEXECUTED_REQUIRES_NEW_ROOT_GO"
+    },
+    {
+      "id": "validate-frozen01",
+      "optionalRootDecision": false,
+      "composition": "green",
+      "label": "obs009-recovery-20261020-benchmark-report-proof01-validate-frozen01",
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "environment": {
+        "prependPATH": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+        "STUDIO_EVAL_API_TOKEN": "UNSET/empty; no livebenchmark commands"
+      },
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-benchmark-report-proof01-validate-frozen01",
+        "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+        "/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner/evaluation/cli.mjs",
+        "validate-corpus",
+        "/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/metadata-freeze/manifest.json"
+      ],
+      "outerTimeoutSeconds": 60,
+      "expectedRawCollectorAndChildExit": 0,
+      "expected": {
+        "valid": true,
+        "frozen": true,
+        "verifyDigest": "manifestDigest canonical fieldblank rule; exactsourcepins/currentprivatefiles",
+        "notIndependentAdoption": true
+      },
+      "externalOriginalOutputs": {
+        "directory": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution",
+        "paths": [
+          "obs009-recovery-20261020-benchmark-report-proof01-validate-frozen01-before.json",
+          "obs009-recovery-20261020-benchmark-report-proof01-validate-frozen01-after.json",
+          "obs009-recovery-20261020-benchmark-report-proof01-validate-frozen01.log",
+          "obs009-recovery-20261020-benchmark-report-proof01-validate-frozen01-results.json"
+        ]
+      },
+      "observer": "unmodifiedexistingcollector, noexclusions/collectorcopy/customobserver",
+      "status": "UNEXECUTED_REQUIRES_NEW_ROOT_GO"
+    }
+  ],
+  "canonicalNodePnpmPhysicalHashes": "UNBOUND untilfreshrootadmission; expectedversions24.20.0/10.33.0",
+  "childVitestIndex": 4,
+  "allOutputPathsRequireFreshAbsenceBinding": "beforeanylaunch labelprefixglob mustbeempty; nopriorlabeloverwrite",
+  "redTerminalCleanupMustPrecedeNextPhase": true,
+  "staticGreenFirstNoRetry": "Anyunexpectedexit/diagnostic/setup/unhandledfailure =>STOParchive; noedit/retry/extraGREEN",
+  "optionalV1RootChoice": "includeonefocusedC2RED onlyifexplicitlyselectedinfutureGO; ifomitted discloseunexecutedfocusedRED, full105GREENstillcontainscontrol",
+  "fixedCollectorOutputRouteAcceptedByPlan": "actualOBS011/execution with these distinct009labels, referenced from009proofreceipt; rootmustexplicitlyadoptthisconcreteroutebeforefutureGO"
+}

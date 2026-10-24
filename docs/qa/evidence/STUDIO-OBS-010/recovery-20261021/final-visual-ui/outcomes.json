@@ -1,0 +1,227 @@
+{
+  "status": "completed_with_observed_logs_limitation",
+  "reviewer": "Uma UX/UI with functional QA scope",
+  "finalTestUrls": [
+    "http://127.0.0.1:5173/checks/studio/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f",
+    "http://127.0.0.1:5173/checks/studio/52ceb57d-a122-464b-b4eb-51fec845b506"
+  ],
+  "runtime": {
+    "browser": "153.0.8010.12",
+    "node": "v24.20.0",
+    "mode": "Vite standalone + Node MSW demo proxy (5173 -> 5174)",
+    "previewPid": 48956,
+    "viewports": [
+      "1440x1000",
+      "390x844"
+    ]
+  },
+  "outcomes": [
+    {
+      "flow": "UI creation of two separate synthetic saved tests",
+      "status": "PASS",
+      "evidence": "A and B created through Create Test after demo CSI correction; 2 browser POST /tests responses 201."
+    },
+    {
+      "flow": "First-secret popup and no personal fields",
+      "status": "PASS",
+      "evidence": "Dialog has disclaimer, Cancel/Continue, zero input/textarea elements."
+    },
+    {
+      "flow": "Cancel and reopen",
+      "status": "PASS",
+      "evidence": "Cancel closes; reopen shows first disclaimer again before any secret exists."
+    },
+    {
+      "flow": "Continue to required existing form",
+      "status": "PASS",
+      "evidence": "Name identifier, password Value, Allowed origins unchanged; Create disabled for blank or missing origins, enabled only after synthetic fields filled."
+    },
+    {
+      "flow": "Dummy secret creation through Insert reference",
+      "status": "PASS",
+      "evidence": "Synthetic alpha created; <secret SYNTHETIC_UI_ALPHA> inserted into authoring input."
+    },
+    {
+      "flow": "Subsequent secret skips disclaimer",
+      "status": "PASS",
+      "evidence": "Test A New secret opens Create Secret form directly."
+    },
+    {
+      "flow": "Variables entrypoint and save",
+      "status": "PASS",
+      "evidence": "Synthetic beta created from Variables secret selector; saved rows verified in later fresh context."
+    },
+    {
+      "flow": "Another test remains independent",
+      "status": "PASS",
+      "evidence": "Test B with no secrets shows first disclaimer via Variables; no test A disclaimer state reused."
+    },
+    {
+      "flow": "Edit/save/add/remove steps",
+      "status": "PASS",
+      "evidence": "2 authored steps saved; edited step 2 and removed temporary third step survive reload; no mirrored authored step copy below editor rows."
+    },
+    {
+      "flow": "Desktop and narrow layout",
+      "status": "PASS",
+      "evidence": "1440x1000 two-panel editor; 390x844 single column; document scrollWidth390=innerWidth390; Variables table supports horizontal scroll to values/actions; popup buttons visible."
+    },
+    {
+      "flow": "Actual demo Run status/result/proof",
+      "status": "PASS",
+      "evidence": "Two guided demo learn sessions completed through actual Run button; proof receipt, available video and playback observed."
+    },
+    {
+      "flow": "Logs tab visible and operable",
+      "status": "PASS",
+      "evidence": "Click #studio-tab-logs displays Live execution logs panel."
+    },
+    {
+      "flow": "Populated guided execution logs after completed demo run",
+      "status": "NOTEXERCISED",
+      "evidence": "No log data was available in the actual completed guided demo Runs. Empty panel was observed; no populated-log claim. Successor neutral empty copy separately PASS."
+    },
+    {
+      "flow": "Actual replay execution",
+      "status": "NOTEXERCISED",
+      "evidence": "Focused supplemental Run selected another guided learn. Two guided-session starts, no replay /execute request; misleading replay names in retained supplemental runner are corrected here."
+    },
+    {
+      "flow": "Real provider / Citi automation / human review / full D-C / five-person pilot",
+      "status": "NOTEXERCISED",
+      "evidence": "Demo MSW only; no model provider calls, external website automation, real credentials or human pilot claims."
+    }
+  ],
+  "actualExecutionCounts": {
+    "guidedLearns": 2,
+    "replays": 0
+  },
+  "sourceStableDuringFinalAttempts": true,
+  "sourceHashes": {
+    "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx": "47484d4fc65ed343d69aa2fed69309fde3f2ed6423c2b80ad30acf2f7b3d2d4d",
+    "frontend/src/components/studio/SecretInput.tsx": "1c8dc829c04adcdfe44868ac96bb9359e5be76b8fcb2e139634b394a9ba08ad6",
+    "frontend/src/components/studio/references/ReferencePicker.tsx": "e2d54d9e22aeb833fab6295fddfc90646450f521b38a74cfa6948062d0f8fd7d",
+    "frontend/src/components/studio/run/RunControl.tsx": "b4f28ce2a0efffb469a304e19d2869c7c8410805e5658a071887b857e5abc176",
+    "frontend/src/components/studio/guided/guidedNarratives.ts": "36aafba385644d20737d172072b01702095810441f781422c6992e987ee67ffa",
+    "frontend/src/components/studio/evidence/VideoEvidencePanel.tsx": "2ccd0fd4e3ffa032a028ad87feefde163001e5091c3a33eb2ba88915e25a1a86"
+  },
+  "servedViteModuleHashes": [
+    {
+      "path": "/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+      "sha256": "1e245f8a009da60cacbc54880b1ad13d36b1746928dacf7262411bccb0811a51"
+    },
+    {
+      "path": "/src/components/studio/SecretInput.tsx",
+      "sha256": "7221e784540c0cb2668903991e7d2b54fae493b54e37ca920cffc1486cc1620f"
+    },
+    {
+      "path": "/src/components/studio/run/RunControl.tsx",
+      "sha256": "265d79d302504813319f56dfcc164568b1fa446f82b06188df530bc2ea2b5252"
+    },
+    {
+      "path": "/src/components/studio/evidence/VideoEvidencePanel.tsx",
+      "sha256": "a494d5da41a1c26a8004b79e77c7221993769cb15b63d147a3358399bdac4c46"
+    },
+    {
+      "path": "/src/components/studio/guided/guidedNarratives.ts",
+      "sha256": "c333fcf0db8baf0e130d11b6edda9d87a5aa191ec7d41cbde0fbc540e82ec390"
+    },
+    {
+      "path": "/src/components/studio/references/ReferencePicker.tsx",
+      "sha256": "400cd0649a0b9a9a2ac524db94e0f45b9c4d61a3f064c18dbc42ffb8e8bed8b9"
+    },
+    {
+      "path": "/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+      "sha256": "1e245f8a009da60cacbc54880b1ad13d36b1746928dacf7262411bccb0811a51"
+    },
+    {
+      "path": "/src/components/studio/SecretInput.tsx",
+      "sha256": "7221e784540c0cb2668903991e7d2b54fae493b54e37ca920cffc1486cc1620f"
+    },
+    {
+      "path": "/src/components/studio/run/RunControl.tsx",
+      "sha256": "265d79d302504813319f56dfcc164568b1fa446f82b06188df530bc2ea2b5252"
+    },
+    {
+      "path": "/src/components/studio/guided/guidedNarratives.ts",
+      "sha256": "c333fcf0db8baf0e130d11b6edda9d87a5aa191ec7d41cbde0fbc540e82ec390"
+    },
+    {
+      "path": "/src/components/studio/evidence/VideoEvidencePanel.tsx",
+      "sha256": "a494d5da41a1c26a8004b79e77c7221993769cb15b63d147a3358399bdac4c46"
+    },
+    {
+      "path": "/src/components/studio/references/ReferencePicker.tsx",
+      "sha256": "400cd0649a0b9a9a2ac524db94e0f45b9c4d61a3f064c18dbc42ffb8e8bed8b9"
+    }
+  ],
+  "pageErrors": [],
+  "failedRequests": [],
+  "httpErrorResponses": [],
+  "successorCopyValidation": {
+    "status": "PASS",
+    "scope": "One-string empty Logs copy; fresh context, no prior result pointer, no third Run. Prior result/playback are bound to prior source snapshot.",
+    "time": "2026-10-21T17:45:28.629Z",
+    "sourceHashes": {
+      "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx": "0fb142d2559efbb3ccbe0a773830d6c1591ff1ed5ae4bd8b72f30b946d436a2d",
+      "frontend/src/components/studio/SecretInput.tsx": "1c8dc829c04adcdfe44868ac96bb9359e5be76b8fcb2e139634b394a9ba08ad6",
+      "frontend/src/components/studio/references/ReferencePicker.tsx": "e2d54d9e22aeb833fab6295fddfc90646450f521b38a74cfa6948062d0f8fd7d",
+      "frontend/src/components/studio/run/RunControl.tsx": "b4f28ce2a0efffb469a304e19d2869c7c8410805e5658a071887b857e5abc176",
+      "frontend/src/components/studio/guided/guidedNarratives.ts": "36aafba385644d20737d172072b01702095810441f781422c6992e987ee67ffa",
+      "frontend/src/components/studio/evidence/VideoEvidencePanel.tsx": "2ccd0fd4e3ffa032a028ad87feefde163001e5091c3a33eb2ba88915e25a1a86"
+    },
+    "sourceStable": true,
+    "servedViteModuleHashes": [
+      {
+        "path": "/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+        "sha256": "017eb97695248c1490f6927a0371c1103c9b77de09158d3a464533bf9395d481"
+      },
+      {
+        "path": "/src/components/studio/SecretInput.tsx",
+        "sha256": "7221e784540c0cb2668903991e7d2b54fae493b54e37ca920cffc1486cc1620f"
+      },
+      {
+        "path": "/src/components/studio/evidence/VideoEvidencePanel.tsx",
+        "sha256": "a494d5da41a1c26a8004b79e77c7221993769cb15b63d147a3358399bdac4c46"
+      },
+      {
+        "path": "/src/components/studio/guided/guidedNarratives.ts",
+        "sha256": "c333fcf0db8baf0e130d11b6edda9d87a5aa191ec7d41cbde0fbc540e82ec390"
+      },
+      {
+        "path": "/src/components/studio/run/RunControl.tsx",
+        "sha256": "265d79d302504813319f56dfcc164568b1fa446f82b06188df530bc2ea2b5252"
+      },
+      {
+        "path": "/src/components/studio/references/ReferencePicker.tsx",
+        "sha256": "400cd0649a0b9a9a2ac524db94e0f45b9c4d61a3f064c18dbc42ffb8e8bed8b9"
+      }
+    ],
+    "screenshot": "23-successor-logs-neutral-copy.png"
+  },
+  "appendOnlyHistory": [
+    {
+      "id": "20261021-mock-publication-replay-visual",
+      "report": "replay-supplement/REPORT.md",
+      "newAttemptCounts": {
+        "guidedLearns": 1,
+        "replays": 1
+      },
+      "priorHistoricalCounts": {
+        "guidedLearns": 2,
+        "replays": 0
+      },
+      "cumulativeVisualRunCounts": {
+        "guidedLearns": 3,
+        "replays": 1
+      },
+      "status": "PASS_MOCK_UI_ONLY",
+      "test": {
+        "name": "SYNTHETIC Replay lifecycle C 20261021",
+        "id": "3d6fce15-a9bb-4173-af84-74566b08d54a",
+        "url": "http://127.0.0.1:5173/checks/studio/3d6fce15-a9bb-4173-af84-74566b08d54a"
+      },
+      "sourceStable": true
+    }
+  ]
+}

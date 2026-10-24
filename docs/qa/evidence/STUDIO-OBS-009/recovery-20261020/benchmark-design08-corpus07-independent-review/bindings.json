@@ -1,0 +1,71 @@
+{
+  "reviewer": "/root/corpus_io06_independent_qa",
+  "designAmendment": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-revision-correction-design08-root-amendment.json",
+    "sha256": "2a51e12ea7ff5db404a1c9874ae72c0974eaa64842c8b0aa7099fa44f6a560d6",
+    "bytes": 2111
+  },
+  "corpusManifest": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-correction07/manifest.json",
+    "sha256": "f262d9db402d5294e609752681353ed5db1f17f3148320d6efdeb1d1f08645ab"
+  },
+  "corpusFiles": [
+    {
+      "path": "bindings.json",
+      "sha256": "6cfb54d6f4ecd44ce2bc787378a3d0ace4bdb2ca0fe8447866feda354b96f51b",
+      "bytes": 3147
+    },
+    {
+      "path": "closed-cli-output.py.txt",
+      "sha256": "3e9bfe3d738bf9b366128274d9bc481de8636f36dd26cbd14e2235fa29ed628a",
+      "bytes": 3315
+    },
+    {
+      "path": "commands.json",
+      "sha256": "a16ff46ebfc64a785826a8cc2d766f343bba75187e557d63eee1280ec90b55cf",
+      "bytes": 26193
+    },
+    {
+      "path": "io-membership-and-delta.mjs.txt",
+      "sha256": "49dc702fc2474db1b1dd364c0d097bffdedddb8bc09e3e721b744ecdefbb5152",
+      "bytes": 9924
+    },
+    {
+      "path": "io-plan.json",
+      "sha256": "19cc0774f73a75acd00d1d733c7c13ed175d4a47e4b0c487fabdc6ecf3228807",
+      "bytes": 7500
+    },
+    {
+      "path": "plan.md",
+      "sha256": "946345f3c89b1ba00b6c51d19e5671efec2d65f66f24b5baabd1e844faf6189a",
+      "bytes": 2475
+    },
+    {
+      "path": "source.patch",
+      "sha256": "fc8bcede182f7240fbba2a441237fd754f9ce7f88d41f59649a69fcbd3223e6c",
+      "bytes": 5362
+    }
+  ],
+  "priorIndependentReviewManifests": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-revision-correction-design07-independent-review/manifest.json",
+      "sha256": "31884cc6f23afba6346ccc48d21871823e64e41803e7cd6ad3563a10a4efbdbe"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-preparation06-independent-review/manifest.json",
+      "sha256": "169a6310d8dfe2c6596a7b213997dadfa740fc04b86119a36ede420aacfc6975"
+    }
+  ],
+  "context": {
+    "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/obs009-design08-corpus07-successor-review-context.txt",
+    "sha256": "bbc599b8fe36d5c9a6f8330923bd7cc11139904fed2591464ebf0483f5cb5e55"
+  },
+  "sourceTextChecks": {
+    "actualMinimalDiffMatchesPatch": true,
+    "inlineMembershipSourceMatchesFile": true,
+    "inlineDeltaSourceMatchesFile": true,
+    "pythonSourceByteExact": "3e9bfe3d738bf9b366128274d9bc481de8636f36dd26cbd14e2235fa29ed628a"
+  },
+  "codeUnderReviewParsedImportedExecuted": false,
+  "privateBodyRead": false
+}

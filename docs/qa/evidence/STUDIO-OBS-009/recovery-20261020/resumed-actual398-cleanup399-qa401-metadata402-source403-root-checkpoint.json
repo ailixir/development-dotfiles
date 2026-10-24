@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-10-22T16:34:07.965483+00:00",
+  "phase": "ACTUAL398_FAILED_CLARIFICATION_CLEANUP399_VERIFIED_QA401_METADATA402_SOURCE403_REVIEW404",
+  "previousCheckpoint": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/resumed-final395-qa396-runtime398-running-root-checkpoint.json",
+  "previousCheckpointSHA256": "daeed8d183a88052de01d5dc39f6921c23bdaa38faf71aaac406086bc49457b6",
+  "goalActive": true,
+  "fullGoalComplete": false,
+  "noProgressAuditCount": 0,
+  "stories": {
+    "009": {
+      "sha256": "b22f4e2c88625fd065911cbcc9e0e735a1088744308ee6984430226a3768d666",
+      "open": 16,
+      "complete": 21,
+      "status": "InProgress"
+    },
+    "010": {
+      "sha256": "d548437da858d080ff5accc5e082f95008daa76b6d7d60303272c4227b8ae172",
+      "open": 10,
+      "complete": 2,
+      "status": "InProgress"
+    },
+    "011": {
+      "sha256": "67b0c439a20e00b83ef572aa549c27c96d8c8301cd0de65b975aadd9f862bdc8",
+      "open": 0,
+      "complete": 18,
+      "status": "Done"
+    }
+  },
+  "A": "46629374343601ec0c1f0fc82b90526b4f734b0f188431a6b5c2f0b738ab6450",
+  "B": "a703a18788a916bed0fdf790a4b4e5c66f0a4cf5c19291e5ea1c494a587c6ce9",
+  "runId": "e2fe538f-f501-4126-86e5-26fd52509d24",
+  "setup": "visual395-setup",
+  "publicEvidencePins": {
+    "visual395-preparation/final-receipt.json": "8a1bc35d8c031b0b959d182487dff2458f3f4ddbc8d5e673dccb34e1363b8ae0",
+    "visual395-preparation/final-seal.json": "3baf4becab8559b4a63bcb2604b36dd0e895ee71ed9509680afe8b86d8ce6cc4",
+    "pair396-review/receipt.json": "7e5a64970a9e3d2ddfcf7d70eaa92c52bb327bf308c1900ac2b27bdc33015fcb",
+    "runtime398/receipt.json": "08c3b5d5f6a52a99096442f63ffbe5a5b0ecd77ad387c8e6675335a298f33cf5",
+    "fresh395-root-run-go.json": "d4df6a9b4c5749dabdbf51423d1ef4add11abf4585192a44ed0d55074ec69b3a",
+    "visual398-execution/receipt.json": "8501f30c7bd47931a73f28352e7082ad2427fd62a716eb93ef8f983d24738d12",
+    "visual398-execution/seal.json": "86976390ef225eee096dcd7ca5cbc296700abacbac709c5cd85615ee17ff4ca0",
+    "cleanup399/receipt.json": "ecfe1c2977f49e372eb3cd2b4599e571925c0ff611248336fa9ba065f302154f",
+    "cleanup399/seal.json": "be193b6fb0693f443f5f26472fc7e8e242730212858b76b99ff406c781407c24",
+    "actual401-review/receipt.json": "61332202485dde71552951dedbfe78f4b339c2c4a4136711bf104be3904f4708",
+    "metadata402/result.json": "8481b42b7837f3bd45efdc51db24eb568f096f77ef9b6d0fdd4327ff065c4e47",
+    "metadata402/receipt.json": "764603b65a072092b60c9d26b5c18b2fd5230c32c1d597fa0bd0066494f41bc9",
+    "metadata402/seal.json": "f4e991157d5b07c43dfb6b933105a70b9b80ec071402d65f39bc956e371d3cdd"
+  },
+  "sourceCorrections": {
+    "393": "Target/Core setup maximum35 to40 minutes,17 pure controls plus actual-new-config12 controls",
+    "397": "Issuer setup maximum35 to40 minutes,10 extracted guard controls plus actual-copied guard3 controls",
+    "actual390SoleCauseProven": false,
+    "bothSourcePortionsAndFinalPairAccepted396": true
+  },
+  "actual398": {
+    "runtimeReady": true,
+    "controlReady": true,
+    "shellProofs": 9,
+    "originalSetupGoNotBefore": "2026-10-22T16:12:07.751Z",
+    "originalSetupGoDeadline": "2026-10-22T16:52:07.751Z",
+    "originalSetupGoSHA256": "9373ffdc4fcddcccd426911e9ad363a2fffc02fcf7fba0812afdb6f0eda24f09",
+    "rootEntryActual600TriLoadAndPureController": true,
+    "allExternalAndCompiledPinsRehashedBySourceBeforeGo": true,
+    "startupSession": 76835,
+    "startupTerminalExitCode": 0,
+    "uiExpert": "sol61_high_visual398_ux",
+    "uiSendAcceptedOnce": true,
+    "uiSendRequestId": "9a5e1e74-45b3-4aec-95c5-87dcbc2a81e7",
+    "uiResends": 0,
+    "rootRunGo": true,
+    "rootRunGoNotBefore": "2026-10-22T16:15:04.735Z",
+    "rootRunGoDeadline": "2026-10-22T16:45:04.735Z",
+    "rootRunGoSHA256": "912828586b51a361ea27e9c902a16c8b6a404bef73a1e3e16266475ebd78ecd7",
+    "healthAllPassed": true,
+    "negative403codes": [
+      403,
+      403,
+      403
+    ],
+    "modelCallsAtHealth": 0,
+    "journeyOutcome": "FAILED_BEFORE_REQUIRED_CLARIFICATION_AND_PUBLICATION",
+    "workflowCode": "AUTHENTIC_CLARIFICATION_MISSING",
+    "mutations": {
+      "start": 1,
+      "clarify": 0,
+      "finalize": 0,
+      "execute": 0
+    },
+    "publications": 0,
+    "stopSettlement": true,
+    "authority": "CONSUMED_TERMINAL_NO_RETRY",
+    "actualViews": 3,
+    "plannedViews": 17,
+    "withheldViews": 1,
+    "unattemptedViews": 13,
+    "actualNativeVideoReview": "NONE_CLAIMED"
+  },
+  "projection": {
+    "context": "visual389-projection-context.json",
+    "contextSHA256": "a749f91d4ad7306f49a68ebf276c604885aff5d9f5db0dafa879514117ee72f9",
+    "preflight": "visual389-preflight.json",
+    "preflightSHA256": "b565fcd7a7ba35f9cdc5ec604d269e3f13d6ec216764c85f7148b7a9f74f6691",
+    "modelNativeInput": false,
+    "actualViewCount": "PENDING_EXPERT_RECORD"
+  },
+  "humanReview": {
+    "requestingUserOnly": true,
+    "fivePersonPilotRequired": false,
+    "actualReview": "PENDING",
+    "C17": "UNRUN",
+    "nativeVisualAssessment": "UNASSESSED",
+    "masking": "INCONCLUSIVE",
+    "fullAcceptance": false
+  },
+  "preserved390": {
+    "terminal": "FAILED_BEFORE_UI_OR_MODEL",
+    "sourceCleanupConfirmed": true,
+    "strictAggregate": false,
+    "directEmbeddedPg": "UNKNOWN",
+    "retry": false
+  },
+  "next": "Developer403 inspects current supersession/budget source against the retained8-attempt snapshot; QA404 reviews only public402 helper/result/source scope, no private reread. Identify a demonstrated app fix or justified local validation-profile correction before any fresh unit. Product/gateway budgets remain with existing owners. Preserve full five-step clarification/publication/edit/incremental/replay and actual human review.",
+  "cleanup399": {
+    "exactInvocations": 1,
+    "originalCleanupConfirmed": false,
+    "laterBoundReadOnlyAllOwnedGone": true,
+    "backendJavaPositiveExit": true,
+    "rolesAbsent": 9,
+    "portsFree": 7,
+    "descendantIdentitiesGone": 38,
+    "embeddedPgBoundScopedGone": true,
+    "ownContainerAbsent": true,
+    "extraCleanupSignalsCancelsQueriesExports": 0,
+    "globalOrUncapturedResourceAbsence": "NOT_ESTABLISHED_OR_CLAIMED",
+    "old390PGUNKNOWNAndStrictFalse": "PRESERVED"
+  },
+  "qa401": {
+    "verdict": "ACCEPT_BOUNDED_FAILED_RUN_EVIDENCE_ONLY_WORKFLOW_STOPPED",
+    "fullAcceptance": false
+  },
+  "metadata402": {
+    "publicClosedResult": {
+      "schemaVersion": 1,
+      "basis": "POST_CLEANUP_RETAINED_EXPORT",
+      "scope": "MATCHED_ONE_OWNED_SESSION",
+      "session": {
+        "state": "FAILED",
+        "errorCode": "BUDGET_EXCEEDED",
+        "modelProposals": 8,
+        "stepIndex": 2,
+        "bootstrapPhase": "READY",
+        "pruned": false
+      },
+      "translation": {
+        "presence": "PRESENT",
+        "continuation": "NEXT",
+        "committedPlanPresent": true
+      },
+      "attemptCount": 8,
+      "attempts": [
+        {
+          "kind": "NEXT_ACTION",
+          "status": "APPLIED",
+          "safeResult": "PRESENT"
+        },
+        {
+          "kind": "NEXT_ACTION",
+          "status": "APPLIED",
+          "safeResult": "PRESENT"
+        },
+        {
+          "kind": "NEXT_ACTION",
+          "status": "SUPERSEDED",
+          "safeResult": "ABSENT"
+        },
+        {
+          "kind": "NEXT_ACTION",
+          "status": "SUPERSEDED",
+          "safeResult": "ABSENT"
+        },
+        {
+          "kind": "NEXT_ACTION",
+          "status": "SUPERSEDED",
+          "safeResult": "ABSENT"
+        },
+        {
+          "kind": "NEXT_ACTION",
+          "status": "SUPERSEDED",
+          "safeResult": "ABSENT"
+        },
+        {
+          "kind": "SOURCE_PLAN",
+          "status": "APPLIED",
+          "safeResult": "PRESENT"
+        },
+        {
+          "kind": "SOURCE_PLAN",
+          "status": "REJECTED",
+          "safeResult": "ABSENT"
+        }
+      ],
+      "providerFailureAttribution": "UNKNOWN_NOT_PERSISTED_BY_THIS_METADATA_MODEL",
+      "stateAtEmittingRead": "UNKNOWN_FROM_SEALED_PUBLIC_METADATA"
+    },
+    "helperSHA256": "a343d5ae578925869e10a5ed62acbf0d6cabcae08659faf6a95e9f62412de45d",
+    "exportReadCount": 1,
+    "identityMetadataReadCount": 1,
+    "runtimeOrQueryOrNewExportOrProviderCalls": 0,
+    "privateValuesReleased": false,
+    "nativeRead": false,
+    "independent404Review": "PENDING"
+  },
+  "original5177HeadStatus": 200
+}

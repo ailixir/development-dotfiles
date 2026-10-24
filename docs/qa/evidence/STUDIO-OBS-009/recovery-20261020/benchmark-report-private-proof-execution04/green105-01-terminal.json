@@ -1,0 +1,108 @@
+{
+  "id": "green105-01",
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs009-recovery-20261020-benchmark-report-proof02-green105-01",
+    "pnpm",
+    "--dir=/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner",
+    "--config.package-manager-strict=false",
+    "exec",
+    "/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "test/evaluation/benchmarkScoring.test.ts",
+    "test/evaluation/corpusManifest.test.ts",
+    "test/evaluation/harnessSelfTest.test.ts",
+    "test/evaluation/budgetAdmission.test.ts",
+    "--coverage.enabled=false",
+    "--minWorkers=1",
+    "--maxWorkers=1",
+    "--no-file-parallelism",
+    "--testTimeout=5000",
+    "--hookTimeout=5000"
+  ],
+  "composition": "green",
+  "startedAtUtc": "2026-10-21T02:30:59.021686+00:00",
+  "rootConditionalSha256": "566c5361edfa0b33311db40a4da39e3a5d5d4258e0751bf631ec5d80ee671472",
+  "correctedProofTask": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/benchmark-report-lint-corrected-proof04-task.txt",
+  "collectorPid": 98331,
+  "ownedProcessGroup": 98331,
+  "rawOuterExit": 0,
+  "endedAtUtc": "2026-10-21T02:31:02.204536+00:00",
+  "actualCollectorResult": {
+    "command": [
+      "pnpm",
+      "--dir=/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "test/evaluation/benchmarkScoring.test.ts",
+      "test/evaluation/corpusManifest.test.ts",
+      "test/evaluation/harnessSelfTest.test.ts",
+      "test/evaluation/budgetAdmission.test.ts",
+      "--coverage.enabled=false",
+      "--minWorkers=1",
+      "--maxWorkers=1",
+      "--no-file-parallelism",
+      "--testTimeout=5000",
+      "--hookTimeout=5000",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-benchmark-report-proof02-green105-01-vitest.json"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-21T02:30:59.344454+00:00",
+    "elapsedSeconds": 2.83,
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "afef67523e1be0d7e1fbf3b3544e0bff9b8c94129e0620a386a6a5a9009d4ae6",
+    "testInputStable": true,
+    "testInputDigestBefore": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f",
+    "testInputDigestAfter": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f",
+    "vitest": {
+      "success": true,
+      "numPassedTests": 105,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTotalTests": 105,
+      "numPassedTestSuites": 21,
+      "numFailedTestSuites": 0
+    },
+    "vitestReportSha256": "07cb5a78e1a9eb6012a4321f03029473f234ed48e9bfc20d8a193959af037727"
+  },
+  "resultSha256": "297c9f87fb54795137c6d04e7ffdca8b400093f9e120d41cd54ebec68ffb65a0",
+  "logSha256": "afef67523e1be0d7e1fbf3b3544e0bff9b8c94129e0620a386a6a5a9009d4ae6",
+  "privateInputDelta": [
+    {
+      "path": "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+      "before": {
+        "path": "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+        "sha256": "b0dd05a02723507fc907c568c1ece377935be417aad057524baaca0289e8e0e9",
+        "bytes": 16215
+      },
+      "after": {
+        "path": "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+        "sha256": "f570ef8f055e6e3eab70953865c4eb32e1c157c45bc1931defcf44e3349c2753",
+        "bytes": 16194
+      }
+    }
+  ],
+  "cacheChangedKeys": [
+    ":test/evaluation/corpusManifest.test.ts",
+    ":test/evaluation/budgetAdmission.test.ts",
+    ":test/evaluation/benchmarkScoring.test.ts",
+    ":test/evaluation/harnessSelfTest.test.ts"
+  ],
+  "cacheOther187ValuesExact": true,
+  "actualAndOwnPrivateSourcesStable": true,
+  "oldBorrowedNamespaceRead": false,
+  "privateProduct238Stable": true,
+  "ownedProcessGroupSignal0Observation": "ESRCH/GONE",
+  "noSignalsGT0": true
+}

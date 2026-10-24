@@ -1,0 +1,76 @@
+{
+  "kind": "STATIC_BUILD_STAMP_DEPENDENCY_ANALYSIS_NOT_EXECUTED_CARRY_PROOF",
+  "sources": {
+    "studio-runner/tsconfig.build.json": "4698dc66d81bb930c7942e2f8a9a336f41463b6d617d0996bbbac63673faf0c1",
+    "studio-runner/scripts/write-runtime-versions.mjs": "6c3e64064184a494092c5de56f69dba818913f293b3b8a3c2d2ba86a54d94f26",
+    "studio-runner/scripts/browser-provenance.mjs": "ea0dcc15b943a935766ba5cb953a0c6b6b1cdfc94c0520e20f99d04e9171dc42",
+    "tools/build-studio-observed-schemas.cjs": "6557931cf566b5346c4b3eb88ed27a5fef279749934c853288202ebf615ca68f",
+    "studio-runner/test/fixtures-tier/globalSetup.ts": "48ed6f54da59ea71fdecbd6273bb08a3ae0644710a02501d1d9fe48aa95abbcd"
+  },
+  "dependencyGroups": [
+    {
+      "name": "compiledproduct",
+      "inputs": [
+        "studio-runner/src/**",
+        "studio-runner/tsconfig.json",
+        "studio-runner/tsconfig.build.json",
+        "typescriptpackage/compilercli/dependencybytes"
+      ],
+      "sourceEvidence": "buildconfig includes onlysrc/**/*.ts and excludes test/fixtures; ESM evaluation/README/corpusmetadata/testhelper edits do not enter productemit"
+    },
+    {
+      "name": "recorded runtime pins",
+      "inputs": [
+        "studio-runner/package.json",
+        "studio-runner/package-lock.json",
+        "studio-runner/Dockerfile",
+        "studio-runner/.nvmrc",
+        "Nodeversion",
+        "IMAGE_TAGenv",
+        "PLAYWRIGHT_BROWSERS_PATHenv"
+      ],
+      "sourceEvidence": "buildRuntimeVersions reads these explicitly; actual env/CLI/browser pins mustremainbound, unknownimage remainsnull"
+    },
+    {
+      "name": "packaged observed schema/reference",
+      "inputs": [
+        "studio-runner/dist/validator/observedSchemas.json",
+        "studio-runner/fixtures/observed-reference/*.json",
+        "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "studio-runner/dist/run/browser.js",
+        "externalpinnedbrowserrootprovenance/executable"
+      ],
+      "sourceEvidence": "writeRuntimeVersionsFile collects sortedfixtureRoot .json (five packaged reference files), independently compares observedChoice in publicationfixtures, hashes packagedschemas/references/launcher. This fixtures/observed-reference/manifest.json is NOT evaluation/observed-authoring/manifest.json."
+    },
+    {
+      "name": "schema generator closure",
+      "inputs": [
+        "tools/build-studio-observed-schemas.cjs",
+        "docs/specs/studio-observed-authoring/contracts/v3/*.schema.json",
+        "generated srcvalidator/guided/executor schemas and types"
+      ],
+      "sourceEvidence": "schema generator reads sorted .schema.json files; no benchmark evaluation manifest input"
+    },
+    {
+      "name": "benchmark report input only",
+      "inputs": [
+        "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+        "studio-runner/evaluation/observed-authoring/evaluate.d.mts",
+        "studio-runner/evaluation/observed-authoring/manifest.json",
+        "studio-runner/evaluation/cli.mjs",
+        "studio-runner/evaluation/README.md",
+        "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+        "studio-runner/test/evaluation/corpusManifest.test.ts",
+        "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+        "studio-runner/test/evaluation/budgetAdmission.test.ts",
+        "studio-runner/test/evaluation/observedCorpus.ts"
+      ],
+      "sourceEvidence": "alltenunder evaluation/test orREADME/corpusmetadata; no runtime stamp collector reads these files. Their generic sourcepins are evaluator-report provenance, not productruntimeidentities."
+    }
+  ],
+  "carryDecision": "CONDITIONALLY REUSE private complete238E19 withoutnewemit/RTmatrix onlyifafter-native fullproductinventory and allprod/build/reference/dependency/browser/envinputs genuinely match acceptedprivateconfiguredproof; rootfreshcarrybinding required. If mismatch STOP, noautomaticbuild orD698substitution. Allgroupsmustbe freshlycomputedfrompostreleasecatalog/externalpins beforecopy andbeforeaftereveryphase. No live source/private walks here.",
+  "originalConfiguredProductBinding": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution02/configured-product-carry-binding.json",
+  "productDigestExpected": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+  "actualDistCopyback": false,
+  "actualDistD698IsNotMatchingNativeBaseCarry": true
+}

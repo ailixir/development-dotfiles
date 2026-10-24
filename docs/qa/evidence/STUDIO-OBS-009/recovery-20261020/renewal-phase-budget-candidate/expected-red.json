@@ -1,0 +1,21 @@
+{
+  "kind": "UNEXECUTED_INTENDED_OLD_PRODUCT_AUTHORITY_ASSERTION_RED",
+  "testOnlyOverlay": "tests.patch",
+  "oldProductRequiredSha256": "c76696f0c74359ee5dab8b57f9feb843b743ff24af2884b2642744f8ead3a32d",
+  "redTestRequiredSha256": "956104377c8e1458b3fb9b73e86df72429b24f0bafe161e33124cb563b300112",
+  "fullName": "009 secret renewal keeps its original claim-phase endpoint does not install an otherwise valid late grant after a delayed renewal phase has ended",
+  "testNamePattern": "^009 secret renewal keeps its original claim-phase endpoint does not install an otherwise valid late grant after a delayed renewal phase has ended$",
+  "discoveryExpected": 28,
+  "executedExpected": 1,
+  "nameFilterOmissionsExpected": 27,
+  "expectedExit": 1,
+  "expectedFailureFrame": "test/guided/ownership.test.ts:298",
+  "expectedFailedAssertion": "expect(runtime.accepting,'phase-end authority; acknowledged lease installs='+String(installed.mock.calls.length)).toBe(false)",
+  "expectedActual": true,
+  "expectedValue": false,
+  "expectedClosedMessageFragment": "phase-end authority; acknowledged lease installs=1",
+  "expectedOldAuthorityInstallationCount": 1,
+  "finallyRequiresOwnedTimersZeroAndMocksRestored": true,
+  "noSetupCompilerGrantFenceExpiryOtherFailureCountsAsRed": true,
+  "noRuntimeExecuted": true
+}

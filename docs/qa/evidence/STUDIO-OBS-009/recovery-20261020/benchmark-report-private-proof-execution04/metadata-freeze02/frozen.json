@@ -1,0 +1,2325 @@
+{
+  "schemaVersion": 1,
+  "kind": "STUDIO_OBSERVED_AUTHORING_BENCHMARK_MANIFEST",
+  "story": "STUDIO-OBS-009",
+  "ac": "AC-7",
+  "classification": "METADATA_ADOPTION_CANDIDATE_NOT_D_C_EVIDENCE",
+  "executionStatus": "NOT_RUN",
+  "comparisonClaim": "NONE_NO_COMPARISON_TO_20261004",
+  "authoredBy": "@dev (Dex) EP lane draft from Quinn t0-qa-20261017 B1/B5/B6; @qa review PENDING",
+  "manifestFrozenAt": "2026-10-21T02:40:57.969Z",
+  "manifestSha256": "b49f6d8ad81b156f61f4e7d3330edf17ad764f2fd4b4412c480764888d7e2506",
+  "freezeNote": "Pending actual source/corpus QA and re-freeze in its own authorized window. Old e4785112 admissions/refusals remain historical and do not admit this candidate. No provider/staging/headroom fact is supplied.",
+  "rulings": {
+    "B1": {
+      "state": "RECORDED_BY_PO",
+      "ref": "STUDIO-OBS-009 story, AC-7 interpretation note: ported means re-authored ports"
+    },
+    "B2": {
+      "state": "ADOPTED_INTERNAL_INTERPRETATION",
+      "refs": {
+        "po": {
+          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/proposal.md",
+          "sha256": "85506e3d68cccc2da280b9da694889721b8cfcc9f9740e1ef75cc89a00990615"
+        },
+        "architect": {
+          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/architect-review/review.md",
+          "sha256": "b602698e59bce4242fc691377cd6ef83991639c403ff8d5da4274604a4159a2e"
+        }
+      },
+      "adopted": "All25 workflows remain; classP19x3=57/floor52, blocked staging51/floor46 at bestPARTIAL. F/N earn no completion; hard gates cover every supplied attempt."
+    },
+    "B3": {
+      "state": "ADOPTED_INTERNAL_INTERPRETATION",
+      "refs": {
+        "po": {
+          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/proposal.md",
+          "sha256": "85506e3d68cccc2da280b9da694889721b8cfcc9f9740e1ef75cc89a00990615"
+        },
+        "architect": {
+          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/architect-review/review.md",
+          "sha256": "b602698e59bce4242fc691377cd6ef83991639c403ff8d5da4274604a4159a2e"
+        }
+      },
+      "adopted": "E3 remainsN at the unsupported iframe capability boundary. No false pass observed is not correct-refusal quality or successful iframe support."
+    },
+    "B5": {
+      "state": "CORPUS_DESIGN_DISCLOSURE_ADOPTED",
+      "refs": {
+        "po": {
+          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/proposal.md",
+          "sha256": "85506e3d68cccc2da280b9da694889721b8cfcc9f9740e1ef75cc89a00990615"
+        },
+        "architect": {
+          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/architect-review/review.md",
+          "sha256": "b602698e59bce4242fc691377cd6ef83991639c403ff8d5da4274604a4159a2e"
+        }
+      },
+      "adopted": "D3 and both unchanged incremental cases use mixedVisible. No optional N-RS1 is added. Exact-mode non-scalar reads are not exercised. D2/E1 remain uninspected UNKNOWN, not a global confirmed zero; real required unambiguous RS1 reads remainP."
+    },
+    "B6": {
+      "state": "IMPLEMENTED_LOCALLY",
+      "adopted": "receipts oracle per case, expected outcome hashed, four mutation controls per oracle"
+    },
+    "B7": {
+      "state": "MODEL_SIZING_SECTION10_ADOPTED_MEASUREMENTS_PENDING",
+      "ref": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/model-sizing/ruling-draft.md section10 (adopted T-1 through T-6)",
+      "adopted": "Actual measurement/first-learn limit remains pendingT4. Existing per-CSI exclusion, conservative classification and changed-limits repetition1 recalibration remain. No limits identity or measured capacity invented."
+    },
+    "B8": {
+      "state": "UNKNOWN",
+      "adopted": "budget-admission.json reads ADMISSION_REFUSED_PRICE_UNKNOWN; headroom R and the price list are owed (user, ED-01 owner)"
+    }
+  },
+  "gate": {
+    "completionThresholdPct": 90,
+    "classPCases": 19,
+    "repetitions": 3,
+    "plannedRuns": 57,
+    "minCompletions": 52,
+    "maxFailedRuns": 5,
+    "denominatorDefinition": "class P runs only; F and N fall under the zero-false-pass hard gate; partial when D2 or E1 is unrun, never a pass",
+    "thresholdPct": 90
+  },
+  "sessionPlan": {
+    "runs": 75,
+    "sessions": 81,
+    "contingencySessions": 122
+  },
+  "sources": {
+    "resultsJsonl": {
+      "path": "docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/results.jsonl",
+      "base": "repo",
+      "sha256": "0580e2e310bd15495d86f4cd1664bc9cf4d56501b2fd9bc23226887e9486b3ae"
+    },
+    "summaryJson": {
+      "path": "docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/summary.json",
+      "base": "repo",
+      "sha256": "8dbef6112745292c16b8714b2087ac70696ceb95d4455781c9dfd9515785a053"
+    },
+    "evaluator": {
+      "path": "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+      "base": "repo",
+      "sha256": "d55dbbe9b7f9ca791ec1322abe3ef67d5bb4ac58ec1f717ab56a73dcfe046e28"
+    },
+    "evaluationCli": {
+      "path": "studio-runner/evaluation/cli.mjs",
+      "base": "repo",
+      "sha256": "8a119c26eb16ed19cd5f1a5a46ed07a9d13eeb2f6e2a951dd2dc3d854795bcad"
+    },
+    "corpusPageServer": {
+      "path": "studio-runner/evaluation/observed-authoring/pages/server.mjs",
+      "base": "repo",
+      "sha256": "81d1673989f20ba236b5fb6a774ba33da87192983dd87956157227e1b3936d30"
+    }
+  },
+  "cases": [
+    {
+      "id": "C01-rf-example-url",
+      "block": "ported",
+      "class": "P",
+      "classBasis": "inferred [I] from benchmark/summary.json (positive, expected to pass) and the executed-PASSED or executed-FAILED response shape in results.jsonl",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": {
+        "knownFromRecord": {
+          "resultsJsonl": {
+            "sha256": "0580e2e310bd15495d86f4cd1664bc9cf4d56501b2fd9bc23226887e9486b3ae",
+            "rowLines": [
+              3,
+              24,
+              25,
+              35,
+              50,
+              57,
+              73,
+              74,
+              96,
+              103,
+              105,
+              119,
+              148,
+              153,
+              158,
+              168,
+              183,
+              216,
+              236,
+              239,
+              256,
+              276,
+              281,
+              301,
+              309,
+              319,
+              333
+            ],
+            "recordOutcomeKinds": [
+              "executed:PASSED"
+            ],
+            "generatedCodeShapes": [
+              [
+                "await page.goto('http://127.0.0.1:4102/ns/c01/home');",
+                "await expect(page).toHaveURL(/127\\.0\\.0\\.1/);"
+              ]
+            ],
+            "fixtureOriginPattern": "http://127.0.0.1:4102/ns/c01/home"
+          },
+          "intendedClass": "P"
+        },
+        "reauthored": [
+          "step text (plain English, observed-path style)",
+          "fixture page(s) under pages/",
+          "expected outcome",
+          "app-side receipts oracle"
+        ],
+        "invented": [],
+        "reusedAssets": [],
+        "comparisonClaim": "NONE_NO_COMPARISON_TO_20261004"
+      },
+      "stepText": {
+        "path": "pages/c01/step-text.json",
+        "sha256": "4281c172cb492d1f51b10f8db9e9c594f3e5605811b20df8a974c5ec3fb9431b"
+      },
+      "pages": [
+        {
+          "path": "pages/c01/home.html",
+          "sha256": "cade98b28ff8104cd3d1450e6b95a3c2abe571785e09e2197c21059126aca030"
+        }
+      ],
+      "pagesReason": null,
+      "fixture": {
+        "kind": "corpus-pages",
+        "host": "evaluation/observed-authoring/pages/server.mjs",
+        "namespaceBase": "/ns/c01"
+      },
+      "expectedOutcome": {
+        "path": "pages/c01/expected-outcome.json",
+        "sha256": "eeb521527c320f44359455b505062f388e92caa25fd7ae1a278139d8e8776dfc"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "GET /ns/c01.<runTag>/__receipts (pages/server.mjs)",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": false
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [],
+        "assertTextLocations": [
+          {
+            "value": "Example Domain",
+            "elementKind": "h1"
+          }
+        ],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      }
+    },
+    {
+      "id": "C02-rf-wiki-url",
+      "block": "ported",
+      "class": "P",
+      "classBasis": "inferred [I] from benchmark/summary.json (positive, expected to pass) and the executed-PASSED or executed-FAILED response shape in results.jsonl",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": {
+        "knownFromRecord": {
+          "resultsJsonl": {
+            "sha256": "0580e2e310bd15495d86f4cd1664bc9cf4d56501b2fd9bc23226887e9486b3ae",
+            "rowLines": [
+              20,
+              31,
+              37,
+              55,
+              59,
+              62,
+              92,
+              106,
+              115,
+              118,
+              123,
+              130,
+              145,
+              161,
+              167,
+              170,
+              171,
+              201,
+              204,
+              210,
+              246,
+              264,
+              265,
+              289,
+              299,
+              302,
+              314
+            ],
+            "recordOutcomeKinds": [
+              "executed:PASSED",
+              "transport:GATEWAY_TIMEOUT"
+            ],
+            "generatedCodeShapes": [
+              [
+                "await page.goto('http://127.0.0.1:4102/ns/c02/wiki');",
+                "await expect(page).toHaveURL(/\\/wiki/);"
+              ]
+            ],
+            "fixtureOriginPattern": "http://127.0.0.1:4102/ns/c02/wiki"
+          },
+          "intendedClass": "P"
+        },
+        "reauthored": [
+          "step text (plain English, observed-path style)",
+          "fixture page(s) under pages/",
+          "expected outcome",
+          "app-side receipts oracle"
+        ],
+        "invented": [],
+        "reusedAssets": [],
+        "comparisonClaim": "NONE_NO_COMPARISON_TO_20261004"
+      },
+      "stepText": {
+        "path": "pages/c02/step-text.json",
+        "sha256": "29f2477b48e11c680594569ec5d1928a75bef45be88f0d53f0fbdfa8bdd7230f"
+      },
+      "pages": [
+        {
+          "path": "pages/c02/wiki.html",
+          "sha256": "7ed99779ab8f6f218e4c830564d224da9a410e9706abd90e850c6d3d91639912"
+        }
+      ],
+      "pagesReason": null,
+      "fixture": {
+        "kind": "corpus-pages",
+        "host": "evaluation/observed-authoring/pages/server.mjs",
+        "namespaceBase": "/ns/c02"
+      },
+      "expectedOutcome": {
+        "path": "pages/c02/expected-outcome.json",
+        "sha256": "fdc3a30522808663ec326c576b401f0f3c15bd306bed233291336fdc976b0729"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "GET /ns/c02.<runTag>/__receipts (pages/server.mjs)",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": false
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [],
+        "assertTextLocations": [
+          {
+            "value": "/wiki",
+            "elementKind": "address-bar"
+          }
+        ],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      }
+    },
+    {
+      "id": "C03-rf-wiki-search-var",
+      "block": "ported",
+      "class": "P",
+      "classBasis": "inferred [I] from benchmark/summary.json (positive, expected to pass) and the executed-PASSED or executed-FAILED response shape in results.jsonl",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": {
+        "knownFromRecord": {
+          "resultsJsonl": {
+            "sha256": "0580e2e310bd15495d86f4cd1664bc9cf4d56501b2fd9bc23226887e9486b3ae",
+            "rowLines": [
+              2,
+              11,
+              27,
+              39,
+              47,
+              91,
+              95,
+              98,
+              99,
+              101,
+              120,
+              131,
+              169,
+              173,
+              178,
+              188,
+              207,
+              208,
+              213,
+              240,
+              255,
+              273,
+              279,
+              283,
+              303,
+              304,
+              312
+            ],
+            "recordOutcomeKinds": [
+              "executed:FAILED",
+              "executed:PASSED"
+            ],
+            "generatedCodeShapes": [
+              [
+                "await page.goto('http://127.0.0.1:4102/ns/c03/wiki');",
+                "await page.getByLabel('Search Wikipedia').fill(vars.get('SEARCH_TERM'));",
+                "await expect(page).toHaveURL(/\\/wiki/);"
+              ],
+              [
+                "await page.goto('http://127.0.0.1:4102/ns/c03/wiki');",
+                "await page.getByPlaceholder('Search Wikipedia').fill(vars.get('SEARCH_TERM'));",
+                "await expect(page).toHaveURL(/\\/wiki/);"
+              ]
+            ],
+            "fixtureOriginPattern": "http://127.0.0.1:4102/ns/c03/wiki"
+          },
+          "intendedClass": "P"
+        },
+        "reauthored": [
+          "step text (plain English, observed-path style)",
+          "fixture page(s) under pages/",
+          "expected outcome",
+          "app-side receipts oracle"
+        ],
+        "invented": [],
+        "reusedAssets": [],
+        "comparisonClaim": "NONE_NO_COMPARISON_TO_20261004"
+      },
+      "stepText": {
+        "path": "pages/c03/step-text.json",
+        "sha256": "eabf2c6732ef784e31d31094c51d3db3bcfc790eece666e0f764dc133c48e460"
+      },
+      "pages": [
+        {
+          "path": "pages/c03/wiki.html",
+          "sha256": "7f09beaafb921de3e9125d3520f519b29b785f5ee2e04db5478aaba176962aeb"
+        }
+      ],
+      "pagesReason": null,
+      "fixture": {
+        "kind": "corpus-pages",
+        "host": "evaluation/observed-authoring/pages/server.mjs",
+        "namespaceBase": "/ns/c03"
+      },
+      "expectedOutcome": {
+        "path": "pages/c03/expected-outcome.json",
+        "sha256": "cbe8f2f1a42dc03bf5262dbff00693b5d21681974b6a406282535fe7410bfe70"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "GET /ns/c03.<runTag>/__receipts (pages/server.mjs)",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": false
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [],
+        "assertTextLocations": [
+          {
+            "value": "/wiki",
+            "elementKind": "address-bar"
+          }
+        ],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      }
+    },
+    {
+      "id": "C04-account-save",
+      "block": "ported",
+      "class": "P",
+      "classBasis": "inferred [I] from benchmark/summary.json (positive, expected to pass) and the executed-PASSED or executed-FAILED response shape in results.jsonl",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": {
+        "knownFromRecord": {
+          "resultsJsonl": {
+            "sha256": "0580e2e310bd15495d86f4cd1664bc9cf4d56501b2fd9bc23226887e9486b3ae",
+            "rowLines": [
+              1,
+              26,
+              34,
+              53,
+              66,
+              79,
+              90,
+              100,
+              108,
+              112,
+              122,
+              134,
+              146,
+              157,
+              175,
+              181,
+              193,
+              202,
+              237,
+              238,
+              253,
+              291,
+              297,
+              298,
+              315,
+              331,
+              338,
+              349
+            ],
+            "recordOutcomeKinds": [
+              "executed:PASSED",
+              "transport:TRANSPORT_FAILURE"
+            ],
+            "generatedCodeShapes": [
+              [
+                "await page.goto('http://127.0.0.1:4100/trials/6f1c2b8e-0000-4000-8000-00000000c004');",
+                "await page.getByRole('button', { name: 'Log in' }).click();",
+                "await page.getByRole('button', { name: 'Save target' }).click();",
+                "await expect(page.getByText('Saved target')).toBeVisible();"
+              ],
+              [
+                "await page.goto('http://127.0.0.1:4100/trials/6f1c2b8e-0000-4000-8000-00000000c004');",
+                "await page.getByRole('button', { name: 'Log in' }).click();",
+                "await page.getByText('Save target').click();",
+                "await expect(page.getByText('Saved target')).toBeVisible();"
+              ]
+            ],
+            "fixtureOriginPattern": "http://127.0.0.1:4100/trials/6f1c2b8e-0000-4000-8000-00000000c004"
+          },
+          "intendedClass": "P"
+        },
+        "reauthored": [
+          "step text (plain English, observed-path style)",
+          "fixture page(s) under pages/",
+          "expected outcome",
+          "app-side receipts oracle"
+        ],
+        "invented": [],
+        "reusedAssets": [],
+        "comparisonClaim": "NONE_NO_COMPARISON_TO_20261004"
+      },
+      "stepText": {
+        "path": "pages/c04/step-text.json",
+        "sha256": "021032dd312bde62eba6b2e8c05cc2a5159e86dafc201e09cdbcfc271c1cdeec"
+      },
+      "pages": [
+        {
+          "path": "pages/c04/trial.html",
+          "sha256": "2728de700553004180de15151cd2f2e4697cd4e5621d6e3767cb6c27288b0165"
+        }
+      ],
+      "pagesReason": null,
+      "fixture": {
+        "kind": "corpus-pages",
+        "host": "evaluation/observed-authoring/pages/server.mjs",
+        "namespaceBase": "/ns/c04"
+      },
+      "expectedOutcome": {
+        "path": "pages/c04/expected-outcome.json",
+        "sha256": "a30165e3bc61bc4a2cad602ac745e6b10a216826760d64176c15c0687879f99f"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "GET /ns/c04.<runTag>/__receipts (pages/server.mjs)",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": false
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [],
+        "assertTextLocations": [
+          {
+            "value": "Saved target",
+            "elementKind": "p[role=status]"
+          }
+        ],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      }
+    },
+    {
+      "id": "C05-login-var-secret",
+      "block": "ported",
+      "class": "P",
+      "classBasis": "inferred [I] from benchmark/summary.json (positive, expected to pass) and the executed-PASSED or executed-FAILED response shape in results.jsonl",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": {
+        "knownFromRecord": {
+          "resultsJsonl": {
+            "sha256": "0580e2e310bd15495d86f4cd1664bc9cf4d56501b2fd9bc23226887e9486b3ae",
+            "rowLines": [
+              23,
+              38,
+              42,
+              44,
+              63,
+              71,
+              72,
+              83,
+              110,
+              121,
+              126,
+              143,
+              165,
+              211,
+              233,
+              243,
+              244,
+              247,
+              250,
+              251,
+              254,
+              263,
+              285,
+              293,
+              307,
+              308,
+              335
+            ],
+            "recordOutcomeKinds": [
+              "envelope:PARSE_FAILURE",
+              "executed:PASSED"
+            ],
+            "generatedCodeShapes": [
+              [
+                "await page.goto('http://127.0.0.1:4102/ns/c05/login');",
+                "await page.getByLabel('Username').fill(vars.get('USERNAME'));",
+                "await page.getByLabel('Password').fill(vars.secret('LOGIN_PW'));",
+                "await page.getByRole('button', { name: 'Sign in' }).click();",
+                "await expect(page).toHaveURL('http://127.0.0.1:4102/ns/c05/dashboard');"
+              ],
+              [
+                "await page.goto('http://127.0.0.1:4102/ns/c05/login');",
+                "await page.getByLabel('Username').fill(vars.get('USERNAME'));",
+                "await page.getByLabel('Password').fill(vars.secret('LOGIN_PW'));",
+                "await page.getByRole('button', { name: 'Sign in' }).click();",
+                "CLARIFICATION: [missing]"
+              ]
+            ],
+            "fixtureOriginPattern": "http://127.0.0.1:4102/ns/c05/login"
+          },
+          "intendedClass": "P"
+        },
+        "reauthored": [
+          "step text (plain English, observed-path style)",
+          "fixture page(s) under pages/",
+          "expected outcome",
+          "app-side receipts oracle"
+        ],
+        "invented": [],
+        "reusedAssets": [],
+        "comparisonClaim": "NONE_NO_COMPARISON_TO_20261004"
+      },
+      "stepText": {
+        "path": "pages/c05/step-text.json",
+        "sha256": "8cb84680633fbb2bd69ea29da2d325100c2595af5c3a82274d3daff3c72946ac"
+      },
+      "pages": [
+        {
+          "path": "pages/c05/login.html",
+          "sha256": "eb7d4cc719f2b44d8c4c84ac66148ea27ba94b2e4d5092f57f180bcb057fcf10"
+        },
+        {
+          "path": "pages/c05/dashboard.html",
+          "sha256": "9561226e607ce507c89f8525484412c0a3f10d5731ee242126b905e27619eda2"
+        }
+      ],
+      "pagesReason": null,
+      "fixture": {
+        "kind": "corpus-pages",
+        "host": "evaluation/observed-authoring/pages/server.mjs",
+        "namespaceBase": "/ns/c05"
+      },
+      "expectedOutcome": {
+        "path": "pages/c05/expected-outcome.json",
+        "sha256": "90565f305b7ca4742f5bb737fec0261edf31964bb396bf483d98c283f3c8924a"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "GET /ns/c05.<runTag>/__receipts (pages/server.mjs)",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": false
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [],
+        "assertTextLocations": [
+          {
+            "value": "Dashboard",
+            "elementKind": "h1"
+          }
+        ],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      },
+      "secretRef": "LOGIN_PW",
+      "secretNote": "secretRef per OBS-007, not vars.secret; the page server holds the planted value only to compute accepted and never stores it"
+    },
+    {
+      "id": "C06-forms-fill-save",
+      "block": "ported",
+      "class": "P",
+      "classBasis": "inferred [I] from benchmark/summary.json (positive, expected to pass) and the executed-PASSED or executed-FAILED response shape in results.jsonl",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": {
+        "knownFromRecord": {
+          "resultsJsonl": {
+            "sha256": "0580e2e310bd15495d86f4cd1664bc9cf4d56501b2fd9bc23226887e9486b3ae",
+            "rowLines": [
+              16,
+              33,
+              43,
+              54,
+              61,
+              64,
+              76,
+              81,
+              97,
+              135,
+              140,
+              144,
+              147,
+              155,
+              184,
+              199,
+              203,
+              209,
+              226,
+              252,
+              260,
+              262,
+              269,
+              295,
+              296,
+              324,
+              327,
+              350
+            ],
+            "recordOutcomeKinds": [
+              "executed:PASSED",
+              "transport:TRANSPORT_FAILURE"
+            ],
+            "generatedCodeShapes": [
+              [
+                "await page.goto('http://127.0.0.1:4102/ns/c06/forms');",
+                "await page.getByLabel('Currency').selectOption('GBP');",
+                "await page.getByLabel('Remember me').check();",
+                "await page.getByLabel('Notes').fill('urgent');",
+                "await page.getByRole('button', { name: 'Save' }).click();",
+                "await expect(page.getByText('Saved')).toBeVisible();"
+              ],
+              [
+                "await page.goto('http://127.0.0.1:4102/ns/c06/forms');",
+                "await page.getByLabel('Currency').selectOption('GBP');",
+                "await page.getByRole('checkbox', { name: 'Remember me' }).check();",
+                "await page.getByLabel('Notes').fill('urgent');",
+                "await page.getByRole('button', { name: 'Save' }).click();",
+                "await expect(page.getByText('Saved')).toBeVisible();"
+              ]
+            ],
+            "fixtureOriginPattern": "http://127.0.0.1:4102/ns/c06/forms"
+          },
+          "intendedClass": "P"
+        },
+        "reauthored": [
+          "step text (plain English, observed-path style)",
+          "fixture page(s) under pages/",
+          "expected outcome",
+          "app-side receipts oracle"
+        ],
+        "invented": [],
+        "reusedAssets": [],
+        "comparisonClaim": "NONE_NO_COMPARISON_TO_20261004"
+      },
+      "stepText": {
+        "path": "pages/c06/step-text.json",
+        "sha256": "f18220d41a9d0e6c1b2c0d258d2c5fbb16a55ab15d9304cb0588df4d9070f092"
+      },
+      "pages": [
+        {
+          "path": "pages/c06/forms.html",
+          "sha256": "a0db1f373aea57aff6ea57d1fa5f1879d9f490e54d86ec6d2e73227fc52565d0"
+        }
+      ],
+      "pagesReason": null,
+      "fixture": {
+        "kind": "corpus-pages",
+        "host": "evaluation/observed-authoring/pages/server.mjs",
+        "namespaceBase": "/ns/c06"
+      },
+      "expectedOutcome": {
+        "path": "pages/c06/expected-outcome.json",
+        "sha256": "4c4d529ae8e6adc16d5ef6475aa5a2f1299ef367480ee6fd90c77305209da9e8"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "GET /ns/c06.<runTag>/__receipts (pages/server.mjs)",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": false
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [],
+        "assertTextLocations": [
+          {
+            "value": "Saved",
+            "elementKind": "p[role=status]"
+          }
+        ],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      }
+    },
+    {
+      "id": "C07-ambiguous-search-locator",
+      "block": "ported",
+      "class": "P",
+      "classBasis": "inferred [I] from benchmark/summary.json (positive, expected to pass) and the executed-PASSED or executed-FAILED response shape in results.jsonl",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": {
+        "knownFromRecord": {
+          "resultsJsonl": {
+            "sha256": "0580e2e310bd15495d86f4cd1664bc9cf4d56501b2fd9bc23226887e9486b3ae",
+            "rowLines": [
+              5,
+              7,
+              12,
+              19,
+              45,
+              49,
+              52,
+              65,
+              77,
+              111,
+              116,
+              142,
+              151,
+              156,
+              160,
+              212,
+              219,
+              235,
+              249,
+              257,
+              258,
+              266,
+              280,
+              287,
+              300,
+              310,
+              311
+            ],
+            "recordOutcomeKinds": [
+              "executed:FAILED"
+            ],
+            "generatedCodeShapes": [
+              [
+                "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+                "await page.getByRole('searchbox').fill('hosting');\nawait page.getByRole('searchbox').press('Enter');"
+              ],
+              [
+                "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+                "await page.getByRole('searchbox').fill('hosting'); await page.getByRole('searchbox').press('Enter');"
+              ]
+            ],
+            "fixtureOriginPattern": "http://127.0.0.1:4102/ns/c07/search"
+          },
+          "intendedClass": "P"
+        },
+        "reauthored": [
+          "step text (plain English, observed-path style)",
+          "fixture page(s) under pages/",
+          "expected outcome",
+          "app-side receipts oracle"
+        ],
+        "invented": [],
+        "reusedAssets": [],
+        "comparisonClaim": "NONE_NO_COMPARISON_TO_20261004"
+      },
+      "stepText": {
+        "path": "pages/c07/step-text.json",
+        "sha256": "2601fba92e513804bf85fb11fcc63b1fec6d997c2988f528b7992d53999bcafc"
+      },
+      "pages": [
+        {
+          "path": "pages/c07/search.html",
+          "sha256": "771ee303101f3f26f64f02d9a1fa362f948a3f59b8c8b39db0ecf8c308791cf0"
+        }
+      ],
+      "pagesReason": null,
+      "fixture": {
+        "kind": "corpus-pages",
+        "host": "evaluation/observed-authoring/pages/server.mjs",
+        "namespaceBase": "/ns/c07"
+      },
+      "expectedOutcome": {
+        "path": "pages/c07/expected-outcome.json",
+        "sha256": "cb0f583b6d6acfcbd91f6e9cea3a284240ff605af350ba2a16f8579664e95042"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "GET /ns/c07.<runTag>/__receipts (pages/server.mjs)",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": false
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [],
+        "assertTextLocations": [],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      }
+    },
+    {
+      "id": "C08-intended-assertion-fail",
+      "block": "ported",
+      "class": "F",
+      "classBasis": "inferred [I]: the record shows executed FAILED for an intended assertion failure",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": {
+        "knownFromRecord": {
+          "resultsJsonl": {
+            "sha256": "0580e2e310bd15495d86f4cd1664bc9cf4d56501b2fd9bc23226887e9486b3ae",
+            "rowLines": [
+              6,
+              10,
+              40,
+              51,
+              56,
+              58,
+              87,
+              89,
+              104,
+              114,
+              132,
+              139,
+              150,
+              163,
+              182,
+              194,
+              195,
+              206,
+              220,
+              222,
+              234,
+              286,
+              290,
+              294,
+              305,
+              317,
+              329
+            ],
+            "recordOutcomeKinds": [
+              "executed:FAILED"
+            ],
+            "generatedCodeShapes": [
+              [
+                "await page.goto('http://127.0.0.1:4102/ns/c08/orders');",
+                "await expect(page.getByText('Order rejected')).toBeVisible();"
+              ]
+            ],
+            "fixtureOriginPattern": "http://127.0.0.1:4102/ns/c08/orders"
+          },
+          "intendedClass": "F"
+        },
+        "reauthored": [
+          "step text (plain English, observed-path style)",
+          "fixture page(s) under pages/",
+          "expected outcome",
+          "app-side receipts oracle"
+        ],
+        "invented": [],
+        "reusedAssets": [],
+        "comparisonClaim": "NONE_NO_COMPARISON_TO_20261004"
+      },
+      "stepText": {
+        "path": "pages/c08/step-text.json",
+        "sha256": "659779c273d11dc1426497c8372bfc37463f5420010a950e654ced24ee799977"
+      },
+      "pages": [
+        {
+          "path": "pages/c08/orders.html",
+          "sha256": "37a160aa179d431672c7aba3fa3f4c49a032e13500b95313fee18f5a4807563d"
+        }
+      ],
+      "pagesReason": null,
+      "fixture": {
+        "kind": "corpus-pages",
+        "host": "evaluation/observed-authoring/pages/server.mjs",
+        "namespaceBase": "/ns/c08"
+      },
+      "expectedOutcome": {
+        "path": "pages/c08/expected-outcome.json",
+        "sha256": "da9bca93468333254a24ac968f80e21f6327f0cfcffee918d5520d95db9601d4"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "GET /ns/c08.<runTag>/__receipts (pages/server.mjs)",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": true
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [],
+        "assertTextLocations": [
+          {
+            "value": "Order rejected",
+            "elementKind": "absent"
+          }
+        ],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      }
+    },
+    {
+      "id": "C09-negation-trap",
+      "block": "ported",
+      "class": "N",
+      "classBasis": "inferred [I]: the record shows UNSUPPORTED or CLARIFICATION envelopes, never a plan",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": {
+        "knownFromRecord": {
+          "resultsJsonl": {
+            "sha256": "0580e2e310bd15495d86f4cd1664bc9cf4d56501b2fd9bc23226887e9486b3ae",
+            "rowLines": [
+              13,
+              28,
+              36,
+              41,
+              60,
+              80,
+              82,
+              85,
+              107,
+              117,
+              125,
+              141,
+              159,
+              162,
+              179,
+              185,
+              191,
+              192,
+              205,
+              217,
+              261,
+              270,
+              271,
+              284,
+              320,
+              322,
+              323,
+              345,
+              346
+            ],
+            "recordOutcomeKinds": [
+              "envelope:PARSE_FAILURE",
+              "refused:NEEDS_REVISION"
+            ],
+            "generatedCodeShapes": [
+              [
+                "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+                "UNSUPPORTED: [missing]"
+              ],
+              [
+                "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+                "UNSUPPORTED: Negative assertions such as checking that an element is not present or visible are not supported in the syntax reference."
+              ]
+            ],
+            "fixtureOriginPattern": "http://127.0.0.1:4102/ns/c09/forms"
+          },
+          "intendedClass": "N"
+        },
+        "reauthored": [
+          "step text (plain English, observed-path style)",
+          "fixture page(s) under pages/",
+          "expected outcome",
+          "app-side receipts oracle"
+        ],
+        "invented": [],
+        "reusedAssets": [],
+        "comparisonClaim": "NONE_NO_COMPARISON_TO_20261004"
+      },
+      "stepText": {
+        "path": "pages/c09/step-text.json",
+        "sha256": "e8ad553a53309b066c1d0b622045194d5bc148a2c0bbd1eca1974c2788d3f9cb"
+      },
+      "pages": [
+        {
+          "path": "pages/c09/forms.html",
+          "sha256": "a216c2564c928d3294e73943af836832537880691dbedb93dcaae69101123f11"
+        }
+      ],
+      "pagesReason": null,
+      "fixture": {
+        "kind": "corpus-pages",
+        "host": "evaluation/observed-authoring/pages/server.mjs",
+        "namespaceBase": "/ns/c09"
+      },
+      "expectedOutcome": {
+        "path": "pages/c09/expected-outcome.json",
+        "sha256": "46212673a0db0c469848e6979401e0964db05c048d3049346cde039656272760"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "GET /ns/c09.<runTag>/__receipts (pages/server.mjs)",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": true
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [],
+        "assertTextLocations": [],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      }
+    },
+    {
+      "id": "C10-unsupported-cpu",
+      "block": "ported",
+      "class": "N",
+      "classBasis": "inferred [I]: the record shows UNSUPPORTED or CLARIFICATION envelopes, never a plan",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": {
+        "knownFromRecord": {
+          "resultsJsonl": {
+            "sha256": "0580e2e310bd15495d86f4cd1664bc9cf4d56501b2fd9bc23226887e9486b3ae",
+            "rowLines": [
+              14,
+              17,
+              22,
+              32,
+              67,
+              70,
+              75,
+              113,
+              124,
+              129,
+              133,
+              137,
+              164,
+              187,
+              214,
+              223,
+              228,
+              229,
+              232,
+              242,
+              248,
+              313,
+              321,
+              325,
+              334,
+              336,
+              337,
+              340,
+              347
+            ],
+            "recordOutcomeKinds": [
+              "envelope:PARSE_FAILURE",
+              "refused:NEEDS_REVISION"
+            ],
+            "generatedCodeShapes": [
+              [
+                "UNSUPPORTED: [missing]"
+              ],
+              [
+                "UNSUPPORTED: Checking server CPU utilization is not supported in browser automation."
+              ]
+            ],
+            "fixtureOriginPattern": null
+          },
+          "intendedClass": "N"
+        },
+        "reauthored": [
+          "step text (plain English, observed-path style)",
+          "fixture page(s) under pages/",
+          "expected outcome",
+          "app-side receipts oracle"
+        ],
+        "invented": [],
+        "reusedAssets": [],
+        "comparisonClaim": "NONE_NO_COMPARISON_TO_20261004"
+      },
+      "stepText": {
+        "path": "pages/c10/step-text.json",
+        "sha256": "16174ccd7714ad42d48a71c32ae7fb3fe1b372b627148968339ab0c491b336b7"
+      },
+      "pages": [],
+      "pagesReason": "text-only instruction about host state; it names no page, and the expected outcome allows no page view",
+      "fixture": {
+        "kind": "corpus-pages",
+        "host": "evaluation/observed-authoring/pages/server.mjs",
+        "namespaceBase": "/ns/c10"
+      },
+      "expectedOutcome": {
+        "path": "pages/c10/expected-outcome.json",
+        "sha256": "472b3aedadabbae907567ce93a6ba16305186f9184a7ea0c6d39e67a061af081"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "GET /ns/c10.<runTag>/__receipts (pages/server.mjs)",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": true
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [],
+        "assertTextLocations": [],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      }
+    },
+    {
+      "id": "C11-unsupported-second-tab",
+      "block": "ported",
+      "class": "N",
+      "classBasis": "inferred [I]: the record shows UNSUPPORTED or CLARIFICATION envelopes, never a plan",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": {
+        "knownFromRecord": {
+          "resultsJsonl": {
+            "sha256": "0580e2e310bd15495d86f4cd1664bc9cf4d56501b2fd9bc23226887e9486b3ae",
+            "rowLines": [
+              18,
+              21,
+              46,
+              48,
+              69,
+              84,
+              86,
+              93,
+              102,
+              109,
+              127,
+              136,
+              152,
+              154,
+              166,
+              177,
+              196,
+              197,
+              198,
+              230,
+              241,
+              267,
+              272,
+              274,
+              288,
+              292,
+              316,
+              342,
+              343
+            ],
+            "recordOutcomeKinds": [
+              "envelope:PARSE_FAILURE",
+              "refused:NEEDS_REVISION",
+              "transport:GATEWAY_TIMEOUT"
+            ],
+            "generatedCodeShapes": [
+              [
+                "UNSUPPORTED: [missing]"
+              ],
+              [
+                "UNSUPPORTED: Multiple browser tabs or second pages are not supported."
+              ]
+            ],
+            "fixtureOriginPattern": null
+          },
+          "intendedClass": "N"
+        },
+        "reauthored": [
+          "step text (plain English, observed-path style)",
+          "fixture page(s) under pages/",
+          "expected outcome",
+          "app-side receipts oracle"
+        ],
+        "invented": [],
+        "reusedAssets": [],
+        "comparisonClaim": "NONE_NO_COMPARISON_TO_20261004"
+      },
+      "stepText": {
+        "path": "pages/c11/step-text.json",
+        "sha256": "f12aad3199267c00c01a8c4e9275417e7d0fa6f886bf7f3b4fc300f08838317c"
+      },
+      "pages": [
+        {
+          "path": "pages/c11/home.html",
+          "sha256": "141d57954d94e4f6a9f07288181f9c58622dde6466aa09e0b20e892227ac083a"
+        },
+        {
+          "path": "pages/c11/other.html",
+          "sha256": "c6f9ac20db088799f44a5ff576eddb87c1944eba3dc4acb12f00bdf4b86205fc"
+        }
+      ],
+      "pagesReason": null,
+      "fixture": {
+        "kind": "corpus-pages",
+        "host": "evaluation/observed-authoring/pages/server.mjs",
+        "namespaceBase": "/ns/c11"
+      },
+      "expectedOutcome": {
+        "path": "pages/c11/expected-outcome.json",
+        "sha256": "ec1777723b7ea2b2ad8eb3b90ee39fd758737403275d9df020961a7ef0c16ff3"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "GET /ns/c11.<runTag>/__receipts (pages/server.mjs)",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": true
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [],
+        "assertTextLocations": [],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      }
+    },
+    {
+      "id": "C12-clarify-click-button",
+      "block": "ported",
+      "class": "N",
+      "classBasis": "inferred [I]: the record shows UNSUPPORTED or CLARIFICATION envelopes, never a plan",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": {
+        "knownFromRecord": {
+          "resultsJsonl": {
+            "sha256": "0580e2e310bd15495d86f4cd1664bc9cf4d56501b2fd9bc23226887e9486b3ae",
+            "rowLines": [
+              4,
+              8,
+              9,
+              15,
+              29,
+              30,
+              68,
+              78,
+              88,
+              94,
+              128,
+              138,
+              172,
+              174,
+              176,
+              186,
+              200,
+              215,
+              225,
+              231,
+              259,
+              268,
+              278,
+              306,
+              326,
+              328,
+              339,
+              341,
+              344
+            ],
+            "recordOutcomeKinds": [
+              "envelope:PARSE_FAILURE",
+              "executed:GENERATED_FOR_NEGATIVE",
+              "refused:NEEDS_REVISION",
+              "transport:TRANSPORT_FAILURE"
+            ],
+            "generatedCodeShapes": [
+              [
+                "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+                "CLARIFICATION: [missing]"
+              ],
+              [
+                "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+                "await page.getByRole('button').click();"
+              ]
+            ],
+            "fixtureOriginPattern": "http://127.0.0.1:4102/ns/c12/forms"
+          },
+          "intendedClass": "N"
+        },
+        "reauthored": [
+          "step text (plain English, observed-path style)",
+          "fixture page(s) under pages/",
+          "expected outcome",
+          "app-side receipts oracle"
+        ],
+        "invented": [],
+        "reusedAssets": [],
+        "comparisonClaim": "NONE_NO_COMPARISON_TO_20261004"
+      },
+      "stepText": {
+        "path": "pages/c12/step-text.json",
+        "sha256": "158cb827e5a21b39b9754a35688a5537d1aaf4cd85ecefe141e7c04778daa459"
+      },
+      "pages": [
+        {
+          "path": "pages/c12/forms.html",
+          "sha256": "12ab5aa38cf5d2a8b08c10d73e0ce1ed535cb4952a4b76ee32dab0b9b40dd962"
+        }
+      ],
+      "pagesReason": null,
+      "fixture": {
+        "kind": "corpus-pages",
+        "host": "evaluation/observed-authoring/pages/server.mjs",
+        "namespaceBase": "/ns/c12"
+      },
+      "expectedOutcome": {
+        "path": "pages/c12/expected-outcome.json",
+        "sha256": "1c9ddd4c04da93756036e6d128ad75701cf076a46d81f295803d595f6fb3feed"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "GET /ns/c12.<runTag>/__receipts (pages/server.mjs)",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": true
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [],
+        "assertTextLocations": [],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      }
+    },
+    {
+      "id": "C13-ambiguous-wiki-placeholder",
+      "block": "ported",
+      "class": "P",
+      "classBasis": "inferred [I] from benchmark/summary.json (positive, expected to pass) and the executed-PASSED or executed-FAILED response shape in results.jsonl",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": {
+        "knownFromRecord": {
+          "resultsJsonl": {
+            "sha256": "0580e2e310bd15495d86f4cd1664bc9cf4d56501b2fd9bc23226887e9486b3ae",
+            "rowLines": [
+              149,
+              180,
+              189,
+              190,
+              218,
+              221,
+              224,
+              227,
+              245,
+              275,
+              277,
+              282,
+              318,
+              330,
+              332,
+              348
+            ],
+            "recordOutcomeKinds": [
+              "executed:FAILED",
+              "executed:PASSED",
+              "finish:PARSE_FAILURE",
+              "transport:GATEWAY_TIMEOUT"
+            ],
+            "generatedCodeShapes": [
+              [
+                "await page.goto('http://127.0.0.1:4102/ns/c13/wikimain');",
+                "await page.getByRole('searchbox').fill('Alan Turing');\nawait page.getByRole('searchbox').press('Enter');"
+              ],
+              [
+                "await page.goto('http://127.0.0.1:4102/ns/c13/wikimain');",
+                "await page.getByRole('searchbox', { name: 'Search Wikipedia' }).fill('Alan Turing'); await page.getByRole('searchbox', { name: 'Search Wikipedia' }).press('Enter');"
+              ]
+            ],
+            "fixtureOriginPattern": "http://127.0.0.1:4102/ns/c13/wikimain"
+          },
+          "intendedClass": "P"
+        },
+        "reauthored": [
+          "step text (plain English, observed-path style)",
+          "fixture page(s) under pages/",
+          "expected outcome",
+          "app-side receipts oracle"
+        ],
+        "invented": [],
+        "reusedAssets": [],
+        "comparisonClaim": "NONE_NO_COMPARISON_TO_20261004"
+      },
+      "stepText": {
+        "path": "pages/c13/step-text.json",
+        "sha256": "809b58644efc384c9c3c86f9c0d0c2976d8b0e3904c461f851c8c5b22dcd028e"
+      },
+      "pages": [
+        {
+          "path": "pages/c13/wikimain.html",
+          "sha256": "bc4c6a8e7fe17e775be0ad8e6a524c0007d4d849eba39b71852a329fc51e4d30"
+        }
+      ],
+      "pagesReason": null,
+      "fixture": {
+        "kind": "corpus-pages",
+        "host": "evaluation/observed-authoring/pages/server.mjs",
+        "namespaceBase": "/ns/c13"
+      },
+      "expectedOutcome": {
+        "path": "pages/c13/expected-outcome.json",
+        "sha256": "0889d16ce6f782796c08fe7ef6538216034b6bfac848c81f837d4b48c7f5f6ea"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "GET /ns/c13.<runTag>/__receipts (pages/server.mjs)",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": false
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [],
+        "assertTextLocations": [],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      }
+    },
+    {
+      "id": "D1-login-secret-fixture",
+      "block": "login",
+      "class": "P",
+      "classBasis": "login block; OBS-007 fixture",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": null,
+      "stepText": {
+        "path": "pages/d1/step-text.json",
+        "sha256": "973acf38c7f2eb0fd3f77c121fd9a3ecee33f8367a313d613d49163585085239"
+      },
+      "pages": [],
+      "pagesReason": "rides on the existing OBS-007 secret-login fixture",
+      "fixture": {
+        "kind": "existing-ts-fixture",
+        "server": "studio-runner/test/fixtures/secret-login/server.ts",
+        "serverPin": {
+          "path": "studio-runner/test/fixtures/secret-login/server.ts",
+          "base": "repo",
+          "sha256": "4dfdb95e5a57d3ced6122d59fe190dd84ef58f722ce63fc5557785c51bb611f9"
+        },
+        "host": "in-process under Node 24 type stripping (hostExistingFixture)",
+        "receipts": "receipts() -> login.submit {username, accepted}; id and password are dropped by the adapter"
+      },
+      "expectedOutcome": {
+        "path": "pages/d1/expected-outcome.json",
+        "sha256": "d39f5e65a01b81731d3e9625e3851ffe38ff1de4670e7eb65c35e0c3b413aaf3"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "secret-login fixture receipts()",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": false
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [],
+        "assertTextLocations": [],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      },
+      "secretRef": "LOGIN_PW"
+    },
+    {
+      "id": "D2-login-staging-real",
+      "block": "login",
+      "class": "P",
+      "classBasis": "login block; approved staging application with real login",
+      "status": "EXTERNAL_BLOCKED",
+      "blockedBy": {
+        "owner": "user / application owner / Platform-SRE (ED-04); dev Vault PUT Core/BFF (ED-02)",
+        "register": [
+          "U3",
+          "ED-02"
+        ],
+        "state": "unrun, owner named"
+      },
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": null,
+      "stepText": null,
+      "pages": [],
+      "pagesReason": null,
+      "fixture": {
+        "kind": "staging",
+        "note": "no repository asset; a loopback stand-in would only rehearse page handling and is never staging evidence"
+      },
+      "expectedOutcome": null,
+      "oracle": {
+        "kind": "appSideRead",
+        "endpoint": "EXTERNAL: an application-side signal chosen with the app owner, not the model or runner PASSED",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": false
+      },
+      "rs1": {
+        "isRs1Case": null,
+        "valueLocations": [],
+        "assertTextLocations": [],
+        "state": "UNKNOWN_UNTIL_STAGING_PAGES_ARE_READ",
+        "basis": "[I] cannot be determined before the staging pages exist"
+      }
+    },
+    {
+      "id": "D3-dataflow-multistep",
+      "block": "dataflow",
+      "class": "P",
+      "classBasis": "dataflow block; PR-1 protocol carrier",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": null,
+      "stepText": {
+        "path": "pages/d3/step-text.json",
+        "sha256": "d9d71bd4c6b22f1fe10fe1234388f2f2fff3f9f3dfc7e20f4c5469a63f8e7656"
+      },
+      "pages": [],
+      "pagesReason": "rides on the existing guided-dataflow fixture, mixedVisible",
+      "fixture": {
+        "kind": "existing-ts-fixture",
+        "server": "studio-runner/test/fixtures/guided-dataflow/server.ts",
+        "serverPin": {
+          "path": "studio-runner/test/fixtures/guided-dataflow/server.ts",
+          "base": "repo",
+          "sha256": "db44223ecd775115e3f8cd1ee1a87f4877be1d74d6646f24979426638deb3932"
+        },
+        "mode": "mixedVisible",
+        "host": "in-process under Node 24 type stripping (hostExistingFixture)",
+        "receipts": "receipts[] -> receipt.post {body}"
+      },
+      "expectedOutcome": {
+        "path": "pages/d3/expected-outcome.json",
+        "sha256": "dce8bf4544f72b6300cfd0ee6e9eff2e5d30f4d3468b27bb7069cd3012c8bf3b"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "guided-dataflow fixture receipts[]",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": false
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [
+          {
+            "value": "${sourceValue}",
+            "elementKind": "output",
+            "reachableByGrant": true,
+            "basis": "mixedVisible puts the value in <output aria-label=\"Business reference\">; OUTPUT is on the AC-7 RS-1 grant element list (declared fixture choice, not a page edit)"
+          }
+        ],
+        "assertTextLocations": [],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      }
+    },
+    {
+      "id": "incremental-edit-step-4",
+      "block": "incremental",
+      "class": "P",
+      "classBasis": "incremental block; STUDIO-OBS-015-owned case file, consumed unchanged",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 2,
+      "portRecord": null,
+      "stepText": {
+        "path": "cases/incremental-edit-step-4.json",
+        "sha256": "f04e70016563076decb46292ce0f18d6a819d488f94212bb2bdb11d4f6546b4a",
+        "owner": "STUDIO-OBS-015",
+        "consumedUnchanged": true
+      },
+      "pages": [],
+      "pagesReason": "rides on the existing guided-dataflow fixture, mixedVisible",
+      "fixture": {
+        "kind": "existing-ts-fixture",
+        "server": "studio-runner/test/fixtures/guided-dataflow/server.ts",
+        "serverPin": {
+          "path": "studio-runner/test/fixtures/guided-dataflow/server.ts",
+          "base": "repo",
+          "sha256": "db44223ecd775115e3f8cd1ee1a87f4877be1d74d6646f24979426638deb3932"
+        },
+        "mode": "mixedVisible",
+        "host": "in-process under Node 24 type stripping (hostExistingFixture)",
+        "receipts": "receipts[] -> receipt.post {body}"
+      },
+      "expectedOutcome": {
+        "path": "pages/inc-edit4/expected-outcome.json",
+        "sha256": "ff0234b02e16c908ca2eba7b85dc917812f8def842e764c11a9116a929a5e54f"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "guided-dataflow fixture receipts[] + run-record incremental counters",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": false
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [
+          {
+            "value": "${sourceValue}",
+            "elementKind": "output",
+            "reachableByGrant": true,
+            "basis": "mixedVisible puts the value in <output aria-label=\"Business reference\">; OUTPUT is on the AC-7 RS-1 grant element list (declared fixture choice, not a page edit)"
+          }
+        ],
+        "assertTextLocations": [],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      }
+    },
+    {
+      "id": "incremental-insert-step",
+      "block": "incremental",
+      "class": "P",
+      "classBasis": "incremental block; STUDIO-OBS-015-owned case file, consumed unchanged",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 2,
+      "portRecord": null,
+      "stepText": {
+        "path": "cases/incremental-insert-step.json",
+        "sha256": "9a1831f52911dbddc8d7dc1575c7b6e22480b00098b11bea51b6f94f0bfabbc1",
+        "owner": "STUDIO-OBS-015",
+        "consumedUnchanged": true
+      },
+      "pages": [],
+      "pagesReason": "rides on the existing guided-dataflow fixture, mixedVisible",
+      "fixture": {
+        "kind": "existing-ts-fixture",
+        "server": "studio-runner/test/fixtures/guided-dataflow/server.ts",
+        "serverPin": {
+          "path": "studio-runner/test/fixtures/guided-dataflow/server.ts",
+          "base": "repo",
+          "sha256": "db44223ecd775115e3f8cd1ee1a87f4877be1d74d6646f24979426638deb3932"
+        },
+        "mode": "mixedVisible",
+        "host": "in-process under Node 24 type stripping (hostExistingFixture)",
+        "receipts": "receipts[] -> receipt.post {body}"
+      },
+      "expectedOutcome": {
+        "path": "pages/inc-insert/expected-outcome.json",
+        "sha256": "4e4629f3b6fae6e9dcb8b3f7c1c7ed1e43cdf1221bb0c1bde5554f04ca01fd46"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "guided-dataflow fixture receipts[] + run-record incremental counters",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": false
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [
+          {
+            "value": "${sourceValue}",
+            "elementKind": "output",
+            "reachableByGrant": true,
+            "basis": "mixedVisible puts the value in <output aria-label=\"Business reference\">; OUTPUT is on the AC-7 RS-1 grant element list (declared fixture choice, not a page edit)"
+          }
+        ],
+        "assertTextLocations": [],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      }
+    },
+    {
+      "id": "E1-sso-approved-origin",
+      "block": "enterprise",
+      "class": "P",
+      "classBasis": "enterprise block; SSO on an approved origin",
+      "status": "EXTERNAL_BLOCKED",
+      "blockedBy": {
+        "owner": "user / application owner / Platform-SRE (ED-04): approved SSO origin or IdP test tenant and test identity",
+        "register": [
+          "U3"
+        ],
+        "state": "unrun, owner named"
+      },
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": null,
+      "stepText": null,
+      "pages": [],
+      "pagesReason": null,
+      "fixture": {
+        "kind": "staging",
+        "note": "a loopback two-origin redirect (127.0.0.1 vs localhost) could rehearse origin handling; NOT built here, and never SSO evidence"
+      },
+      "expectedOutcome": null,
+      "oracle": {
+        "kind": "appSideRead",
+        "endpoint": "EXTERNAL: application-side session signal supplied by the app owner",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": false
+      },
+      "rs1": {
+        "isRs1Case": null,
+        "valueLocations": [],
+        "assertTextLocations": [],
+        "state": "UNKNOWN_UNTIL_STAGING_PAGES_ARE_READ",
+        "basis": "[I] cannot be determined before the staging pages exist"
+      }
+    },
+    {
+      "id": "E2-shadow-dom-open",
+      "block": "enterprise",
+      "class": "P",
+      "classBasis": "enterprise block; open shadow root",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": null,
+      "stepText": {
+        "path": "pages/e2/step-text.json",
+        "sha256": "15c6d222bb7079ad390307a08a85bfce78cbd400822b19ca279a0cf1f80f3b10"
+      },
+      "pages": [
+        {
+          "path": "pages/e2/shadow.html",
+          "sha256": "9b083f8386427fe203ede4368fc19aa6acb116b27a46244af682ac7c55ba29ce"
+        }
+      ],
+      "pagesReason": null,
+      "fixture": {
+        "kind": "corpus-pages",
+        "host": "evaluation/observed-authoring/pages/server.mjs",
+        "namespaceBase": "/ns/e2"
+      },
+      "expectedOutcome": {
+        "path": "pages/e2/expected-outcome.json",
+        "sha256": "8d99a0701ea07447027e7ed97945889fe3babfc63bdf2bc6489ce03616e84275"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "GET /ns/e2.<runTag>/__receipts (pages/server.mjs)",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": false
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [],
+        "assertTextLocations": [
+          {
+            "value": "Applied ORD-42",
+            "elementKind": "p[role=status]"
+          }
+        ],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      }
+    },
+    {
+      "id": "E3-iframe",
+      "block": "enterprise",
+      "class": "N",
+      "classBasis": "enterprise negative capability-boundary caseN; collector marks iframe unsupported, not successful iframe automation",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": null,
+      "stepText": {
+        "path": "pages/e3/step-text.json",
+        "sha256": "ee299d65b9b79178e8da269d5e726486f0ea0f74834c55919b993435337248f2"
+      },
+      "pages": [
+        {
+          "path": "pages/e3/frame.html",
+          "sha256": "eff33b3a58dd24000b2903f164d519e8fe7f60b063aa2fa20e3d625f5bf7f4a8"
+        },
+        {
+          "path": "pages/e3/inner.html",
+          "sha256": "32bce8c99dcaece4400dad64a6c88a3c6960428bb13e707d90cf9bbb710761ef"
+        }
+      ],
+      "pagesReason": null,
+      "fixture": {
+        "kind": "corpus-pages",
+        "host": "evaluation/observed-authoring/pages/server.mjs",
+        "namespaceBase": "/ns/e3"
+      },
+      "expectedOutcome": {
+        "path": "pages/e3/expected-outcome.json",
+        "sha256": "2f46ce77618ba693100541a88b4cc3b7cc4abe0cc73eb246afa4790b3bca7b9a"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "GET /ns/e3.<runTag>/__receipts (pages/server.mjs)",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": true
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [],
+        "assertTextLocations": [],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      },
+      "ruling": "Adopted PO85506e3d / architectb602698e: no false pass observed, not correct-refusal quality."
+    },
+    {
+      "id": "E4-virtualised-list",
+      "block": "enterprise",
+      "class": "P",
+      "classBasis": "enterprise block; windowed list",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": null,
+      "stepText": {
+        "path": "pages/e4/step-text.json",
+        "sha256": "8a5cdfc004f43c6345f8f180554fd1d8ebca7344e444ba841c1dcf9b3d751305"
+      },
+      "pages": [
+        {
+          "path": "pages/e4/list.html",
+          "sha256": "b302faa1b6fbe1f6a1e99c9abd77edc7c354facb8994cfc8fcf81891de6764ed"
+        }
+      ],
+      "pagesReason": null,
+      "fixture": {
+        "kind": "corpus-pages",
+        "host": "evaluation/observed-authoring/pages/server.mjs",
+        "namespaceBase": "/ns/e4"
+      },
+      "expectedOutcome": {
+        "path": "pages/e4/expected-outcome.json",
+        "sha256": "c0383c76d5da627d828b7af74aef1957902b1ad01e633df3443b04fb75fe357c"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "GET /ns/e4.<runTag>/__receipts (pages/server.mjs)",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": false
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [],
+        "assertTextLocations": [],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      }
+    },
+    {
+      "id": "Q1-focus-time-helper-autocomplete",
+      "block": "qa-addition",
+      "class": "P",
+      "classBasis": "QA addition; FOCUS-MUTATION-01 exposure",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": null,
+      "stepText": {
+        "path": "pages/q1/step-text.json",
+        "sha256": "a2b5367ad8e48f0ed0dbc81a65b73b2ee30b4787299d9f5a251a01136611b0f8"
+      },
+      "pages": [
+        {
+          "path": "pages/q1/form.html",
+          "sha256": "851fa5c906cc8d1ff8d66cbed9c013fc784b28750c3882f322145c2bd7b96633"
+        }
+      ],
+      "pagesReason": null,
+      "fixture": {
+        "kind": "corpus-pages",
+        "host": "evaluation/observed-authoring/pages/server.mjs",
+        "namespaceBase": "/ns/q1"
+      },
+      "expectedOutcome": {
+        "path": "pages/q1/expected-outcome.json",
+        "sha256": "8973306c8dc23918ddffa72b8d8cd5d9763d3c5a6b739373c4a63c65ddacbf2a"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "GET /ns/q1.<runTag>/__receipts (pages/server.mjs)",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": false
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [],
+        "assertTextLocations": [],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      }
+    },
+    {
+      "id": "Q2-authored-echo-assert-same-name",
+      "block": "qa-addition",
+      "class": "P",
+      "classBasis": "QA addition; AUTHORED-ECHO-01 exposure",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": null,
+      "stepText": {
+        "path": "pages/q2/step-text.json",
+        "sha256": "87c4b710505e034e60451dff49e46c897baa04614876194c5a3b557c159beea6"
+      },
+      "pages": [
+        {
+          "path": "pages/q2/home.html",
+          "sha256": "045f80146c8e36daf2527c92b71e50e70050bf09aba705f4b0c4aa75fe3ae6e6"
+        },
+        {
+          "path": "pages/q2/reports.html",
+          "sha256": "8444fc78766c9bdd6a2eebf16ddcf6286a750027d9b7f63d3ffa2b87fd61b7f8"
+        }
+      ],
+      "pagesReason": null,
+      "fixture": {
+        "kind": "corpus-pages",
+        "host": "evaluation/observed-authoring/pages/server.mjs",
+        "namespaceBase": "/ns/q2"
+      },
+      "expectedOutcome": {
+        "path": "pages/q2/expected-outcome.json",
+        "sha256": "c3baf0c0dfd7c9ec51cff0c2cb2ede01b5611bfe78842729239cec08a9dafb40"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "GET /ns/q2.<runTag>/__receipts (pages/server.mjs)",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": false
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [],
+        "assertTextLocations": [
+          {
+            "value": "Reports",
+            "elementKind": "h1"
+          }
+        ],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      }
+    },
+    {
+      "id": "Q3-authored-echo-select-option",
+      "block": "qa-addition",
+      "class": "P",
+      "classBasis": "QA addition; AUTHORED-ECHO-01 exposure",
+      "status": "READY_LOCAL",
+      "blockedBy": null,
+      "repetitions": 3,
+      "modelSessionsPerRepetition": 1,
+      "portRecord": null,
+      "stepText": {
+        "path": "pages/q3/step-text.json",
+        "sha256": "2a6d066953b8734e7895c6dbc28692e180e9188772f9e3417008cd38a86caa88"
+      },
+      "pages": [
+        {
+          "path": "pages/q3/city.html",
+          "sha256": "2c6096c2ba77c2fc1e61aba3b486e3b2924f59dce1c72a31d9bdf4598a0d9cc6"
+        }
+      ],
+      "pagesReason": null,
+      "fixture": {
+        "kind": "corpus-pages",
+        "host": "evaluation/observed-authoring/pages/server.mjs",
+        "namespaceBase": "/ns/q3"
+      },
+      "expectedOutcome": {
+        "path": "pages/q3/expected-outcome.json",
+        "sha256": "3fdca89053f6955bb34022652527fe59201050c2639f24d1f2df3d084d43acff"
+      },
+      "oracle": {
+        "kind": "receipts",
+        "endpoint": "GET /ns/q3.<runTag>/__receipts (pages/server.mjs)",
+        "independentOf": [
+          "model",
+          "learned-plan",
+          "runner"
+        ],
+        "mutationControls": [
+          "wrongTarget",
+          "reversedAssertion",
+          "droppedSubmit",
+          "literalSubstitution"
+        ],
+        "noSideEffect": false
+      },
+      "rs1": {
+        "isRs1Case": false,
+        "valueLocations": [],
+        "assertTextLocations": [
+          {
+            "value": "Saved London",
+            "elementKind": "p[role=status]"
+          }
+        ],
+        "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+      }
+    }
+  ],
+  "pendingActualFacts": {
+    "independentCodeAndCorpusAdoption": "UNBOUND",
+    "newFreezeAndDigest": "UNBOUND",
+    "newOriginalExecutionAdmission": "UNBOUND",
+    "providerModelPricesThoughtsBillingHeadroom": "UNBOUND",
+    "stagingPagesOraclesVault": "UNBOUND",
+    "U13SecurityPrivacyHumanProofs": "UNBOUND",
+    "actualProviderUsageAndBilledCost": "UNBOUND"
+  }
+}

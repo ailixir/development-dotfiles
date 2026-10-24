@@ -1,0 +1,41 @@
+{
+  "verdict": "CLEAN_FOR_CAUSE_SUPPORTED_STATIC_SEMANTIC_REPROOF",
+  "candidateManifestSha256": "7de7fbe32a9948ffa91f83881efe247c552ec366f17421d005900d5a34d751cd",
+  "findings": [],
+  "resolvedSites": [
+    {
+      "id": "BR-LINT-01",
+      "status": "SOURCE_CORRECTION_EQUIVALENT_UNEXECUTED",
+      "change": "explicit standard Buffer import; same byteLength and boundary"
+    },
+    {
+      "id": "BR-LINT-02",
+      "status": "SOURCE_CORRECTION_EQUIVALENT_UNEXECUTED",
+      "change": "typed optional view of same stop object retains optional-call semantic old RED"
+    },
+    {
+      "id": "BR-LINT-03",
+      "status": "SOURCE_CORRECTION_EQUIVALENT_UNEXECUTED",
+      "change": "original closure bound before wrapper; one original invocation per charge"
+    }
+  ],
+  "priorSourceQaCarry": {
+    "manifestSha256": "828715fd2fd8c80bda8db247869c3ca3e955d934acce8580fd0d4b42b84ff2db",
+    "evaluatorAndDeclarationsExact": true,
+    "noGenericReReview": true
+  },
+  "caseForecast": {
+    "original": 86,
+    "existingAdded": 19,
+    "green": 105,
+    "c12Red": 8,
+    "v1C2Red": 1,
+    "namesAndAssertionsUnchanged": true,
+    "executedOnCorrectedSource": false
+  },
+  "nextGate": "Fresh own private/current-actual-successor/resource/collector/label bindings and separate root lane admission; corrected static gates before bounded semantic proof.",
+  "executionGo": false,
+  "actualAdoptionGo": false,
+  "lifecycleGo": false,
+  "actualPrivateWrites": false
+}

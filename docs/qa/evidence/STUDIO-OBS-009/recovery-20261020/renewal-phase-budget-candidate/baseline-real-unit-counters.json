@@ -1,0 +1,417 @@
+{
+  "reportPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-rt-current-unit01-vitest.json",
+  "reportSha256": "c3c3465272a9c6fd494b2f12432ba27757628f6a5eabe22df1a7c2cfe79b123e",
+  "files": [
+    {
+      "path": "studio-runner/test/guided/ownership.test.ts",
+      "cases": [
+        {
+          "ancestorTitles": [
+            "actual owning-worker driver and acknowledged lease authority"
+          ],
+          "title": "caps secret reauthorization requests at one second and stops on the two-second lost-response ceiling",
+          "fullName": "actual owning-worker driver and acknowledged lease authority caps secret reauthorization requests at one second and stops on the two-second lost-response ceiling",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "actual owning-worker driver and acknowledged lease authority"
+          ],
+          "title": "uses absolute one-second epochs rather than adding response delay to the next secret renewal",
+          "fullName": "actual owning-worker driver and acknowledged lease authority uses absolute one-second epochs rather than adding response delay to the next secret renewal",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "actual owning-worker driver and acknowledged lease authority"
+          ],
+          "title": "stops with authentic REVOKED on secret renewal denial and cannot accept another step",
+          "fullName": "actual owning-worker driver and acknowledged lease authority stops with authentic REVOKED on secret renewal denial and cannot accept another step",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "actual owning-worker driver and acknowledged lease authority"
+          ],
+          "title": "claims once, serially renews beyond30seconds with fresh keys, and installs a delayed context under only acknowledged authority",
+          "fullName": "actual owning-worker driver and acknowledged lease authority claims once, serially renews beyond30seconds with fresh keys, and installs a delayed context under only acknowledged authority",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "actual owning-worker driver and acknowledged lease authority"
+          ],
+          "title": "renews while a consumed browser action is busy without resetting workflow or materialization",
+          "fullName": "actual owning-worker driver and acknowledged lease authority renews while a consumed browser action is busy without resetting workflow or materialization",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "actual owning-worker driver and acknowledged lease authority"
+          ],
+          "title": "stops on renewal failure, stale fence/lease or terminal grant and cannot revive via context or assignment retry",
+          "fullName": "actual owning-worker driver and acknowledged lease authority stops on renewal failure, stale fence/lease or terminal grant and cannot revive via context or assignment retry",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "actual owning-worker driver and acknowledged lease authority"
+          ],
+          "title": "pre-context stop before assign creates a durable tombstone and sends no claim or browser command",
+          "fullName": "actual owning-worker driver and acknowledged lease authority pre-context stop before assign creates a durable tombstone and sends no claim or browser command",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "actual owning-worker driver and acknowledged lease authority"
+          ],
+          "title": "ignores a late initial claim after cancellation and never recreates ownership after restart",
+          "fullName": "actual owning-worker driver and acknowledged lease authority ignores a late initial claim after cancellation and never recreates ownership after restart",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "actual owning-worker driver and acknowledged lease authority"
+          ],
+          "title": "permits clarification waits but rejects contradictory grant scope and context attempts to extend authority",
+          "fullName": "actual owning-worker driver and acknowledged lease authority permits clarification waits but rejects contradictory grant scope and context attempts to extend authority",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "STUDIO-OBS-014 AC-1 governed policy from the hash-bound runner context (AR-2)"
+          ],
+          "title": "starts the runtime with the context policy, never a configured one",
+          "fullName": "STUDIO-OBS-014 AC-1 governed policy from the hash-bound runner context (AR-2) starts the runtime with the context policy, never a configured one",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "STUDIO-OBS-014 AC-1 governed policy from the hash-bound runner context (AR-2)"
+          ],
+          "title": "refuses a policy that does not match its frozen hash before any launch or observation, then accepts the bound one",
+          "fullName": "STUDIO-OBS-014 AC-1 governed policy from the hash-bound runner context (AR-2) refuses a policy that does not match its frozen hash before any launch or observation, then accepts the bound one",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "STUDIO-OBS-014 AC-1 governed policy from the hash-bound runner context (AR-2)"
+          ],
+          "title": "refuses a context without the policy fields before any launch",
+          "fullName": "STUDIO-OBS-014 AC-1 governed policy from the hash-bound runner context (AR-2) refuses a context without the policy fields before any launch",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "STUDIO-OBS-014 AC-1 governed policy from the hash-bound runner context (AR-2)"
+          ],
+          "title": "holds every later context to the policy already in force",
+          "fullName": "STUDIO-OBS-014 AC-1 governed policy from the hash-bound runner context (AR-2) holds every later context to the policy already in force",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "REL-001 start-up refusals keep their cause"
+          ],
+          "title": "keeps the launch error, the failed launch step and the failed start step under the unchanged CONTEXT_LOST message",
+          "fullName": "REL-001 start-up refusals keep their cause keeps the launch error, the failed launch step and the failed start step under the unchanged CONTEXT_LOST message",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "REL-001 start-up refusals keep their cause"
+          ],
+          "title": "names why a running browser reported itself lost while the start was still in flight",
+          "fullName": "REL-001 start-up refusals keep their cause names why a running browser reported itself lost while the start was still in flight",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "REL-001 start-up refusals keep their cause"
+          ],
+          "title": "keeps the journal error as the cause when the assignment cannot be acquired",
+          "fullName": "REL-001 start-up refusals keep their cause keeps the journal error as the cause when the assignment cannot be acquired",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "REL-001/D4 a start that cannot finish is refused inside the backend window"
+          ],
+          "title": "refuses a launcher that never settles with the full chain and one TIMEOUT line, and keeps the only slot held",
+          "fullName": "REL-001/D4 a start that cannot finish is refused inside the backend window refuses a launcher that never settles with the full chain and one TIMEOUT line, and keeps the only slot held",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "REL-001/D4 a start that cannot finish is refused inside the backend window"
+          ],
+          "title": "releases the slot after a launcher that honours its deadline has closed, and takes the next assignment",
+          "fullName": "REL-001/D4 a start that cannot finish is refused inside the backend window releases the slot after a launcher that honours its deadline has closed, and takes the next assignment",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "REL-001/D4 a start that cannot finish is refused inside the backend window"
+          ],
+          "title": "replies at the instant a launcher that ignored the abort settles inside the reserve, closes what it made and releases the slot",
+          "fullName": "REL-001/D4 a start that cannot finish is refused inside the backend window replies at the instant a launcher that ignored the abort settles inside the reserve, closes what it made and releases the slot",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "REL-001/D4 a start that cannot finish is refused inside the backend window"
+          ],
+          "title": "Quinn F5: keeps the only slot held when the failed launch cannot confirm its processes are gone, and still replies with the full chain",
+          "fullName": "REL-001/D4 a start that cannot finish is refused inside the backend window Quinn F5: keeps the only slot held when the failed launch cannot confirm its processes are gone, and still replies with the full chain",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "KL-015-D5 the stop reply and the slot follow the confirmed close"
+          ],
+          "title": "U1 (i) a started session whose graceful close hangs: terminate at the grace, the 200 only after it, the next assign accepted",
+          "fullName": "KL-015-D5 the stop reply and the slot follow the confirmed close U1 (i) a started session whose graceful close hangs: terminate at the grace, the 200 only after it, the next assign accepted",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "KL-015-D5 the stop reply and the slot follow the confirmed close"
+          ],
+          "title": "U3 (i) a terminate that finds a survivor: the stop rejects CONTEXT_LOST, the slot stays held, a repeat stop returns the same rejection",
+          "fullName": "KL-015-D5 the stop reply and the slot follow the confirmed close U3 (i) a terminate that finds a survivor: the stop rejects CONTEXT_LOST, the slot stays held, a repeat stop returns the same rejection",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "KL-015-D5 the stop reply and the slot follow the confirmed close"
+          ],
+          "title": "U4 (ii) a start that fails after the browser launched replies after the hard teardown alone, and releases the slot",
+          "fullName": "KL-015-D5 the stop reply and the slot follow the confirmed close U4 (ii) a start that fails after the browser launched replies after the hard teardown alone, and releases the slot",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "KL-015-D5 the stop reply and the slot follow the confirmed close"
+          ],
+          "title": "U4 (ii) a stop that arrives while the failed start tears down joins the same settle, never answering earlier",
+          "fullName": "KL-015-D5 the stop reply and the slot follow the confirmed close U4 (ii) a stop that arrives while the failed start tears down joins the same settle, never answering earlier",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "path": "studio-runner/test/guided/stopReason.test.ts",
+      "cases": [
+        {
+          "ancestorTitles": [
+            "stop reason when the lease and the session expiry coincide"
+          ],
+          "title": "reports EXPIRED from the assignment timer when it fires a millisecond before Date.now() reaches the expiry",
+          "fullName": "stop reason when the lease and the session expiry coincide reports EXPIRED from the assignment timer when it fires a millisecond before Date.now() reaches the expiry",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the lease and the session expiry coincide"
+          ],
+          "title": "reports EXPIRED from the runtime timer when it fires a millisecond before Date.now() reaches the expiry",
+          "fullName": "stop reason when the lease and the session expiry coincide reports EXPIRED from the runtime timer when it fires a millisecond before Date.now() reaches the expiry",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the lease and the session expiry coincide"
+          ],
+          "title": "reports EXPIRED, not LEASE_LOST, when a secret-session renewal falls in the last 100 ms and starts no claim",
+          "fullName": "stop reason when the lease and the session expiry coincide reports EXPIRED, not LEASE_LOST, when a secret-session renewal falls in the last 100 ms and starts no claim",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the lease and the session expiry coincide"
+          ],
+          "title": "reports EXPIRED for a session that renews until its hard expiry, and starts no claim inside the last 100 ms",
+          "fullName": "stop reason when the lease and the session expiry coincide reports EXPIRED for a session that renews until its hard expiry, and starts no claim inside the last 100 ms",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the lease ends strictly before the session expiry"
+          ],
+          "title": "still reports LEASE_LOST from the runtime timer",
+          "fullName": "stop reason when the lease ends strictly before the session expiry still reports LEASE_LOST from the runtime timer",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the lease ends strictly before the session expiry"
+          ],
+          "title": "still reports LEASE_LOST when a secret session's lease ends before its next renewal",
+          "fullName": "stop reason when the lease ends strictly before the session expiry still reports LEASE_LOST when a secret session's lease ends before its next renewal",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the last renewal claim is cut by the claim margin (C-1)"
+          ],
+          "title": "reports EXPIRED at the expiry, not LEASE_LOST 100 ms earlier, when a secret-session renewal claim is slower than its margin budget",
+          "fullName": "stop reason when the last renewal claim is cut by the claim margin (C-1) reports EXPIRED at the expiry, not LEASE_LOST 100 ms earlier, when a secret-session renewal claim is slower than its margin budget",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the last renewal claim is cut by the claim margin (C-1)"
+          ],
+          "title": "reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8000 ms",
+          "fullName": "stop reason when the last renewal claim is cut by the claim margin (C-1) reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8000 ms",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the last renewal claim is cut by the claim margin (C-1)"
+          ],
+          "title": "reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8007 ms",
+          "fullName": "stop reason when the last renewal claim is cut by the claim margin (C-1) reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8007 ms",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the last renewal claim is cut by the claim margin (C-1)"
+          ],
+          "title": "reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8015 ms",
+          "fullName": "stop reason when the last renewal claim is cut by the claim margin (C-1) reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8015 ms",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the last renewal claim is cut by the claim margin (C-1)"
+          ],
+          "title": "reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8023 ms",
+          "fullName": "stop reason when the last renewal claim is cut by the claim margin (C-1) reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8023 ms",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the last renewal claim is cut by the claim margin (C-1)"
+          ],
+          "title": "reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8031 ms",
+          "fullName": "stop reason when the last renewal claim is cut by the claim margin (C-1) reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8031 ms",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the last renewal claim is cut by the claim margin (C-1)"
+          ],
+          "title": "reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8040 ms",
+          "fullName": "stop reason when the last renewal claim is cut by the claim margin (C-1) reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8040 ms",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the last renewal claim is cut by the claim margin (C-1)"
+          ],
+          "title": "reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8048 ms",
+          "fullName": "stop reason when the last renewal claim is cut by the claim margin (C-1) reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8048 ms",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the last renewal claim is cut by the claim margin (C-1)"
+          ],
+          "title": "reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8057 ms",
+          "fullName": "stop reason when the last renewal claim is cut by the claim margin (C-1) reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8057 ms",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the last renewal claim is cut by the claim margin (C-1)"
+          ],
+          "title": "reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8066 ms",
+          "fullName": "stop reason when the last renewal claim is cut by the claim margin (C-1) reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8066 ms",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the last renewal claim is cut by the claim margin (C-1)"
+          ],
+          "title": "reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8075 ms",
+          "fullName": "stop reason when the last renewal claim is cut by the claim margin (C-1) reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8075 ms",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the last renewal claim is cut by the claim margin (C-1)"
+          ],
+          "title": "reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8084 ms",
+          "fullName": "stop reason when the last renewal claim is cut by the claim margin (C-1) reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8084 ms",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the last renewal claim is cut by the claim margin (C-1)"
+          ],
+          "title": "reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8093 ms",
+          "fullName": "stop reason when the last renewal claim is cut by the claim margin (C-1) reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8093 ms",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the last renewal claim is cut by the claim margin (C-1)"
+          ],
+          "title": "reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8102 ms",
+          "fullName": "stop reason when the last renewal claim is cut by the claim margin (C-1) reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8102 ms",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the last renewal claim is cut by the claim margin (C-1)"
+          ],
+          "title": "reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8111 ms",
+          "fullName": "stop reason when the last renewal claim is cut by the claim margin (C-1) reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8111 ms",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the last renewal claim is cut by the claim margin (C-1)"
+          ],
+          "title": "reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8120 ms",
+          "fullName": "stop reason when the last renewal claim is cut by the claim margin (C-1) reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8120 ms",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason when the last renewal claim is cut by the claim margin (C-1)"
+          ],
+          "title": "reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8131 ms",
+          "fullName": "stop reason when the last renewal claim is cut by the claim margin (C-1) reports EXPIRED for a non-secret session to its hard expiry with a 20 ms claim latency: lifetime 8131 ms",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason controls for the claim margin: other aborts and refusals keep their reason"
+          ],
+          "title": "reports LEASE_LOST when the lease ends strictly before the expiry and the claim is slower than its margin budget",
+          "fullName": "stop reason controls for the claim margin: other aborts and refusals keep their reason reports LEASE_LOST when the lease ends strictly before the expiry and the claim is slower than its margin budget",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason controls for the claim margin: other aborts and refusals keep their reason"
+          ],
+          "title": "reports LEASE_LOST at the claim cap when the lease is at the expiry and the backend never answers a cap-bound claim",
+          "fullName": "stop reason controls for the claim margin: other aborts and refusals keep their reason reports LEASE_LOST at the claim cap when the lease is at the expiry and the backend never answers a cap-bound claim",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [
+            "stop reason controls for the claim margin: other aborts and refusals keep their reason"
+          ],
+          "title": "reports REVOKED at once when the backend refuses a renewal inside the margin band",
+          "fullName": "stop reason controls for the claim margin: other aborts and refusals keep their reason reports REVOKED at once when the backend refuses a renewal inside the margin band",
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "noRuntimeHere": true
+}

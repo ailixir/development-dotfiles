@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 3,
+  "session": {
+    "schemaVersion": 3,
+    "sessionId": "86f5435d-7a00-48e8-b1db-5c10e2c66aed",
+    "testId": "06bb41b2-ecba-4ff7-8e91-269e98fb533d",
+    "state": "FAILED",
+    "expiresAt": "2026-10-21T19:14:41.503311Z",
+    "counters": {
+      "actions": 0,
+      "observations": 0,
+      "modelProposals": 3,
+      "modelInputTokens": 39019,
+      "modelOutputTokens": 12288,
+      "sanitizedEvidenceBytes": 0
+    },
+    "progress": {
+      "stepCount": 3,
+      "activeStep": null
+    }
+  },
+  "result": {
+    "schemaVersion": 3,
+    "sessionId": "86f5435d-7a00-48e8-b1db-5c10e2c66aed",
+    "executionId": "86f5435d-7a00-48e8-b1db-5c10e2c66aed",
+    "scopeHash": "0d34116e371660d7c67bd2290aaf628d602b66759e647fc2ffa7d273be29fabb",
+    "mode": "guided",
+    "outcome": "FAILED",
+    "learnedFromThisRun": false,
+    "replayVerified": false,
+    "scheduleActivated": false,
+    "assertionsPassed": false,
+    "relearnedFrom": null,
+    "actionTimings": [],
+    "evidence": {
+      "kind": "guidedLedger",
+      "ref": "86f5435d-7a00-48e8-b1db-5c10e2c66aed",
+      "video": {
+        "status": "PROCESSING",
+        "error": null,
+        "expiresAt": null,
+        "partial": false
+      }
+    },
+    "progress": {
+      "stepCount": 3,
+      "activeStep": null
+    },
+    "explanation": {
+      "sessionId": "86f5435d-7a00-48e8-b1db-5c10e2c66aed",
+      "sourceRevision": "2",
+      "configurationRevision": "1",
+      "steps": [
+        {
+          "stepId": "cc56c59f-2ae5-4d04-b9af-db6e0cbc4d8c",
+          "number": 1,
+          "completed": false,
+          "learnedFromThisRun": false,
+          "reusedFrom": null,
+          "relearnedAfterDrift": false,
+          "actions": []
+        },
+        {
+          "stepId": "d13b4a43-c97a-471c-b1ae-77e880f72cd1",
+          "number": 2,
+          "completed": false,
+          "learnedFromThisRun": false,
+          "reusedFrom": null,
+          "relearnedAfterDrift": false,
+          "actions": []
+        },
+        {
+          "stepId": "42c7016a-4b5f-423a-835a-4e66affbab96",
+          "number": 3,
+          "completed": false,
+          "learnedFromThisRun": false,
+          "reusedFrom": null,
+          "relearnedAfterDrift": false,
+          "actions": []
+        }
+      ],
+      "referenceFlows": []
+    },
+    "errorCode": "INVALID_CONTRACT",
+    "publication": {
+      "status": "REFUSED",
+      "receipt": null
+    },
+    "currentReadiness": {
+      "revisionId": null,
+      "ready": false,
+      "code": "NOT_PUBLISHED"
+    }
+  }
+}

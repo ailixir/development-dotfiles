@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-10-22T01:51:46.195390+00:00",
+  "scope": "Root242 status checkpoint only; not new runtime authority or story acceptance",
+  "stories": {
+    "STUDIO-OBS-009": "InProgress",
+    "STUDIO-OBS-010": "InProgress",
+    "STUDIO-OBS-011": "Done"
+  },
+  "actual238": {
+    "manifestSHA256": "20bba85b03f3c1809163c3b6763e60133bacdb808efc570b385b7433b649c160",
+    "reportSHA256": "44e4b57c9da065aa8cb52babe6713faf10844ec18fcf4127f6169f2a656e94e4",
+    "receiptSHA256": "58a3b74e09e83413f1f4a060ea404c9e3d22b24573a98737452b9af7de9c903b",
+    "workflow": "FAILED_STOPPED",
+    "firstLearnPublication": "SUCCEEDED_CONFIRMED",
+    "safeScreenshots": {
+      "planned": 17,
+      "attempted": 6,
+      "released": 5,
+      "withheld": 1,
+      "unresolved": 0,
+      "notAttempted": 11,
+      "expertViewed": 5,
+      "completeness": "PARTIAL"
+    },
+    "questionDesktop390Readable": true,
+    "radioSelectionState": "NOT_ASSESSED_MASKED",
+    "nativeDownloadedDecodedViewed": false,
+    "masking": "INCONCLUSIVE",
+    "C17": "UNRUN",
+    "fullAcceptance": false
+  },
+  "closed238": {
+    "firstSession": "SUCCEEDED",
+    "publication": "CONFIRMED",
+    "proposals": 7,
+    "attempts": {
+      "SOURCE_PLAN/APPLIED": 1,
+      "NEXT_ACTION/APPLIED": 6
+    },
+    "nativeSucceededOk": 5,
+    "lastAssertionPassed": true,
+    "firstNextActionExplicitJsonNullStepIndex": true,
+    "remainingFiveNextIndicesInRange": true,
+    "overflowIndices": 0,
+    "fixtureOutcomePassed": true,
+    "attemptReportedTokens": {
+      "input": 44183,
+      "output": 2246
+    },
+    "sessionBudgetCounters": {
+      "input": 128292,
+      "output": 28672
+    },
+    "billedUsageClaim": false,
+    "postlearnHarnessFailed": true,
+    "incrementalReplayNativeReviewUnrun": true,
+    "fullAcceptance": false
+  },
+  "cleanup239": {
+    "receiptSHA256": "ee5516a4eed38d304ae96e3017686fa3cf39381c4cd653dcbd0351efe8569a46",
+    "once": true,
+    "exportTables": 14,
+    "exportRows": 20,
+    "revoke": 204,
+    "cancels": 0,
+    "initialCleanupConfirmed": false,
+    "initialFalseProbePort": 18196,
+    "laterReadonlyAllOwnedResourcesGone": true,
+    "all43FinalDirectoryAggregatesMatch234Baseline": true,
+    "initial237190DeltaRetainedMechanismUnknown": true,
+    "fiveSafeImagePairsPreserved": true
+  },
+  "qa240": {
+    "verdict": "ACCEPT_SCOPED_EVIDENCE_WORKFLOW_FAILED_STOPPED",
+    "receiptSHA256": "c7d3b964b6d1c222138236b7d217ae5bd56312e5b3a54400bd37d157f573211e"
+  },
+  "diagnosis241": {
+    "sealSHA256": "762e0eced8daeb27cc861c20ef9e481dcce2f9f3eeac174b6d9432b56cf88da6",
+    "originalEmitWitnesses": 4,
+    "designControls": 17,
+    "initialMissingProgressIdentityNullRuntimeZeroSourceChain": true,
+    "actualOverflowHypothesisDisproved": true,
+    "liveProducerCause": "NOT_CLAIMED",
+    "next": "242narrowcopiedhelper;243offlineconfiguration;244combinedreview"
+  },
+  "candidate242": {
+    "candidateSHA256": "2cf5e69aea30732838a1a3324e39ec00c1fe90867587effc652122bf5628e7f8",
+    "sealSHA256": "2d481fd8db26e822135692ba0e827ee2ec50d8a79df77eda4c0b074dbb1a8944",
+    "actualASTControls": 43,
+    "parsedSqlEligibilityControls": 24,
+    "sqlSyntaxOneSelect": "PASS",
+    "databaseCatalogExecution": false,
+    "consumed234AndProductionSourcesUnchanged": true,
+    "review": "PENDING244_COMBINED"
+  },
+  "next": "FINAL243 config ->244 independent source/config review -> separate245SetupGO/readiness ->246 UX health -> RootRunGO -> bounded journey ->247oncecleanup ->248QA; no pending GO is authorized by this document",
+  "source233": {
+    "sourceSHA256": "145bb693623f726a924b7288b2dd7bb885b411c42bbe8eb9dbba02812eb72e83",
+    "testSHA256": "7763bcaada33dc48945365cf0dacd89a9db881582fc210d0353281aff5eba556",
+    "finalSeal": "region233-implementation/final-seal.json",
+    "finalSealSHA256": "86f7d8152e30486aaf9fe0d12eda27e44e6c19b0d1541d04ced1aa5fd2cd8f4c",
+    "mainOverlayManifestSHA256": "f3acdee8aae1b4c98c0923560629480c422c067e65aa688c285bb65b85c6a57d",
+    "mainClassSHA256": "d4967f253087dc005231e58a76ecd2c2639af75c222b9c81bd005d0d2acb575c",
+    "mainFiles": 4,
+    "changedMainClasses": 1,
+    "nestedUnchanged": 3,
+    "junit": {
+      "started": 84,
+      "succeeded": 84,
+      "failed": 0,
+      "aborted": 0,
+      "skipped": 0
+    },
+    "privateLoaderAndParametersProof": true,
+    "originalBuildResourcesParentClasses": "UNCHANGED",
+    "actualUIEffectiveness": "238genuinePrimarySecondaryquestionAnsweredOnceAndFirstPublicationSucceeded;laterPostlearnHarnessStopped",
+    "qaSource235": {
+      "verdict": "ACCEPT_FINAL_SOURCE_MAINCLASSES_AND_FOCUSED_TEST_EVIDENCE",
+      "receiptSHA256": "f9ce9634fdde8c82d1b86288fb1e54db1a747cfd766c90ef7e95173893b957f7"
+    }
+  },
+  "source222": {
+    "resourceRawSHA256": "3db1a7c6aa35ad582e56fff37734860b793bbd03b227a091ddf445022bab8cae",
+    "outputCanonicalProvenanceSHA256": "2406b380aaa01b43c9ce5fb44caee93113b397864898b555d0eed2bd182950e9",
+    "finalSealSHA256": "de2950d57a6d907d9c3f3e4d1c9ecc99150e7c5ff78fe82db9f452001931ab76",
+    "soleProductionFile": "backend/src/main/resources/studio/guided-output-contract.md",
+    "source87Snapshot": "clarification222-implementation/before/source87-pins.json",
+    "paragraphDesign": "clarification219-design.md",
+    "designApproval": "clarification221-review/receipt.json",
+    "actualOfflineProducerProof": "PASS",
+    "schemasClientParserB190OtherSources": "UNCHANGED",
+    "originalBuildResources": "UNCHANGED",
+    "historical214Mechanism": "UNKNOWN",
+    "futureModelEffectiveness": "UNMEASURED",
+    "qa223": {
+      "verdict": "ACCEPT_EXACT_PROMPT_RESOURCE_CHANGE",
+      "receiptSHA256": "33dfe1351bcb88cd931456364168888960ab91dc1513ec72e04fc0bf6a95fb10"
+    }
+  },
+  "originalApp": "http://127.0.0.1:5177 preserved; original compiled runtime unchanged",
+  "externalAcceptance": "Approved company workflow corpus/staging and operational/security records plus real human C17 and five consenting pilots still owed; no gateway/budget management scope",
+  "historicalRecordingConcern": "R93-REC1 remains open;238 native not decoded/viewed",
+  "model": "All subagents gpt-6.1-sol/high",
+  "noProgressAudit": 0,
+  "wholeBackendChecks": "Six attempts exhausted; no seventh authorized",
+  "statusOnlyNotAuthority": true
+}

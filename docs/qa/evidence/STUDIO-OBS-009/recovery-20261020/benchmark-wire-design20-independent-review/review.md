@@ -1,0 +1,31 @@
+# Independent wire-capture design20 review
+
+Disposition: REVISE_BEFORE_SCOPED_IMPLEMENTATION. The raw-capture, isolation, accounting and local-scope design is sound in principle, but two exact canary-set completeness gaps must be resolved before implementation.
+
+## WD20-01 — empty or invalid canary sets cannot establish known absence
+
+Design18 copies the supplied canary list and declares publicHttp/fulfilled/collector completeness, but its row/completeness rules contain no condition establishing a nonempty inspectable secret-canary set. Current scanCanaries at423–437 accepts an empty array, and variantsOf filters an empty string into no variants. Thus [] or [''] can scan every response and still produce zero without inspecting any sensitive canary. A malformed/unobservable canary configuration likewise cannot support a known absence claim.
+
+Require a nonempty valid copied set of nonempty string canaries for COMPLETE/known-total local inspection. Empty/invalid/uninspectable configuration must remain explicitly UNAVAILABLE/UNKNOWN in the existing local observation/completeness machinery, with totalLeakRuns null and no D_C GATE_PASS. Preserve standalone public-client usability and HARNESS_SELF_TEST labeling; do not silently invent or substitute a canary. Add a focused direct-driver configuration case and an otherwise-passing population case proving empty/invalid inspection cannot become zero-complete. The exact status can use the existing proposed row; no public product protocol is needed.
+
+## WD20-02 — actual selected/generated fixture canaries must reach the run
+
+Current runBenchmark defaults plantedSecrets to only c05 at1503. Its secret-login branch at1540 generates a fresh password when d1 is absent, while common.secretCanaries at1546 still uses only Object.values(plantedSecrets). The actual generated fixture password is therefore omitted by default even though the list is nonempty. In addition, ...driveOptions follows this list and can replace it, excluding the fixture password or other harness-known canaries. The proposed private run binding copies this incomplete list unchanged, so raw scanning alone does not repair the local omission.
+
+Build the per-run inspected set from the actual harness-known selected/generated fixture canaries, together with admitted additional canaries. A driveOptions override must not remove required harness-known values. If a required value cannot be inspected, completeness is unknown; do not infer it from a nonempty unrelated c05 value. Keep the password transient and out of run/error/log metadata. Add a requirement-level test of the real runBenchmark-to-driver binding for the d1-absent generated-password path and override protection, using controlled module/fixture seams without a real host/provider. Avoid exporting a checker only to test a copied algorithm. This remains within the proposed evaluator/harness scope; no private corpus payload or fixture source needs modification.
+
+## Local GATE_PASS versus external AC-7/AC-10
+
+NOT_CONFIGURED extraTexts does not by itself require a new global collector implementation for this local fix. Current evaluate.mjs789–802 labels the result COMPLETION_SUBGATE_ONLY_NOT_D_C_ACCEPTANCE with gate scope COMPLETION_AND_HARD_FACT_SUBGATE_ONLY and requiredActualEvidence; CLI execution remains RAW_EMITTED_UNREVIEWED. README62 explicitly excludes completed D-C/pilot acceptance while required usage, staging/security/U13/privacy/human evidence is missing.
+
+A local subgate GATE_PASS may therefore coexist with NOT_CONFIGURED only while those exact qualifications remain, the new summary is explicitly local, globalWireComplete remains null, and numeric hardGates are confirmed lower bounds rather than global absence totals. It cannot satisfy canonical AC-7's global secret/PII hard-zero, AC-10's actual gateway/all-text/positive-canary/manual-video obligations, or a full D-C PASS. Preserve those fields/disclosures in source/tests and leave external facts pending; do not add a self-attested global-complete flag or quietly relabel missing collectors as globally scanned. This is a scope clarification, not a third source defect or permission to narrow the story.
+
+## Accepted mechanics and affected verification
+
+Per-run WeakMap factory rebinding preserves immutable actual-client transport settings without a shared observer slot. The design requires the right interleaved actual-client identity/cleanup test. Full consumed text is synchronously scanned before the unchanged two-million UTF-16-unit check, JSON or status rejection; over-bound tail scanning uses non-copying search and no raw retained queue. Safe source-literal error codes, fixed errors, no parser/body/cause leakage, full decoded response capture before revision checks, and existing no409 retry are appropriate.
+
+The raw observer accumulates facts without latching stop before known/potential-start accounting. Interrupted collection is stage-owned, at most once, sticky on partial failure, awaited before disposal and does not erase primary failure or prior hits. Unknown body/scanner/collector capture and all-attempt aggregate non-PASS must remain explicit. A programmable double is not raw-complete. Session accounting and the three cause-assessment scopes remain separate.
+
+Four existing targets remain justified. Retain the original31 controls, add gap-specific tests, and run the31 affected benchmark-scoring cases plus type-check/four-file lint only under a later admission. The synthetic helper may declare its UNIT-ONLY observation premise explicitly; historical real records are not grandfathered. No stop-rule or corpus-validator semantic change is proposed; an actual later deviation would require concrete added test scope. New source pins need a genuine newly admitted original freeze-first qualification, never replay of old adoption05/09 or historical proof counts.
+
+All three design artifacts and current public source/reference hashes were checked. This review read no private manifest/case/oracle/SDK/raw-capture body, executed no reviewed code/test/helper/CLI and changed no source, story, lifecycle, gate, pointer or ledger. Existing QA13/31/type/lint acceptance remains its honest scoped history. No implementation or runtime authority is granted.

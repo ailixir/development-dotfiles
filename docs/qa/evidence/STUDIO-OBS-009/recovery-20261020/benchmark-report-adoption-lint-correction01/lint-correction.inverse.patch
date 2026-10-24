@@ -1,0 +1,44 @@
+--- a/studio-runner/evaluation/observed-authoring/manifest.json
++++ b/studio-runner/evaluation/observed-authoring/manifest.json
+@@ -105,7 +105,7 @@
+     "evaluationCli": {
+       "path": "studio-runner/evaluation/cli.mjs",
+       "base": "repo",
+-      "sha256": "8a119c26eb16ed19cd5f1a5a46ed07a9d13eeb2f6e2a951dd2dc3d854795bcad"
++      "sha256": "10d01f207187d9502c0d183e9f23f5d3b742ba6aa47f7b00c79eefedda0729c2"
+     },
+     "corpusPageServer": {
+       "path": "studio-runner/evaluation/observed-authoring/pages/server.mjs",
+--- a/studio-runner/evaluation/cli.mjs
++++ b/studio-runner/evaluation/cli.mjs
+@@ -1,7 +1,6 @@
+ #!/usr/bin/env node
+ import { readFile, writeFile, mkdir } from 'node:fs/promises';
+ import { existsSync, readFileSync } from 'node:fs';
+-import { Buffer } from 'node:buffer';
+ // eslint-disable-next-line no-restricted-imports -- Fixed evaluation self-test executable and file paths; no model input.
+ import { spawnSync } from 'node:child_process';
+ import { fileURLToPath } from 'node:url';
+--- a/studio-runner/test/evaluation/harnessSelfTest.test.ts
++++ b/studio-runner/test/evaluation/harnessSelfTest.test.ts
+@@ -128,7 +128,7 @@
+     execute: () => Promise.resolve({ executionId: 'unused' }), readExecution: () => Promise.resolve({ status: 'PASSED' }),
+   };
+   const stop = createStopRule({ allocationUsd: options.stopAfterBase ? 125 : 1_000_000_000, price: { pInPerMTok: 1_000_000, pOutPerMTok: 0 }, reservedCeiling: { input: 1000, output: 1000 } });
+-  const record = stop.record.bind(stop);
++  const record = stop.record;
+   stop.record = (session) => { order.push(`charge-${String(stop.state().sessions + 1)}`); return record(session); };
+   const run = await driveIncremental({ manifest, entry, expected: expectedOf(entry), caseFile: readJson(entry.stepText?.path ?? '') as JsonObject,
+     client, receipts: { mark: () => events.length, since: (cursor) => ({ actions: events.slice(cursor), views: [] }) }, switchSourceValue: () => { order.push('switch'); },
+--- a/studio-runner/test/evaluation/budgetAdmission.test.ts
++++ b/studio-runner/test/evaluation/budgetAdmission.test.ts
+@@ -260,8 +260,7 @@
+     for (const fact of [{ leak: true }, { falsePass: true }]) {
+       const stop = createStopRule({ allocationUsd: 10, price: { pInPerMTok: 1000, pOutPerMTok: 0 }, reservedCeiling: { input: 10_000, output: 100 } });
+       stop.record({ inputTokens: 8000, outputTokens: 0 });
+-      const legacyStop: { observeHardGate?: ReturnType<typeof createStopRule>['observeHardGate'] } = stop;
+-      legacyStop.observeHardGate?.(fact);
++      stop.observeHardGate?.(fact);
+       expect(stop.state().stopped).toBe('STOPPED_HARD_GATE'); // Old latch remains STOPPED_BUDGET_80: semantic RED, not absent-method credit.
+       expect(stop.state()).toMatchObject({ sessions: 1, spentUsd: 8, observedReasons: ['STOPPED_BUDGET_80', 'STOPPED_HARD_GATE'] });
+       expect(() => stop.record({ inputTokens: 1, outputTokens: 1 })).toThrow('SESSION_AFTER_STOP');

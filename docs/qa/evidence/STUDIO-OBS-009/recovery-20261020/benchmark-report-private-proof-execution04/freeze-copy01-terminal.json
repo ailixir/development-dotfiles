@@ -1,0 +1,48 @@
+{
+  "id": "freeze-copy01",
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs009-recovery-20261020-benchmark-report-proof02-freeze-copy01",
+    "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+    "/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner/evaluation/cli.mjs",
+    "freeze-corpus",
+    "/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/metadata-freeze02/manifest.json"
+  ],
+  "composition": "green",
+  "startedAtUtc": "2026-10-21T02:40:57.555397+00:00",
+  "rootConditionalSha256": "566c5361edfa0b33311db40a4da39e3a5d5d4258e0751bf631ec5d80ee671472",
+  "correctedProofTask": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/benchmark-report-lint-corrected-proof04-task.txt",
+  "collectorPid": 12323,
+  "ownedProcessGroup": 12323,
+  "rawOuterExit": 0,
+  "endedAtUtc": "2026-10-21T02:40:58.118861+00:00",
+  "actualCollectorResult": {
+    "command": [
+      "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+      "/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/repo/studio-runner/evaluation/cli.mjs",
+      "freeze-corpus",
+      "/private/tmp/obs009-benchmark-report-adoption-20261020-proof01/metadata-freeze02/manifest.json"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-21T02:40:57.930513+00:00",
+    "elapsedSeconds": 0.18,
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "1d535ea789fc7e6e2f054cf43b96255ce5902322f66bd88a92acd16ddd6927a6",
+    "testInputStable": true,
+    "testInputDigestBefore": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f",
+    "testInputDigestAfter": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f"
+  },
+  "resultSha256": "8a7de11f84b21b021ddb5ceb21ad361c18c62b583d4ae7fa826b32c1e3a6b0b6",
+  "logSha256": "1d535ea789fc7e6e2f054cf43b96255ce5902322f66bd88a92acd16ddd6927a6",
+  "privateInputDelta": [],
+  "cacheChangedKeys": [],
+  "cacheOther187ValuesExact": true,
+  "actualAndOwnPrivateSourcesStable": true,
+  "oldBorrowedNamespaceRead": false,
+  "privateProduct238Stable": true,
+  "ownedProcessGroupSignal0Observation": "ESRCH/GONE",
+  "noSignalsGT0": true
+}

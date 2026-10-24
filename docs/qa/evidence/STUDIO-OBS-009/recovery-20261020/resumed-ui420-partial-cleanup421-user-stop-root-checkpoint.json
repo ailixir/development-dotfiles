@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-10-22T18:02:49.032953+00:00",
+  "phase": "USER_STOP_AFTER_CURRENT_TASK_UI420_PARTIAL_CLEANUP421_CLOSED",
+  "statusOnlyNotAuthority": true,
+  "userInstruction": "resume and stop once the current task is done, we have to stop to replan the parallel tasks",
+  "currentTaskComplete": true,
+  "currentTaskScope": "SETTLE_CURRENT_UI_ATTEMPT_SHUTDOWN_OWNED_STACK_RECORD_HANDOFF_THEN_STOP",
+  "goalStatus": "PAUSED_FOR_USER_REPLANNING",
+  "fullGoalComplete": false,
+  "previousCheckpoint": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/resumed-validator415-pair418-runtime419-ui420-live-root-checkpoint.json",
+  "previousCheckpointSHA256": "2eefe19c07ba09b968c6c7fc741daebea07374bbe1622bc2513aced3f418b7d0",
+  "A": "b9b2d1fd1e96c814ef62969df2cc3be1f90180ed5d95aa11a230fc14a2f71c0f",
+  "B": "3a6bc9d203468d3df4290023a5ed1b2671449de0941131b140788c28c068c30a",
+  "runId": "afc2ebf8-ba9b-4c10-9f24-8ed876b489e0",
+  "actual420": {
+    "status": "TERMINAL_PARTIAL_FILE_GATE_TIMEOUT",
+    "failedStage": "full-learn",
+    "invocation": {
+      "code": 1,
+      "signal": null,
+      "launchFailed": false,
+      "deadlineFired": false,
+      "rawOutputDiscarded": true
+    },
+    "mutations": {
+      "start": 1,
+      "clarify": 1,
+      "finalize": 1,
+      "execute": 0
+    },
+    "flowFacts": {
+      "publications": 1,
+      "genuineClarificationAnswered": true,
+      "firstProtectedPrimaryOutcome": true,
+      "firstStepAndActionDomSeekValidated": false,
+      "secondStepAndActionDomSeekValidated": false,
+      "postIncrementalLedgerReached": false,
+      "postReplayLedgerReached": false,
+      "ordinaryReplayDomSeekValidated": false,
+      "stopSettlement": true
+    },
+    "screenshots": {
+      "planned": 17,
+      "attempted": 6,
+      "released": 6,
+      "withheld": 0,
+      "unresolved": 0,
+      "notAttempted": 11,
+      "screenshotCompleteness": "PARTIAL",
+      "actuallyExpertReviewed": 6
+    },
+    "cause": "UNKNOWN_NOT_INFERRED",
+    "uiSends": 1,
+    "resends": 0,
+    "retries": 0,
+    "receipt": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/visual420-execution/receipt.json",
+    "receiptSHA256": "19003fb76bd67df5d932de5bd0934b7bf1004a282cca3d24fbf1900a62e32fa3",
+    "sealSHA256": "a50827b78c6b992f15728dab4348268151e9c93049503faeb4f9ffec23bbaa9e",
+    "report": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/visual420-execution/report.md"
+  },
+  "cleanup421": {
+    "receipt": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/cleanup421/receipt.json",
+    "receiptSHA256": "be0af4e5feee0b35b94a17c9b6da883bc687a8a476c738058ad765b97553924c",
+    "sealSHA256": "19a237b27b786be99442e94dc3891646791443cffbfd907aeb7033d563534996",
+    "exactInvocations": 1,
+    "originalCleanupConfirmed": false,
+    "laterBoundReadOnlyAllOwnedGone": true,
+    "rolesAbsent": 9,
+    "portsFree": 7,
+    "capturedDescendantIdentitiesGone": 30,
+    "boundEmbeddedPgGone": true,
+    "ownedContainerAbsent": true,
+    "originalProtectedPidsNeverSignalled": true,
+    "sourceExportTables": 14,
+    "sourceExportRows": 21,
+    "sourceExportSHA256": "28b1c7f3832541ba403cb26ef729057c11d189ceeca5d2ec48a0725f28b4e922",
+    "exportBodyRead": false,
+    "globalUncapturedResourceAbsence": "NOT_ESTABLISHED_OR_CLAIMED"
+  },
+  "humanReview": {
+    "requestingUserOnly": true,
+    "fiveRealPilotUsersRequired": false,
+    "actualReview": "PENDING",
+    "completeVideoPack": "NOT_ESTABLISHED_CURRENT_RUN_STOPPED_BEFORE_SEEKS_EDIT_INCREMENTAL_AND_REPLAY",
+    "C17": "UNRUN",
+    "nativeVisualAssessment": "UNASSESSED",
+    "masking": "INCONCLUSIVE",
+    "fullAcceptance": false
+  },
+  "storyStatus": {
+    "STUDIO-OBS-009": "InProgress",
+    "STUDIO-OBS-010": "InProgress",
+    "STUDIO-OBS-011": "Done"
+  },
+  "executionStopped": {
+    "activeExpertTasks": [],
+    "reviewpack422": "PREFLIGHTED_BUT_NEVER_DISPATCHED_DEFERRED_TO_USER_REPLAN",
+    "newRuntimeOrModelRun": false,
+    "newParallelDispatch": false,
+    "newImplementationOrDiagnosis": false,
+    "next": "WAIT_FOR_USER_REPLANNING_NO_AUTOMATIC_CONTINUATION"
+  },
+  "formalStoryQaClaim": false
+}

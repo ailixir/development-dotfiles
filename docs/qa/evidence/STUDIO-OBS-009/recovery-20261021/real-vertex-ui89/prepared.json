@@ -1,0 +1,94 @@
+{
+  "at": "2026-10-21T19:43:51.906Z",
+  "freshDatabase": true,
+  "url": "http://127.0.0.1:5177/checks/studio/91f9e0c4-83ab-4f0f-b11f-8ad95d903bd2",
+  "saved": {
+    "id": "91f9e0c4-83ab-4f0f-b11f-8ad95d903bd2",
+    "name": "Synthetic Reports final validation 89",
+    "description": "",
+    "csiId": "CSI-LOCAL-71",
+    "environment": "Development",
+    "steps": [
+      {
+        "id": "6a3e5927-230d-4aeb-9a6a-5e472a0528da",
+        "text": "Open http://127.0.0.1:18182/fixture",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "e0e22954-2b38-418c-afb2-54b96ddf9af7",
+        "text": "Click Reports",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "c1f7f2aa-7488-4b7f-8f0d-dad1770d617e",
+        "text": "Verify Reports ready heading is visible",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ],
+    "variables": [],
+    "configuration": {
+      "browser": "chromium",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "timeoutSeconds": 30,
+      "waitStrategy": "networkidle"
+    },
+    "status": "PAUSED",
+    "schedule": null,
+    "createdAt": "2026-10-21T19:43:50.838440Z",
+    "updatedAt": "2026-10-21T19:43:51.182896Z",
+    "lastRunAt": null,
+    "lastRunStatus": null,
+    "sourceRevision": 2,
+    "configurationRevision": 1,
+    "readiness": "UNLEARNED",
+    "firstChangedStepId": null,
+    "confirmedRevisionId": null,
+    "confirmedRevisionArtifactHash": null,
+    "confirmedRevisionArtifact": null,
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "revisionInputs": {
+      "contextDigest": "01a89259e35bf0e502cbb60190b4406cab4fe06d4a7ae6457ddc290595d34cab",
+      "globalContext": "fd1cddfc07d00b5f56d167b6efe483819fb92a92c22fe4644ed6cf1a8e098068",
+      "stepContexts": [
+        {
+          "stepId": "6a3e5927-230d-4aeb-9a6a-5e472a0528da",
+          "hash": "fd1cddfc07d00b5f56d167b6efe483819fb92a92c22fe4644ed6cf1a8e098068"
+        },
+        {
+          "stepId": "e0e22954-2b38-418c-afb2-54b96ddf9af7",
+          "hash": "fd1cddfc07d00b5f56d167b6efe483819fb92a92c22fe4644ed6cf1a8e098068"
+        },
+        {
+          "stepId": "c1f7f2aa-7488-4b7f-8f0d-dad1770d617e",
+          "hash": "fd1cddfc07d00b5f56d167b6efe483819fb92a92c22fe4644ed6cf1a8e098068"
+        }
+      ],
+      "nonsecretReferencedValues": [],
+      "selectedEvidenceReferences": []
+    },
+    "review": null
+  },
+  "createHttp": 201,
+  "saveHttp": 200,
+  "priorUIProposalReservations": 6,
+  "priorIsolatedDiagnosticInvocations": 2,
+  "newProposalCap": 8,
+  "independentAcceptance": "ACCEPT_LOCAL_IMPLEMENTATION87",
+  "rootRuntimeReady": true
+}

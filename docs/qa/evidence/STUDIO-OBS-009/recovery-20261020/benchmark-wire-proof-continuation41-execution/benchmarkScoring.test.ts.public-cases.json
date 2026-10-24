@@ -1,0 +1,303 @@
+{
+  "rawReportReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-scoring01-vitest.json",
+    "sha256": "cde864d9682dd4b776f1525a348755fbf989612eeeea3d45c0d400df26c44804",
+    "bytes": 12990
+  },
+  "physicalFiles": 1,
+  "file": "test/evaluation/benchmarkScoring.test.ts",
+  "selectedStatuses": {
+    "passed": 31
+  },
+  "filteredStatuses": {},
+  "sourceBoundIdentityAndMultiplicityMatched": true,
+  "cases": [
+    {
+      "publicAuthoredFullName": "gate arithmetic on the corpus with the two staging cases unrun is PARTIAL (never a pass) at 51 runs when every run completes: the denominator drops to 17 x 3 and the floor to 46",
+      "ancestorTitles": [
+        "gate arithmetic on the corpus with the two staging cases unrun"
+      ],
+      "identitySha256": "4017790e0de5767d3b960a632e78531d63daffd6175d01cdf691143f0076e3ab",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "gate arithmetic on the corpus with the two staging cases unrun still reports PARTIAL at exactly 46 of 51 (90.2 percent) and GATE_FAIL at 45 of 51",
+      "ancestorTitles": [
+        "gate arithmetic on the corpus with the two staging cases unrun"
+      ],
+      "identitySha256": "b2dbf2448bdc671c8a078c09259f6cdeca0f48e5fa9e662422b6705fc37e8de6",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "gate arithmetic on the corpus with the two staging cases unrun reports INCOMPLETE when planned runs are missing instead of dividing by what ran",
+      "ancestorTitles": [
+        "gate arithmetic on the corpus with the two staging cases unrun"
+      ],
+      "identitySha256": "90b6ed4b6af2ae48233d982d63d4a2dca08d83297288d87d8bce3b34f5a510a1",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "gate arithmetic on the corpus with the two staging cases unrun the full 57-run arithmetic is 52 of 57 = 91.2 percent passing and 51 of 57 = 89.5 percent failing",
+      "ancestorTitles": [
+        "gate arithmetic on the corpus with the two staging cases unrun"
+      ],
+      "identitySha256": "aaaaec48bf64140de42dd9b95de90ca428e5a5308e06e8ae80518277a508220e",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "completion without clarification does not credit a class P run that needed a clarification, even when the oracle is satisfied (no reclassification as ambiguous)",
+      "ancestorTitles": [
+        "completion without clarification"
+      ],
+      "identitySha256": "ffa7c55591b4bff864df1ad8559c50c5b54263f85d3ae95a57db61320e8fdd1a",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "hard gates a false pass fails the gate even with every other run completing",
+      "ancestorTitles": [
+        "hard gates"
+      ],
+      "identitySha256": "275e97f671cea3de0e4c9ecb500f11ecd4c352df7da138f8c1c3d5781ac9d2b5",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "hard gates a secret or PII leak fails the gate",
+      "ancestorTitles": [
+        "hard gates"
+      ],
+      "identitySha256": "34921af44beb4d9ddcc7dff08504408d338e7e07aaa875e4269831a1140ccbac",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "hard gates retains an earlier 'false pass' after a clean final attempt is credited",
+      "ancestorTitles": [
+        "hard gates"
+      ],
+      "identitySha256": "712b59c6210c79dba11699b2af033b6b6a2f97602ff0c6d3c38ef4395fedaf55",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "hard gates retains an earlier 'secret or PII leak' after a clean final attempt is credited",
+      "ancestorTitles": [
+        "hard gates"
+      ],
+      "identitySha256": "92ac7ff7fdfc99d0fb3ce0b9b379295967cb0f66d1fd2df3c73f61788f0cd232",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "labels and honesty rules a HARNESS_SELF_TEST run is labelled and its verdict is NOT_EVIDENCE whatever it scores",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "identitySha256": "ec1304bcedbcbd881d22d93de0e3d61f85b02dfecbe46b9428da91df87c5bc64",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "labels and honesty rules never reports a pass when a record mixes modes",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "identitySha256": "09db1a3acd20299aedc1177b84bf7089b0555ac5e24ccf8f15f9a5f9c0d30ac8",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "labels and honesty rules refuses a run that started before the manifest freeze, and one that names another manifest",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "identitySha256": "be4d92418f1def374eb08218e216a55807eb04916760af7f7f752e0ff4c41870",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "labels and honesty rules refuses a run record that omits rs1NonScalarReadGaps (written as 0 when none, never omitted)",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "identitySha256": "dcfd849653dff5fcc53b186cc1d5af86b3dc1d6e2d0c33fc27eabfda2150c804",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "labels and honesty rules refuses a run record that omits authoredEchoUnobservableTargets (written as 0 when none, never omitted)",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "identitySha256": "af725190772c8dd7751df8807a13f91475293c7dfc40af6efbe7d6fe4356be75",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "labels and honesty rules refuses a run record that omits focusMutationRefusedFills (written as 0 when none, never omitted)",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "identitySha256": "4042d1de9fb856ca73d3b4c19a5075dbcdd7080381807217d8254f1978cc106b",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "labels and honesty rules writes the three accounting fields as explicit zeros with their denominators",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "identitySha256": "e5db154792d52d8d8fad943aa1a895766bafae92462e28dc3b7dbcd9a8e25b8f",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "labels and honesty rules counts RS-1 gaps inside the gate denominator and lists them with case, element kind and run number",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "identitySha256": "428a27e30dd63ec8176cbca6f459ac02e1e7ba34a5ee3f7c24aefcfc4c9ec1c7",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "labels and honesty rules keeps an infrastructure-failed run visible and credits only its re-run; an unreported retry is a problem",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "identitySha256": "93f8b7435bb0f7d8a459bf56495306788c1a37a47267e927611c15fc1c1c8adf",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "labels and honesty rules publishes p50/p95 latency, model calls, tokens and cost with denominators; cost stays unavailable without a price",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "identitySha256": "676c1e1669934bc5a9f2a16437579c14839849968a5160ea28516af9e0d65d3b",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "labels and honesty rules reports class F and N separately, outside the completion denominator",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "identitySha256": "8f8eef5ec5caad9f5b0213bf33358cf1024038a1389674f25a5a96a6e7026c15",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "replay stability (consensus plan s11): >= 98 percent over 100 replays with one artifact hash passes at 98 of 100 with one hash, fails at 97, fails when the hash drifts, fails when fewer than 100 replays ran",
+      "ancestorTitles": [
+        "replay stability (consensus plan s11): >= 98 percent over 100 replays with one artifact hash"
+      ],
+      "identitySha256": "4f0b4c012ec82d49e6c9d0d119822bcd1d5f67ca30721d23a239638903731fe5",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "replay stability (consensus plan s11): >= 98 percent over 100 replays with one artifact hash labels a self-test run NOT_EVIDENCE even when it passes",
+      "ancestorTitles": [
+        "replay stability (consensus plan s11): >= 98 percent over 100 replays with one artifact hash"
+      ],
+      "identitySha256": "763d9aab07d4de39a8590ace9fa87554203221678c6befb553caaca4fb3f20c2",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group1: an unreviewed generic budget failure is UNKNOWN rather than an observed zero",
+      "ancestorTitles": [
+        "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+      ],
+      "identitySha256": "9e46d3ad7427292e1de37d8464e4903a855305effea631f866b490eef7bffd7a",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group1: plausible VERIFIED hashes cannot replace actual bound independent adoption",
+      "ancestorTitles": [
+        "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+      ],
+      "identitySha256": "e2e9c5fbb847190411ef90e971b3ed23b7aea9626e51d5bee883beccb8bf93d9",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group2: 'rs1NonScalarReadGaps' binds real event references and preserves a failed class-P run",
+      "ancestorTitles": [
+        "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+      ],
+      "identitySha256": "1c81ade1ab1d80a22649bc880bf37caf851362ddd14aea63cd3cf8fbe6daaa79",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group2: 'authoredEchoUnobservableTargets' binds real event references and preserves a failed class-P run",
+      "ancestorTitles": [
+        "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+      ],
+      "identitySha256": "f0c32639594e7e544482969ff30badc609f791f03d7cce0da6d1e842d8cecbe9",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group2: 'focusMutationRefusedFills' binds real event references and preserves a failed class-P run",
+      "ancestorTitles": [
+        "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+      ],
+      "identitySha256": "22f1bc76ee38ea2422829a9dd8cc2e6394e88ce322e0d3fb2272c0fcc8e1d25f",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group2: distinct same-element events survive incomplete scope while count/ref inconsistencies are refused",
+      "ancestorTitles": [
+        "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+      ],
+      "identitySha256": "ed6adacc5985d53a6f692857d03b85fcf9ff62e131d32ef91d33e0eb180371ef",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group3: final-P, credited-all and every supplied attempt have separate cause denominators",
+      "ancestorTitles": [
+        "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+      ],
+      "identitySha256": "a8d579e531fc6131b78b9fd9c3ab2cbd7172873b1abef4b9d8e10ea18bb11686",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group6: immutable originals defeat hard-fact laundering and the offline branch writes fresh files without a client",
+      "ancestorTitles": [
+        "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+      ],
+      "identitySha256": "3cf1f705403a2e8eb0d7d9c0987d46b1a50ca105d116f291a27e1ae4d625cacd",
+      "status": "passed",
+      "selected": true
+    },
+    {
+      "publicAuthoredFullName": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group6: later admission cannot retroactively authorize original execution or promote a self-test",
+      "ancestorTitles": [
+        "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)"
+      ],
+      "identitySha256": "fc32ac8d7d5dffc9d3464416aca600961ddfb47ffb73de9d308353fa041c1dd2",
+      "status": "passed",
+      "selected": true
+    }
+  ],
+  "success": true,
+  "reportedCounts": {
+    "numTotalTests": 31,
+    "numPassedTests": 31,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numRuntimeErrorTestSuites": null
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "kind": "IMMUTABLE_PRIOR_CATALOG_METADATA_PROJECTION_ONLY",
+  "source": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution01/terminal-private-full-snapshots.json",
+  "sourceSha256": "c839c86b720389585b5cd6999f1cd8f2f49369d32d49974ef7c2ca2fb3dc3fa9",
+  "benchmarkTenRows": [
+    {
+      "path": "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+      "sha256": "c12fad22b810b92b0ce8dbc9f8f54da4540d6ad1de56d027b226acb3d047be56",
+      "bytes": 73346
+    },
+    {
+      "path": "studio-runner/evaluation/observed-authoring/evaluate.d.mts",
+      "sha256": "e202c36be92007fd22e4bb01636e23b95028471b732a47d369ac569a04c2b2de",
+      "bytes": 17116
+    },
+    {
+      "path": "studio-runner/evaluation/observed-authoring/manifest.json",
+      "sha256": "9858fc11b2086a50762c7334b5fa0e88f2a3370ffc166a62075b771d7bc70f16",
+      "bytes": 76292
+    },
+    {
+      "path": "studio-runner/evaluation/cli.mjs",
+      "sha256": "ec074937ae648792143b44b9013d8b17f13b105bb206caa9250ca2843d65f524",
+      "bytes": 10461
+    },
+    {
+      "path": "studio-runner/evaluation/README.md",
+      "sha256": "fcf738f8899d59255a13fea0b55e1919c0d7337d06321a4020d47137e9d9c207",
+      "bytes": 6771
+    },
+    {
+      "path": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "sha256": "5769819380217737448766661d62e52445b6f166ef8cf6b8f0c05e9e631ce7be",
+      "bytes": 11685
+    },
+    {
+      "path": "studio-runner/test/evaluation/corpusManifest.test.ts",
+      "sha256": "db7189d40e751949ef8714a880a5e9ff8d743f51c0e34637e37e2b44a541da6a",
+      "bytes": 12144
+    },
+    {
+      "path": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+      "sha256": "4e6b86e4bf1a09eee46570eca97a8f2e8504a1756a1c91636459e9d77884e7dd",
+      "bytes": 19422
+    },
+    {
+      "path": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+      "sha256": "0217f2b5230ad5a81d22ec90bc229ee54fa1550868a0f933c2bce736e580d549",
+      "bytes": 17824
+    },
+    {
+      "path": "studio-runner/test/evaluation/observedCorpus.ts",
+      "sha256": "be1a3630ac7a466f86542977890c7410197830350e7599ff28e436ae2865a746",
+      "bytes": 3670
+    }
+  ],
+  "matchesActualC12BeforePins": true,
+  "v2SuccessorMetadata": "only3fixturetest/helperfiles+knowncachechanged, allotherrangesexact by bound source-catalog successor",
+  "freshPostNativeSourceCompatibility": "UNBOUND; priorcatalogisNOTcurrentlivecache/sourceadmission",
+  "privateBodiesOrLiveTreeWalked": false
+}

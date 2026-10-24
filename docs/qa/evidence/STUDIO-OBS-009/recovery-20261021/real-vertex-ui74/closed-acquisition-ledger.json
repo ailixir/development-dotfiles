@@ -1,0 +1,125 @@
+{
+  "scope": "closed read-only projections of own synthetic failed session only",
+  "sessionId": "cef6d254-0b33-44b3-b8a2-571e5c656289",
+  "databaseMutation": false,
+  "session": {
+    "state": "FAILED",
+    "limits": {
+      "maxActions": 200,
+      "maxSourceSteps": 100,
+      "maxObservations": 400,
+      "maxRuntimeValues": 32,
+      "maxModelProposals": 12,
+      "maxSessionSeconds": 600,
+      "maxObservationBytes": 32768,
+      "maxObservationDepth": 8,
+      "maxObservationNodes": 500,
+      "maxRuntimeValueBytes": 4096,
+      "maxStatementsPerStep": 8,
+      "maxModelInputTokensTotal": 786432,
+      "maxModelOutputTokensTotal": 98304,
+      "maxRuntimeValuesBytesTotal": 65536,
+      "maxSanitizedEvidenceBytesTotal": 1048576
+    },
+    "counters": {
+      "actions": 1,
+      "observations": 26,
+      "modelProposals": 3,
+      "modelInputTokens": 36285,
+      "modelOutputTokens": 12288,
+      "sanitizedEvidenceBytes": 22541
+    },
+    "errorCode": null,
+    "expiresAt": "2026-10-21T19:02:09.566078Z",
+    "ownerLeaseExpiresAt": "2026-10-21T18:53:27.162251Z",
+    "progressStepIndex": 1,
+    "generation": 26,
+    "acquisitionAllowanceMs": 30000,
+    "totalExtraPolls": 24,
+    "activeStepIndex": 1,
+    "usedMs": 27821,
+    "extraPolls": 24,
+    "lastGeneration": 26,
+    "nextPollAt": "2026-10-21T18:52:56.934Z",
+    "window": {
+      "deadline": "2026-10-21T18:52:56.972Z",
+      "openedAt": "2026-10-21T18:52:29.151Z",
+      "windowId": "857e74dc-41f6-4e55-962b-c81b1ad986c5",
+      "uncertain": false,
+      "reservedMs": 27821,
+      "lastCheckedAt": "2026-10-21T18:52:56.684Z"
+    },
+    "pendingPollNumber": null,
+    "activeKeys": [
+      "stepId",
+      "usedMs",
+      "window",
+      "pending",
+      "planHash",
+      "workerId",
+      "stepIndex",
+      "extraPolls",
+      "nextPollAt",
+      "ownerFence",
+      "obligationId",
+      "planRevision",
+      "lastGeneration",
+      "targetIntentHash",
+      "lastObservationHash"
+    ]
+  },
+  "attempts": [
+    {
+      "kind": "SOURCE_PLAN",
+      "attemptNumber": 1,
+      "status": "REJECTED",
+      "errorCode": null,
+      "safeResultKind": null,
+      "inputTokens": 4302,
+      "outputTokens": 369,
+      "inputCeiling": 11656,
+      "outputCeiling": 4096,
+      "leaseUntil": "2026-10-21T18:53:11.117594+00:00",
+      "createdAt": "2026-10-21T18:52:11.119414+00:00",
+      "updatedAt": "2026-10-21T18:52:15.503202+00:00"
+    },
+    {
+      "kind": "SOURCE_PLAN",
+      "attemptNumber": 2,
+      "status": "APPLIED",
+      "errorCode": null,
+      "safeResultKind": "SOURCE_PLAN",
+      "inputTokens": 4305,
+      "outputTokens": 525,
+      "inputCeiling": 11676,
+      "outputCeiling": 4096,
+      "leaseUntil": "2026-10-21T18:53:15.520682+00:00",
+      "createdAt": "2026-10-21T18:52:15.522164+00:00",
+      "updatedAt": "2026-10-21T18:52:19.781543+00:00"
+    },
+    {
+      "kind": "NEXT_ACTION",
+      "attemptNumber": 1,
+      "status": "APPLIED",
+      "errorCode": null,
+      "safeResultKind": "NEXT_ACTION",
+      "inputTokens": 4953,
+      "outputTokens": 181,
+      "inputCeiling": 12953,
+      "outputCeiling": 4096,
+      "leaseUntil": "2026-10-21T18:53:23.698396+00:00",
+      "createdAt": "2026-10-21T18:52:23.69961+00:00",
+      "updatedAt": "2026-10-21T18:52:26.622833+00:00"
+    }
+  ],
+  "translationState": {
+    "continuation": "NEXT",
+    "plan_revision": 1,
+    "created_at": "2026-10-21T18:52:09.601636+00:00",
+    "updated_at": "2026-10-21T18:52:56.687864+00:00"
+  },
+  "usage": [],
+  "testTimeout": {
+    "timeoutSeconds": 30
+  }
+}

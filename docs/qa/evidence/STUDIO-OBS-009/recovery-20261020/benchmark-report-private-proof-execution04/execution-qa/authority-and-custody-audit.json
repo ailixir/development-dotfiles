@@ -1,0 +1,105 @@
+{
+  "kind": "INDEPENDENT_AUTHORITY_AND_CUSTODY_CHECK",
+  "rootAdmissionHash": "566c5361edfa0b33311db40a4da39e3a5d5d4258e0751bf631ec5d80ee671472",
+  "bindingMatchesRootFile": true,
+  "rootReferences": [
+    {
+      "name": "sourceCandidate",
+      "hashMatches": true
+    },
+    {
+      "name": "sourceQa",
+      "hashMatches": true
+    },
+    {
+      "name": "resourceQa",
+      "hashMatches": true
+    },
+    {
+      "name": "copyComplete",
+      "hashMatches": true
+    },
+    {
+      "name": "ownRestoredPrivateSnapshot",
+      "hashMatches": true
+    },
+    {
+      "name": "previousBenchmarkExecution",
+      "hashMatches": true
+    },
+    {
+      "name": "previous011PartialProof",
+      "hashMatches": true
+    },
+    {
+      "name": "guardCorrection",
+      "hashMatches": true
+    },
+    {
+      "name": "previousGuardFailure",
+      "hashMatches": true
+    }
+  ],
+  "sealedPackets": [
+    {
+      "directory": "benchmark-report-adoption-lint-correction01",
+      "manifestSha256": "7de7fbe32a9948ffa91f83881efe247c552ec366f17421d005900d5a34d751cd",
+      "artifactCount": 74,
+      "allHashesMatch": true
+    },
+    {
+      "directory": "independent-qa",
+      "manifestSha256": "457f8df3e7c080ba5435f0a314eb76370ef4dd3b7e9e31f5ee9420c4acfafbcf",
+      "artifactCount": 3,
+      "allHashesMatch": true
+    },
+    {
+      "directory": "benchmark-report-reused-copy-guard-correction01",
+      "manifestSha256": "9c2de7f668c2f38b84e30a0f93406eb630214e5ea351d6485b4c9e7636790c32",
+      "artifactCount": 15,
+      "allHashesMatch": true
+    },
+    {
+      "directory": "benchmark-report-private-proof-preparation",
+      "manifestSha256": "e5b069410211d10f31a44a1c68e41c773ed46216022dc874a2f2127941808648",
+      "artifactCount": 12,
+      "allHashesMatch": true
+    },
+    {
+      "directory": "benchmark-report-private-proof-execution01",
+      "manifestSha256": "37dd1408d938be3071acc680cad883d076f752232dada2a48a86bd82df685482",
+      "artifactCount": 8,
+      "allHashesMatch": true
+    },
+    {
+      "directory": "benchmark-report-private-proof-execution02",
+      "manifestSha256": "9676b7d5efd1fc3809ff66ef9c0c3a78faa3b2ba6c43cea70698491fa44da9da",
+      "artifactCount": 63,
+      "allHashesMatch": true
+    },
+    {
+      "directory": "benchmark-report-private-proof-execution03",
+      "manifestSha256": "a8e3125b491ec4805e0f04b056b72bd797db701e5f710ee09d297af2da532708",
+      "artifactCount": 14,
+      "allHashesMatch": true
+    }
+  ],
+  "handoff": {
+    "manifestSha256": "4ace8ab31cde947a320c092d39953b43182a4671de181227338d91fb61eac357",
+    "artifactCount": 48,
+    "allHashesMatch": true
+  },
+  "resumeBinding": {
+    "atUtc": "2026-10-21T02:28:20.330461+00:00",
+    "taskPath": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/benchmark-report-proof04-resume-task.txt",
+    "taskSha256": "489872df08db3cea5de9fdd14f575fcdee362a0a827a3a4a41da9ead1424eccb",
+    "handoff48AllHashesExact": true,
+    "ownV1PhaseAndCacheExactFrozen": true,
+    "actualFullSourceDistExactInitial": true,
+    "parentAdmissionUnchanged": true,
+    "noOldNativeNamespaceRead": true,
+    "noPrepareReinstallCompletedStageRedoRestoreOrSeed": true,
+    "nextOriginalCommand": "c12-red01"
+  },
+  "installedGuardScriptsExact": true
+}

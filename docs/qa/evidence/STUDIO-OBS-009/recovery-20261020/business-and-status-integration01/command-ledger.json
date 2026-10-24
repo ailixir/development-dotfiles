@@ -1,0 +1,66 @@
+[
+  {
+    "argv": [
+      "python3",
+      ".aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py",
+      "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/business-and-status-integration01/actual-before.json"
+    ],
+    "exit": 0,
+    "atUtc": "2026-10-20T23:39:24.817021+00:00"
+  },
+  {
+    "argv": [
+      "python3",
+      "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/business-and-status-integration01/prepare.py"
+    ],
+    "attempt": 1,
+    "exit": 1,
+    "preservedScript": "prepare-initial-syntax-error.py.txt",
+    "detail": "Evidence-only script syntax failure before execution; zero actual writes."
+  },
+  {
+    "argv": [
+      "python3",
+      "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/business-and-status-integration01/prepare.py"
+    ],
+    "attempt": 2,
+    "exit": 0,
+    "detail": "All nine exact preimages/candidates and protected/dependency bindings passed before actual writing."
+  },
+  {
+    "argv": [
+      "python3",
+      "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/business-and-status-integration01/apply.py"
+    ],
+    "attempt": 1,
+    "exit": 1,
+    "preservedScript": "apply-attempt01-prefix-assumption.py.txt",
+    "detail": "Prewrite reader used dist-relative row without prefix; zero actual writes. Corrected only reader path handling."
+  },
+  {
+    "argv": [
+      "python3",
+      "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/business-and-status-integration01/apply.py"
+    ],
+    "attempt": 2,
+    "exit": 0,
+    "detail": "All frozen inputs rechecked, then exactly nine approved target writes; all nine exact hashes/modes passed."
+  },
+  {
+    "argv": [
+      "python3",
+      ".aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py",
+      "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/business-and-status-integration01/actual-after.json"
+    ],
+    "exit": 0,
+    "atUtc": "2026-10-20T23:41:15.534923+00:00"
+  },
+  {
+    "argv": [
+      "python3",
+      "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/business-and-status-integration01/verify.py"
+    ],
+    "exit": 0,
+    "detail": "Complete captured source/dist, explicit nine targets, protected/dependency rows and two-insertion inverse passed."
+  }
+]

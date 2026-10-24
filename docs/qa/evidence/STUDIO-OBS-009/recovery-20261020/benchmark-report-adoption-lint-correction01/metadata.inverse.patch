@@ -1,0 +1,215 @@
+--- a/studio-runner/evaluation/observed-authoring/manifest.json
++++ b/studio-runner/evaluation/observed-authoring/manifest.json
+@@ -3,68 +3,39 @@
+   "kind": "STUDIO_OBSERVED_AUTHORING_BENCHMARK_MANIFEST",
+   "story": "STUDIO-OBS-009",
+   "ac": "AC-7",
+-  "classification": "METADATA_ADOPTION_CANDIDATE_NOT_D_C_EVIDENCE",
++  "classification": "HARNESS_PREPARATION_NOT_D_C_EVIDENCE",
+   "executionStatus": "NOT_RUN",
+   "comparisonClaim": "NONE_NO_COMPARISON_TO_20261004",
+   "authoredBy": "@dev (Dex) EP lane draft from Quinn t0-qa-20261017 B1/B5/B6; @qa review PENDING",
+-  "manifestFrozenAt": null,
+-  "manifestSha256": null,
+-  "freezeNote": "Pending actual source/corpus QA and re-freeze in its own authorized window. Old e4785112 admissions/refusals remain historical and do not admit this candidate. No provider/staging/headroom fact is supplied.",
++  "manifestFrozenAt": "2026-10-18T16:38:51.221Z",
++  "manifestSha256": "e4785112885541c03f7ebed2b08bdc878a183d8e692b62140fa4491560df285b",
++  "freezeNote": "Frozen at preparation so the self-test can prove manifestFrozenAt < runStartedAt. @qa re-reviews the step texts and expected outcomes before T4; any edit re-freezes and changes manifestSha256, which voids a prior budget admission.",
+   "rulings": {
+     "B1": {
+       "state": "RECORDED_BY_PO",
+       "ref": "STUDIO-OBS-009 story, AC-7 interpretation note: ported means re-authored ports"
+     },
+     "B2": {
+-      "state": "ADOPTED_INTERNAL_INTERPRETATION",
+-      "refs": {
+-        "po": {
+-          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/proposal.md",
+-          "sha256": "85506e3d68cccc2da280b9da694889721b8cfcc9f9740e1ef75cc89a00990615"
+-        },
+-        "architect": {
+-          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/architect-review/review.md",
+-          "sha256": "b602698e59bce4242fc691377cd6ef83991639c403ff8d5da4274604a4159a2e"
+-        }
+-      },
+-      "adopted": "All25 workflows remain; classP19x3=57/floor52, blocked staging51/floor46 at bestPARTIAL. F/N earn no completion; hard gates cover every supplied attempt."
++      "state": "RECOMMENDED_NOT_RULED",
++      "ref": "prep t0-questions B2; story \"Not decided by @po in this pass\"",
++      "adopted": "class-P-only denominator is used as the working definition; a different ruling changes only gate.classPCases"
+     },
+     "B3": {
+-      "state": "ADOPTED_INTERNAL_INTERPRETATION",
+-      "refs": {
+-        "po": {
+-          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/proposal.md",
+-          "sha256": "85506e3d68cccc2da280b9da694889721b8cfcc9f9740e1ef75cc89a00990615"
+-        },
+-        "architect": {
+-          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/architect-review/review.md",
+-          "sha256": "b602698e59bce4242fc691377cd6ef83991639c403ff8d5da4274604a4159a2e"
+-        }
+-      },
+-      "adopted": "E3 remainsN at the unsupported iframe capability boundary. No false pass observed is not correct-refusal quality or successful iframe support."
++      "state": "RECOMMENDED_NOT_RULED",
++      "ref": "prep t0-questions B3",
++      "adopted": "E3-iframe is class N"
+     },
+     "B5": {
+-      "state": "CORPUS_DESIGN_DISCLOSURE_ADOPTED",
+-      "refs": {
+-        "po": {
+-          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/proposal.md",
+-          "sha256": "85506e3d68cccc2da280b9da694889721b8cfcc9f9740e1ef75cc89a00990615"
+-        },
+-        "architect": {
+-          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/architect-review/review.md",
+-          "sha256": "b602698e59bce4242fc691377cd6ef83991639c403ff8d5da4274604a4159a2e"
+-        }
+-      },
+-      "adopted": "D3 and both unchanged incremental cases use mixedVisible. No optional N-RS1 is added. Exact-mode non-scalar reads are not exercised. D2/E1 remain uninspected UNKNOWN, not a global confirmed zero; real required unambiguous RS1 reads remainP."
++      "state": "MODE_DECLARED",
++      "adopted": "mixedVisible for D3 and both incremental cases; no exact-mode case in class P; the optional N-RS1 case is NOT added (PO option, undecided)"
+     },
+     "B6": {
+       "state": "IMPLEMENTED_LOCALLY",
+       "adopted": "receipts oracle per case, expected outcome hashed, four mutation controls per oracle"
+     },
+     "B7": {
+-      "state": "MODEL_SIZING_SECTION10_ADOPTED_MEASUREMENTS_PENDING",
+-      "ref": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/model-sizing/ruling-draft.md section10 (adopted T-1 through T-6)",
+-      "adopted": "Actual measurement/first-learn limit remains pendingT4. Existing per-CSI exclusion, conservative classification and changed-limits repetition1 recalibration remain. No limits identity or measured capacity invented."
++      "state": "MEASUREMENT_RECORDED_SEPARATELY",
++      "ref": "execution-20261018/ep/b7-proposals.json; MODEL-SIZING ruling still owed (@architect + @pm)"
+     },
+     "B8": {
+       "state": "UNKNOWN",
+@@ -96,21 +67,6 @@
+       "path": "docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/summary.json",
+       "base": "repo",
+       "sha256": "8dbef6112745292c16b8714b2087ac70696ceb95d4455781c9dfd9515785a053"
+-    },
+-    "evaluator": {
+-      "path": "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+-      "base": "repo",
+-      "sha256": "d55dbbe9b7f9ca791ec1322abe3ef67d5bb4ac58ec1f717ab56a73dcfe046e28"
+-    },
+-    "evaluationCli": {
+-      "path": "studio-runner/evaluation/cli.mjs",
+-      "base": "repo",
+-      "sha256": "8a119c26eb16ed19cd5f1a5a46ed07a9d13eeb2f6e2a951dd2dc3d854795bcad"
+-    },
+-    "corpusPageServer": {
+-      "path": "studio-runner/evaluation/observed-authoring/pages/server.mjs",
+-      "base": "repo",
+-      "sha256": "81d1673989f20ba236b5fb6a774ba33da87192983dd87956157227e1b3936d30"
+     }
+   },
+   "cases": [
+@@ -1725,7 +1681,7 @@
+         "noSideEffect": false
+       },
+       "rs1": {
+-        "isRs1Case": null,
++        "isRs1Case": false,
+         "valueLocations": [],
+         "assertTextLocations": [],
+         "state": "UNKNOWN_UNTIL_STAGING_PAGES_ARE_READ",
+@@ -1963,7 +1919,7 @@
+         "noSideEffect": false
+       },
+       "rs1": {
+-        "isRs1Case": null,
++        "isRs1Case": false,
+         "valueLocations": [],
+         "assertTextLocations": [],
+         "state": "UNKNOWN_UNTIL_STAGING_PAGES_ARE_READ",
+@@ -2032,7 +1988,7 @@
+       "id": "E3-iframe",
+       "block": "enterprise",
+       "class": "N",
+-      "classBasis": "enterprise negative capability-boundary caseN; collector marks iframe unsupported, not successful iframe automation",
++      "classBasis": "enterprise block; B3 RECOMMENDED class N (collector marks iframe as an unsupported surface), not ruled",
+       "status": "READY_LOCAL",
+       "blockedBy": null,
+       "repetitions": 3,
+@@ -2084,7 +2040,7 @@
+         "assertTextLocations": [],
+         "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+       },
+-      "ruling": "Adopted PO85506e3d / architectb602698e: no false pass observed, not correct-refusal quality."
++      "ruling": "B3: recommended class N (collector treats iframe as an unsupported surface); NOT ruled by @po/@architect"
+     },
+     {
+       "id": "E4-virtualised-list",
+@@ -2312,14 +2268,5 @@
+         "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+       }
+     }
+-  ],
+-  "pendingActualFacts": {
+-    "independentCodeAndCorpusAdoption": "UNBOUND",
+-    "newFreezeAndDigest": "UNBOUND",
+-    "newOriginalExecutionAdmission": "UNBOUND",
+-    "providerModelPricesThoughtsBillingHeadroom": "UNBOUND",
+-    "stagingPagesOraclesVault": "UNBOUND",
+-    "U13SecurityPrivacyHumanProofs": "UNBOUND",
+-    "actualProviderUsageAndBilledCost": "UNBOUND"
+-  }
++  ]
+ }
+--- a/studio-runner/evaluation/README.md
++++ b/studio-runner/evaluation/README.md
+@@ -10,7 +10,7 @@
+ 
+ | File | Purpose |
+ |---|---|
+-| `observed-authoring/manifest.json` | 25 workflows: 19 class P, 1 class F, 5 class N. Candidate metadata is deliberately unfrozen until actual QA/re-freeze (`manifestFrozenAt`, `manifestSha256` are null). Pins the sha256 of every step text, page, expected outcome, fixture server and the 2026-10-04 `results.jsonl`. |
++| `observed-authoring/manifest.json` | 25 workflows: 19 class P, 1 class F, 5 class N. Frozen (`manifestFrozenAt`, `manifestSha256`). Pins the sha256 of every step text, page, expected outcome, fixture server and the 2026-10-04 `results.jsonl`. |
+ | `observed-authoring/pages/<case>/` | Re-authored fixture pages (loopback, ephemeral port), the step text and the expected outcome of each case, and `pages/server.mjs`, the host that logs page views and posted events itself. |
+ | `observed-authoring/cases/*.json` | The two STUDIO-OBS-015 incremental cases. Owned by 015, consumed unchanged. |
+ | `observed-authoring/evaluate.mjs` | Manifest validator and freezer, outcome oracle and its four mutation controls, canary scan, isolation check, run driver, scoring and accounting, replay-stability scoring, B7 measurement, budget-admission ledger, start guard and stop rule. |
+@@ -20,9 +20,9 @@
+ - **Ported means re-authored.** Each of the 13 ported cases carries a fidelity record: what is known from the 2026-10-04 record (cited by `results.jsonl` row lines and the file's sha256), what was re-authored, and an `invented` list that must be empty. `comparisonClaim` is `NONE_NO_COMPARISON_TO_20261004`; no 2026-10-04 number is a baseline.
+ - **Independent oracle per case.** The oracle is the fixture's own record (page views logged by the host, events the page posts, or the existing fixtures' receipts), never the runner's DOM check and never the system's own PASSED. Class F and N cases expect no side effect at all. Expected outcomes are written and hashed before any run; a run that starts before `manifestFrozenAt` is refused.
+ - **Mutation controls.** Wrong target, reversed assertion, dropped submit and literal substitution are each injected against every oracle and must be rejected.
+-- **RS-1.** Every case has an explicit RS-1 mark (`[]` when it reads no value). Pages are not edited to dodge it. `rs1NonScalarReadGaps`, `authoredEchoUnobservableTargets` and `focusMutationRefusedFills` are present as integers on every run record, 0 confirmed events when none are classified; causeAssessment remains UNKNOWN until actual closed review and independent adoption establish coverage. Default0 is never verified absence.
+-- **Gate arithmetic is computed, not typed.** Class P only: 19 x 3 = 57 runs, at least 52 completions (51 of 57 fails), at most 5 failed. With the two staging cases unrun it is 51 runs, at least 46, and the result is `PARTIAL`, never a pass. The class-P denominator and negative iframe boundary follow PO85506e3d / architectb602698e. E3 does not establish correct-refusal quality or successful iframe support. D3/incrementals select mixedVisible by corpus design; D2/E1 stay separately uninspected UNKNOWN. No optional N-RS1 or exact-P predicate change is included.
+-- **Budget admission before any provider call.** `budget-admission.json` is an append-only, hash-chained ledger. A `D_C` run starts only if its latest entry is `ADMITTED` for exactly this manifest digest. With the price or the headroom unknown the status reads `ADMISSION_REFUSED_PRICE_UNKNOWN` or `ADMISSION_REFUSED_HEADROOM_UNKNOWN` and the harness makes zero provider calls. The token caps and the cost bound come from an explicit proposal plan (planned proposals x contingency x the per-call ceiling for output; x bytes per call, or one named cap, for input), not from sessions x session totals (MODEL-SIZING, 2026-10-18). The stop rule halts after the session that crosses 80 percent of the allocation, or at the first false pass or leak; a session with unknown public budget counters is charged what it recorded as reserved, and only a session with nothing recorded is charged the session totals. These are conservative protective charges, not observed provider usage/billing.
++- **RS-1.** Every case has an explicit RS-1 mark (`[]` when it reads no value). Pages are not edited to dodge it. `rs1NonScalarReadGaps`, `authoredEchoUnobservableTargets` and `focusMutationRefusedFills` are present as integers on every run record, 0 when none.
++- **Gate arithmetic is computed, not typed.** Class P only: 19 x 3 = 57 runs, at least 52 completions (51 of 57 fails), at most 5 failed. With the two staging cases unrun it is 51 runs, at least 46, and the result is `PARTIAL`, never a pass. The class-P denominator and the iframe-as-class-N reading are recommendations (T0 B2, B3), not rulings; the manifest says so.
++- **Budget admission before any provider call.** `budget-admission.json` is an append-only, hash-chained ledger. A `D_C` run starts only if its latest entry is `ADMITTED` for exactly this manifest digest. With the price or the headroom unknown the status reads `ADMISSION_REFUSED_PRICE_UNKNOWN` or `ADMISSION_REFUSED_HEADROOM_UNKNOWN` and the harness makes zero provider calls. The token caps and the cost bound come from an explicit proposal plan (planned proposals x contingency x the per-call ceiling for output; x bytes per call, or one named cap, for input), not from sessions x session totals (MODEL-SIZING, 2026-10-18). The stop rule halts after the session that crosses 80 percent of the allocation, or at the first false pass or leak; a session without reported usage is charged what it recorded as reserved, and only a session with nothing recorded is charged the session totals.
+ - **Self-tests are not evidence.** Runs driven by a scripted client are labelled `HARNESS_SELF_TEST_NOT_D_C_EVIDENCE` and their verdict is `NOT_EVIDENCE`.
+ 
+ Commands, from `studio-runner/` (Node 24):
+@@ -34,29 +34,12 @@
+ node evaluation/cli.mjs admission-record LEDGER --create --planned-proposals N --contingency F (--input-bytes-per-call N | --input-token-cap N) --plan-basis TEXT [--price-in --price-out --price-source --headroom --headroom-source --allocation]
+ node evaluation/cli.mjs admission-guard LEDGER          # exit 0 only when the latest entry is ADMITTED for this manifest
+ node evaluation/cli.mjs b7 EVIDENCE.json...             # proposals per session from fixture-provider budget evidence
+-node evaluation/cli.mjs benchmark CONFIG NEW_DIR        # live D_C raw/unreviewed records plus original execution/admission snapshot
+-node evaluation/cli.mjs benchmark-report CONFIG NEW_DIR # offline immutable originals + cause-only annotations; zero API/provider calls
++node evaluation/cli.mjs benchmark CONFIG NEW_DIR        # live D_C run; refused without an ADMITTED ledger entry
+ pnpm --config.package-manager-strict=false exec vitest run test/evaluation --coverage.enabled=false
+ ```
+ 
+-What cannot be done from here, and who owns it: any model call, the AC-8 gateway probe (ED-01 owner), the deployed stack and internal image (U4), the staging login and SSO cases D2 and E1 (U3, application owner), the budget figures (user: headroom; ED-01 owner: price list), the actual U13/AUTHORED-ECHO-01 disposition before its coding/first real call (FOCUS-MUTATION-01 remains credited), and the human C-17 masked-video reviewer. The HTTP binding `createPublicApiClient` was written from the OpenAPI text and has not been run against a live backend. The incremental case checks only what the public API shows (per-step `learnedFromThisRun` and `reusedFrom`, counters around finalize); backend reservations per prefix step and merged-revision replay model calls stay with the backend integration tests.
++What cannot be done from here, and who owns it: any model call, the AC-8 gateway probe (ED-01 owner), the deployed stack and internal image (U4), the staging login and SSO cases D2 and E1 (U3, application owner), the budget figures (user: headroom; ED-01 owner: price list), the AUTHORED-ECHO-01 and FOCUS-MUTATION-01 landings before the first real call, and the human C-17 masked-video reviewer. The HTTP binding `createPublicApiClient` was written from the OpenAPI text and has not been run against a live backend. The incremental case checks only what the public API shows (per-step `learnedFromThisRun` and `reusedFrom`, counters around finalize); backend reservations per prefix step and merged-revision replay model calls stay with the backend integration tests.
+ 
+ ## Compile-era oracle and report layer
+ 
+ `oracle.mjs`, `report.mjs`, `fixture-server.mjs`, `example-manifest.json` and `oracle.test.mjs` belong to Story 10.26. `node evaluation/cli.mjs validate-manifest FILE`, `oracle-self-test` (now `oracle.test.mjs` only) and `summarize FILE [OUT_JSON] [OUT_MD]` still work. The `run` command went with `lifecycle.mjs`. `browser-oracle.test.mjs` imports `dist/validator`, which no longer exists after the compile retirement, so it fails at the baseline before this change and is no longer run by `oracle-self-test`.
+-
+-## Cause review and offline report binding
+-
+-The existing builder reports `gateP`, `creditedAllClasses` and `allAttempts` separately. Counts are classified-event claims; verified totals require complete bound independent review, otherwise total is null. Earlier excluded attempts and all original false-pass/leak facts remain. Code checks exact bindings and closed types; it does not authenticate a reviewer, infer causal truth from a name/hash, or supply actual independent QA adoption. Generic BUDGET_EXCEEDED, page marks, successful sessions, missing canaries and display hints never establish cause or absence.
+-
+-`benchmark-report` config names `manifest`, optional `corpusRoot`, pinned `rawRuns` and `causeAnnotations` references, `reviews` references, `independentQaAdoption`, `originalExecution`, the original-start `admissionLedger` and separate `intervalAdmissionLedger`. Each reference is `{path,sha256}` over exact file bytes. Raw original JSONL is never rewritten. The annotation header binds its hash; exactly one ordinal/canonical-record-hash/manifest/case/rep/attempt annotation covers every original position, including UNKNOWN. Only cause counts, cause-event arrays and causeAssessment may differ; events/counts already present cannot decrease. Non-cause details, completion/oracle/hard facts, modes, infra, timestamps, sessions and counters stay original. Disputed raw facts need a separately authorized successor retaining their original claims.
+-
+-Closed review records bind each cause, original raw record, authored-goal/outcome/location pins and justified observation scope. Independent adoption must cover those exact records and actual original execution/configuration evidence. A hash-shaped claim alone stays UNKNOWN/non-adoptable. The CLI preserves original/refusal artifacts and writes only a fresh destination. HARNESS_SELF_TEST cannot become D_C. The admission reference must identify the immutable original-time ledger snapshot (future live output `admission-ledger.json`), not a later mutable ledger substituted as permission. It verifies the effective original entry and admittedAt before the execution start and every included D_C run. Legacy missing original receipt/snapshot/provenance remains UNBOUND/refused; no rescore-time timestamp or inferred limits identity repairs it. Later ledger entries neither admit earlier work nor rewrite its retained snapshot. The original receipt must additionally bind the actual original `finishedAt` and exact `intervalLedgerSha256`; the independent adoption must bind that terminal history and affirm its actual original interval was reviewed. The terminal history must preserve the complete original-start snapshot as an exact prefix, cover every original raw run finish, and contain no same-purpose STOP, refusal or changed admission anywhere from original execution start through its end. STOP followed by re-admission cannot restore the interrupted single history; endpoint ADMITTED alone is insufficient. Other-purpose entries alone and entries strictly after the bound original end do not constitute an interval interruption. Raw `runFinishedAt` ISO validation remains required. Missing or unbound authoritative end/history stays UNKNOWN/non-adoptable, never filled with a start timestamp, rescore/report clock, guessed duration or later permission.
+-
+-Future live CLI output preserves `admission-ledger.json` as the original start snapshot, samples an actual closure time after the original run returns, and reads separate terminal ledger bytes into `admission-ledger-interval.json` when available. Its unreviewed receipt binds those exact bytes and the actual sampled end; neither a start snapshot nor this terminal read alone authenticates complete original history. Independent adoption must establish that actual authoritative coverage. Missing ledger/end/receipt facts, process death and legacy captures remain UNKNOWN; no durable journal, producer recovery or legacy provenance is invented.
+-
+-Learn sessions preserve separate base/suffix facts. Each started learn is charged once; a base failure, leak or existing stop starts no suffix. A partial repetition retains real base SUCCEEDED with whole published:false and explicit incomplete oracle; base success alone is not a final false pass. Later hard facts share the existing latch without charging again. The three scopes expose logical attempts, known started sessions, unknown scope, per-value known subtotals and null incomplete totals. An empty population is not observed zero; an affirmative complete no-start record can establish zero. Public proposal/reservation counters and conservative/fallback stop charges remain `PUBLIC_BUDGET_COUNTERS`/named protective bases. Proposals are not actual wire calls. Actual provider tokens/cost remain null/UNAVAILABLE; this code does not manufacture ED-01 or MODEL-SIZING per-call evidence.
+-
+-An observation failure retains only public replies already captured by the existing driver. Known base/suffix session facts and protective charges survive; an unacknowledged start keeps `learnSessionsComplete:false`, unknown top-level counters, and an omitted `suffixStarted` rather than an invented not-started assertion. Its potential consumption uses the existing conservative fallback charge separately from observed session counts. The driver stops before another logical attempt. No backend state or infrastructure exclusion is fabricated. Process death or fixture cleanup failure before the original receipt is emitted still leaves original provenance UNKNOWN; this is not a durable crash journal. Actual independent review and deployed configuration evidence must be supplied by their existing owners: the current `admission-record` code-default/pinned:null record alone cannot establish the original deployed configuration for adoption.
+-
+-The numeric gate is only a completion/hard-fact subgate, not completed D-C or pilot acceptance while required usage, staging/security/U13/privacy/human evidence is missing. Required evaluator/CLI/page-server source pins, actual source QA, existing freezer and a new prior admission remain necessary after actual application; old e4785112 admissions do not transfer. All75 logical runs/81 model sessions/122 contingency sessions and the original25 workflow/page/outcome bytes remain unchanged. Actual provider prices, sharedUSD500 headroom, configuration/staging facts and independent review adoption are UNBOUND here.

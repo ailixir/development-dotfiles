@@ -1,0 +1,42 @@
+--- a/studio-runner/evaluation/observed-authoring/evaluate.mjs
++++ b/studio-runner/evaluation/observed-authoring/evaluate.mjs
+@@ -1258,7 +1258,7 @@
+       }
+       return run;
+     },
+-    dispose() { disposed = true; prepared.length = 0; values.length = 0; rawFindings.clear(); findings.clear(); for (const key of Object.keys(texts)) delete texts[key]; },
++    dispose() { disposed = true; prepared.length = 0; values.length = 0; rawFindings.clear(); findings.clear(); for (const key of Object.keys(texts)) Reflect.deleteProperty(texts, key); },
+   };
+   return { client: wrapped, texts, observation };
+ }
+@@ -1348,7 +1348,7 @@
+ 
+ /** Recover only public fields already held by the existing transient API capture. No new request/observer. */
+ async function interruptedRun({ entry, rep, attempt, mode, manifest, startedAt, captured, phases, knownSessions, attemptedStarts,
+-  chargedAtStart, spentAtStart, stopRule, now, secretCanaries, observation, incremental = undefined, priorFindings = [], priorStopObservations = [] }) {
++  chargedAtStart, spentAtStart, stopRule, now, observation, incremental = undefined, priorFindings = [], priorStopObservations = [] }) {
+   const rows = Object.entries(captured).map(([label, text]) => {
+     try { return { label, n: Number(label.split('#')[1]), body: JSON.parse(text) }; } catch { return { label, n: Number(label.split('#')[1]), body: null }; }
+   });
+--- a/studio-runner/test/evaluation/harnessSelfTest.test.ts
++++ b/studio-runner/test/evaluation/harnessSelfTest.test.ts
+@@ -537,14 +537,14 @@
+   });
+ 
+   it('WIRE-OBS18 isolates interleaved drivers sharing one actual public client through cleanup', async () => {
+-    const enteredA = deferred<void>(); const enteredB = deferred<void>(); const releaseA = deferred<void>(); const releaseB = deferred<void>();
++    const enteredA = deferred<undefined>(); const enteredB = deferred<undefined>(); const releaseA = deferred<undefined>(); const releaseB = deferred<undefined>();
+     const api = wireHarness({ failureAt: 'get', response: async (owner) => {
+-      if (owner === 1) { enteredA.release(); await releaseA.promise; return new Response(JSON.stringify({ diagnostic: 'owned-A-canary' }), { status: 409 }); }
+-      enteredB.release(); await releaseB.promise; return new Response(JSON.stringify({ diagnostic: 'owned-A-canary owned-B-canary' }), { status: 409 });
++      if (owner === 1) { enteredA.release(undefined); await releaseA.promise; return new Response(JSON.stringify({ diagnostic: 'owned-A-canary' }), { status: 409 }); }
++      enteredB.release(undefined); await releaseB.promise; return new Response(JSON.stringify({ diagnostic: 'owned-A-canary owned-B-canary' }), { status: 409 });
+     } });
+     const a = api.run(1, ['owned-A-canary']); const b = api.run(2, ['owned-B-canary']);
+-    await Promise.all([enteredA.promise, enteredB.promise]); releaseA.release(); const first = await a;
+-    releaseB.release(); const second = await b;
++    await Promise.all([enteredA.promise, enteredB.promise]); releaseA.release(undefined); const first = await a;
++    releaseB.release(undefined); const second = await b;
+     expect(first.run.details?.canaryFindings).toContainEqual(expect.objectContaining({ label: 'publicHttp', canarySha256Prefix: sha256Hex('owned-A-canary').slice(0, 12) }));
+     expect(second.run.details?.canaryFindings).toContainEqual(expect.objectContaining({ label: 'publicHttp', canarySha256Prefix: sha256Hex('owned-B-canary').slice(0, 12) }));
+     expect(second.run.details?.canaryFindings?.some((finding) => finding.canarySha256Prefix === sha256Hex('owned-A-canary').slice(0, 12))).toBe(false);

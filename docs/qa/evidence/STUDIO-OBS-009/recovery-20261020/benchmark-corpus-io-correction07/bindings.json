@@ -1,0 +1,55 @@
+{
+  "scope": "SOURCE_ONLY_MINIMAL_IO06_QA01_AND_PHASE_CORRECTION07",
+  "references": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-preparation06/manifest.json",
+      "sha256": "19f249bb4a1efa09a78af04fdc649376c7f62fd481b2b47230ceb41701befa3f"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-preparation06/source-fragments-and-bindings.json",
+      "sha256": "c5e5a221ef609cab80529eecf7e81e0310a200f83ef9cf1a5a2b2f580f179b9f"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-preparation06-independent-review/manifest.json",
+      "sha256": "169a6310d8dfe2c6596a7b213997dadfa740fc04b86119a36ede420aacfc6975"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-preparation06-independent-review/findings.json",
+      "sha256": "27bcb36b45e744033ad2193cedbd4ade544170ed96969b9401b3eb6e9b23c0d4"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-preparation06-independent-review/review.md",
+      "sha256": "9f393d6135087567b31f976a36d33c04958893fc66f19d06faa27c1ed79c2416"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/obs009-corpus-io07-correction-context.txt",
+      "sha256": "1311d2efad64661934808bbd5182642ac6bc824c7c5eee520492558a203f5403"
+    }
+  ],
+  "findingInventory": [
+    {
+      "id": "IO06-QA-01",
+      "severity": "HIGH",
+      "sourceDisposition": "FIXED_IN_UNEXECUTED_SUCCESSOR",
+      "change": "Two .next absence calls use new no-follow lstat helper; ENOENT only absent, all entries held, all other errors closed unavailable."
+    }
+  ],
+  "requiredRecipeDisposition": "REMOVED_VALIDATE_BEFORE; FREEZE_THEN_INTERNAL_VALIDATE_THEN_VALIDATE_AFTER; TWO_ORIGINAL_CLI_INVOCATIONS",
+  "closedPythonByteExactSha256": "3e9bfe3d738bf9b366128274d9bc481de8636f36dd26cbd14e2235fa29ed628a",
+  "safeReadResolverMaskDerivedAndClosedErrorBoundaryPreservation": "Exact text spans unchanged except one absence observation at each result and removed preliminary phase; source.patch is complete delta.",
+  "sourceBefore": "38174684723a7941812407027f2571d411f338fa1d3c08734cde1cf2bb0b256d",
+  "sourceAfter": "49dc702fc2474db1b1dd364c0d097bffdedddb8bc09e3e721b744ecdefbb5152",
+  "freshRootMetadata08ReferenceFromContext": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-actual-adoption-preflight05/fresh-metadata08-receipt.json",
+    "sha256": "6e4e6b5be0e505f8bd7f5a5bbccff42fc02f9b8fd4d1e2ccb6294569d39f1f58",
+    "source": "Root supplied closed provenance; no full catalogue or private body read in this preparation."
+  },
+  "correctedCandidateAndActualMembership": "UNBOUND_UNTIL_SEPARATE_REVIEW_ROOT_RELEASE",
+  "sourceParsedImportedOrExecuted": false,
+  "privateBodiesCataloguesCurrentSdkOrSourceCaptured": false,
+  "actualSourceOrManifestMutation": false,
+  "release": false,
+  "executionAuthority": false,
+  "authorSelfApproval": false,
+  "handoff": "Independent narrow source/data re-review; no runtime or actual adoption GO inferred."
+}

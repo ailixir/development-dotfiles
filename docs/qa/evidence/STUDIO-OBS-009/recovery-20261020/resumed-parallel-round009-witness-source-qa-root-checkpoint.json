@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-10-22T18:49:38.005124+00:00",
+  "phase": "PARALLEL_ROUND_009_SOURCE_QA_AND_ONCE_HISTORICAL_WITNESS",
+  "statusOnlyNotAuthority": true,
+  "userExecutionResumed": true,
+  "goalApiObservedStatus": "paused",
+  "goalApiCannotEditObjectiveOrResume": true,
+  "workingGoalFile": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/parallel-execution-20261022/GOAL.md",
+  "waveStateFile": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/parallel-execution-20261022/goal-state.json",
+  "wavePolicy": {
+    "maxExpertWorkers": 3,
+    "model": "gpt-6.1-sol",
+    "effort": "high",
+    "noNestedWorkers": true,
+    "reviewEveryWave": true,
+    "refillReadySlots": true,
+    "oneWriterPerFileSet": true,
+    "oneRuntimeOwner": true,
+    "finalVisualExpertRequired": true,
+    "humanReview": "requesting-user-only"
+  },
+  "round": 9,
+  "orcaRunId": "run_fda1dc8b2c82",
+  "activeExperts": [
+    {
+      "key": "coordinate-projector",
+      "round": 8,
+      "state": "DISPATCHED",
+      "effectiveModel": "gpt-6.1-sol",
+      "effectiveEffort": "high",
+      "taskId": "task_23e88a1984ad",
+      "dispatchId": "ctx_3f65b8b84726",
+      "terminal": "term_2ce1b281-736d-46cf-95ac-4d12900d93f0"
+    },
+    {
+      "key": "qa-coordinate",
+      "round": 9,
+      "state": "DISPATCHED",
+      "effectiveModel": "gpt-6.1-sol",
+      "effectiveEffort": "high",
+      "reuseFromDispatch": "ctx_773492ca801c",
+      "taskId": "task_97be4ca78a28",
+      "dispatchId": "ctx_9209192c7576",
+      "terminal": "term_96ff5573-46aa-40c1-b26a-49c512cc846e"
+    },
+    {
+      "key": "architect-coordinate",
+      "round": 9,
+      "state": "DISPATCHED",
+      "effectiveModel": "gpt-6.1-sol",
+      "effectiveEffort": "high",
+      "taskId": "task_47446194fb2a",
+      "dispatchId": "ctx_e04ff6f6fbfa",
+      "terminal": "term_d60e3872-efc4-47ea-9479-ffc02007e677"
+    }
+  ],
+  "sourceQa": {
+    "receipt": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/parallel-execution-20261022/round-002/qa-review/receipt.json",
+    "receiptSHA256": "18af9bc6ff2eee392b9d7ce0fcd50e907348da624bf34a33f3fc5c871c38bc99",
+    "disposition": "ACCEPT_BOUNDED_SOURCE_SYNTHETIC_AND_DOCUMENTARY_SCOPE",
+    "formalStoryQaClaim": false,
+    "focusedCommandDenominators": {
+      "consumerBaseline": {
+        "passed": 17,
+        "total": 17
+      },
+      "consumerSuccessor": {
+        "passed": 17,
+        "total": 17
+      },
+      "reusedDeadlineControls": {
+        "passed": 15,
+        "total": 15
+      },
+      "producer": {
+        "passed": 28,
+        "total": 28
+      },
+      "binding": {
+        "passed": 35,
+        "total": 35
+      },
+      "compiler": {
+        "filePins": 13,
+        "driverDiagnostics": 0
+      },
+      "missingParentObservations": 2,
+      "canonicalDocuments": 3
+    }
+  },
+  "actualHistoricalWitness": {
+    "receipt": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/parallel-execution-20261022/round-007/receipt.json",
+    "receiptSHA256": "03d03e60c0ac97ac34ada552dc5fdd223965c5454b80b14c01087ea4854ec228",
+    "onceInvocations": 1,
+    "exactPrivateNames": 7,
+    "closedMetadata": {
+      "schemaVersion": 1,
+      "operation": "ledger",
+      "gateStage": "postlearn",
+      "requestPresent": true,
+      "markerPresent": true,
+      "producerCompletion": "PRESENT",
+      "producerExit": "NONZERO",
+      "resultPresent": false,
+      "resultBinding": "UNKNOWN",
+      "producerStarted": true,
+      "producerExited": true,
+      "resultCommitted": null,
+      "correlationMatched": true,
+      "bridgeFailurePresent": true,
+      "outcome": "PRODUCER_EXIT_NONZERO",
+      "historicalCause": "UNKNOWN"
+    },
+    "rawValuesReleased": false,
+    "nativeOrConfigGoTokenCookieExportLogGuardRead": false,
+    "rootControlPhysicalIdentitiesStable": true,
+    "underlying420Cause": "UNKNOWN"
+  },
+  "canonicalClarification": {
+    "receipt": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/parallel-execution-20261022/round-006/canonical-integration/receipt.json",
+    "scope": "PO_AUTHORED_QA_ACCEPTED_INSERT_ONLY",
+    "noDedicatedReplayActionApiRequired": true,
+    "guidedStepAndActionSeeksStillRequired": true,
+    "replayStepSeekAndActualHumanActionCorrespondenceStillRequired": true,
+    "noActionTimestampInferredFromStepOffset": true,
+    "taskMarkersAndLifecycleUnchanged": true
+  },
+  "historical420": {
+    "consumed": true,
+    "partial": true,
+    "start": 1,
+    "clarify": 1,
+    "finalize": 1,
+    "execute": 0,
+    "publications": 1,
+    "genuineClarificationAnswered": true,
+    "protectedPrimaryOutcome": true,
+    "maskedScreenshotsReviewed": 6,
+    "editIncrementalReplayAndSeeks": "UNREACHED"
+  },
+  "cleanup421": {
+    "originalConfirmed": false,
+    "laterBoundOwnResourcesGone": true,
+    "globalUncapturedAbsence": "NOT_CLAIMED"
+  },
+  "storyState": {
+    "009": {
+      "status": "InProgress",
+      "sha256": "b22f4e2c88625fd065911cbcc9e0e735a1088744308ee6984430226a3768d666",
+      "openMarkers": 16,
+      "completeMarkers": 21
+    },
+    "010": {
+      "status": "InProgress",
+      "sha256": "774088ae1e1d0c955e9422f2c310328edd007bb643d955e6f4021d3be4cf5054",
+      "openMarkers": 10,
+      "completeMarkers": 2
+    },
+    "011": {
+      "status": "Done",
+      "sha256": "67b0c439a20e00b83ef572aa549c27c96d8c8301cd0de65b975aadd9f862bdc8",
+      "openMarkers": 0,
+      "completeMarkers": 18
+    }
+  },
+  "userQuestions": {
+    "lateRunbookDisposition": "PENDING_NO_ANSWER_ASSUMED",
+    "localFirstVsApprovedCompanyRoute": "PENDING_NO_ANSWER_ASSUMED"
+  },
+  "runtimeProviderCallsThisResumption": 0,
+  "actualRetainedExportBodyRead": false,
+  "humanReview": "PENDING_REQUESTING_USER_ONLY_NO_FIVE_PILOT_USERS",
+  "nativeVisual": "UNASSESSED",
+  "C17": "UNRUN",
+  "fullGoalComplete": false,
+  "next": "COMPLETE_SOURCE_ONLY_COORDINATE_PROJECTOR_ARCHITECT_RULE_AND_INDEPENDENT_QA_THEN_SEPARATE_ROOT_ONCE_ADMISSION_NO_BLIND_RUN"
+}

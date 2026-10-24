@@ -1,0 +1,28 @@
+{
+  "scope": "fresh owned runtime86 synthetic application governance only",
+  "modelCalls": 0,
+  "oldRowsFabricated": false,
+  "freshCoreChecks": [
+    {
+      "http": 200,
+      "principal": "local-author-71",
+      "ownsSyntheticCsi": true,
+      "approverRole": false
+    },
+    {
+      "http": 200,
+      "principal": "local-approver-71",
+      "ownsSyntheticCsi": true,
+      "approverRole": true
+    }
+  ],
+  "initialLookupHttp": 404,
+  "createHttp": 201,
+  "approveHttp": 200,
+  "finalLookupHttp": 200,
+  "activeVersion": 1,
+  "policyId": "e013eb29-01b8-4590-a0a0-ab9fef761340",
+  "authorPrincipal": "local-author-71",
+  "approverPrincipal": "local-approver-71",
+  "distinctPrincipals": true
+}

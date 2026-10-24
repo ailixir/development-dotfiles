@@ -1,0 +1,76 @@
+{
+  "reviewer": "/root/corpus_io06_independent_qa",
+  "candidate30Manifest": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate30/manifest.json",
+    "sha256": "5f9bb7f662104f50d4b6c1c93b238954e7d3ab5e90632c45cc8e62c0a44e6022",
+    "bytes": 2975
+  },
+  "candidate30Artifacts": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate30/studio-runner/evaluation/observed-authoring/evaluate.mjs",
+      "sha256": "15d2bcd0ee2bb227f0b54307b6a50608e720f68e89b6726d6cc57c55beb96523",
+      "bytes": 125912
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate30/studio-runner/evaluation/observed-authoring/evaluate.d.mts",
+      "sha256": "714b60cb2f5c7de01d3504095a8c0340060b3683a3e26e8e296593119fb99f05",
+      "bytes": 23546
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate30/studio-runner/test/evaluation/harnessSelfTest.test.ts",
+      "sha256": "09d68060f6f0c3fafc27dea6a7938d950d050940a1522511a0742065e14b09b7",
+      "bytes": 65996
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate30/studio-runner/test/evaluation/observedCorpus.ts",
+      "sha256": "6631c807b5ead597ffa64ac816d2fe90f9694a647afe48be30b814d48f84902e",
+      "bytes": 10728
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate30/candidate.patch",
+      "sha256": "6513bf1cc9cbfb65cd759b0cf02340add73282e961616d725aa8345ae9a39cd1",
+      "bytes": 57878
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate30/candidate22-to30.patch",
+      "sha256": "6e587ff7ca9e1245d1a960b6d39a020350ddd951e828d606cb6ae9bcf0a5ea2a",
+      "bytes": 5001
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate30/bindings.json",
+      "sha256": "98115153922772e887a8a1611135453263a2561767d7d7f453b3f85509a0dd8d",
+      "bytes": 5712
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate30/plan.md",
+      "sha256": "92a88147a2e1b51a57e4174689a34cbf9dae37d5d1cfd0152a558f62c42531ea",
+      "bytes": 3233
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate30/requirement-test-matrix.json",
+      "sha256": "8fa523f7b48573423fc73c82363b032ba12e961a4ce13069beb2528ac0111304",
+      "bytes": 2790
+    }
+  ],
+  "predecessorManifest": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate22/manifest.json",
+    "sha256": "8e9ff55985f89d9431e0fd1bbcd7faac9f3a1571bae12fcfce1b1f8986722d27"
+  },
+  "predecessorQa23": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate23-independent-review/manifest.json",
+    "sha256": "e1e5ba3a9f8289d5147cb54da1ee460fdc8336e1c616d19e24ae82f5459b42e9"
+  },
+  "context": {
+    "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/obs009-wire-candidate33-review-context.txt",
+    "sha256": "a329cb509048e1ea40d447baa8fc9fd2b61ce10d5e6c5dac6bd2f9be81abd96c"
+  },
+  "textComparisonFacts": {
+    "allNineNewAndEightOldArtifactsRehashed": true,
+    "completeActualBaselinePatchMatches": true,
+    "minimal22To30PatchMatches": true,
+    "productionDeltaInverseRestoresOldEvaluator": true,
+    "declarationsHelperByteExact": true
+  },
+  "method": "Narrow public code/test text and metadata/hash comparison, no new broad audit or execution",
+  "predecessorAcceptedControlsReusedByExactEquality": true
+}

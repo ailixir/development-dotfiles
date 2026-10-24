@@ -1,0 +1,100 @@
+{
+  "kind": "IMPLEMENTATION_DESIGN_TRACE_NOT_ACCEPTANCE",
+  "conditionsResolvedDesigns": {
+    "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-adoption-source-design/design.md": "26082d9b53c7e0a309a3fd0f669b96ddb00ebf8b45b601bfa3a691ae2cf7f2dc",
+    "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-adoption-design-correction01/addendum.md": "034dd24833a43786b470a196538333f8e121605c928a23c1a8f32c6de8a4db7c",
+    "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-adoption-design-correction01/independent-qa/review.md": "3dbeaa71030465eeb727ae07d30381101f624a6467a2cd72c6308120cea87fd4"
+  },
+  "C1": {
+    "source": [
+      "projectReviewedInput",
+      "buildBenchmark",
+      "cli benchmark-report"
+    ],
+    "binding": "Exact original rawJSONL bytes/hash, canonical record hash,1-based nonblank record ordinal,manifest/case/rep/attempt. Every original position annotated once includingUNKNOWN; supplied alternate population rejected while ORIGINAL hardfacts still reported. Invalid and duplicate original identities retained and INVALID, no dedupe. Only three cause counters/eventarrays/assessment overlay; original positive claims cannot decrease, noncause facts unchanged. Original erroneous facts need explicit separate successor/disposition; not this adapter.",
+    "controls": [
+      "group6 hardfact laundering first semantic0versus1",
+      "annotation delete/insert/duplicate/relabel/reserved-noncause keys",
+      "prior cause decrease and duplicate original identity retention"
+    ]
+  },
+  "C2": {
+    "source": [
+      "causeErrors",
+      "projectReviewedInput",
+      "validateRunRecord",
+      "cli pinnedread"
+    ],
+    "binding": "Closed per-cause review binds actual authored goal/outcome/location pins, exact original record and observed events/scope. Verified0 requires complete reviewed scope+adoption; partial confirmed positives persistUNKNOWN. Independent adoption binds actual original execution/config/ledger/review hashes; no reviewer authentication inferred from hashes/name/boolean. Existing guardStart effective original admission strictly before execution and every run, same canonical entry retained, intervening stop/refusal/newadmission refuses; current time cannot backdate it. Supplied mixedmode/manifest invalid. Missing actual receipt/config/ledger/review =>UNKNOWN/nonadoptable.",
+    "controls": [
+      "group1 unreviewedbudget and fakeVERIFIED",
+      "group2 forged identity/count/ref/partial scope",
+      "group6 late admission, interveningstop/refusal/admission, wrongmanifest, selftestpromotion, codepins"
+    ]
+  },
+  "C3": {
+    "source": [
+      "driveCase",
+      "driveIncremental",
+      "learnPhase",
+      "chargeLearn",
+      "interruptedRun",
+      "createStopRule.observeHardGate",
+      "runBenchmark"
+    ],
+    "binding": "Each actual base/suffix retains public state,counters,oracle and phase. Chargeonce per learn with existing cost fallback. Checkbase failure/hardfact/budget before suffix and recheck after finalize/update. Whole incomplete publishedfalse/explicit incompleteoracle, raw baseSUCCEEDED unchanged, no manufacturedfalsepass. Late hardfact latch no extra charge; budget+hard reasons retained. On lost response use EXISTING captured public replies only, charge possible start conservatively separately, stop before nextlogicalattempt.",
+    "controls": [
+      "group5 sum13/140/25 exactly2charges/order",
+      "budget/failedbase/baseleak onephase onecharge",
+      "late update leak and late budget-tohard latch",
+      "unknownstart base kept+1potentialcharge, topnull/sessioncoveragefalse"
+    ]
+  },
+  "C4": {
+    "source": [
+      "budgetUsage",
+      "sumLearnUsage",
+      "sessionScopeKnown",
+      "causeSummary",
+      "chargeSummary",
+      "buildBenchmark"
+    ],
+    "binding": "All3scopes gateP/creditedAllClasses/allAttempts explicit; finalP completion unchanged. Per-value nullable totals, knownsubtotals and unknownattempt/session identities, old missing session populationUNKNOWN, emptyNULL, affirmative complete no-start may0. Duplicates retained with unknown totals. Proposals != wirecalls, public counters/reservations != actualtokens/bill; conservative priced math and protectivefallback charges separate, actual measurements unavailable.",
+    "controls": [
+      "group3 51/69/70 scope split",
+      "group5 missing base/suffix values/empty/unknown/no-start",
+      "old scoring costmodel assertions corrected to unavailableactual+knownproposals/conservative"
+    ]
+  },
+  "metadata": {
+    "source": [
+      "manifest.json",
+      "validateCorpusManifest",
+      "corpusManifest.test.ts",
+      "README.md"
+    ],
+    "binding": "25 workflows/classes/pages/step/outcome bytes/reps kept;19P57/52, partial51/46;75logical81sessions122contingency; exact-modeP condition unchanged; mixedVisible/capabilityboundary disclosed, no optionalNRS1.23knownlocal/2unknownstaging, globalRS1 null. B2/B3/B5/B7 settled internal dispositions recorded, B8prices/headroom and actualexternalfactsUNBOUND. Three generic codepins evaluated with correctrepo/corpus roots; candidate nullfreeze/digest, actualsourceQA+refreeze+newprioradmission owed."
+  },
+  "preciseCompatibilityDefaults": [
+    {
+      "field": "incremental.suffixStarted",
+      "case": "start request attempted but no successful public response identifies a session",
+      "default": "omit suffixStarted (UNKNOWN), learnSessionsComplete:false; preserve knownbase and null top totals, separate conservative potential-start charge. Do not fabricate false boolean/sessionId/state/infraexclusion. SourceQA should verify this narrow representation against reviewed C3; no generic redesign requested."
+    },
+    {
+      "field": "execution/configuration/adoption provenance",
+      "case": "legacy original receipt absent or admission-record pinned:null/code defaults alone",
+      "default": "UNBOUND/nonadoptable/UNKNOWN; existing owners must supply actual closed evidence. No invented producer or inferred limits history."
+    }
+  ],
+  "proofLimits": [
+    "NO runtime/parser/compiler/test/type/lint/metadatafreezer/capture/seed/native/browser/model/network/Git executed by author",
+    "existing capture recovery is not crashdurable; processdeath/cleanupfailure before emitted original receipt staysUNKNOWN",
+    "numeric scopedGATE_PASS/CLI0 is completion+hardfactsubgate only, explicitly never actualD-C/T4usage/security/human acceptance",
+    "caller-supplied VERIFIED/adoption/hash claims do not authenticate humans; existing independentQA process must establish truth and authority",
+    "actualprovider calls/tokens/billedcost,MODEL-SIZINGactualpercall evidence,real staging/security/privacy/human/U13 remainowed; FMcredited existingdisposition retained",
+    "no new limits identity or mixed-limit partitioning/provenance claim; anotheradmission between includedruns is refused rather than unioned",
+    "actualapplication outside011freeze/gate requires freshsourcebinding+ownaffectedproof; no borrowed011/native/c12runtimecredit"
+  ],
+  "status": "STOP_FOR_INDEPENDENT_SOURCE_QA; ALL_IMPLEMENTATION_OUTCOMES_UNEXECUTED"
+}

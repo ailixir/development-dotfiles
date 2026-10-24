@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-10-22T19:26:26.296233+00:00",
+  "phase": "PARALLEL_EXECUTION_ROUND_015_QA_INTEGRATION_HUMAN_PREP",
+  "statusOnlyNotAuthority": true,
+  "goalUserResumed": true,
+  "goalApiObservedStatus": "paused",
+  "goalPolicyFile": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/parallel-execution-20261022/GOAL.md",
+  "goalStateFile": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/parallel-execution-20261022/goal-state.json",
+  "round": 15,
+  "runId": "run_fda1dc8b2c82",
+  "activeExperts": {
+    "qa-ledger-login": {
+      "taskId": "task_0f9f45b31a97",
+      "dispatchId": "ctx_3816cbcbf95f",
+      "terminal": "term_96ff5573-46aa-40c1-b26a-49c512cc846e"
+    },
+    "source-integration": {
+      "taskId": "task_3a3891d5499d",
+      "dispatchId": "ctx_803e32dce9bd",
+      "terminal": "term_e27b5702-d98a-40c9-bd71-41bc045cb40d"
+    },
+    "human-review-preparation": {
+      "taskId": "task_cdf9eafea0ec",
+      "dispatchId": "ctx_7d6ddd55c041",
+      "terminal": "term_9ca12c55-c319-4e50-bd46-11cf7da567ad"
+    }
+  },
+  "allModels": "gpt-6.1-sol/high",
+  "maxExpertConcurrency": 3,
+  "actualHistoricalWitness": {
+    "producer": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/parallel-execution-20261022/round-007/receipt.json",
+    "coordinate": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/parallel-execution-20261022/round-011/receipt.json",
+    "coordinateReceiptSHA256": "dd33a9d26e0900862131dfe14112b43cdeddf255ff846a7cbfad3866c1781e2d",
+    "postlearnProducer": "NONZERO_NO_RETAINED_RESULT",
+    "coordinateResult": {
+      "coordinateGuard": "FAIL",
+      "sourceStepCount": 5,
+      "modelAttemptCount": 8,
+      "coordinateAttemptCount": 7,
+      "concreteResolvedCount": 5,
+      "initialNullResolvedCount": 0,
+      "unresolvedCount": 2,
+      "unresolvedByInvariant": {
+        "missingIndex": 0,
+        "nullIneligible": 2,
+        "negativeIndex": 0,
+        "outOfRangeIndex": 0
+      },
+      "rejectedNullCount": 0,
+      "verifyNullCount": 0,
+      "nullWithTimestampTieCount": 0,
+      "coordinateStatusCounts": {
+        "RESERVED": 0,
+        "CALLING": 0,
+        "APPLIED": 6,
+        "REJECTED": 0,
+        "SUPERSEDED": 1,
+        "UNKNOWN_CALL": 0
+      },
+      "schemaVersion": 1,
+      "basis": "RETAINED_POST_STOP_SNAPSHOT",
+      "boundFullSession": true,
+      "immutableScopeBindingMatched": true,
+      "sourceAndConfigurationRevisionBindingsMatched": true,
+      "frozenSourceStepsValid": true,
+      "exportTableCount": 14,
+      "exportRowCount": 21,
+      "exportHashMatched": true,
+      "historicalCause": "UNKNOWN",
+      "soleOriginalFailureProven": false,
+      "outcome": "DEMONSTRATED_RETAINED_SNAPSHOT_PROJECTION_BLOCKER"
+    },
+    "metadataInvocationCounts": {
+      "sevenNameProducerWitness": 1,
+      "twoInputCoordinateWitness": 1
+    },
+    "actualExportBodyReadByReviewedHelper": true,
+    "rawPrivateValuesReleased": false,
+    "manualPrivateContentsRead": false,
+    "nativeConfigGoTokenCookieRawLogGuardContentRead": false,
+    "soleOriginal420FailureProven": false
+  },
+  "ledgerCandidate": {
+    "file": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/parallel-execution-20261022/round-012/ledger-correction/ledger.py",
+    "sha256": "384f62eca72000c943d8a8e8c7c13747d176d94236f49cee794fd0be4f443738",
+    "authorOfflineControls": 25,
+    "independentQa": "PENDING",
+    "scope": "PROVED_FULL_EXPLICIT_NULL_ALL_STATUSES_PLUS_EXACT_LOCAL_PREFIX4",
+    "productMainOrBudgetChanged": false
+  },
+  "localLoginCandidate": {
+    "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/parallel-execution-20261022/round-010/local-login-candidate",
+    "offlineGroups": 11,
+    "steps": 6,
+    "changedStep": 5,
+    "prefix": 4,
+    "suffix": 2,
+    "scope": "LOCAL_SYNTHETIC_ONLY",
+    "companyApproval": false,
+    "captureJoin": "INTEGRATOR_RETAIN_STABLE_LEGACY_KEY_WITH_ACTUAL_SIX_COVERAGE"
+  },
+  "sourceIntegration": {
+    "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/parallel-execution-20261022/round-014/source-integration",
+    "futureSetupNamespace": "visual430-setup",
+    "futureHarnessNamespace": "profile430-harness",
+    "actualNamespaceCreated": false,
+    "sourceBFinalFrozen": false,
+    "noActualConfigGenerationYet": true,
+    "tinyBinderPASSRetargetRequiresNewStaticProof": true
+  },
+  "humanReviewPreparation": {
+    "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/parallel-execution-20261022/round-015/human-review-preparation",
+    "actualNativeMetadataAccess": false,
+    "nativeMediaModelView": false,
+    "userDecision": "PENDING",
+    "fivePilotUsersRequired": false
+  },
+  "canonicalDocs": {
+    "poClarification": "INTEGRATED_QA_ACCEPTED_NO_NEW_REPLAY_ACTION_API",
+    "story010SHA256": "774088ae1e1d0c955e9422f2c310328edd007bb643d955e6f4021d3be4cf5054",
+    "taskMarkersUnchanged": true
+  },
+  "sourceDiscoveryAccounting": {
+    "actualPrivateContentsSelectedManually": false,
+    "privateDirectoryDiscoveryMetadataAbsenceProven": false,
+    "note": "Read-only discovery traversals may observe path/filesystem metadata; no blanket zero-incidental-stat claim. Actual admitted helper inputs remain exact and separately accounted."
+  },
+  "architectTerminal": "RETAINED_BY_ORCA_USER_TAKEOVER_NO_PROCESS_ACTION",
+  "storyStatus": {
+    "009": "InProgress",
+    "010": "InProgress",
+    "011": "Done"
+  },
+  "actualApplicationProviderCallsThisResumption": 0,
+  "newRuntimeStarted": false,
+  "actualUserQuestions": "LATE_CONTENT_AND_COMPANY_ROUTE_PENDING_NO_APPROVAL_ASSUMED",
+  "fullGoalComplete": false,
+  "next": "QA_LEDGER_AND_INTEGRATED_COHORT_FREEZE_SOURCE_THEN_SEPARATE_FRESH_CONFIG_CREATION"
+}

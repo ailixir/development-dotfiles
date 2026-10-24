@@ -1,0 +1,98 @@
+{
+  "scope": "SOURCE_ONLY_MINIMAL_MEASURED_MEMBER_SUCCESSOR08",
+  "references": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-correction07/manifest.json",
+      "sha256": "f262d9db402d5294e609752681353ed5db1f17f3148320d6efdeb1d1f08645ab"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-correction07/bindings.json",
+      "sha256": "6cfb54d6f4ecd44ce2bc787378a3d0ace4bdb2ca0fe8447866feda354b96f51b"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-correction07/source.patch",
+      "sha256": "fc8bcede182f7240fbba2a441237fd754f9ce7f88d41f59649a69fcbd3223e6c"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-design08-corpus07-independent-review/manifest.json",
+      "sha256": "0a0ab537074dd4e23ddae1927a41bc42bcba9c20fbd3648a9a88b99f243b846f"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/obs009-corpus-members08-context.txt",
+      "sha256": "bac06dfedef38e0be9c6bfa560ff0f31af56392ca23f69733057a3f865b63cb1"
+    }
+  ],
+  "sourceBeforeSha256": "49dc702fc2474db1b1dd364c0d097bffdedddb8bc09e3e721b744ecdefbb5152",
+  "sourceAfterSha256": "ef3e5b9ac8b0bc6d770c074b02a3a42643baa0c9d30daddd91945abd913a3e33",
+  "sourceDelta": "Replace unmeasured root regular/no-symlink assertion with finite metadata authority; after original catalogue/path checks, lstat member+ancestors throughR; memberisFile/no symlink; measuredtrue only on completion, null on unavailable.",
+  "regularNoSymlinkActualMembershipStillUnmeasuredHere": true,
+  "safeReadResolverNoFollowNextMaskDerivedDeltaAndPhaseOrderTextExact": true,
+  "pythonProjectorByteExactSha256": "3e9bfe3d738bf9b366128274d9bc481de8636f36dd26cbd14e2235fa29ed628a",
+  "onlyMetadataWrapperDataRebound": [
+    {
+      "command": "freeze-actual",
+      "beforePrefix": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "node"
+      ],
+      "afterPrefix": [
+        "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node"
+      ],
+      "remainingArgvByteExact": true
+    },
+    {
+      "command": "validate-after",
+      "beforePrefix": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "node"
+      ],
+      "afterPrefix": [
+        "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node"
+      ],
+      "remainingArgvByteExact": true
+    },
+    {
+      "command": "membershipProspect",
+      "beforePrefix": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "node"
+      ],
+      "afterPrefix": [
+        "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node"
+      ],
+      "onlyAdditionalChange": "Embedded minimum metadata-measurement source successor; unchanged operation/admission placeholders/CLI semantics."
+    },
+    {
+      "command": "deltaProspect",
+      "beforePrefix": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "node"
+      ],
+      "afterPrefix": [
+        "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node"
+      ],
+      "onlyAdditionalChange": "Embedded minimum metadata-measurement source successor; unchanged operation/admission placeholders/CLI semantics."
+    }
+  ],
+  "nodeBinaryBinding": {
+    "path": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+    "sha256": "9d050fd455b56426e25d4d603c7c501cbb2630348e836cf221dcce748e90588a",
+    "rootProvidedVerifiedMetadataNotNewMeasurement": true
+  },
+  "correctedCandidatePrivateMembershipStill": "UNBOUND_PENDING_SEPARATE_ROOT_READ_ADMISSION",
+  "rootSourceClean07BoundaryPreserved": true,
+  "sourceParsedImportedOrExecuted": false,
+  "privateManifestCataloguePinBodiesCurrentSdkOrActualMetadataWalk": false,
+  "release": false,
+  "executionAuthority": false,
+  "authorSelfApproval": false,
+  "actualSourceOrLifecycleMutation": false
+}

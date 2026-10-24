@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-10-22T08:30:14.668557+00:00",
+  "statusOnlyNotAuthority": true,
+  "phase": "339_VERIFIED_BY_EXPORT_BUDGET_EXCEEDED_332_AND_336_ACCEPTED_340_TIMING_DECISION_PENDING_341_SOURCE_REVIEW",
+  "actual329": {
+    "receiptSHA256": "ea239d6cb89831e5f530a89831114a7813a9a561ac54ad5fb9415511e8c8bda7",
+    "manifestSHA256": "73a71d572f96bab50bde4d2555dbed17fae6bdc0c4ca1a9fb6ae8dc328e1bb82",
+    "observerSHA256": "6fc4d61be1ff7d9d13d70a4297cecd22f10aade4fbca7fbba6040c4a3c5dcb25",
+    "outcome": "GUIDED_PUBLICATION_FAILED_INCREMENTAL",
+    "observer": {
+      "availability": "OBSERVED",
+      "lastCompletedBeforeLimit": {
+        "state": "FAILED",
+        "stepZone": "NO_ACTIVE_STEP",
+        "requestBracket": "BEFORE_LIMIT"
+      },
+      "terminalObservedBeforeLimit": "FAILED",
+      "pendingReadAtStop": "NONE",
+      "exactCutoffState": "UNKNOWN",
+      "providerPredicate": "UNKNOWN"
+    },
+    "firstPublication": true,
+    "firstLearnAttemptsReservations": 7,
+    "secondPublicationReplay": false,
+    "postincrementalLedger": "UNRUN",
+    "mutations": {
+      "starts": 2,
+      "clarify": 1,
+      "finalize": 1,
+      "replay": 0
+    },
+    "images": {
+      "planned": 17,
+      "attempted": 11,
+      "released": 11,
+      "withheld": 0,
+      "unresolved": 0,
+      "notAttempted": 6,
+      "actualExpertViews": 11
+    },
+    "visual": "PARTIAL",
+    "stopSettled": true,
+    "retries": 0
+  },
+  "cleanup330": {
+    "receiptSHA256": "1627393acab111c6c562830a797b5fadfad0918459737e685445d8392a1f674c",
+    "onceSeconds": 22.972,
+    "originalCleanupConfirmed": false,
+    "initialReason": "18196probe",
+    "laterReadOnlyAllGone": true,
+    "positiveJavaExit": true,
+    "positiveExitSHA256": "e590ee0263f9172ec02a9602e55bec23cec474ad48a462b526c54fb295b9fb6c",
+    "guardedExportSHA256": "7cc74e2350cb51079cd0ebc6637390e2f59e31b47d4fc0430af18dd82ff3c7a4",
+    "additionalCancels": 0,
+    "revokeHttp": 204
+  },
+  "collector331": {
+    "receiptSHA256": "8c151b5694d1319498a5705e3bb889f8b5e9e88f92b800244545472854085bda",
+    "result": "UNAVAILABLE",
+    "gates": [],
+    "invocations": 1,
+    "exitCode": 0,
+    "noCountPurposePhaseCauseInference": true
+  },
+  "docs333334": {
+    "qa333ReceiptSHA256": "64aeffc306b84f1c3922084e65e02e65deb6d5180ab3e22b5e5a8525c16b402e",
+    "application334SealSHA256": "6383e390795db547575f9254c2aa849ed3a6df77f9965a94b1b5ca05dd7b7096",
+    "localChildContentBoxesCompleted": 2,
+    "actualDelivery": "2026-10-20",
+    "reviewDate": "2026-10-22",
+    "parentT2": "OPEN_PRE_T0_CHRONOLOGY_UNMET",
+    "fullStoryDone": false,
+    "independent336": "ACCEPT_BOUNDED_DOC_BOOKKEEPING_OPEN_PARENT_GATES",
+    "qa336ReceiptSHA256": "583c525bebbd91490f54e87eb00be230ebed2460ceee01e0ab327987d6175480"
+  },
+  "next": "341 source-only budget-path review; no demonstrated causal defect yet. No budget/gateway administration, cap/prompt changes, newdiagnostic/runtime/modelcase/GO. Current source/archive/originalproviderpredicate/cutoff/budgetsubtype UNKNOWN. Original5177 preserved; external security/staging/D-C/human/pilot acceptance remains owed.",
+  "noProgressAuditCount": 0,
+  "fullAcceptance": false,
+  "masking": "INCONCLUSIVE",
+  "C17": "UNRUN",
+  "stories": {
+    "011": "Done",
+    "009": "InProgress",
+    "010": "InProgress"
+  },
+  "qa332": {
+    "receiptSHA256": "5b91aa531a4fbcd3bace1d01babedf0799277085f557624e82555102a31ce608",
+    "verdict": "ACCEPT_BOUNDED_EVIDENCE_ONLY_WORKFLOW_STOPPED"
+  },
+  "projection339": {
+    "collection": "VERIFIED",
+    "basis": "POST_STOP_EXPORT",
+    "cutoff": "UNKNOWN",
+    "exportSessionState": "FAILED",
+    "durableSwitch": "BOUNDARY",
+    "retainedPrefixActions": "ALL_EXPECTED_SUCCEEDED_ONCE",
+    "retainedAttemptsByKind": {
+      "SOURCE_PLAN": {
+        "presence": "PRESENT",
+        "statuses": [
+          "APPLIED"
+        ]
+      },
+      "NEXT_ACTION": {
+        "presence": "NONE",
+        "statuses": []
+      },
+      "VERIFY_STEP": {
+        "presence": "NONE",
+        "statuses": []
+      }
+    },
+    "publishedRevision": "NONE_BY_EXPORT",
+    "cutoffContinuationBootstrapAuthorityFinalization": "UNKNOWN",
+    "deliveryDisposition": "UNKNOWN",
+    "providerActivityLatency": "UNKNOWN",
+    "originalPlanPayloadApplicationPredicate": "UNKNOWN",
+    "retainedFailureCode": "BUDGET_EXCEEDED"
+  },
+  "projection339RootReceiptSHA256": "fbdf4068c70ab1f0b550949cd9c34480a544a8715fcefe9a73d86059b6d86214",
+  "implementation337SealSHA256": "3ebc6db38331f998ab6b05dfddf747615ba4c934f683a40fb40a07c32f686632",
+  "review338ReceiptSHA256": "56de044c68fd4bd51b9ad571e7bd023c809b5a775815895034624a5af97eef6e",
+  "product340": {
+    "ruling": "Late content bookkeeping supported; original before-T0 deadline not waived. Narrow prospective exception proposal pending and unapplied; parentT2 remains open under either option until final measurement/PM acceptance.",
+    "proposal": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/product340-review/PROPOSAL.md",
+    "receiptSHA256": "73c1a9c5d94cd9c3ef264efb3d36f307a9a4aad6420d1294b004d3a766a8f683"
+  }
+}

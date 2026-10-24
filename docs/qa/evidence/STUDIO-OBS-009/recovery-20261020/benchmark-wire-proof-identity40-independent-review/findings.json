@@ -1,0 +1,217 @@
+{
+  "scope": "INDEPENDENT_PROOF38_HARNESS_IDENTITY_DIAGNOSIS40",
+  "disposition": "HARNESS_IDENTITY_RECONCILED_WITH_SOURCE_AUTHORED_CATALOGUE",
+  "productFindingCount": 0,
+  "metadataFinding": {
+    "id": "IDENTITY40-01",
+    "cause": "Object-string title substitution values were expanded without Vitest single quotes in the prebound catalogue.",
+    "affectedHarnessRows": 6,
+    "futureScoringRows": 5,
+    "minimalCorrection": "Add exact single-quoted source-value alternatives only to11 enumerated rows; preserve all other catalogue/matching rules.",
+    "status": "RECONCILED_METADATA_ONLY"
+  },
+  "actualHarnessEvidence": {
+    "originalMatchedRows": 70,
+    "correctedMatchedRows": 76,
+    "previouslyUnknownRowsSourceProven": 6,
+    "unmatchedActualRows": 0,
+    "unmatchedExpectedRows": 0,
+    "physicalFiles": 1,
+    "selectedPassed": 61,
+    "selectedFailedPending": 0,
+    "filteredSkipped": 15,
+    "totalAssertionRows": 76,
+    "old31IdentityMultisetExact": true,
+    "newWireSelectedInstances": 30,
+    "selectedDistinctFullNames": 61,
+    "repeatedNamesKeepMultiplicityNotExtraUniqueCredit": true,
+    "scoringFiniteRowsAdjustedBeforeRun": 5,
+    "scoringCasesUnrun": 31,
+    "typesLintUnrun": true,
+    "rawReportSuccess": true,
+    "fullNamesAndTitleAncestryConsistent": true,
+    "matchingAssignmentSha256": "a3eca9d0977a246e274e34d2d2076d7242149ba09f82b450d2f2142b41c0b406",
+    "unknownRawTitlesExported": false
+  },
+  "finiteRowCorrections": [
+    {
+      "catalogueRowIndex": 55,
+      "file": "test/evaluation/harnessSelfTest.test.ts",
+      "token": "$label",
+      "sourceLines": [
+        444,
+        445,
+        446,
+        447,
+        448
+      ],
+      "sourceValue": "HTTP non2xx JSON",
+      "unquotedIdentitySha256": "1163ab242dd6796b797912f8d71697f2262c697fc4d489d1db5c8b638d7767f1",
+      "quotedIdentitySha256": "d50bc104022b655009ca8cc76acf0331ac48abfcb843cf1d1696fa79a8749934",
+      "finiteAllowedNameCount": 2
+    },
+    {
+      "catalogueRowIndex": 56,
+      "file": "test/evaluation/harnessSelfTest.test.ts",
+      "token": "$label",
+      "sourceLines": [
+        444,
+        445,
+        446,
+        447,
+        448
+      ],
+      "sourceValue": "malformed JSON",
+      "unquotedIdentitySha256": "8e3c50ad79c1bddb46921796a0d3f164d63b078f32eff4c0264d22fb393e9d34",
+      "quotedIdentitySha256": "b8863da433751693c3cf8875e3fea6e776abda442f2dcee60988711acfbcbe03",
+      "finiteAllowedNameCount": 2
+    },
+    {
+      "catalogueRowIndex": 57,
+      "file": "test/evaluation/harnessSelfTest.test.ts",
+      "token": "$label",
+      "sourceLines": [
+        444,
+        445,
+        446,
+        447,
+        448
+      ],
+      "sourceValue": "over-bound tail",
+      "unquotedIdentitySha256": "eaf5b1498086b623f6d16bf3114e2b8434814986f52f3b023fb938d4608a6191",
+      "quotedIdentitySha256": "6fd989905366e12fd2f50157a1adf73d01488b9766199e2bdc5241adcf1a4f21",
+      "finiteAllowedNameCount": 2
+    },
+    {
+      "catalogueRowIndex": 62,
+      "file": "test/evaluation/harnessSelfTest.test.ts",
+      "token": "$label",
+      "sourceLines": [
+        571,
+        572
+      ],
+      "sourceValue": "empty",
+      "unquotedIdentitySha256": "7bcf1212d3aee7684b2cdab3ccfe1be33fdfc3638d0a9e7f4e14cbd835d4fd88",
+      "quotedIdentitySha256": "fcd814d5babf1b241b8715e9a640e623b9807fbb96740b707867176f456b4cc5",
+      "finiteAllowedNameCount": 2
+    },
+    {
+      "catalogueRowIndex": 63,
+      "file": "test/evaluation/harnessSelfTest.test.ts",
+      "token": "$label",
+      "sourceLines": [
+        571,
+        572
+      ],
+      "sourceValue": "empty string",
+      "unquotedIdentitySha256": "7cdadb89f3699657e1f323c96abd6a78298e1d6e3037fd45b214eb9065b395a6",
+      "quotedIdentitySha256": "3d5bebb8ad82ac632722660cab00875fca2610d88d72c48b064cb818610ba5df",
+      "finiteAllowedNameCount": 2
+    },
+    {
+      "catalogueRowIndex": 64,
+      "file": "test/evaluation/harnessSelfTest.test.ts",
+      "token": "$label",
+      "sourceLines": [
+        571,
+        572
+      ],
+      "sourceValue": "uninspectable",
+      "unquotedIdentitySha256": "7cd9754fc707d1b65b47765b051f20b5bcb142fa3d3bb02505ddead91487ad04",
+      "quotedIdentitySha256": "9df8791cef06138ba263a73d0cb5802c28a1acb177cdd5a7712bd3ec69ca7a93",
+      "finiteAllowedNameCount": 2
+    },
+    {
+      "catalogueRowIndex": 99,
+      "file": "test/evaluation/benchmarkScoring.test.ts",
+      "token": "$observation",
+      "sourceLines": [
+        73,
+        74,
+        75,
+        76
+      ],
+      "sourceValue": "false pass",
+      "unquotedIdentitySha256": "40429959da0fc579b6f09882148de39135629a85fa634e38ed56d19b84f0abc5",
+      "quotedIdentitySha256": "712b59c6210c79dba11699b2af033b6b6a2f97602ff0c6d3c38ef4395fedaf55",
+      "finiteAllowedNameCount": 2
+    },
+    {
+      "catalogueRowIndex": 100,
+      "file": "test/evaluation/benchmarkScoring.test.ts",
+      "token": "$observation",
+      "sourceLines": [
+        73,
+        74,
+        75,
+        76
+      ],
+      "sourceValue": "secret or PII leak",
+      "unquotedIdentitySha256": "bee2d65a8d3679146869a0f7fd5419fcb3682305e0ebe97ac67e9b225c79543a",
+      "quotedIdentitySha256": "92ac7ff7fdfc99d0fb3ce0b9b379295967cb0f66d1fd2df3c73f61788f0cd232",
+      "finiteAllowedNameCount": 2
+    },
+    {
+      "catalogueRowIndex": 104,
+      "file": "test/evaluation/benchmarkScoring.test.ts",
+      "token": "$field",
+      "sourceLines": [
+        241,
+        242,
+        243,
+        244,
+        245
+      ],
+      "sourceValue": "rs1NonScalarReadGaps",
+      "unquotedIdentitySha256": "d1b35d2c770087a183d93e79f616dae24e3f5e81d41f75299deab0e62d711aab",
+      "quotedIdentitySha256": "1c81ade1ab1d80a22649bc880bf37caf851362ddd14aea63cd3cf8fbe6daaa79",
+      "finiteAllowedNameCount": 2
+    },
+    {
+      "catalogueRowIndex": 105,
+      "file": "test/evaluation/benchmarkScoring.test.ts",
+      "token": "$field",
+      "sourceLines": [
+        241,
+        242,
+        243,
+        244,
+        245
+      ],
+      "sourceValue": "authoredEchoUnobservableTargets",
+      "unquotedIdentitySha256": "61d0ade705f0acbeeed9de60d1f14bbe210ebf96777c261926610418f653db6e",
+      "quotedIdentitySha256": "f0c32639594e7e544482969ff30badc609f791f03d7cce0da6d1e842d8cecbe9",
+      "finiteAllowedNameCount": 2
+    },
+    {
+      "catalogueRowIndex": 106,
+      "file": "test/evaluation/benchmarkScoring.test.ts",
+      "token": "$field",
+      "sourceLines": [
+        241,
+        242,
+        243,
+        244,
+        245
+      ],
+      "sourceValue": "focusMutationRefusedFills",
+      "unquotedIdentitySha256": "b879817b04da88a717edf6a02339d260fd31ed03efe13780a1167b07dceef400",
+      "quotedIdentitySha256": "22f1bc76ee38ea2422829a9dd8cc2e6394e88ce322e0d3fb2272c0fcc8e1d25f",
+      "finiteAllowedNameCount": 2
+    }
+  ],
+  "preservedOriginalOutcomes": {
+    "orchestratorRawExit": 1,
+    "harnessWrapperRawExit": 0,
+    "harnessInvocations": 1,
+    "scoringTypesLintInvocations": 0,
+    "originalStopAndCatalogueUntouched": true
+  },
+  "continuationRecommendation": "Separate root admission for ONLY scoring01/types01/lint01 with corrected finite catalogue and fresh runtime/input/cache guards; no harness rerun.",
+  "fullAffectedProofAccepted": false,
+  "runtimeAuthority": false,
+  "storyQaVerdict": false,
+  "codeUnderReviewParsedImportedExecuted": false,
+  "productSourceChanged": false,
+  "privateRawUnknownTitlesOrFailureBodiesDisclosed": false
+}

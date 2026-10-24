@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-10-22T02:49:58.959553+00:00",
+  "scope": "Root261 status checkpoint only, no new authority",
+  "stories": {
+    "009": "InProgress",
+    "010": "InProgress",
+    "011": "Done"
+  },
+  "source252": {
+    "resourceRawSHA256": "d0f6a7fb6f8e36b0f2f3fc0123b8e04621a8e69d9337b32aec5a369d44298dd1",
+    "sealSHA256": "b3fe88f033fbf3bd7d6b17cd76aa94118b140a7b66ae05c2ac296fd5f76e85a7",
+    "soleProductionFile": "backend/src/main/resources/studio/guided-output-contract.md",
+    "parentRawSHA256": "3db1a7c6aa35ad582e56fff37734860b793bbd03b227a091ddf445022bab8cae",
+    "actualFrozenValidatorControls": 17,
+    "actualManualMergedPureChecks": true,
+    "privateDatabaseMergeExecuted": false,
+    "actualAssemblerResourceAndContextParityProof": true,
+    "frozen769And183JarsOriginalBuildResourceUnchanged": true,
+    "namedJavaUnchanged": 9,
+    "schemasUnchanged": 44,
+    "actual246ExactPredicate": "UNKNOWN",
+    "modelEffectiveness": "UNMEASURED",
+    "independentCombinedQA": "254ACCEPT_FINAL_PAIR_FOR_ONE_BOUNDED_UNIT"
+  },
+  "final253": {
+    "A": "ddcfecf5c6882b23ff28deb6304e66fe82b5cb0fda88c8f10babab12fcb82133",
+    "B": "955645b38519ae1c044ee96442f0a80c17928511eaf0c8654038b42d98f3928b",
+    "runId": "8555f72b-f9dc-4756-9226-7aba7df45c2e",
+    "receiptSHA256": "9b58293388331b84ae0e0b7550cadac74734682c98153299252ed41afb8dc1be",
+    "sourceManifestSHA256": "a80ee249ce13c2cf061cfd4f9fc8878a9a0b91a0efbc041a694aa14f48092ac9",
+    "changedResources": 1,
+    "otherCompiledFilesUnchanged": 768,
+    "jarsUnchanged": 183,
+    "ledger242Retained": true,
+    "main233Retained": true,
+    "prior57SealedDirectorySetsOriginalProtectedStatePreserved": true,
+    "active254ExcludedFromImmutableBaseline": true,
+    "explicitFinal": true,
+    "GOcreated": false
+  },
+  "qa254": {
+    "verdict": "ACCEPT_FINAL_PAIR_FOR_ONE_BOUNDED_UNIT",
+    "receiptSHA256": "047041ce29e5ea6e76250891149c67c75fa4d730e3285ae64ebb91d6a755de38"
+  },
+  "setup255": {
+    "scope": "Onefresh255setup/256UIauthoring after254source/configpair;RootRunGOseparate",
+    "A": "ddcfecf5c6882b23ff28deb6304e66fe82b5cb0fda88c8f10babab12fcb82133",
+    "B": "955645b38519ae1c044ee96442f0a80c17928511eaf0c8654038b42d98f3928b",
+    "runId": "8555f72b-f9dc-4756-9226-7aba7df45c2e",
+    "rootSetupGoSHA256": "01f1b8dfb49a57a730d1ad5b404827d7403338576079a02541cf728dc2915012",
+    "notBefore": "2026-10-22T02:26:25.907Z",
+    "deadline": "2026-10-22T03:01:25.907Z",
+    "newContractSHA256": "d0f6a7fb6f8e36b0f2f3fc0123b8e04621a8e69d9337b32aec5a369d44298dd1",
+    "retainedServiceSourceSHA256": "145bb693623f726a924b7288b2dd7bb885b411c42bbe8eb9dbba02812eb72e83",
+    "retainedLedgerSHA256": "2cf5e69aea30732838a1a3324e39ec00c1fe90867587effc652122bf5628e7f8",
+    "rootRunGoCreated": false,
+    "qa254ReceiptSHA256": "047041ce29e5ea6e76250891149c67c75fa4d730e3285ae64ebb91d6a755de38"
+  },
+  "preactivation255": {
+    "failureSHA256": "607e886d713769a51c35ac46642058dc61291c25edce62333abfe764fa1506af",
+    "refusal": "OWNED_TERMINAL_STATUS_NOT_RUNNING",
+    "old259Statuses": "ALL_EXITED",
+    "acceptedServiceCommands": 0,
+    "sendMarkers": 0,
+    "activationMarkers": 0,
+    "startedResources": 0,
+    "cleanupCalls": 0,
+    "RootSetupGOAndDeadlineUnchanged": true,
+    "replacement260": "9actualRunning/correctOwned/boundedEmptyVerified",
+    "newContext": "runtime255-first-activation-context.json"
+  },
+  "actual255Failure": {
+    "stage": "FIRST_ACTUAL_STARTUP_OWNERSHIP_BARRIER",
+    "code": "TARGET_OWNER_LISTENER_UNCONFIRMED_120S",
+    "targetCommandAcceptedOnce": true,
+    "targetTerminalStayedRunning": true,
+    "otherRolesPositivelyLive": 6,
+    "readinessCalls": 0,
+    "controlCalls": 0,
+    "ui256Dispatched": false,
+    "RootRunGoIssued": false,
+    "modelCalls": 0,
+    "cleanup253InvokedBy255AgentOnce": true,
+    "cleanupFinal": {
+      "receiptSHA256": "a438eed3c82efcca61554c45f62966995c647d45f4da14b43655b262bb7d7609",
+      "once": true,
+      "originalCleanupConfirmed": true,
+      "initialSevenPortsFree": true,
+      "laterReadonlyAllOwnedResourcesGone": true,
+      "guardedExport": "NOT_AVAILABLE_DB_METADATA_ABSENT_BEFORE_READINESS",
+      "extraDbQueries": 0,
+      "scopedTokenIssued": false,
+      "revoke": null,
+      "prior57OriginalProtectedStatePreserved": true
+    },
+    "deadlineUnchanged": "2026-10-22T03:01:25.907Z",
+    "exactMechanism": "UNKNOWN",
+    "noResendRestart": true
+  },
+  "qa258": {
+    "verdict": "ACCEPT_SCOPED_FAILED_SETUP_EVIDENCE",
+    "receiptSHA256": "71fd8b63ce66f55da63d2681075b9745f409ca117800ee69a22be91fb99ce206"
+  },
+  "startup261": {
+    "receiptSHA256": "2d185524082952ee2c08dbbfd45db29a7b6366febf2feace0ad10fc3b0f02f06",
+    "designSHA256": "842cea88faec2173732954739ac5e36089f1a85bad4556997b05bc0690b70561",
+    "probeResultSHA256": "a856649b1ebd2b124b37df1a1d042560256e2162a02b0a25bf8ff8371453c2fe",
+    "inertProbe": {
+      "sends": 1,
+      "accepted": true,
+      "executionProved": true,
+      "standaloneOutputDistinctFromEcho": true,
+      "cursorReadsToProof": 1,
+      "elapsedMs": 287,
+      "rawTailAndNonceRetained": false,
+      "appRuntimeUiBrowserApiDbModelCalls": 0
+    },
+    "historical255Cause": "UNKNOWN",
+    "futureProtocol": "Sequential one-send5s executionproofs all9shells before serviceactivation; sequentialactualCLI sends with parallelstartup/ownerpoll; all priorguards retained",
+    "rootDesignDisposition": "ACCEPT_FOR_OFFLINE262IMPLEMENTATION_ONLY"
+  },
+  "lastActuallyExecutedUi": "246; eleven current safeimages expertviewed,PARTIAL, incrementalSOURCE_PLANfailed; no256UI/model/RunGO",
+  "phase": "262newPinnedStartupController/offlineConfig;263independentProtocolReviewParallel;NoNewGo",
+  "next": "FINAL262controller/config ->263independentcombinedreview ->fresh264setup/265UX/266cleanup/267QA; newbindings/GO pending",
+  "originalApp": "http://127.0.0.1:5177 preserved; originalcompiledruntimeunchanged",
+  "externalAcceptance": "Company/staging/operational/security evidence and actualhumanC17/fiveconsentingpilots still owed;gateway/budgetmanagement outside scope",
+  "wholeBackendCheck": "Six attempts exhausted; no seventh",
+  "model": "All subagents gpt-6.1-sol/high",
+  "noProgressAudit": 0,
+  "statusOnlyNotAuthority": true
+}

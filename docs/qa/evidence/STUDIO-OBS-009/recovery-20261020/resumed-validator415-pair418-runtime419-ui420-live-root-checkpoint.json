@@ -1,0 +1,470 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-10-22T17:51:56.864791+00:00",
+  "phase": "CORRECTED415_ACTUAL_STATIC417_ACCEPTED418_STACK419_READY_UI420_RUN_GO_LIVE",
+  "previousCheckpoint": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/resumed-profile407-pair410-ui412-prego-failed-cleanup414-validator415-root-checkpoint.json",
+  "previousCheckpointSHA256": "6c4e67e956cf8bc36c2fa8000dc64c108a5cba069239385cdc786d386d7b2266",
+  "goalActive": true,
+  "fullGoalComplete": false,
+  "noProgressAuditCount": 0,
+  "stories": {
+    "009": {
+      "sha256": "b22f4e2c88625fd065911cbcc9e0e735a1088744308ee6984430226a3768d666",
+      "open": 16,
+      "complete": 21,
+      "status": "InProgress"
+    },
+    "010": {
+      "sha256": "d548437da858d080ff5accc5e082f95008daa76b6d7d60303272c4227b8ae172",
+      "open": 10,
+      "complete": 2,
+      "status": "InProgress"
+    },
+    "011": {
+      "sha256": "67b0c439a20e00b83ef572aa549c27c96d8c8301cd0de65b975aadd9f862bdc8",
+      "open": 0,
+      "complete": 18,
+      "status": "Done"
+    }
+  },
+  "A": "b9b2d1fd1e96c814ef62969df2cc3be1f90180ed5d95aa11a230fc14a2f71c0f",
+  "B": "3a6bc9d203468d3df4290023a5ed1b2671449de0941131b140788c28c068c30a",
+  "runId": "afc2ebf8-ba9b-4c10-9f24-8ed876b489e0",
+  "setup": "visual417-setup",
+  "publicEvidencePins": {
+    "visual395-preparation/final-receipt.json": "8a1bc35d8c031b0b959d182487dff2458f3f4ddbc8d5e673dccb34e1363b8ae0",
+    "visual395-preparation/final-seal.json": "3baf4becab8559b4a63bcb2604b36dd0e895ee71ed9509680afe8b86d8ce6cc4",
+    "pair396-review/receipt.json": "7e5a64970a9e3d2ddfcf7d70eaa92c52bb327bf308c1900ac2b27bdc33015fcb",
+    "runtime398/receipt.json": "08c3b5d5f6a52a99096442f63ffbe5a5b0ecd77ad387c8e6675335a298f33cf5",
+    "fresh395-root-run-go.json": "d4df6a9b4c5749dabdbf51423d1ef4add11abf4585192a44ed0d55074ec69b3a",
+    "visual398-execution/receipt.json": "8501f30c7bd47931a73f28352e7082ad2427fd62a716eb93ef8f983d24738d12",
+    "visual398-execution/seal.json": "86976390ef225eee096dcd7ca5cbc296700abacbac709c5cd85615ee17ff4ca0",
+    "cleanup399/receipt.json": "ecfe1c2977f49e372eb3cd2b4599e571925c0ff611248336fa9ba065f302154f",
+    "cleanup399/seal.json": "be193b6fb0693f443f5f26472fc7e8e242730212858b76b99ff406c781407c24",
+    "actual401-review/receipt.json": "61332202485dde71552951dedbfe78f4b339c2c4a4136711bf104be3904f4708",
+    "metadata402/result.json": "8481b42b7837f3bd45efdc51db24eb568f096f77ef9b6d0fdd4327ff065c4e47",
+    "metadata402/receipt.json": "764603b65a072092b60c9d26b5c18b2fd5230c32c1d597fa0bd0066494f41bc9",
+    "metadata402/seal.json": "f4e991157d5b07c43dfb6b933105a70b9b80ec071402d65f39bc956e371d3cdd",
+    "metadata404-review/receipt.json": "3b7a184bdc833bfecc8b62af3b538884f3e0802a5209169644c1e54d2d5bb3af",
+    "budget403-source/seal.json": "83a97de0df4db7a17e48384221d1775d05b1b200bcb189d423b5f31948da6394",
+    "guard406-review/receipt.json": "973e6b94d2178888b1220c47b9facd3a9c9c90b83921e2ea384d8d5b0be5ecd0",
+    "guard405/result.json": "91c786070b760142a1fa5080ba3eb8c0d94e3ab36d938c48393057a78c14d971",
+    "guard405/receipt.json": "d194869e4e3f9da579c6094d33513253b2b4bdf20afdc681dd126d899e9a2f0b",
+    "guard405/seal.json": "a521b992645f6ad4991e348417e7f88434c250f05a32975ae3e765c5b5c5477e",
+    "profile407-source-check/seal.json": "6fa95e92655313da51dcf0659c36037261e8b3640dc660cecac6733900ba60b9",
+    "profile407-checks/seal.json": "885a4eea1fcb52c8135b8be1c982b4831e3a9b50a05aa4afd4f930cb273ca6ca",
+    "visual408-preparation/seal.json": "b8738a947f18b90407055dec97b4ecef809971911572e8c273d40cc8b8c0e6b9",
+    "visual409-preparation/final-seal.json": "1eb598f93ddd8ebababef2a08054dd48e2717a0299c0c58e43ef7809a1b19b6b",
+    "pair410-review/receipt.json": "48ed01eb438ac05cca4deb8f415f1877b191a6e9ab4bc105c07183163b692e7f",
+    "runtime411/receipt.json": "64970cd188e1e75e8bc0612941bacdc502eae2deef801dec61603f8d72101f88",
+    "visual412-execution/receipt.json": "14ea5471ed3aac28c61d957ec3defd54661b0ea8817631f7eac373e63acd3936",
+    "visual412-execution/seal.json": "a7d772d1db8f3824938a2ab4e41e433dd63bf32a9c7e86164d6f1f275495def7",
+    "failure413/projection-01.json": "8fb4ee0f7bbf9a60249ef1d17e17876076e810ec93e78a7c6270712b43a67adb",
+    "cleanup414/receipt.json": "a1e5531c9666766ce3658f57c1e29a14662cbb791cd9ba976be3da2d1463118a",
+    "cleanup414/seal.json": "f85534df724b8aefc999ea9341c27b3080383e04964adbd45760f6c0f75eacd0",
+    "validator415-correction/seal.json": "1cb2507b3ebc5c9fbf2c1866233acbc49cce322a127c6a46ffd18b0e36a2bc1f",
+    "validator418-review/source-stage-receipt.json": "c86e1be447d4c60a4358e1879d89426613659aac430f90496c4d696107e3c046",
+    "visual417-preparation/final-receipt.json": "a00b50e5ecdadc528d9bf16a45eabc7c259d96618e1de90145bacd42d2e6281c",
+    "visual417-preparation/final-seal.json": "d2917a6fd1c367ed0172ad3b7286200382704aa099084169680c71cc310e9918",
+    "validator418-review/receipt.json": "7cd59d1411322d7a89b3e5283ad3c51236f801f68e876821642cb5b85f7546ab",
+    "runtime419/receipt.json": "05fbb9e4fa5169cf403e74286dfe0558ef8436d01e54dfb2ab787a67ab46536d",
+    "runtime419-setup-go-closed.json": "4d5a97f2e143c47ce7c3cd4463955f8304d901431de87dd9cd734c564b8df4b6",
+    "fresh417-root-run-go.json": "51eaa07943ffeff225dc638ec95587338609069a4a22420cc8927177a19b0e83"
+  },
+  "sourceCorrections": {
+    "393": "Target/Core setup maximum35 to40 minutes,17 pure controls plus actual-new-config12 controls",
+    "397": "Issuer setup maximum35 to40 minutes,10 extracted guard controls plus actual-copied guard3 controls",
+    "actual390SoleCauseProven": false,
+    "bothSourcePortionsAndFinalPairAccepted396": true
+  },
+  "actual398": {
+    "runtimeReady": true,
+    "controlReady": true,
+    "shellProofs": 9,
+    "originalSetupGoNotBefore": "2026-10-22T16:12:07.751Z",
+    "originalSetupGoDeadline": "2026-10-22T16:52:07.751Z",
+    "originalSetupGoSHA256": "9373ffdc4fcddcccd426911e9ad363a2fffc02fcf7fba0812afdb6f0eda24f09",
+    "rootEntryActual600TriLoadAndPureController": true,
+    "allExternalAndCompiledPinsRehashedBySourceBeforeGo": true,
+    "startupSession": 76835,
+    "startupTerminalExitCode": 0,
+    "uiExpert": "sol61_high_visual398_ux",
+    "uiSendAcceptedOnce": true,
+    "uiSendRequestId": "9a5e1e74-45b3-4aec-95c5-87dcbc2a81e7",
+    "uiResends": 0,
+    "rootRunGo": true,
+    "rootRunGoNotBefore": "2026-10-22T16:15:04.735Z",
+    "rootRunGoDeadline": "2026-10-22T16:45:04.735Z",
+    "rootRunGoSHA256": "912828586b51a361ea27e9c902a16c8b6a404bef73a1e3e16266475ebd78ecd7",
+    "healthAllPassed": true,
+    "negative403codes": [
+      403,
+      403,
+      403
+    ],
+    "modelCallsAtHealth": 0,
+    "journeyOutcome": "FAILED_BEFORE_REQUIRED_CLARIFICATION_AND_PUBLICATION",
+    "workflowCode": "AUTHENTIC_CLARIFICATION_MISSING",
+    "mutations": {
+      "start": 1,
+      "clarify": 0,
+      "finalize": 0,
+      "execute": 0
+    },
+    "publications": 0,
+    "stopSettlement": true,
+    "authority": "CONSUMED_TERMINAL_NO_RETRY",
+    "actualViews": 3,
+    "plannedViews": 17,
+    "withheldViews": 1,
+    "unattemptedViews": 13,
+    "actualNativeVideoReview": "NONE_CLAIMED"
+  },
+  "projection": {
+    "context": "visual389-projection-context.json",
+    "contextSHA256": "a749f91d4ad7306f49a68ebf276c604885aff5d9f5db0dafa879514117ee72f9",
+    "preflight": "visual389-preflight.json",
+    "preflightSHA256": "b565fcd7a7ba35f9cdc5ec604d269e3f13d6ec216764c85f7148b7a9f74f6691",
+    "modelNativeInput": false,
+    "actualViewCount": "PENDING_EXPERT_RECORD"
+  },
+  "humanReview": {
+    "requestingUserOnly": true,
+    "fivePersonPilotRequired": false,
+    "actualReview": "PENDING",
+    "C17": "UNRUN",
+    "nativeVisualAssessment": "UNASSESSED",
+    "masking": "INCONCLUSIVE",
+    "fullAcceptance": false
+  },
+  "preserved390": {
+    "terminal": "FAILED_BEFORE_UI_OR_MODEL",
+    "sourceCleanupConfirmed": true,
+    "strictAggregate": false,
+    "directEmbeddedPg": "UNKNOWN",
+    "retry": false
+  },
+  "next": "Observe SAME actual420 invocation through admitted408 projector, individually view onlyreleasedverifiedmaskedPNGs. No resends/retries/sourcechanges. Onterminal bind420receipt/seal toonceownedcleanup421 andindependentQA; ifcomplete prepare authentic quarantined native-video metadata pack for requestinguser review via separatelyadmitted bounded helper, never native modelview. Full009/010/benchmark/company/security/human gates remainunproven.",
+  "cleanup399": {
+    "exactInvocations": 1,
+    "originalCleanupConfirmed": false,
+    "laterBoundReadOnlyAllOwnedGone": true,
+    "backendJavaPositiveExit": true,
+    "rolesAbsent": 9,
+    "portsFree": 7,
+    "descendantIdentitiesGone": 38,
+    "embeddedPgBoundScopedGone": true,
+    "ownContainerAbsent": true,
+    "extraCleanupSignalsCancelsQueriesExports": 0,
+    "globalOrUncapturedResourceAbsence": "NOT_ESTABLISHED_OR_CLAIMED",
+    "old390PGUNKNOWNAndStrictFalse": "PRESERVED"
+  },
+  "qa401": {
+    "verdict": "ACCEPT_BOUNDED_FAILED_RUN_EVIDENCE_ONLY_WORKFLOW_STOPPED",
+    "fullAcceptance": false
+  },
+  "metadata402": {
+    "publicClosedResult": {
+      "schemaVersion": 1,
+      "basis": "POST_CLEANUP_RETAINED_EXPORT",
+      "scope": "MATCHED_ONE_OWNED_SESSION",
+      "session": {
+        "state": "FAILED",
+        "errorCode": "BUDGET_EXCEEDED",
+        "modelProposals": 8,
+        "stepIndex": 2,
+        "bootstrapPhase": "READY",
+        "pruned": false
+      },
+      "translation": {
+        "presence": "PRESENT",
+        "continuation": "NEXT",
+        "committedPlanPresent": true
+      },
+      "attemptCount": 8,
+      "attempts": [
+        {
+          "kind": "NEXT_ACTION",
+          "status": "APPLIED",
+          "safeResult": "PRESENT"
+        },
+        {
+          "kind": "NEXT_ACTION",
+          "status": "APPLIED",
+          "safeResult": "PRESENT"
+        },
+        {
+          "kind": "NEXT_ACTION",
+          "status": "SUPERSEDED",
+          "safeResult": "ABSENT"
+        },
+        {
+          "kind": "NEXT_ACTION",
+          "status": "SUPERSEDED",
+          "safeResult": "ABSENT"
+        },
+        {
+          "kind": "NEXT_ACTION",
+          "status": "SUPERSEDED",
+          "safeResult": "ABSENT"
+        },
+        {
+          "kind": "NEXT_ACTION",
+          "status": "SUPERSEDED",
+          "safeResult": "ABSENT"
+        },
+        {
+          "kind": "SOURCE_PLAN",
+          "status": "APPLIED",
+          "safeResult": "PRESENT"
+        },
+        {
+          "kind": "SOURCE_PLAN",
+          "status": "REJECTED",
+          "safeResult": "ABSENT"
+        }
+      ],
+      "providerFailureAttribution": "UNKNOWN_NOT_PERSISTED_BY_THIS_METADATA_MODEL",
+      "stateAtEmittingRead": "UNKNOWN_FROM_SEALED_PUBLIC_METADATA"
+    },
+    "helperSHA256": "a343d5ae578925869e10a5ed62acbf0d6cabcae08659faf6a95e9f62412de45d",
+    "exportReadCount": 1,
+    "identityMetadataReadCount": 1,
+    "runtimeOrQueryOrNewExportOrProviderCalls": 0,
+    "privateValuesReleased": false,
+    "nativeRead": false,
+    "independent404Review": "ACCEPT_METADATA_ONLY_SOURCE_AND_BOUNDED_EVIDENCE_SCOPE"
+  },
+  "original5177HeadStatus": 200,
+  "guard405": {
+    "sourceReview406": "ACCEPT_SOURCE_ONLY_FIRST_FULL_GUARD_METADATA_ADAPTER",
+    "actualCollectorCalls": 1,
+    "result": {
+      "collection": "VERIFIED",
+      "guards": [
+        "SESSION_RESERVATION_LIMITS"
+      ],
+      "transactions": [
+        "COMMITTED"
+      ]
+    },
+    "exportRereads": 0,
+    "nativeVideoRead": false,
+    "inputScope": "A_PINNED_PROFILE_SAME402_SEALED_METADATA_IDENTITY_EXISTING_FIXED_4096BYTE_GUARD_FILE",
+    "exactCountInputOutputSubterm": "UNKNOWN",
+    "supersessionCause": "UNKNOWN",
+    "chronologyOrPerGuardTransactionPairing": "NOT_PROVIDED"
+  },
+  "local407Decision": {
+    "initialPremiseDefault24": "REFUTED_PRESERVED_SOURCE_CHECK",
+    "applicationProposalDefault": 100,
+    "documentedPlanningTarget": 24,
+    "ruling": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/model-sizing/ruling-draft.md",
+    "rulingSHA256": "03cbfd6261663d51d4c2e7611d4749933e641ee68b63fda5a121f61c809eeaf9",
+    "rulingSection": "8.3 lines390-407",
+    "rootDecision": "FRESH_LOCAL_VALIDATION24_PER_LEARN_2STARTS48_TOTAL_INDEPENDENT_OF_PRODUCT_DEFAULT",
+    "applicationGatewayCsiTokenInputOutputBudgetsChange": false,
+    "productJavaChange": false,
+    "existingDefaultsPreserved": {
+      "proposalDefault": 100,
+      "inputTokens": 786432,
+      "outputTokens": 98304,
+      "perCallOutput": 4096
+    },
+    "oldLocalOverride": 8,
+    "status": "IMPLEMENTATION_RUNNING_NO_FINAL407_YET",
+    "newActualCaseOrGo": "NONE"
+  },
+  "ux408": {
+    "agent": "sol61_high_visual398_ux",
+    "state": "PUBLIC_SOURCE_PREPARATION_WAITING_EXPLICIT_FINAL407_B",
+    "projectorChanges": "FINITE_SOURCE_PIN_B_HARNESS_PATH_AND_408_ADMISSION_NAMESPACE_ONLY",
+    "proposal8or16GuardIn389Projector": false,
+    "mutation2_1_2_1Bounds": "UNCHANGED",
+    "capturePlan17AndNativeLimits": "UNCHANGED",
+    "privateInputAdmission": false
+  },
+  "prior398Case": {
+    "A": "46629374343601ec0c1f0fc82b90526b4f734b0f188431a6b5c2f0b738ab6450",
+    "B": "a703a18788a916bed0fdf790a4b4e5c66f0a4cf5c19291e5ea1c494a587c6ce9",
+    "runId": "e2fe538f-f501-4126-86e5-26fd52509d24",
+    "setup": "visual395-setup"
+  },
+  "source407": {
+    "local24PerLearn2Starts48Total": true,
+    "focusedControlsPassed": 13,
+    "typesFactoryAnd11PythonSyntaxPassed": true,
+    "independent410SourceAccepted": true,
+    "productDefault100AndOtherBudgetsUnchanged": true
+  },
+  "projector408": {
+    "projectorSHA256": "45d4a76ce2b7c1d1082364e8aaae452c258ea5e82774484a9fbf9ccd6501717f",
+    "syntheticControlsPassed": 18,
+    "independent410SourceAccepted": true,
+    "actualPrivateProjectionAdmission": false,
+    "actualFixedFilesCreated": false
+  },
+  "pair409": {
+    "independent410Accepted": true,
+    "ownFilesStrictlyVerified": 53,
+    "source407CapsAnd393397BindingsVerified": true,
+    "actualNewProfile12TargetCore12Issuer3CatalogPassed": true,
+    "codeOwner": "visual395-setup_CODE_ONLY",
+    "code817Jars183ClosureVerifiedByConstructor": true,
+    "classloader39Proof": "EXACT_CLASSPATH395_REUSE_NOT_NEW_EXECUTION",
+    "actualRootSetupGoAllPinRehashPassed": true
+  },
+  "actual411": {
+    "startupSession": 99103,
+    "startupExitCode": 0,
+    "runtimeReady": true,
+    "controlReady": true,
+    "sourceNineShellProofsPassed": true,
+    "rootSetupGoNotBefore": "2026-10-22T17:11:38.095Z",
+    "rootSetupGoDeadline": "2026-10-22T17:51:38.095Z",
+    "rootSetupGoSHA256": "a610fc8397e64483ee8c5f615c9199b3c32f1c159314e39a1b049120b1c9efc6",
+    "actual600TriLoadPure9ControllerBeforeGo": true,
+    "actualGoAuthority": "CONSUMED_TERMINAL_NO_RETRY"
+  },
+  "actual412": {
+    "onceSendRequestId": "3e61fd0d-5988-447f-b8f5-c52183493165",
+    "sendCount": 1,
+    "retry": false,
+    "uiOutcome": "STOPPED",
+    "code": "FILE_GATE_TIMEOUT",
+    "stage": "author",
+    "invocationExitCode": 1,
+    "mutations": {
+      "start": 0,
+      "clarify": 0,
+      "finalize": 0,
+      "execute": 0
+    },
+    "rootRunGoIssued": false,
+    "rootWatcherSession": 27545,
+    "watcherTerminalCode": "SOURCE_BRIDGE_FAILURE_NO_ISSUANCE",
+    "bridgeProducers": [
+      {
+        "producer": "draft-created",
+        "exitCode": 0
+      },
+      {
+        "producer": "first-secret-created",
+        "exitCode": 1
+      }
+    ],
+    "actualImageViews": 0,
+    "plannedCaptures": 17,
+    "captureAttemptReleaseWithholdCounts": "UNKNOWN_NOT_ADMITTED",
+    "stopSettlement413Witness": "NOT_RECORDED",
+    "fullAcceptance": false
+  },
+  "cleanup414": {
+    "exactDirectPreGoSourceInvocations": 1,
+    "fullRunGoWrapperUsed": false,
+    "fakeRunGoCreated": false,
+    "originalCleanupConfirmed": false,
+    "originalUiOwnsPriorCancel": true,
+    "laterBoundReadOnlyGone": true,
+    "rolesAbsent": 9,
+    "portsFree": 7,
+    "capturedDescendantsGone": 17,
+    "backendPositiveExit": true,
+    "boundEmbeddedPgGone": true,
+    "containerAbsent": true,
+    "extraCleanupSignalsCancelsQueriesExports": 0,
+    "onlySourceExportTables": 14,
+    "onlySourceExportRows": 4,
+    "sourceExportSHA256": "eb9bf2ea8ebf22f9d967dc9cb0fb3029e3d637ff31bcabb315c2a441994265d7",
+    "exportBodyRead": false,
+    "globalUncapturedResourceAbsence": "NOT_ESTABLISHED_OR_CLAIMED"
+  },
+  "validator415": {
+    "state": "EXPLICITFINAL415_SOURCE_ACCEPTED418",
+    "oldSource": "visual409-setup/ConfigValidator.java",
+    "oldSourceSHA256": "4dc20b3a29c7c0dfa9eee05f04ae974aebe4e427627715a5de99c7c2ff04509c",
+    "demonstratedMandatoryMismatch": "cap8Bound_maxModelProposals_equals8_AGAINST_NEW_CONFIG24",
+    "scope": "FRESH_COPY_LABEL_cap24Bound_AND_COMPARISON24_ONLY_ALL_OTHER_BYTES_INVERSE_IDENTICAL",
+    "actual412SoleCause": "NOT_PROVEN_RAW_ADAPTER_LOG_UNREAD",
+    "mandatoryFutureGate": "CORRECTED_ACTUAL_CONFIGVALIDATOR_STATIC_MODE_ON_ACTUAL_FRESH_CONFIG_BEFORE_A_SEAL_NO_NETWORK",
+    "newSourceSHA256": "5b0deac2d2f5f10309a742d7ea6221aaed841d46fbe31e9645e0b3fb691e2ec0",
+    "onlySourceEdits": "cap8Bound\u2192cap24Bound andmaxModelProposalscomparison8\u219224",
+    "syntheticStaticCases": 5,
+    "unchangedCheckObservations": 60,
+    "new24ActualExitCode": 0,
+    "old8BaselineExitCode": null,
+    "old8FinitePassMetadataRetained": true
+  },
+  "prior412Case": {
+    "A": "861177c8bb01ce4f20b3250c1b6a25de3eced86c3c94b31ae79ff252d7220b59",
+    "B": "3a6bc9d203468d3df4290023a5ed1b2671449de0941131b140788c28c068c30a",
+    "runId": "717fc8ea-974b-4d53-8c99-d333bcaa954f",
+    "setup": "visual409-setup"
+  },
+  "pair417": {
+    "independent418Accepted": true,
+    "actualStaticAll13TrueExit0BeforeASeal": true,
+    "actualStaticProofSHA256": "9da5c2327c13eb4cab19c75e54961d3c65736be14e11286f0da9ddca72585701",
+    "actualBackendConfigSHA256": "ed81f5ad13393c52b93dd5e34cab3d9b8305c36b5f00b3ffcedec5a3872cc692",
+    "ownFilesVerified": 53,
+    "externalProofPins": 855,
+    "actualNewProfile12TargetCore12Issuer3CatalogPassed": true,
+    "compiledCode817Jars183": "CONSTRUCTOR_VERIFIED_AND_ACTUAL_ROOT_SETUP_GO_REHASHED",
+    "runtimeClassPathCodeOwner": "UNCHANGED_FROZEN395_CODE_ONLY",
+    "classloader39Proof": "EXPLICIT_EXACT_CP395_REUSE_NOT_NEW_EXECUTION"
+  },
+  "actual419": {
+    "startupSession": 6432,
+    "startupExitCode": 0,
+    "runtimeReady": true,
+    "controlReady": true,
+    "shellProofs": 9,
+    "rootSetupGoSHA256": "ddc4d94c2e6b85fe51061bbc41353fccc0ef1f575938f655da975529afab29e8",
+    "originalSetupNotBefore": "2026-10-22T17:45:15.491Z",
+    "originalSetupDeadline": "2026-10-22T18:25:15.491Z",
+    "actual600TriLoadPure9ConstructorPassed": true,
+    "rootRunGoIssued": true,
+    "rootWatcherSession42078ExitCode": 0,
+    "rootRunGoSHA256": "f425417072615864cfbfb23562f0c34a0e1c7013fb27e080b0314be5d91272a6",
+    "runGoNotBefore": "2026-10-22T17:48:12.480Z",
+    "runGoDeadline": "2026-10-22T18:18:12.480Z",
+    "allLiveHealthChecksPassed": true,
+    "negative403codes": [
+      403,
+      403,
+      403
+    ],
+    "modelCallsAtHealth": 0
+  },
+  "actual420": {
+    "state": "RUNNING_FULL_LEARN_NOT_ACCEPTED",
+    "expert": "sol61_high_visual398_ux",
+    "uiSendCount": 1,
+    "sendRequestId": "57b04387-6d30-4e79-99ee-f746f1810931",
+    "resends": 0,
+    "viewsReportedAsOf": "2026-10-22T17:50:59Z",
+    "actuallyViewedLabels": [
+      "01-first-secret-disclaimer",
+      "02-first-secret-disclaimer-narrow",
+      "03-secret-form-before-value",
+      "04-authored-five-steps"
+    ],
+    "actualViews": 4,
+    "plannedLabels": 17,
+    "waitingLabels": 13,
+    "refusedLabels": 0,
+    "viewLimit": "03maskObscuresSomeLabelsNoSecretOrEmptyStatePixelClaim",
+    "clarificationOrPublicationObservedYet": false,
+    "invocation": "PENDING"
+  },
+  "projection408Actual": {
+    "context": "visual408-projection-context.json",
+    "contextSHA256": "011ac46db35e7cf72fccfe51f38e8397792db2125ff19ddb4f3200430dd6089a",
+    "preflight": "visual408-preflight.json",
+    "preflightSHA256": "34fb2aae05d57f16179dbb72048054ab5e781f98b3156d8c826b834b5621d5f5",
+    "helperSHA256": "45d4a76ce2b7c1d1082364e8aaae452c258ea5e82774484a9fbf9ccd6501717f",
+    "exactSetupRoot": "visual417-setup",
+    "nativeMediaAdmitted": false,
+    "sourcePins": 19
+  }
+}

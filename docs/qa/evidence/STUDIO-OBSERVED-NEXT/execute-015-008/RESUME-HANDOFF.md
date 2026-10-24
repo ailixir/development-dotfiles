@@ -1,3 +1,7 @@
+> **User-requested pause — 2026-10-19; saved 2026-10-20T02:28:39.994268+00:00.** The current checkpoint supersedes execution directions below. Read [RESUME-HANDOFF-20261019-CODEX.md](../RESUME-HANDOFF-20261019-CODEX.md). Source08 is HOLD1; revisionB is not dispatched. All specialists completed; original held session29815 is preserved. Resume only on explicit user request.
+
+> **SUPERSEDED 2026-10-18:** resume from `docs/qa/evidence/STUDIO-OBSERVED-NEXT/RESUME-HANDOFF-20261018.md`.
+
 # Resume handoff — STUDIO-OBSERVED 015 → 008
 
 **PAUSED at 2026-10-16T01:56:49.032887+00:00, by explicit user request: “Stop the work on this session and persist the info so, we can resume from another session.”** Do not resume until the user requests it. This checkpoint is not completion.

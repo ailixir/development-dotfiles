@@ -1,0 +1,45 @@
+{
+  "reviewer": "/root/corpus_io06_independent_qa",
+  "exactSealedReferences": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-design21-root-amendment.json",
+      "sha256": "d850f5583dd688f01cd96ba127a7b39590c93c5dbda917ef40e954f46876d883",
+      "bytes": 4380
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-design20-independent-review/manifest.json",
+      "sha256": "633e764c491c5e26be037ff14bd09ea6c66d5eaf1d1df1935972d1bf4086b33e",
+      "bytes": 810
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-capture-design18/manifest.json",
+      "sha256": "b003fff84a28c3f9d9837582a235704b5db018c326f368e06c462135042d6c2b",
+      "bytes": 1011
+    }
+  ],
+  "priorReviewArtifacts": [
+    {
+      "path": "bindings.json",
+      "sha256": "ae792e5279080fecdc1fda825d42fe33f845c139e434c9b55dc92dafc0097351",
+      "bytes": 4450
+    },
+    {
+      "path": "findings.json",
+      "sha256": "c18613a45b80402aa0198224b814721126d0f0bae59ac1ce3d588e15984ad023",
+      "bytes": 3432
+    },
+    {
+      "path": "review.md",
+      "sha256": "3f2465f1ecdeaadca3f3980c235930e32687f3a6e786aa3fb3ac4dde42446e51",
+      "bytes": 6273
+    }
+  ],
+  "context": {
+    "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/obs009-wire-design21-amendment-review-context.txt",
+    "sha256": "b508e88223ad31884f1587d4b453950f5b13aad23a719b08ec57ece1e1a1d2ff"
+  },
+  "method": "Independent exact amendment and prior source-grounded finding comparison; no implementation/execution",
+  "allOtherDesign18ControlsCarryWithoutRelaxation": true,
+  "externalScopeQuestionResolutionPreserved": true,
+  "scopeNoPrivateBodiesOrSdk": true
+}

@@ -1,0 +1,32 @@
+{
+  "id": "lint01",
+  "wrapperRawExit": 0,
+  "result": {
+    "command": [
+      "pnpm",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eslint/bin/eslint.js",
+      "evaluation/observed-authoring/evaluate.mjs",
+      "evaluation/observed-authoring/evaluate.d.mts",
+      "test/evaluation/harnessSelfTest.test.ts"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-21T11:40:32.298775+00:00",
+    "elapsedSeconds": 2.8,
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+    "testInputStable": true,
+    "testInputDigestBefore": "0c59568e8e686c69703f650006edd70e8033db2906db7e434943735beebaff2d",
+    "testInputDigestAfter": "0c59568e8e686c69703f650006edd70e8033db2906db7e434943735beebaff2d"
+  },
+  "resultReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-revision11-lint01-results.json",
+    "sha256": "eb707cd9fbf74bfec94f63b78a329619d1f36b20cb5c56f116fedc8ee9c74b32",
+    "bytes": 808
+  },
+  "stdoutSha256": "e68c1104a65f2b7c275a2d95944c41fdbf2bf1340d6493a180032eb7c0f33a11",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

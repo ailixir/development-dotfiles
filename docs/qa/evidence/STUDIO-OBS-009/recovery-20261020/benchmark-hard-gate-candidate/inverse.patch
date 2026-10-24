@@ -1,0 +1,70 @@
+--- a/studio-runner/evaluation/observed-authoring/evaluate.mjs
++++ b/studio-runner/evaluation/observed-authoring/evaluate.mjs
+@@ -493,9 +493,8 @@
+   const completions = pRuns.filter(isCompletion).length;
+   const failedRuns = pRuns.length - completions;
+   const rate = pRuns.length === 0 ? null : completions / pRuns.length;
+-  // An excluded earlier attempt can still hit a hard gate; retries never erase observed facts.
+-  const falsePasses = runs.filter((r) => r.oracle?.falseSuccess === true);
+-  const leaks = runs.filter((r) => (r.secretOrPiiLeak ?? 0) > 0);
++  const falsePasses = credited.filter((r) => r.oracle?.falseSuccess === true);
++  const leaks = credited.filter((r) => (r.secretOrPiiLeak ?? 0) > 0);
+   const zero = (field) => {
+     const items = credited.flatMap((r) => (r.details?.[field] ?? []).map((d) => ({ caseId: r.caseId, rep: r.rep, ...d })));
+     return { total: credited.reduce((n, r) => n + r[field], 0), runsCounted: credited.length, items };
+@@ -535,7 +534,7 @@
+       },
+       blockedUnrun,
+     },
+-    hardGates: { falsePasses: falsePasses.length, secretOrPiiLeaks: leaks.length, falsePassRuns: falsePasses.map((r) => ({ caseId: r.caseId, rep: r.rep, attempt: r.attempt })), leakRuns: leaks.map((r) => ({ caseId: r.caseId, rep: r.rep, attempt: r.attempt })) },
++    hardGates: { falsePasses: falsePasses.length, secretOrPiiLeaks: leaks.length, falsePassRuns: falsePasses.map((r) => ({ caseId: r.caseId, rep: r.rep })), leakRuns: leaks.map((r) => ({ caseId: r.caseId, rep: r.rep })) },
+     classFN: {
+       runs: credited.filter((r) => classOf.get(r.caseId) !== 'P').length,
+       correct: credited.filter((r) => classOf.get(r.caseId) !== 'P' && r.oracle?.correct === true).length,
+--- a/studio-runner/test/evaluation/benchmarkScoring.test.ts
++++ b/studio-runner/test/evaluation/benchmarkScoring.test.ts
+@@ -64,33 +64,6 @@
+     expect(result.gate.verdict).toBe('GATE_FAIL');
+     expect(result.hardGates.secretOrPiiLeaks).toBe(1);
+   });
+-
+-  it.each([
+-    { observation: 'false pass', caseId: 'C08-intended-assertion-fail', falsePass: true, leak: 0 },
+-    { observation: 'secret or PII leak', caseId: 'D1-login-secret-fixture', falsePass: false, leak: 1 },
+-  ])('retains an earlier $observation after a clean final attempt is credited', ({ caseId, falsePass, leak }) => {
+-    const runs = syntheticRuns(manifest, { mode: 'D_C' });
+-    const target = must(runs.find((r) => r.caseId === caseId && r.rep === 1));
+-    const infra: RunRecord = {
+-      ...structuredClone(target), attempt: 1, infrastructureFailure: 'HOST_PORT_COLLISION',
+-      oracle: { correct: false, falseSuccess: falsePass, failures: ['synthetic-earlier-attempt'] },
+-      secretOrPiiLeak: leak,
+-    };
+-    target.attempt = 2;
+-    const result = score([infra, ...runs]);
+-    expect(result.denominatorLedger.problems).toEqual([]);
+-    expect(result.denominatorLedger.creditedRuns).toBe(69);
+-    expect(result.denominatorLedger.infrastructureFailures).toEqual([
+-      { caseId, rep: 1, attempt: 1, infrastructureFailure: 'HOST_PORT_COLLISION', rerun: true },
+-    ]);
+-    expect(result.gate.classP).toMatchObject({ runsCredited: 51, completions: 51, failedRuns: 0 });
+-    expect(result.gate.verdict).toBe('GATE_FAIL');
+-    expect(result.hardGates).toEqual({
+-      falsePasses: falsePass ? 1 : 0, secretOrPiiLeaks: leak,
+-      falsePassRuns: falsePass ? [{ caseId, rep: 1, attempt: 1 }] : [],
+-      leakRuns: leak > 0 ? [{ caseId, rep: 1, attempt: 1 }] : [],
+-    });
+-  });
+ });
+ 
+ describe('labels and honesty rules', () => {
+@@ -148,10 +121,6 @@
+     const reported = score([infra, ...runs]);
+     expect(reported.denominatorLedger.infrastructureFailures).toEqual([expect.objectContaining({ caseId: 'C01-rf-example-url', infrastructureFailure: 'HOST_PORT_COLLISION', rerun: true })]);
+     expect(reported.gate.classP.runsCredited).toBe(51);
+-    expect(reported.gate.classP).toMatchObject({ completions: 51, failedRuns: 0 });
+-    expect(reported.denominatorLedger.creditedRuns).toBe(69);
+-    expect(reported.gate.verdict).toBe('PARTIAL');
+-    expect(reported.hardGates).toEqual({ falsePasses: 0, secretOrPiiLeaks: 0, falsePassRuns: [], leakRuns: [] });
+     const silent: RunRecord = { ...structuredClone(target), attempt: 1, infrastructureFailure: null };
+     const hidden = score([silent, ...runs]);
+     expect(hidden.denominatorLedger.problems.some((p) => p.code === 'UNREPORTED_RETRY')).toBe(true);

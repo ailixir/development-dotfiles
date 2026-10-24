@@ -1,0 +1,83 @@
+{
+  "kind": "TEXT_AND_HASH_PRESERVATION_NOT_PARSER_OR_RUNTIME_PROOF",
+  "oldOwnershipUnitWholePrefixExact": true,
+  "originalUnit24IdentitiesAndAssertionsPreservedByBytePrefix": true,
+  "originalUnitBytes": 31216,
+  "originalUnitExpectLexemes": 140,
+  "new4CasesOnlyAppend": true,
+  "unchangedControls": [
+    {
+      "path": "studio-runner/test/guided/stopReason.test.ts",
+      "sha256": "f2d703d0d5d7b01b77c779c63ecd45cbe32fe97eeeb437837d982eb377ab9bcf"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts",
+      "sha256": "bd0e0f1b48aa941a58b8aacbd611d6d26940de9daf0be86c8f261e7004edec98"
+    },
+    {
+      "path": "studio-runner/src/guided/runtime.ts",
+      "sha256": "8ce999d78ff0fe7500e9c7aece20beaf31c4e6ce2c74c0c256de7d71713da3f8"
+    },
+    {
+      "path": "studio-runner/src/guided/types.ts",
+      "sha256": "36bf59b7a0ff9b941380a178880caeec73dab63560a2116ca7a079fd4718e155"
+    },
+    {
+      "path": "studio-runner/package.json",
+      "sha256": "2a7926800745772854c8bcecb9eba8d0136103c4a281e21afa598b347524f19e"
+    },
+    {
+      "path": "studio-runner/package-lock.json",
+      "sha256": "71d287538cf4659d75b965f57937b41bbe7540bb81a3a8c40a66edbb76e13613"
+    }
+  ],
+  "productUnchangedSpans": [
+    "schedule method body",
+    "checkGrant method body",
+    "requestClaim epoch/BUSY/inFlight/controller/abort race and finally",
+    "acquire initial request callsite",
+    "renew grant install body and nextRenewal+=1000/schedule",
+    "renew C1/REVOKED catch/stop pipeline",
+    "all assign/context/stop/close bodies"
+  ],
+  "productEditsExactInverseReconstructBefore": true,
+  "newClaimPhaseCheckAfterAwaitAndOriginalLiveBeforeApply": true,
+  "newTestsUseExistingFakeTimersSetupOnly": "Date/setTimeout/clearTimeout; local setSystemTime verified against installed Vitest fake-timers source; one case-local original checkGrant spy queues one microtask; no production hook/service",
+  "originalNative41ExpectLexemesUnchanged": 41,
+  "candidateCompilerParserTestsNotRun": true,
+  "verifiedUnchangedProductSpanHashes": [
+    {
+      "name": "schedule",
+      "bytes": 1127,
+      "sha256": "eb290c94ed17094214257564572fdf6ab657e083cb89374f91776b3de08065a1",
+      "unchanged": true
+    },
+    {
+      "name": "grant-validation",
+      "bytes": 1831,
+      "sha256": "e16902ed11127a55385f537d1fd2b6f35306327e0bada3034bb83b93b34ac02d",
+      "unchanged": true
+    },
+    {
+      "name": "request-controller-race-epoch-and-finally",
+      "bytes": 1061,
+      "sha256": "2ab86536706d81264597e5e792debd82c2286e84e8ae6cec6329b93778e2609d",
+      "unchanged": true
+    },
+    {
+      "name": "acquire-assignment-and-receipt",
+      "bytes": 2084,
+      "sha256": "50c2783974e07faa54b6135b70ca722b1277957304945096fa623a94749fad92",
+      "unchanged": true
+    },
+    {
+      "name": "installation-and-all-catch-context-stop-close-tail",
+      "bytes": 5545,
+      "sha256": "46b29a320387a53408e8a6b10995ac18916b7f26edadc2930a5e7f9012588cf6",
+      "unchanged": true
+    }
+  ],
+  "productInverseReconstructsExactBeforeVerifiedNow": true,
+  "candidateProductSha256": "87b661946b0819aac38e130f3b4a8467222f70789416b188236b9345d4a96387",
+  "candidateTestSha256": "956104377c8e1458b3fb9b73e86df72429b24f0bafe161e33124cb563b300112"
+}

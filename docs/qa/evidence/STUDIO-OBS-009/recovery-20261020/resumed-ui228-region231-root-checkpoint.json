@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-10-22T01:16:03.105647+00:00",
+  "previousCheckpoint": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/resumed-source222-runtime227-root-checkpoint.json",
+  "goalStatus": "active",
+  "fullGoalComplete": false,
+  "noProgressAuditCount": 0,
+  "storyStates": {
+    "011": "Done",
+    "009": "InProgress",
+    "010": "InProgress"
+  },
+  "modelPolicy": "allsubagentsgpt-6.1-sol/high",
+  "source222": {
+    "resourceRawSHA256": "3db1a7c6aa35ad582e56fff37734860b793bbd03b227a091ddf445022bab8cae",
+    "outputCanonicalProvenanceSHA256": "2406b380aaa01b43c9ce5fb44caee93113b397864898b555d0eed2bd182950e9",
+    "finalSealSHA256": "de2950d57a6d907d9c3f3e4d1c9ecc99150e7c5ff78fe82db9f452001931ab76",
+    "soleProductionFile": "backend/src/main/resources/studio/guided-output-contract.md",
+    "source87Snapshot": "clarification222-implementation/before/source87-pins.json",
+    "paragraphDesign": "clarification219-design.md",
+    "designApproval": "clarification221-review/receipt.json",
+    "actualOfflineProducerProof": "PASS",
+    "schemasClientParserB190OtherSources": "UNCHANGED",
+    "originalBuildResources": "UNCHANGED",
+    "historical214Mechanism": "UNKNOWN",
+    "futureModelEffectiveness": "UNMEASURED",
+    "qa223": {
+      "verdict": "ACCEPT_EXACT_PROMPT_RESOURCE_CHANGE",
+      "receiptSHA256": "33dfe1351bcb88cd931456364168888960ab91dc1513ec72e04fc0bf6a95fb10"
+    }
+  },
+  "configuration224": {
+    "A": "84112f246326e781d3d37fc3e7e33bdb37e99a9c8b783f329e11c19d397753e7",
+    "B": "955645b38519ae1c044ee96442f0a80c17928511eaf0c8654038b42d98f3928b",
+    "runId": "b945d2c0-7db8-4e72-82de-da3090ee420e",
+    "receiptSHA256": "c9b64dbcc685e7dd39b0f8a6f44f354fa8bc7de2f16b15d691d5e7ed101df79d",
+    "sourceManifestSHA256": "cc12666681fee1c1f0e713a24505934b868383f42f0b2737ff2a83e5fb459fbd",
+    "newContractRawSHA256": "3db1a7c6aa35ad582e56fff37734860b793bbd03b227a091ddf445022bab8cae",
+    "explicitFinal": true,
+    "changedOwnedResource": 1,
+    "otherResourcesUnchanged": 768,
+    "librariesUnchanged": 183,
+    "preflights225227228229": "all exit0",
+    "GOcreated": false
+  },
+  "actual228": {
+    "manifestSHA256": "576f45a13515cf6701473f9e83ea75264672d0b8ea41c7505ba1ea6e493e1ad3",
+    "reportSHA256": "e6379e2eda6c89cfdc1977538ff3b4f340b369600ce3daa7d5827040b4c4adac",
+    "receiptSHA256": "8580aa67b642dede28cd7e6bfa50fbea1230b92f4d72ef59de31d2311b39ba86",
+    "stateAfterUISettlement": "CANCELLED",
+    "genuineAmbiguousQuestion": true,
+    "questionGUI": "NOT_ASSESSED",
+    "modelProposalsApplied": 5,
+    "sourcePlans": 1,
+    "nextActions": 4,
+    "nativeSuccesses": 3,
+    "answers": 0,
+    "finalizations": 0,
+    "replays": 0,
+    "attemptReportedTokens": {
+      "input": 30850,
+      "output": 1595
+    },
+    "sessionBudgetCounters": {
+      "input": 89518,
+      "output": 20480
+    },
+    "billedClaim": false,
+    "safeScreenshots": {
+      "planned": 17,
+      "attempted": 4,
+      "released": 3,
+      "withheld": 1,
+      "unresolved": 0,
+      "notAttempted": 13,
+      "expertViewed": 3,
+      "completeness": "PARTIAL"
+    },
+    "recording": "AVAILABLE/nonpartial/notdownloadeddecodedviewed",
+    "fullAcceptance": false
+  },
+  "diagnosed228Cause": {
+    "choiceIdsDistinct": true,
+    "bothSafeLabelsPublicOpen": true,
+    "publicRegionFieldsOpaqueRefs": true,
+    "primaryPhraseMatches": 0,
+    "secondaryPhraseMatches": 0,
+    "sameSnapshotResolvedTags": [
+      "PRIMARY",
+      "SECONDARY"
+    ],
+    "rawActualDataReleased": false
+  },
+  "cleanup229": {
+    "receiptSHA256": "e5b5fa3e9b263ee55f5703945965c206624b50b3d7769be89f29877bd8a75e4a",
+    "closedClarificationProjectionSHA256": "41deefc59b4be98c90b1233be7a4c1d29a37442544ba895ce9a22be5edb90817",
+    "once": true,
+    "seconds": 23.027,
+    "exportTables": 14,
+    "exportRows": 15,
+    "revoke": 204,
+    "duplicateCancels": 0,
+    "initialCleanupConfirmed": false,
+    "initialFalseProbePort": 18196,
+    "laterReadonlyAllOwnProcessesSevenPortsCidPgGone": true,
+    "prior37UnitsOriginalState3SafeImagesUnchanged": true
+  },
+  "qa230": {
+    "verdict": "ACCEPT_SCOPED_EVIDENCE_WORKFLOW_FAILED_STOPPED",
+    "receiptSHA256": "d89630bfa78081927b1c89162cfec68f1981415ee596c586ae69eecd4ab8567d"
+  },
+  "region231Design": "region231-design.md;privatebackendunique same-admitted-snapshotregionID->namelabeljoin,eligibility/nullfallback;no ancestoror newauthority",
+  "currentParallelWork": {
+    "sol61_high_visual106": "232independentUXdesignseal"
+  },
+  "nextSafeAction": "Wait232FINALdesignapproval thenbind/preflight233sourcehelperimplementation+focusedtests/privatecompile. No app/runtime/model or234prep untilsource233FINAL.",
+  "temporaryStack": "All224ownresourcesgone;original5177protectedruntimepreserved",
+  "privacy": "OnlyverifiedcurrentmaskedStudioimagesmaymodelview;native/failedPNG/payload/OCR/logsnevershown;maskingINCONCLUSIVE/C17UNRUN/fullAcceptancefalse",
+  "externalAcceptance": "traceability139/OWNER-INPUTS.md remainsowed;no consent/companyrecordfabrication/no storyDone",
+  "historical214": "FAILED_INVALID_CONTRACT/UNKNOWN;preserved.228realquestiondoesnotretroactivelydiagnose214."
+}

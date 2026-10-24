@@ -1,0 +1,138 @@
+{
+  "status": "SOURCE_ONLY009_BUSINESS_CANDIDATE_READY_FOR_INDEPENDENT_ARCHITECTURE_SECURITY_QA",
+  "sourceScope": [
+    "studio-runner/src/guided/ownership.ts",
+    "studio-runner/test/guided/ownership.test.ts"
+  ],
+  "beforePins": {
+    "studio-runner/src/guided/ownership.ts": "c76696f0c74359ee5dab8b57f9feb843b743ff24af2884b2642744f8ead3a32d",
+    "studio-runner/test/guided/ownership.test.ts": "436b45e61faab72efd9ec5d801f7e720ae8801872702c80286c31af37f5d8e19"
+  },
+  "candidatePins": {
+    "studio-runner/src/guided/ownership.ts": "87b661946b0819aac38e130f3b4a8467222f70789416b188236b9345d4a96387",
+    "studio-runner/test/guided/ownership.test.ts": "956104377c8e1458b3fb9b73e86df72429b24f0bafe161e33124cb563b300112"
+  },
+  "productForwardPatchSha256": "545ec1cf16792e34da64de3620ffc66019f00b8c1175dbfe5eec81bb1966a46e",
+  "testsForwardPatchSha256": "bf01f445e02f652e3e495bbbd08758f3197082c6f93042642a86cb2dedff9cf8",
+  "combinedPatchSha256": "789d7cd15301b865c671c20920da67434b2e225f0d9dec30534d89c9343a1450",
+  "allBeforeRedGreenBuffersAndInversesBound": true,
+  "actualFilesRemainExactBefore": true,
+  "baselineOwnershipExecutedCases": 24,
+  "baselineStopReasonExecutedCases": 26,
+  "proposedNewOwnershipCases": 4,
+  "proposedOwnershipCases": 28,
+  "proposedCompleteFocusedGreenCases": 54,
+  "originalNativeModesUnchanged": 4,
+  "allOutcomeCountsAreUnexecutedPredictionsHere": true,
+  "expectedOldRedFrame": "test/guided/ownership.test.ts:298",
+  "expectedOldRedFullName": "009 secret renewal keeps its original claim-phase endpoint does not install an otherwise valid late grant after a delayed renewal phase has ended",
+  "tieChoiceRequiresExplicitSourceReview": true,
+  "notNeutralRT7": true,
+  "runtimeOrActualSourceApplicationGo": false,
+  "artifacts": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/baseline-real-unit-counters.json",
+      "sha256": "1f847c813516dd415ee3b1015c66ed472fa4f408f60a2d756a6d83c941ba0716"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/before/studio-runner/src/guided/ownership.ts",
+      "sha256": "c76696f0c74359ee5dab8b57f9feb843b743ff24af2884b2642744f8ead3a32d"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/before/studio-runner/test/guided/ownership.test.ts",
+      "sha256": "436b45e61faab72efd9ec5d801f7e720ae8801872702c80286c31af37f5d8e19"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/combined.patch",
+      "sha256": "789d7cd15301b865c671c20920da67434b2e225f0d9dec30534d89c9343a1450"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/composition-and-compatibility.md",
+      "sha256": "5b1110effe7fdd6e70d655d50aa7c85ccb9ac44584134ec74624e1722d43257e"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/counterexample-before-code.md",
+      "sha256": "b58c322d0d69188be7875917dc23fb9c2d3acd813e89f4810bab6ef305f7adde"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/counterexample-defined-before-code.json",
+      "sha256": "b914faa0c9f7f3e232ce872b68a789b601a3d721419e374f384d73c5d9e0d81c"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/design.md",
+      "sha256": "038444ee9f1bfc47cb78a3bb7df4d99f9635915c298fa94c238e808c63b56914"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/edit-ledger.json",
+      "sha256": "b200e5a96419d23f8f1e866160ef5f4a9748676e9ff846b20bc5a31392a4bf2d"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/expected-red.json",
+      "sha256": "5ec633f69a0807d66d3dff4ad514f42d41dc1489338ce68839df9c3779208060"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/expected-test-counters.json",
+      "sha256": "ebe746ff20c9590499b9eddafe723a7fbc472c3c28cf230b7fb21ec561bd842d"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/fake-clock-semantics-binding.json",
+      "sha256": "ceb53d9e0f7dbe28016395545d5fd12ae213654bbd816a10fd37946a57bc93d3"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/future-proof-plan.json",
+      "sha256": "6789809402d226e9d80c8bedd4f227ed8942d26eb5a677a0a60764cdc22975d4"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/green/studio-runner/src/guided/ownership.ts",
+      "sha256": "87b661946b0819aac38e130f3b4a8467222f70789416b188236b9345d4a96387"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/green/studio-runner/test/guided/ownership.test.ts",
+      "sha256": "956104377c8e1458b3fb9b73e86df72429b24f0bafe161e33124cb563b300112"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/preservation.json",
+      "sha256": "9d9cf5a8234975b1c19841da0a3ddf78ffc0760341cdb7337224261ce8d757dc"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/product.patch",
+      "sha256": "545ec1cf16792e34da64de3620ffc66019f00b8c1175dbfe5eec81bb1966a46e"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/receipt.md",
+      "sha256": "d4e7848f422299ad3062c47facec65430f82608529521bced5fd9211ac50a50b"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/red/studio-runner/src/guided/ownership.ts",
+      "sha256": "c76696f0c74359ee5dab8b57f9feb843b743ff24af2884b2642744f8ead3a32d"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/red/studio-runner/test/guided/ownership.test.ts",
+      "sha256": "956104377c8e1458b3fb9b73e86df72429b24f0bafe161e33124cb563b300112"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/restore-combined.patch",
+      "sha256": "093c209b5f42407e12f3bfa3a4896c37675dca50c8ac38e02f1f54e2a10e3fc4"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/restore-product.patch",
+      "sha256": "5176a6a9c22c4e1d9104b1141bb3efcfccb4e9621cd43fe922d2bde78c331e60"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/restore-tests.patch",
+      "sha256": "da7267c373bc09d69ccf4a63a5479273d11b8c3baecc5b16accc67489400e049"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/review-request.md",
+      "sha256": "88e527d2f09f68de0597e2bf93223ddd9a53cac3683e961696fbde2deb1426ef"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/staged-binding.json",
+      "sha256": "da1435a7d14be8351484fd4060dfba599efe9cfdb011cc2bde59be4a093fa6ad"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/tests.patch",
+      "sha256": "bf01f445e02f652e3e495bbbd08758f3197082c6f93042642a86cb2dedff9cf8"
+    }
+  ]
+}

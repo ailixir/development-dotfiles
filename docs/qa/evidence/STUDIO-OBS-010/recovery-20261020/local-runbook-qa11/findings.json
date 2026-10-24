@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "story": "STUDIO-OBS-010",
+  "scope": "independent early-T2 local AC-5 document content only",
+  "verdict": "LOCAL_DOC_QA_ACCEPTED_WITH_EXTERNAL_ROWS_PENDING",
+  "mandatoryLocalFindings": [],
+  "localRequirementGroups": 17,
+  "groups": [
+    {
+      "id": "AC5-01",
+      "requirement": "Single observed path",
+      "location": "Opening; Deployment identity; Drain/rollback",
+      "assessment": "LOCAL_CONTENT_ACCEPTED",
+      "basis": "Authoring, guided Run, automatic publication and explicit later replay form one path; no account-provider or legacy compile instructions. Preserve immutable receipts and avoid unknown-effect retries."
+    },
+    {
+      "id": "AC5-02",
+      "requirement": "Scoped provisioning and whole-origin trust",
+      "location": "RBR-01",
+      "assessment": "LOCAL_CONTENT_ACCEPTED",
+      "basis": "CSI/environment/test scope, closed name/value/allowedOrigins body, create-only cas=0 and names-only reads; whole-origin trust and same-origin script risk explicit. Approved origins/accounts and G-2 remain owed."
+    },
+    {
+      "id": "AC5-03",
+      "requirement": "Rotation",
+      "location": "RBR-02",
+      "assessment": "LOCAL_CONTENT_ACCEPTED",
+      "basis": "Protected Vault-owner same-reference rotation preserves learned hashes; actual version identifiers remain audit facts. New names require source change/relearn. Deployed proof owed."
+    },
+    {
+      "id": "AC5-04",
+      "requirement": "Revocation",
+      "location": "RBR-03",
+      "assessment": "LOCAL_CONTENT_ACCEPTED",
+      "basis": "One control poll including queue/request plus one in-flight step; no instantaneous cancellation or completed-outcome rewrite. Lost control response disclosed without invented cause."
+    },
+    {
+      "id": "AC5-05",
+      "requirement": "Audit retention",
+      "location": "RBR-04",
+      "assessment": "LOCAL_CONTENT_ACCEPTED",
+      "basis": "12-month default under monthly partition pruning is not exact expiry, SIEM proof or video retention. UNKNOWN_OUTCOME is not a wire status or maybe-typed evidence for the named preready case."
+    },
+    {
+      "id": "AC5-06",
+      "requirement": "4096 bound",
+      "location": "RBR-05",
+      "assessment": "LOCAL_CONTENT_ACCEPTED",
+      "basis": "4096 UTF-16 units, no truncation, distinct create/dispatch refusals and response-cap caveat match selected source."
+    },
+    {
+      "id": "AC5-07",
+      "requirement": "Password-only limit and residuals",
+      "location": "RBR-06",
+      "assessment": "LOCAL_CONTENT_ACCEPTED",
+      "basis": "Multiple-password/non-password targets unsupported with no fallback; password-read refusal, page echoes, memory copies and browser scratch residuals explicit."
+    },
+    {
+      "id": "AC5-08",
+      "requirement": "Heap/core diagnostics",
+      "location": "RBR-07",
+      "assessment": "LOCAL_CONTENT_ACCEPTED",
+      "basis": "Chart negative JVM flags and runner ulimit separated from unproved host/backend/operator controls; unsafe diagnostic collection not instructed."
+    },
+    {
+      "id": "AC5-09",
+      "requirement": "Vault least privilege/history",
+      "location": "RBR-08",
+      "assessment": "LOCAL_CONTENT_ACCEPTED",
+      "basis": "Scoped API create/read plus metadata list/read, worker data-read only, no runner identity; mounted token and KVv2 history. Actual policy positives/denials owed; skipped tests do not count."
+    },
+    {
+      "id": "AC5-10",
+      "requirement": "mTLS/TLS rotation",
+      "location": "RBR-09",
+      "assessment": "LOCAL_CONTENT_ACCEPTED",
+      "basis": "Both identities, EKUs/SANs, separated keys, issuer trust, controller fingerprint and drain/rotation inputs actionable. Actual Secrets/certs/propagation/modes/handshakes owed."
+    },
+    {
+      "id": "AC5-11",
+      "requirement": "Disposable database recreation",
+      "location": "RBR-10",
+      "assessment": "LOCAL_CONTENT_ACCEPTED",
+      "basis": "Exact guarded quoted dropdb/createdb command recorded not run; requires owner/disposable DB/data preservation; forward migrations without repair over V34 history. D-B owed."
+    },
+    {
+      "id": "AC5-12",
+      "requirement": "Governed policy administration",
+      "location": "RBR-11",
+      "assessment": "LOCAL_CONTENT_ACCEPTED",
+      "basis": "Authenticated version/approval/audit and separate approver; governed learning versus TrustedPolicy replay narrows, never widens. Content owner/approval missing rather than fabricated."
+    },
+    {
+      "id": "AC5-13",
+      "requirement": "Incremental learn again",
+      "location": "RBR-12",
+      "assessment": "LOCAL_CONTENT_ACCEPTED",
+      "basis": "Fresh browser, model-free unchanged prefix and whole suffix relearn; eligible earlier drift requires no-effect proof and cannot retry unknown effects. Shipped templates match; per-app focus separate."
+    },
+    {
+      "id": "AC5-14",
+      "requirement": "G-1/G-2/G-3",
+      "location": "RBR-13",
+      "assessment": "LOCAL_CONTENT_ACCEPTED",
+      "basis": "Shared authenticated chain; no real credential before authenticated TLS on every secret hop; no scheduled secret use before production authorities. Local config does not close gates."
+    },
+    {
+      "id": "AC5-15",
+      "requirement": "Clocks",
+      "location": "RBR-14",
+      "assessment": "LOCAL_CONTENT_ACCEPTED",
+      "basis": "Runner/all API replicas/workers/DB NTP, Platform/SRE bound owed, zero issuedAt tolerance, named 409 symptom and JVM-vs-DB deadline comparison. No invented tolerance/window remedy."
+    },
+    {
+      "id": "AC5-16",
+      "requirement": "Measured Live surface",
+      "location": "RBR-18",
+      "assessment": "LOCAL_CONTENT_ACCEPTED",
+      "basis": "Dated 729-id/671-protected boundary/references retained with only 011-start PM acceptance. Final-tree post-009 remeasure/re-date and separate PM acceptance pending."
+    },
+    {
+      "id": "AC5-17",
+      "requirement": "First-learn limit/P-1",
+      "location": "RBR-19; readiness MODEL-SIZING e1",
+      "assessment": "LOCAL_CONTENT_ACCEPTED",
+      "basis": "Verbatim disclosure, blank p95 and pending T4. Same-pass derived-from-T4 update, below-15 re-rule/PM decision, fixture contingency and arithmetic-only capacity explicit; no chunking commitment."
+    }
+  ],
+  "provenanceFollowup": {
+    "blockingLocalContent": false,
+    "owner": "documentation owner / root",
+    "action": "After local PM and QA acceptance, update stale preparation banner with actual local verdict references; retain all external/final-acceptance boundaries."
+  },
+  "formalStoryGate": false,
+  "storyLifecycleChanged": false,
+  "t2Ac5Complete": false,
+  "externalGateClosed": false,
+  "pilotApproved": false,
+  "deploymentApproved": false,
+  "releaseApproved": false
+}

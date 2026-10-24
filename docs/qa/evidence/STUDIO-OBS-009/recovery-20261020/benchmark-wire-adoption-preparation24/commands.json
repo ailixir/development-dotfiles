@@ -1,0 +1,132 @@
+{
+  "scope": "PROSPECTIVE_FOUR_TARGET_COPY_ONLY_NOT_RUNTIME_AUTHORITY",
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "actualCodeCopyGo": false,
+  "executionAuthority": false,
+  "scriptSha256": "6ab86f6dc880313e1d34aa373062f7a87812f58339af3b1a03b377060d6288ea",
+  "materialization": "Root creates NEW bound25inputs/admission only after candidate22 seal/newQA; preserve this null template unchanged. No placeholder valid hashes.",
+  "rootAdmissionDraft": {
+    "releaseActualAdoption": false,
+    "actualCodeCopyGo": false,
+    "obs011FormallyClosedAndFreezeReleased": false,
+    "soleActualWriter": false,
+    "onlyFourTargetsAuthorized": false,
+    "newWireCandidateQaAccepted": false,
+    "noNativeOrProviderAuthority": true,
+    "obs011ClosureAndFreezeReleaseReference": {
+      "path": null,
+      "sha256": "3caf132496885cfdce4e0889366f55c6e926b866afe57b7f2fd282c643e079ad"
+    },
+    "acceptedPriorLocalQaReference": {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-actual-execution-qa13/manifest.json",
+      "sha256": "ca4c0a4418113e9d1645ed3c3d1744b25549564bc3f83236bb235a05fb08311d",
+      "role": "HISTORICAL_PRIOR_LOCAL_UNIT_ONLY_NOT_NEW_WIRE_PROOF"
+    },
+    "sourceCandidateQaReference": {
+      "path": null,
+      "sha256": null,
+      "role": "FUTURE_INDEPENDENT_NEW_WIRE_CANDIDATE_QA"
+    },
+    "inputsReference": {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-bound25/inputs.json",
+      "sha256": null
+    },
+    "freshBeforeCapture": {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-preflight25/before-source.json",
+      "sha256": null
+    },
+    "freshRelevantInputQualificationAccepted": false,
+    "freshTargetModes": {
+      "studio-runner/evaluation/observed-authoring/evaluate.mjs": null,
+      "studio-runner/evaluation/observed-authoring/evaluate.d.mts": null,
+      "studio-runner/test/evaluation/harnessSelfTest.test.ts": null,
+      "studio-runner/test/evaluation/observedCorpus.ts": null
+    },
+    "executionDirectory": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-adoption25",
+    "pythonOptimizationMustBeZero": true
+  },
+  "prospectiveApplyArgv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-adoption-preparation24/apply-reviewed-four.py.txt",
+    "UNBOUND_NEW_ABSOLUTE_ROOT_ADMISSION",
+    "UNBOUND_NEW_ROOT_ADMISSION_SHA256"
+  ],
+  "originalCaptureRefs": {
+    "captureScript": {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py",
+      "sha256": "cc943d9dfcf1ff07e463cfcc266e906704a5f04ae621b0355c6a5022f75f5e63"
+    },
+    "snapshotScript": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution01/input-snapshot.py",
+      "sha256": "b6d962a6aaba1c0135e3cee63cb66341bfd42dba3238deef8a7187992ba01849"
+    },
+    "copyProfile": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution01/fresh-copy-catalog.json",
+      "sha256": "2624360a76136f37b4e1bc267734eb1954aff16fbd54e56984356ed192eb33a2"
+    }
+  },
+  "futureMetadataCommands": [
+    {
+      "when": "Freshrootreleasedbeforewindow; execution25MUSTremainabsent",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-preflight25/before-source.json"
+      ]
+    },
+    {
+      "when": "Samefreshpreflight; no fakeCOPYreceipt or profilechange",
+      "argv": [
+        "python3",
+        "-c",
+        "from pathlib import Path; import runpy,json,hashlib,sys; r=Path.cwd(); p=r/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution01/input-snapshot.py'; assert hashlib.sha256(p.read_bytes()).hexdigest()=='b6d962a6aaba1c0135e3cee63cb66341bfd42dba3238deef8a7187992ba01849'; value=runpy.run_path(str(p))['snapshot'](r); output=Path(sys.argv[1]); handle=output.open('x'); handle.write(json.dumps(value,indent=2)); handle.close()",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-preflight25/before-full-inputs.json"
+      ]
+    },
+    {
+      "when": "Afterexactfourapplication/beforeanyconsumer",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-adoption25/after-source.json"
+      ]
+    },
+    {
+      "when": "Afterexactfourapplication",
+      "argv": [
+        "python3",
+        "-c",
+        "from pathlib import Path; import runpy,json,hashlib,sys; r=Path.cwd(); p=r/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution01/input-snapshot.py'; assert hashlib.sha256(p.read_bytes()).hexdigest()=='b6d962a6aaba1c0135e3cee63cb66341bfd42dba3238deef8a7187992ba01849'; value=runpy.run_path(str(p))['snapshot'](r); output=Path(sys.argv[1]); handle=output.open('x'); handle.write(json.dumps(value,indent=2)); handle.close()",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-adoption25/after-full-inputs.json"
+      ]
+    }
+  ],
+  "requiredChecks": [
+    "Python sys.flags.optimize==0/no-O/-OO and root caller guard; script hardrejects optimization without assert",
+    "Allfourwhitelist preimage SHA/bytes/capturedmode plus freshrootmodes and candidateSHA/bytes/QA refs beforeANYwrite",
+    "Allfourafterbuffers exact; MF95287hash/79287bytes/mode0644 regularbeforeandaftercodecopy, NOTtarget",
+    "FreshfullSDK/runtime/canonical5/bin21/protected11/hashed11env/Nodebinary guards futureUNBOUND; rootnewreadadmission only",
+    "Compare allsource/fullinput rows against exactpredictedfourchanges/non-targetequality/distE19; honestnewdigest/count notforced0c"
+  ],
+  "noCodeCopyFreezeOrProofBundling": true,
+  "laterSeparateOperations": [
+    "Originalfreeze-first actualsource-pin/stamp/digest update underseparate rootoperation admission; no privateMDFtransplant",
+    "Futurewireproof/type/lint and typedtwo-existing-cache-entrypolicy underrootreview; no test commandauthorizedhere"
+  ],
+  "futureWireCachePolicy": {
+    "status": "UNBOUND_REQUIRED_ROOT_REVIEW_LATER_NOT_EXEMPTION",
+    "onlyExistingFileRoles": [
+      "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+      "studio-runner/test/evaluation/benchmarkScoring.test.ts"
+    ],
+    "exactCacheKeysAndBeforeValues": null,
+    "orderedKeys": 191,
+    "nonTargetEntriesExact": 189,
+    "typedMutableFields": [
+      "finite numeric duration excluding boolean",
+      "exact bool failed"
+    ],
+    "noWholeSdkExclusionOrCacheReset": true
+  },
+  "oldExecution05NotReplayed": true
+}

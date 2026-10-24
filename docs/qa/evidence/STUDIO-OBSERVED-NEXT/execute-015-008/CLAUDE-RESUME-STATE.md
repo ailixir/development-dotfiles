@@ -1319,3 +1319,41 @@ Then Quinn's formal gate, Pax's admin close, and the root close.
 - **Then:** Gage makes the R4 local commits → 011 T0 (fresh full check + JaCoCo baseline) → waves.
 - **010 T2 COMPLETE:** @pm ACCEPTED-WITH-NOTES for the list `e5c58fa5…` (P1–P6 met). Note 1: the waiver is read as covering the 2-test-file fix digest `061fc41f` — root agrees; this follows the user's intent to skip the regression. Pax is next, then the Gage R4 commits.
 - PLANFIX-ARCHIVE: root copied the planfix console outputs into `post-g9/planfix-archive/` (SHA256SUMS).
+- **UPDATE: the R4 commits are LOCAL** (no push): f075dc085, 3c781f84e, b45ea4a69, 6c2138c60, 26a12ee3e, 61dfa9572, 4f9e451a0, plus the receipt b39359f78. Only dispatch-governance.js is modified.
+  - For the pre-push gate: the docs commit carries about 314 MB of evidence.
+- **Pax:** 009 0.3.28 (local validation MET; 14 owed-for-Done rows), 011 0.2.16 (start conditions satisfied), README checkpoint.
+- **011 T0 STARTED.** Dex: execute-011 collectors, T0-AW, run-frontend.py, approved-skips. Then root runs the fresh full baseline: check + JaCoCo, the owed regression.
+- **011 T0 setup done (Dex):** execute-011 collectors; Awaitility 4.2.2 resolves (branch A, no build change); run-frontend.py; approved-skips copied as a placeholder (`c6f16987…`).
+  - Root decision: the evidence folder is `STUDIO-OBS-011/execution/`; the plan text is aligned at the T0 record.
+  - **B1 baseline launching:** `t0/b1-baseline.sh`.
+- **B1 RUNNING** (bg bl78ao9jv, label obs011-t0-baseline-check01). HOLD: no source writes. Aria is finalizing the 011 T0 record (lanes.v3, re-anchors, W1 dispatch list).
+- **Aria's 011 T0 record is ready** (`t0/t0-record.md`, `lanes.v3.json`, `w-brief.v3.md`). The start digest is `061fc41f…` (HEAD b39359f78). Awaitility is used directly (no Await.java).
+  - **Root decision on B2–B7: option B.** Reuse G9b for B2–B6 (identical inputs); run B7 frontend fresh after B1.
+  - Read-only early lanes started:
+    - Dex: 11-IT-R prep;
+    - Dex: T0-DEV check + fold confirmation;
+    - Dara: R-F2;
+    - Uma: R-CO.
+  - **W1 at B1 green:** GS-T, GS-M a, LEFT, FOLD-prep, IT-R.
+- **Uma R-CO: SIGN-WITH-NOTES.** N1: add frontend/src/.../scheduleProvenance.test.tsx:30 to the 11-FE write set (root decision: ADD, a one-line assertion). N2: no F08 item.
+- **Dara R-F2: SIGN-WITH-NOTES.** The fixture file stays; only the V18 adapter is removed. InferenceMigrationIT has 4 cases and is deleted. Port P-1/P-2/P-3, red-first. Use the wider exit grep (78 hits → 0). 2 Java rules go to GuidedPublicationMigrationTest; J-4/J-8 are for Dex to name.
+  - **Root decision P-3: ADD `GuidedReplayingPrefixMigrationIT` to the 11-LEFT write set** (one case), not carried.
+- **Dex 11-IT-R prep done** (`t0/early/11-IT-R/`).
+  - 95 sleeps: 74 POLL / 21 DELIBERATE.
+  - The TEST-001 root cause is the class-level canary vacuity scan (D1–D6).
+  - Plan: 5 full-class runs within the cap of 6.
+  - **Root decisions:**
+    - (1) D5 accepted provisionally; @qa must co-sign "not weaker" at the 11-IT-R exit.
+    - (2) The private `awaitLast` helper is accepted (it preserves fall-through semantics).
+    - (3) "Green twice" = two consecutive full-class runs on the same sha256.
+    - (4) The six unprovable POLL ids (1, 2, 4, 6, 93, 95) are carried by name.
+- **HANDOFF 2026-10-18 ~20:30:** the session was closed on user request. The entry point is `docs/qa/evidence/STUDIO-OBSERVED-NEXT/RESUME-HANDOFF-20261018.md`. B1 was left running (1500/0 at handoff). The T0-DEV agent was stopped (rerun it).
+- **B1 DONE (exit 1)** at about 21:45. 2775 total / 2751 passed / 15 failed / 9 skipped.
+  - test: 2687/15/9. guidedIncrementalTest 62/62. crossReplicaTest 2/2.
+  - Source/dist stable; start capture == end capture.
+  - All 15 failures are in ReplayIT:
+    - 1 root failure: `actualGuidedReleasedValueInjectedFailureRedactsProducedSinks` at `:19249`, expected UNKNOWN_OUTCOME but got FAILED. It passed in G9, G9b and S-W3.
+    - 13 are the cleanupUnconfirmed cascade at `:3767`.
+    - 1 is the class-level executionError (TRACE levels).
+  - **JaCoCo verification did NOT run** (`t0/b1-coverage-tasks.txt` is empty). The coverage gate is still owed.
+  - The current handoff is owned by the other session: `RESUME-HANDOFF-20261018-CODEX.md`.

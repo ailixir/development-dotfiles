@@ -1,0 +1,12 @@
+--- candidate08/harnessSelfTest.test.ts
++++ actual-lint11/harnessSelfTest.test.ts
+@@ -143,7 +143,8 @@
+   if (options.missing === 'suffixOutput') Object.assign(counters[1] ?? {}, { modelOutputTokens: null });
+   const client: StudioApiClient = {
+     createDraft: () => Promise.resolve({ id: 'memory', sourceRevision: 1, configurationRevision: 1 }),
+-    readDraft: revision.client.readDraft, updateDraft: revision.client.updateDraft,
++    readDraft: (id) => revision.client.readDraft(id),
++    updateDraft: (id, name, authoring, revisions) => revision.client.updateDraft(id, name, authoring, revisions),
+     startSession: (draft) => {
+       startedDrafts.push({ ...draft });
+       starts += 1; order.push(`start-${String(starts)}`);

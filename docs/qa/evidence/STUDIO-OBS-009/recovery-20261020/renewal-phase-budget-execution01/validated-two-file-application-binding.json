@@ -1,0 +1,31 @@
+{
+  "kind": "PRIVATE_CONTROLLED_VALIDATED009_TWOFILE_CANDIDATE_PENDING_EXECUTION_QA_ROOT",
+  "paths": [
+    {
+      "path": "studio-runner/src/guided/ownership.ts",
+      "requiredActualBeforeSha256": "c76696f0c74359ee5dab8b57f9feb843b743ff24af2884b2642744f8ead3a32d",
+      "validatedCandidateSha256": "87b661946b0819aac38e130f3b4a8467222f70789416b188236b9345d4a96387",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/green/studio-runner/src/guided/ownership.ts",
+      "executedBufferArchivePath": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-execution01/runtime-matched-green-buffers/studio-runner/src/guided/ownership.ts",
+      "archiveSource": "Immutable sealed candidate bytes, independently SHA-matched inside private tree before and after unit/native runtime; private runtime files now intentionally restored",
+      "privateTestedPathNowRestoredToOld": true
+    },
+    {
+      "path": "studio-runner/test/guided/ownership.test.ts",
+      "requiredActualBeforeSha256": "436b45e61faab72efd9ec5d801f7e720ae8801872702c80286c31af37f5d8e19",
+      "validatedCandidateSha256": "956104377c8e1458b3fb9b73e86df72429b24f0bafe161e33124cb563b300112",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/green/studio-runner/test/guided/ownership.test.ts",
+      "executedBufferArchivePath": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-execution01/runtime-matched-green-buffers/studio-runner/test/guided/ownership.test.ts",
+      "archiveSource": "Immutable sealed candidate bytes, independently SHA-matched inside private tree before and after unit/native runtime; private runtime files now intentionally restored",
+      "privateTestedPathNowRestoredToOld": true
+    }
+  ],
+  "genuineRed": "genuine-red.json",
+  "greenUnit54": "unit-green-reconciliation.json",
+  "native4": "native4-reconciliation.json",
+  "privateConfiguredProofDistDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+  "copyPrivateDistToActual": false,
+  "actualApplyReleased": false,
+  "independentExecutionQaStillRequired": true,
+  "noHistoricalCauseOrFullTierCredit": true
+}

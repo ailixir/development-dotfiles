@@ -1,0 +1,57 @@
+{
+  "rootProgramReadReleased": true,
+  "executionAuthority": true,
+  "operation": "membership",
+  "manifestRef": {
+    "path": "studio-runner/evaluation/observed-authoring/manifest.json",
+    "sha256": "05424dbc0b98c9d5c8c3a5f14b51ff1efccb0cf43afe132d1390adc05208be31",
+    "bytes": 79203
+  },
+  "sourceCatalogueRef": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-actual-adoption-execution05/after-ten-source.json",
+    "sha256": "6619301b06958d4dfbf3ef9af1a2892d0140be6cd192f31d6b7103579c4459bc",
+    "bytes": 360050
+  },
+  "fullCatalogueRef": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-actual-adoption-execution05/after-ten-full-inputs.json",
+    "sha256": "8be8284a4e8aa45658c0475e32149a4a3594969f326acd99eb545df8a5cc0a22",
+    "bytes": 5740239
+  },
+  "importedCodeRefs": [
+    {
+      "path": "studio-runner/evaluation/cli.mjs",
+      "sha256": "8a119c26eb16ed19cd5f1a5a46ed07a9d13eeb2f6e2a951dd2dc3d854795bcad",
+      "bytes": 15633
+    },
+    {
+      "path": "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+      "sha256": "3383b01c0ba1e95b0a48696c1f7fa0592bf7108a770ce2d3c010a76976ea9d68",
+      "bytes": 115084
+    },
+    {
+      "path": "studio-runner/evaluation/oracle.mjs",
+      "sha256": "7ad08d2bc19b84dd17cb2cac2d9edb57bb1e86a38b360f401f6a13da7b2de233",
+      "bytes": 6174
+    },
+    {
+      "path": "studio-runner/evaluation/report.mjs",
+      "sha256": "70d41a8fb146d23b2fedd566a762dd115db23dbe8d45b59ce0e14de5197b84c0",
+      "bytes": 18338
+    },
+    {
+      "path": "studio-runner/evaluation/observed-authoring/pages/server.mjs",
+      "sha256": "81d1673989f20ba236b5fb6a774ba33da87192983dd87956157227e1b3936d30",
+      "bytes": 7273
+    }
+  ],
+  "authorizeFiniteMemberMetadataChecks": true,
+  "membershipOutput": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-execution06/declared-io-membership.private.json",
+  "actualSourceAdoptionReceipt": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-actual-adoption-bound09/actual-adoption09-root-receipt.json",
+    "sha256": "84b6aa319f447b726401ee7d1d70a36128690cfd2b34e2f523525330b7f00c98",
+    "bytes": 5691
+  },
+  "rootSoleActualWriterWindow": true,
+  "pinPayloadReadsAuthorized": false,
+  "modelPrivateBodyDisclosureAuthorized": false
+}

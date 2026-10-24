@@ -1,0 +1,41 @@
+{
+  "verdict": "SOURCE_CLEAN_FOR_BOUNDED_PRIVATE_PROOF",
+  "reviewScope": "BR-C2-01 delta only; original broader source review retained",
+  "candidateManifestSha256": "d32e682b0d9f21b054670993ada828f79944ebefc8d7e4baad4262fd72481331",
+  "findingDisposition": [
+    {
+      "id": "BR-C2-01",
+      "status": "RESOLVED_IN_CANDIDATE_SOURCE_UNEXECUTED",
+      "terminalHistoryExactStartPrefix": true,
+      "actualOriginalEndAndIndependentIntervalBindingRequired": true,
+      "fullInclusiveSamePurposeIntervalScan": true,
+      "stopThenReadmitRejected": true,
+      "missingEndHistoryOwnerReviewNonAdoptable": true,
+      "rawHardFactsRetained": true
+    }
+  ],
+  "newFindings": [],
+  "v1DeltaControl": {
+    "sourceQualified": true,
+    "selectedCase": "reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only) group6: later admission cannot retroactively authorize original execution or promote a self-test",
+    "firstExpectedSemanticFailure": "first final-run tail STOP: boundIndependentAdoption true in v1, expected false",
+    "priorPositiveAndAdmissionControlsReachable": true,
+    "forecastFailures": 1,
+    "forecastNameFilterOmissions": 104,
+    "executed": false,
+    "notNinthOriginalC12Red": true
+  },
+  "originalProofForecast": {
+    "c12SemanticRedFailures": 8,
+    "c12FilterOmissions": 97,
+    "v2GreenCases": 105,
+    "originalCases": 86,
+    "existingAdditions": 19,
+    "runtimeResults": "UNEXECUTED"
+  },
+  "executionGo": false,
+  "actualApplicationGo": false,
+  "nativeProviderLifecycleGo": false,
+  "futureCollectorOutputRoute": "UNBOUND_ROOT_MUST_BIND",
+  "requiredNextGate": "Fresh source/custody/collector/output binding and root authorization; bounded semantic RED(s), one full affected GREEN, existing types/lint/private freeze-validation. No extra matrix/Replay/native call."
+}

@@ -1,0 +1,87 @@
+{
+  "scope": "BOUND_TWO_TARGET_LINT_ADOPTION47_INPUTS",
+  "candidateSealedAndQaAccepted": true,
+  "targets": [
+    {
+      "target": "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+      "capturedBeforeSha256": "15d2bcd0ee2bb227f0b54307b6a50608e720f68e89b6726d6cc57c55beb96523",
+      "expectedBeforeBytes": 125912,
+      "capturedBeforeModeNow": "0o644",
+      "observationReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-actual-preflight47/fresh-qualification47.json",
+        "sha256": "dbd0e50b3e2894f53fb0e632f611a93fdded3d562f93c4b54af4af0464bc0c76",
+        "bytes": 9797
+      },
+      "notFutureFreshAdmission": false,
+      "sourceBuffer": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-candidate44/studio-runner/evaluation/observed-authoring/evaluate.mjs",
+        "sha256": "b9c95ddcee770fe1b88ea56587627f7bb5c6dc461c9687df08229a786244a518",
+        "bytes": 125913,
+        "mode": "0o644"
+      },
+      "candidateState": "SEALED44_ACCEPTED_SOURCE46"
+    },
+    {
+      "target": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+      "capturedBeforeSha256": "09d68060f6f0c3fafc27dea6a7938d950d050940a1522511a0742065e14b09b7",
+      "expectedBeforeBytes": 65996,
+      "capturedBeforeModeNow": "0o644",
+      "observationReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-actual-preflight47/fresh-qualification47.json",
+        "sha256": "dbd0e50b3e2894f53fb0e632f611a93fdded3d562f93c4b54af4af0464bc0c76",
+        "bytes": 9797
+      },
+      "notFutureFreshAdmission": false,
+      "sourceBuffer": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-candidate44/studio-runner/test/evaluation/harnessSelfTest.test.ts",
+        "sha256": "9b3c5f987f98f8ec620daa88e2453ff3126551ea5687036bd2384f8c036fca64",
+        "bytes": 66052,
+        "mode": "0o644"
+      },
+      "candidateState": "SEALED44_ACCEPTED_SOURCE46"
+    }
+  ],
+  "whitelistExact": [
+    "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+    "studio-runner/test/evaluation/harnessSelfTest.test.ts"
+  ],
+  "manifestGuard": {
+    "path": "studio-runner/evaluation/observed-authoring/manifest.json",
+    "sha256": "6bc320ac60eebb2dda423ab8e44e66462a5765877991f9bc9000e46d940a9b7b",
+    "bytes": 79287,
+    "mode": "0o644",
+    "targetOfCodeCopy": false,
+    "beforeAndAfterCopyHashRegularMetadataOnly": true,
+    "jsonBodyDecode": false
+  },
+  "capturedActualBase": {
+    "sourceDigest": "0cbbf17558419ee44e1e24a98e437d7a73ff053ec54ac290058efcb0d947c928",
+    "sourceRows": 1814,
+    "distDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+    "distRows": 238,
+    "provenance": "Fresh original47 captures exactly qualified against sealed41 latest lint baseline",
+    "reference": {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-actual-preflight47/before-source.json",
+      "sha256": "697882fc1522648b8602ebefb985ca1f1531b4090e24392768fca806a6a3aff9",
+      "bytes": 360050
+    }
+  },
+  "candidateSealReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-candidate44/manifest.json",
+    "sha256": "cd1fca0b83e33d8c9efec515ec4f36f90a65e4cf4fba4facf2c1eba8ae589411",
+    "bytes": 1655
+  },
+  "newLintCandidateQaReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-source46-independent-review/manifest.json",
+    "sha256": "cf7490277c48f7e99fc9b98183066aae5f638ef26a44315b81a1db64eb8cb7dd",
+    "bytes": 945
+  },
+  "futureRuntimeQualificationReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-actual-preflight47/fresh-qualification47.json",
+    "sha256": "dbd0e50b3e2894f53fb0e632f611a93fdded3d562f93c4b54af4af0464bc0c76",
+    "bytes": 9797
+  },
+  "actualCodeCopyGo": true,
+  "runtimeGo": false,
+  "executionAuthority": false
+}

@@ -1,0 +1,159 @@
+{
+  "kind": "ACTUAL_CHANGED_UNIT_ADAPTER_FOCUSED_TYPES_LINT12",
+  "startedAt": "2026-10-21T11:40:23.103174+00:00",
+  "admission": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-revision-actual-proof12/root-admission.json",
+    "sha256": "344dccad3e7fb6db8d67aa14eddde2c5145316c0e8bdb9a2d230a41b928f9300",
+    "bytes": 3039
+  },
+  "earlierLintFailurePreserved": true,
+  "steps": [
+    {
+      "id": "focused01",
+      "wrapperRawExit": 0,
+      "result": {
+        "command": [
+          "pnpm",
+          "--config.package-manager-strict=false",
+          "exec",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vitest/vitest.mjs",
+          "run",
+          "--config",
+          "vitest.config.ts",
+          "test/evaluation/harnessSelfTest.test.ts",
+          "--coverage.enabled=false",
+          "--minWorkers=1",
+          "--maxWorkers=1",
+          "--no-file-parallelism",
+          "--testTimeout=5000",
+          "--hookTimeout=5000",
+          "--testNamePattern",
+          "FR06-01|group5:",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-revision11-focused01-vitest.json"
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-21T11:40:23.493445+00:00",
+        "elapsedSeconds": 0.78,
+        "exit": 0,
+        "sourceStable": true,
+        "distStable": true,
+        "logSha256": "9cf255cf8f81399d9c10517b8bf0ff8a3bd04c31ee5b68d6921d735bdcd02dc4",
+        "testInputStable": true,
+        "testInputDigestBefore": "0c59568e8e686c69703f650006edd70e8033db2906db7e434943735beebaff2d",
+        "testInputDigestAfter": "0c59568e8e686c69703f650006edd70e8033db2906db7e434943735beebaff2d",
+        "vitest": {
+          "success": true,
+          "numPassedTests": 31,
+          "numFailedTests": 0,
+          "numPendingTests": 15,
+          "numTotalTests": 46,
+          "numPassedTestSuites": 4,
+          "numFailedTestSuites": 0
+        },
+        "vitestReportSha256": "05e9886ef3d7bb03ca04850d04738b8214091bd7665c3bb51197290f749a7728"
+      },
+      "resultReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-revision11-focused01-results.json",
+        "sha256": "764941aafc4ce8048411b3a4367e32c81be3cbe713fad37dca49577668052434",
+        "bytes": 1478
+      },
+      "stdoutSha256": "ff273a8ba25559f6766c6c92da37faaba3cb8a0515ee2e95cfbff77a1f5e17a8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "types01",
+      "wrapperRawExit": 0,
+      "result": {
+        "command": [
+          "pnpm",
+          "--config.package-manager-strict=false",
+          "run",
+          "type-check"
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-21T11:40:24.511378+00:00",
+        "elapsedSeconds": 7.56,
+        "exit": 0,
+        "sourceStable": true,
+        "distStable": true,
+        "logSha256": "0557942738d7f86f5f8604c4747e13f8f369af4fd78db8af6a251753555de40c",
+        "testInputStable": true,
+        "testInputDigestBefore": "0c59568e8e686c69703f650006edd70e8033db2906db7e434943735beebaff2d",
+        "testInputDigestAfter": "0c59568e8e686c69703f650006edd70e8033db2906db7e434943735beebaff2d"
+      },
+      "resultReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-revision11-types01-results.json",
+        "sha256": "8f96b0b98c0932758655b92568bcf8a86b2ea7b4059a2c53a27a06d21b33ea8c",
+        "bytes": 567
+      },
+      "stdoutSha256": "eadfe4f45cfba7c96794e45d9dac0ad63cb3ffa0ddcf1d75c918767294121c01",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "lint01",
+      "wrapperRawExit": 0,
+      "result": {
+        "command": [
+          "pnpm",
+          "--config.package-manager-strict=false",
+          "exec",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eslint/bin/eslint.js",
+          "evaluation/observed-authoring/evaluate.mjs",
+          "evaluation/observed-authoring/evaluate.d.mts",
+          "test/evaluation/harnessSelfTest.test.ts"
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-21T11:40:32.298775+00:00",
+        "elapsedSeconds": 2.8,
+        "exit": 0,
+        "sourceStable": true,
+        "distStable": true,
+        "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+        "testInputStable": true,
+        "testInputDigestBefore": "0c59568e8e686c69703f650006edd70e8033db2906db7e434943735beebaff2d",
+        "testInputDigestAfter": "0c59568e8e686c69703f650006edd70e8033db2906db7e434943735beebaff2d"
+      },
+      "resultReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-revision11-lint01-results.json",
+        "sha256": "eb707cd9fbf74bfec94f63b78a329619d1f36b20cb5c56f116fedc8ee9c74b32",
+        "bytes": 808
+      },
+      "stdoutSha256": "e68c1104a65f2b7c275a2d95944c41fdbf2bf1340d6493a180032eb7c0f33a11",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "allThreePassed": true,
+  "finishedAt": "2026-10-21T11:40:36.943049+00:00",
+  "rawExits": [
+    0,
+    0,
+    0
+  ],
+  "actualFocusedProjection": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-revision-actual-proof12/focused-public-cases.json",
+    "sha256": "692bc31d6458062815a3a5dd95e8ebf26a46f7b5e4b02f00c79fd8a1a34de245",
+    "bytes": 10424
+  },
+  "cacheDisposition": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-revision-actual-proof12/cache-disposition.json",
+    "sha256": "b8f72058920a4c49e8909f1db3c3d39fe89d1ffbdd753506169339fbd35d1ab6",
+    "bytes": 351
+  },
+  "afterFullInputs": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-revision-actual-proof12/after-full-inputs.json",
+    "sha256": "a6d59b42bd6fac7871c5d5fda68e6296e607bbb611b4068f8629fe970c521e66",
+    "bytes": 5740239
+  },
+  "afterSource": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-revision11-lint01-after.json",
+    "sha256": "6a7aabb38ebf15ff453ad1cbe11f043beb83810bb61efc5e12594a1415f9bbf7",
+    "bytes": 360050
+  },
+  "sourceDigest": "0c59568e8e686c69703f650006edd70e8033db2906db7e434943735beebaff2d",
+  "sourceUnchanged": true,
+  "distUnchanged": true,
+  "sdkAndOtherInputsUnchangedExceptKnownCache": true,
+  "independentQaStillOwed": true
+}

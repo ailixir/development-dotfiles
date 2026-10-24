@@ -1,0 +1,285 @@
+--- a/studio-runner/evaluation/observed-authoring/evaluate.mjs
++++ b/studio-runner/evaluation/observed-authoring/evaluate.mjs
+@@ -1042,6 +1042,18 @@
+ const TERMINAL = ['SUCCEEDED', 'PUBLICATION_CONFLICT', 'FAILED', 'UNKNOWN_OUTCOME', 'CANCELLED', 'EXPIRED'];
+ const sleep = (ms) => new Promise((done) => { setTimeout(done, ms); });
+ 
++function checkedDraftRevisions(value) {
++  if (!isRecord(value) || !Number.isSafeInteger(value.sourceRevision) || value.sourceRevision <= 0
++      || !Number.isSafeInteger(value.configurationRevision) || value.configurationRevision <= 0) throw new Error('Invalid draft revisions');
++  return { sourceRevision: value.sourceRevision, configurationRevision: value.configurationRevision };
++}
++
++// Response validation belongs after withTextCapture, including malformed successful responses.
++function checkedDraft(value, id) {
++  if (!isRecord(value) || value.id !== id) throw new Error('Invalid draft identity');
++  return { id, ...checkedDraftRevisions(value) };
++}
++
+ /**
+  * HTTP binding of the public routes in docs/specs/studio/openapi.yaml. [I] It was written from the OpenAPI
+  * text only and has not been run against a live backend: the stub client in test/evaluation covers the driver,
+@@ -1065,7 +1077,8 @@
+   const idem = () => ({ 'idempotency-key': randomUUID() });
+   return {
+     createDraft: async (name, authoring) => (await call('POST', '/tests', { name, csiId, environment: environmentId, ...authoring.request })).body,
+-    updateDraft: async (id, name, authoring) => (await call('PUT', `/tests/${id}`, { name, csiId, environment: environmentId, ...authoring.request })).body,
++    readDraft: async (id) => (await call('GET', `/tests/${id}`)).body,
++    updateDraft: async (id, name, authoring, revisions) => (await call('PUT', `/tests/${id}`, { name, csiId, environment: environmentId, ...authoring.request, ...checkedDraftRevisions(revisions) })).body,
+     startSession: async (draft, extra = {}) => (await call('POST', '/guided-sessions', {
+       schemaVersion: 3, testId: draft.id, sourceRevision: String(draft.sourceRevision), configurationRevision: String(draft.configurationRevision),
+       environmentId, applicationId, versions: { contract: 3 }, ...extra,
+@@ -1359,9 +1372,12 @@
+       sessions[0].hardGates.secretOrPiiLeak = Math.max(sessions[0].hardGates.secretOrPiiLeak, afterFinalizeScan.leaks);
+       if (stopRule !== null) { stopRule.observeHardGate({ falsePass: finalizedBase.falseSuccess, leak: afterFinalizeScan.leaks > 0 }); rememberStop('base'); }
+       if (canContinue() && sessions[0].session.published) {
++        const currentDraft = checkedDraft(await client.readDraft(draft.id), draft.id);
+         switchSourceValue();
+         const current = { authoring: caseFile.current, variables: caseFile.base.variables, configuration: caseFile.base.configuration };
+-        const updated = await client.updateDraft(draft.id, `${entry.id} edit r${String(rep)}`, buildAuthoringRequest(current, vars));
++        const updated = checkedDraft(await client.updateDraft(draft.id, `${entry.id} edit r${String(rep)}`, buildAuthoringRequest(current, vars), {
++          sourceRevision: currentDraft.sourceRevision, configurationRevision: currentDraft.configurationRevision,
++        }), draft.id);
+         // Update/finalization can reveal a late hard fact after the base was charged. Do not charge it again.
+         const beforeSuffixScan = await scanPhase(phases);
+         sessions[0].hardGates.secretOrPiiLeak = Math.max(sessions[0].hardGates.secretOrPiiLeak, beforeSuffixScan.leaks);
+--- a/studio-runner/evaluation/observed-authoring/evaluate.d.mts
++++ b/studio-runner/evaluation/observed-authoring/evaluate.d.mts
+@@ -156,9 +156,16 @@
+   nextSessionAllowed(): boolean; state(): { observedReasons: string[]; sessions: number; spentUsd: number; stopped: string | null; stopThresholdUsd: number };
+ };
+ 
++/** Numeric PUT tokens; the driver rejects nonpositive, unsafe or nonnumeric values. */
++export interface DraftRevisionTuple { sourceRevision: number; configurationRevision: number }
++export interface DraftSnapshot extends DraftRevisionTuple { id: string }
++
+ export interface StudioApiClient {
+   createDraft(name: string, authoring: { request: JsonObject }): Promise<{ id: string; sourceRevision: number | string; configurationRevision: number | string }>;
+-  updateDraft(id: string, name: string, authoring: { request: JsonObject }): Promise<{ id: string; sourceRevision: number | string; configurationRevision: number | string }>;
++  /** Full decoded successful body, captured before the driver validates its identity/revisions. */
++  readDraft(id: string): Promise<unknown>;
++  /** Validates only the explicit PUT input tuple; response validation follows privacy capture. */
++  updateDraft(id: string, name: string, authoring: { request: JsonObject }, revisions: DraftRevisionTuple): Promise<unknown>;
+   startSession(draft: { id: string; sourceRevision: number | string; configurationRevision: number | string }, extra?: JsonObject): Promise<{ session: { sessionId: string; state: string; counters?: JsonObject } }>;
+   readSession(id: string): Promise<{ session: { sessionId: string; state: string; counters?: JsonObject } }>;
+   readClarification(id: string): Promise<{ clarificationId: string; generation: number } | null>;
+--- a/studio-runner/test/evaluation/harnessSelfTest.test.ts
++++ b/studio-runner/test/evaluation/harnessSelfTest.test.ts
+@@ -7,7 +7,7 @@
+  */
+ import { describe, expect, it } from 'vitest';
+ import {
+-  runBenchmark, driveIncremental, createStopRule, buildBenchmark, mutateObservation, idealObservation, SELF_TEST_LABEL,
++  runBenchmark, driveIncremental, createPublicApiClient, createStopRule, buildBenchmark, mutateObservation, idealObservation, SELF_TEST_LABEL,
+   type CorpusManifest, type ExpectedOutcome, type JsonObject, type StudioApiClient, type RunRecord,
+ } from '../../evaluation/observed-authoring/evaluate.mjs';
+ import { expectedOf, frozenManifest, readJson } from './observedCorpus.js';
+@@ -50,6 +50,7 @@
+       log.push(`createDraft ${name}`);
+       return Promise.resolve({ id: `t${String(n)}`, sourceRevision: 1, configurationRevision: 1 });
+     },
++    readDraft: (id) => Promise.resolve({ id, sourceRevision: 1, configurationRevision: 1 }),
+     updateDraft: (id, name) => { log.push(`updateDraft ${name}`); return Promise.resolve({ id, sourceRevision: 2, configurationRevision: 1 }); },
+     startSession: async (draft, extra) => {
+       const d = drafts.get(draft.id);
+@@ -98,10 +99,40 @@
+   effects: effectsFor(expected, mutate),
+ });
+ 
+-/** Group5 uses only memory receipts and a scripted object: no host, fetch, browser, model or backend. */
+-async function memoryIncremental(options: { stopAfterBase?: boolean; failedBase?: boolean; leakedBase?: boolean; lateLeak?: boolean; unconfirmedSuffixStart?: boolean; missing?: 'baseProposal' | 'suffixProposal' | 'baseInput' | 'suffixOutput' } = {}) {
++interface RevisionRequest { method: string; url: string; body: unknown; authorization: string | null }
++
++/** The real public client with in-memory HTTP replies: transport never calls fetch or opens a host. */
++function revisionApi(options: { readResponse?: unknown; updateResponse?: unknown; conflict?: boolean; readUnavailable?: boolean; onRequest?: (method: string) => void } = {}) {
++  const requests: RevisionRequest[] = [];
++  const client = createPublicApiClient({
++    baseUrl: 'http://127.0.0.1/api/v1/studio', token: 'unit-transport-token', csiId: '60406', environmentId: 'dev', applicationId: 'unit-app',
++    transport: (url, init) => {
++      const method = init.method ?? 'GET';
++      if (url.pathname !== '/api/v1/studio/tests/memory' || !['GET', 'PUT'].includes(method)) return Promise.reject(new Error('Unexpected unit request'));
++      const body: unknown = typeof init.body === 'string' ? JSON.parse(init.body) : undefined;
++      requests.push({ method, url: url.toString(), body, authorization: new Headers(init.headers).get('authorization') });
++      options.onRequest?.(method);
++      const status = method === 'GET' && options.readUnavailable ? 503 : method === 'PUT' && options.conflict ? 409 : 200;
++      const response = status === 503 ? { code: 'UNAVAILABLE' } : status === 409 ? { error: 'STALE_REVISION' }
++        : method === 'GET' ? 'readResponse' in options ? options.readResponse : { id: 'memory', sourceRevision: 7, configurationRevision: 11 }
++          : 'updateResponse' in options ? options.updateResponse : { id: 'memory', sourceRevision: 17, configurationRevision: 19 };
++      return Promise.resolve(new Response(JSON.stringify(response), { status, headers: { 'content-type': 'application/json' } }));
++    },
++  });
++  return { client, requests };
++}
++
++/** Group5 uses only memory receipts and scripted/injected replies: no host, fetch, browser, model or backend. */
++async function memoryIncremental(options: { stopAfterBase?: boolean; failedBase?: boolean; leakedBase?: boolean; lateLeak?: boolean; unconfirmedSuffixStart?: boolean; missing?: 'baseProposal' | 'suffixProposal' | 'baseInput' | 'suffixOutput'; draftRead?: unknown; draftUpdate?: unknown; draftConflict?: boolean; draftReadUnavailable?: boolean } = {}) {
+   const entry = entryOf(manifest, 'incremental-edit-step-4');
+   const events: JsonObject[] = []; const order: string[] = []; const finalized = new Set<string>(); let starts = 0;
++  const startedDrafts: Parameters<StudioApiClient['startSession']>[0][] = [];
++  const revision = revisionApi({
++    readResponse: 'draftRead' in options ? options.draftRead : { id: 'memory', sourceRevision: 7, configurationRevision: 11 },
++    updateResponse: 'draftUpdate' in options ? options.draftUpdate : { id: 'memory', sourceRevision: 17, configurationRevision: 19, ...(options.lateLeak ? { diagnostics: 'unit-canary-secret' } : {}) },
++    conflict: options.draftConflict === true, readUnavailable: options.draftReadUnavailable === true,
++    onRequest: (method) => { order.push(method === 'GET' ? 'read-draft' : 'update'); },
++  });
+   const counters: JsonObject[] = [
+     { modelProposals: 10, modelInputTokens: 100, modelOutputTokens: 20 },
+     { modelProposals: 3, modelInputTokens: 40, modelOutputTokens: 5 },
+@@ -112,8 +143,9 @@
+   if (options.missing === 'suffixOutput') Object.assign(counters[1] ?? {}, { modelOutputTokens: null });
+   const client: StudioApiClient = {
+     createDraft: () => Promise.resolve({ id: 'memory', sourceRevision: 1, configurationRevision: 1 }),
+-    updateDraft: () => { order.push('update'); return Promise.resolve({ id: 'memory', sourceRevision: 2, configurationRevision: 1, diagnostics: options.lateLeak ? 'unit-canary-secret' : undefined }); },
+-    startSession: () => {
++    readDraft: revision.client.readDraft, updateDraft: revision.client.updateDraft,
++    startSession: (draft) => {
++      startedDrafts.push({ ...draft });
+       starts += 1; order.push(`start-${String(starts)}`);
+       if (starts === 2 && options.unconfirmedSuffixStart) return Promise.reject(new Error('unit start observation unavailable'));
+       events.push({ type: 'receipt.post', body: starts === 1 ? 'base-reference-value' : 'fresh-current-session-reference' });
+@@ -134,7 +166,7 @@
+     client, receipts: { mark: () => events.length, since: (cursor) => ({ actions: events.slice(cursor), views: [] }) }, switchSourceValue: () => { order.push('switch'); },
+     vars: {}, mode: 'HARNESS_SELF_TEST', stopRule: stop, ...FAST, secretCanaries: ['unit-canary-secret'],
+     extraTexts: options.leakedBase ? () => Promise.resolve({ closedUnit: 'unit-canary-secret' }) : null });
+-  return { run, starts, stop, order };
++  return { run, starts, stop, order, requests: revision.requests, startedDrafts };
+ }
+ 
+ describe('group5: pure two-session and missing-charge controls', () => {
+@@ -143,7 +175,7 @@
+     expect(run.usage?.modelProposals).toBe(13); // Defining old semantic RED: suffix-only3.
+     expect(run.usage).toEqual({ basis: 'PUBLIC_BUDGET_COUNTERS', modelProposals: 13, inputTokens: 140, outputTokens: 25 });
+     expect(starts).toBe(2); expect(stop.state().sessions).toBe(2);
+-    expect(order).toEqual(['start-1', 'charge-1', 'finalize-m1', 'switch', 'update', 'start-2', 'charge-2', 'finalize-m2']);
++    expect(order).toEqual(['start-1', 'charge-1', 'finalize-m1', 'read-draft', 'switch', 'update', 'start-2', 'charge-2', 'finalize-m2']);
+     expect(run.learnSessions?.map((session) => session.phase)).toEqual(['base', 'incremental']);
+     expect(run.incremental).toMatchObject({ logicalStatus: 'COMPLETE', suffixStarted: true, notCompletedBecause: null });
+     expect(run.oracle).toMatchObject({ correct: true, falseSuccess: false });
+@@ -211,6 +243,127 @@
+     expect(JSON.stringify(run)).not.toContain('unit-canary-secret');
+   });
+ });
++
++describe('FR06-01: current draft revision transport and capture', () => {
++  it('FR06-01 sends current numeric PUT tokens after authored fields and retains full successful bodies', async () => {
++    const read = { id: 'memory', sourceRevision: 7, configurationRevision: 11, diagnostics: 'read-marker' };
++    const written = { id: 'memory', sourceRevision: 17, configurationRevision: 19, diagnostics: 'write-marker' };
++    const { client, requests } = revisionApi({ readResponse: read, updateResponse: written });
++    expect(await client.readDraft('memory')).toEqual(read);
++    expect(await client.updateDraft('memory', 'edited', { request: { authoringSchemaVersion: 2, steps: [], sourceRevision: 500, configurationRevision: 900 } }, { sourceRevision: 7, configurationRevision: 11 })).toEqual(written);
++    expect(requests).toEqual([
++      { method: 'GET', url: 'http://127.0.0.1/api/v1/studio/tests/memory', body: undefined, authorization: 'Bearer unit-transport-token' },
++      { method: 'PUT', url: 'http://127.0.0.1/api/v1/studio/tests/memory', body: { name: 'edited', csiId: '60406', environment: 'dev', authoringSchemaVersion: 2, steps: [], sourceRevision: 7, configurationRevision: 11 }, authorization: 'Bearer unit-transport-token' },
++    ]);
++  });
++
++  const invalid = [
++    { label: 'missing', value: undefined }, { label: 'null', value: null }, { label: 'string', value: '7' },
++    { label: 'zero', value: 0 }, { label: 'negative', value: -1 }, { label: 'fraction', value: 1.5 },
++    { label: 'unsafe', value: Number.MAX_SAFE_INTEGER + 1 },
++  ];
++  it.each((['sourceRevision', 'configurationRevision'] as const).flatMap((field) => invalid.map((entry) => ({ field, ...entry }))))(
++    'FR06-01 refuses $label $field before PUT without coercing the revision or adding a session', async ({ field, value }) => {
++      const direct = revisionApi();
++      const revisions = { sourceRevision: 7, configurationRevision: 11 };
++      // Model a malformed external JS caller without hiding the boundary behind an any cast.
++      Object.defineProperty(revisions, field, { value });
++      await expect(direct.client.updateDraft('memory', 'edited', { request: {} }, revisions)).rejects.toThrow('Invalid draft revisions');
++      expect(direct.requests).toHaveLength(0);
++      const { run, starts, stop, requests } = await memoryIncremental({ draftRead: { id: 'memory', sourceRevision: 7, configurationRevision: 11, [field]: value } });
++      expect(requests.map((request) => request.method)).toEqual(['GET']);
++      expect(starts).toBe(1); expect(stop.state().sessions).toBe(1);
++      expect(run.usage).toMatchObject({ modelProposals: 10, inputTokens: 100, outputTokens: 20 });
++      expect(run.incremental).toMatchObject({ logicalStatus: 'INCOMPLETE', suffixStarted: false });
++      expect(run.oracle).toMatchObject({ correct: false, falseSuccess: false });
++    },
++  );
++
++  it('FR06-01 preserves the largest safe numeric input without stringifying or rounding it', async () => {
++    const { client, requests } = revisionApi();
++    await client.updateDraft('memory', 'edited', { request: {} }, { sourceRevision: Number.MAX_SAFE_INTEGER, configurationRevision: Number.MAX_SAFE_INTEGER });
++    expect(requests[0]?.body).toMatchObject({ sourceRevision: 9007199254740991, configurationRevision: 9007199254740991 });
++  });
++
++  it('FR06-01 fetches after base publication and uses that tuple for PUT and the PUT response for suffix start', async () => {
++    const { run, starts, stop, order, requests, startedDrafts } = await memoryIncremental();
++    expect(order).toEqual(['start-1', 'charge-1', 'finalize-m1', 'read-draft', 'switch', 'update', 'start-2', 'charge-2', 'finalize-m2']);
++    expect(requests.map((request) => request.method)).toEqual(['GET', 'PUT']);
++    expect(requests[1]?.body).toMatchObject({ sourceRevision: 7, configurationRevision: 11 });
++    expect(startedDrafts).toEqual([{ id: 'memory', sourceRevision: 1, configurationRevision: 1 }, { id: 'memory', sourceRevision: 17, configurationRevision: 19 }]);
++    expect(starts).toBe(2); expect(stop.state().sessions).toBe(2);
++    expect(run.oracle).toMatchObject({ correct: true, falseSuccess: false });
++    expect(run.usage).toMatchObject({ modelProposals: 13, inputTokens: 140, outputTokens: 25 });
++  });
++
++  it.each([{ phase: 'GET', puts: 0 }, { phase: 'PUT', puts: 1 }])(
++    'FR06-01 refuses a mismatched draft identity from $phase without a suffix or retry', async ({ phase, puts }) => {
++      const wrong = { id: 'different-draft', sourceRevision: 7, configurationRevision: 11 };
++      const { run, starts, stop, requests } = await memoryIncremental(phase === 'GET' ? { draftRead: wrong } : { draftUpdate: wrong });
++      expect(requests.filter((request) => request.method === 'GET')).toHaveLength(1);
++      expect(requests.filter((request) => request.method === 'PUT')).toHaveLength(puts);
++      expect(starts).toBe(1); expect(stop.state().sessions).toBe(1);
++      expect(run.incremental).toMatchObject({ logicalStatus: 'INCOMPLETE', suffixStarted: false });
++      expect(run.oracle).toMatchObject({ correct: false, falseSuccess: false });
++    },
++  );
++
++  it('FR06-01 propagates one HTTP409 and records one incomplete base without reloading, retrying or charging twice', async () => {
++    const direct = revisionApi({ conflict: true });
++    await expect(direct.client.updateDraft('memory', 'edited', { request: {} }, { sourceRevision: 7, configurationRevision: 11 })).rejects.toMatchObject({ status: 409, code: 'STALE_REVISION' });
++    expect(direct.requests.map((request) => request.method)).toEqual(['PUT']);
++    const { run, starts, stop, requests } = await memoryIncremental({ draftConflict: true });
++    expect(requests.map((request) => request.method)).toEqual(['GET', 'PUT']);
++    expect(starts).toBe(1); expect(stop.state().sessions).toBe(1);
++    expect(run.learnSessions).toHaveLength(1); expect(run.learnSessions?.[0]?.budgetCharge).toMatchObject({ amountUsd: 100 });
++    expect(run.usage).toMatchObject({ modelProposals: 10, inputTokens: 100, outputTokens: 20 });
++    expect(run.incremental).toMatchObject({ logicalStatus: 'INCOMPLETE', suffixStarted: false });
++    expect(run.oracle).toEqual({ correct: false, falseSuccess: false, failures: ['incremental-not-completed'] });
++  });
++
++  it('FR06-01 stops after an unavailable GET without PUT or a fabricated suffix charge', async () => {
++    const { run, starts, stop, requests } = await memoryIncremental({ draftReadUnavailable: true });
++    expect(requests.map((request) => request.method)).toEqual(['GET']);
++    expect(starts).toBe(1); expect(stop.state().sessions).toBe(1);
++    expect(run.incremental).toMatchObject({ logicalStatus: 'INCOMPLETE', suffixStarted: false });
++    expect(run.usage).toMatchObject({ modelProposals: 10, inputTokens: 100, outputTokens: 20 });
++    expect(run.oracle?.correct).toBe(false);
++  });
++
++  it('FR06-01 scans a valid current-draft response canary before any suffix and redacts the run record', async () => {
++    const { run, starts, stop, requests } = await memoryIncremental({ draftRead: { id: 'memory', sourceRevision: 7, configurationRevision: 11, diagnostics: 'unit-canary-secret' } });
++    expect(requests.map((request) => request.method)).toEqual(['GET', 'PUT']);
++    expect(starts).toBe(1); expect(stop.state()).toMatchObject({ sessions: 1, stopped: 'STOPPED_HARD_GATE' });
++    expect(run.secretOrPiiLeak).toBeGreaterThan(0);
++    expect(run.incremental).toMatchObject({ logicalStatus: 'INCOMPLETE', suffixStarted: false });
++    expect(JSON.stringify(run)).not.toContain('unit-canary-secret');
++  });
++
++  it.each([{ phase: 'GET', puts: 0 }, { phase: 'PUT', puts: 1 }])(
++    'FR06-01 captures malformed-revision plus canary $phase JSON before rejecting it and preserves the attempted write fact', async ({ phase, puts }) => {
++      const malformed = { id: 'memory', sourceRevision: 'not-a-numeric-revision', configurationRevision: 11, diagnostics: 'unit-canary-secret' };
++      const { run, starts, stop, requests } = await memoryIncremental(phase === 'GET' ? { draftRead: malformed } : { draftUpdate: malformed });
++      expect(requests.filter((request) => request.method === 'GET')).toHaveLength(1);
++      expect(requests.filter((request) => request.method === 'PUT')).toHaveLength(puts);
++      expect(starts).toBe(1); expect(stop.state()).toMatchObject({ sessions: 1, stopped: 'STOPPED_HARD_GATE' });
++      expect(run.learnSessions).toHaveLength(1);
++      expect(run.secretOrPiiLeak).toBeGreaterThan(0);
++      expect(run.incremental).toMatchObject({ logicalStatus: 'INCOMPLETE', suffixStarted: false });
++      expect(run.oracle).toMatchObject({ correct: false });
++      expect(run.usage).toMatchObject({ modelProposals: 10, inputTokens: 100, outputTokens: 20 });
++      expect(JSON.stringify(run)).not.toContain('unit-canary-secret');
++    },
++  );
++
++  it('FR06-01 treats an unsafe successful PUT response as an attempted write with no suffix or retry', async () => {
++    const { run, starts, stop, requests } = await memoryIncremental({ draftUpdate: { id: 'memory', sourceRevision: Number.MAX_SAFE_INTEGER + 1, configurationRevision: 19 } });
++    expect(requests.map((request) => request.method)).toEqual(['GET', 'PUT']);
++    expect(starts).toBe(1); expect(stop.state().sessions).toBe(1);
++    expect(run.incremental).toMatchObject({ logicalStatus: 'INCOMPLETE', suffixStarted: false });
++    expect(run.oracle).toMatchObject({ correct: false, falseSuccess: false });
++  });
++});
++
+ const entryOf = (m: CorpusManifest, id: string) => m.cases.find((c) => c.id === id) ?? (() => { throw new Error(id); })();
+ const FAST = { pollMs: 0, pause: () => Promise.resolve() };
+ 

@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "phase": 356,
+  "final": true,
+  "verdict": "BLOCKED",
+  "scope": "Independent consolidated File List355 source/provenance coverage review only",
+  "sealedAtUtc": "2026-10-22T10:07:21.970625+00:00",
+  "contextSHA256": "da19e71b4a74fedb69aa24dfc214611962bd71585e7cebf641e577ab72a2adfa",
+  "implementationSealSHA256": "edc7acfebf94f448fe86b961ac989c81fd95050c64474c81c0471bb3e497ff2a",
+  "implementationReceiptSHA256": "2fad8f5a52b0492eab0592c9c16456d600dcb9ae1a7d1257aae571fd3205ac39",
+  "publicManifestSHA256": "e51647db366b70c975f1ebfee840613836faf5c9622fd396b2790d814bc2ff25",
+  "inventorySHA256": "a51a825e97f3e6eec7738dd4c5e479d218e285fa7eddaae2ee39a240b93ae522",
+  "fileListSHA256": "b27a267353280260ba0b0ac91d470af3d71455999fd3e6eb93377361da96f76c",
+  "findings": [
+    {
+      "id": "F356-01",
+      "severity": "BLOCKING",
+      "classification": "PROTECTED_RUNTIME_OUTPUT_ADMITTED_AS_SAFE_SOURCE",
+      "sourceAnchors": [
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/filelist355-implementation/compose.py:137",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/filelist355-implementation/compose.py:271",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/filelist355-implementation/compose.py:284"
+      ],
+      "inventoryPath": "backend/build/corun/fault-injection-raw.json",
+      "publicProvenance": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/f/receipt.md:68",
+      "finding": "The broad backend/ code-prefix classifier admits a raw runtime report input as config/PRESENT and reads it for a new content hash, size and mode. A public source mention does not authorize target metadata/content access. This contradicts the reference-only runtime evidence boundary.",
+      "smallestCorrection": "Preserve FINAL355. In a separately bound successor, exclude build/runtime/raw outputs before every filesystem operation; retain this target only as evidence/reference-only through the existing public receipt, without fresh target hash/size/mode. Update inventory/category/counts/readable claims and delivery pins. Do not inspect, chmod, delete or rehash the raw target.",
+      "scope": "No source-coverage or authorship expansion required."
+    }
+  ],
+  "completedChecks": {
+    "uniqueRelativeRows": 535,
+    "originalOwnershipGroupsMapped": 22,
+    "all22DeclarationTextMatchesStory": true,
+    "all33CoverageGroupsMapToInventory": true,
+    "acceptedExplicitPathListsMapped": [
+      95,
+      8,
+      6,
+      4,
+      21
+    ],
+    "currentAcceptedSourcePinsMatch": 31,
+    "publicInputPinsMatch": 90,
+    "safeCurrentHashByteModeMatchesExcludingFinding": 477,
+    "declaredSafeAbsentRowsConfirmed": 16,
+    "referenceOnlyRowsSkippedWithoutFilesystemAccess": 41,
+    "recordedActualChangeApplicationPaths": 171,
+    "exclusive009AuthorshipNotAssertedOnEveryRow": true,
+    "linkLocatorsResolvedWithoutTargetTraversal": 1846,
+    "uniqueLinkTargetsMappedOrOwned": 538,
+    "localSealAndPublicManifestPinsMatch": true,
+    "story009Unchanged": true,
+    "story009Open": 16,
+    "story009Complete": 21,
+    "story010And011HashesUnchanged": true,
+    "captureTimeStoryDigestNotRecursiveFutureAppendClaim": true
+  },
+  "reviewAccessCorrection": {
+    "initialOpaqueHashVerificationReadOfOverbroadAdmittedRuntimeRow": 1,
+    "description": "Initial inventory verification followed the overly broad PRESENT classification and encountered this row for opaque hash/size/mode comparison. No body was printed, parsed or retained; subsequent checks excluded backend/build and did not re-access the target. This is recorded rather than claiming zero runtime-artifact access.",
+    "actualPrivateCaseInputsReadHashStat": false,
+    "rawBodyLogMediaPrintedOrDecoded": false
+  },
+  "remainingLimits": [
+    "No full T6, critical-path/D-C, story, company, pilot, human or external gate acceptance; all16 open markers and010 timing decision remain.",
+    "405 broader source-related rows are not an exclusive009 changed-file count;171 change/application records retain shared historical lineage.",
+    "Protected entries remain locators through public anchors; no complete private/raw artifact index or new author-history audit is required.",
+    "Current329 failed/PARTIAL11of17/replay0,339 BYEXPORT-only BUDGET_EXCEEDED,341 subtype/original predicate/provider/cutoff UNKNOWN and354 mask/font/mobile limits remain.",
+    "No story append or lifecycle/source/runtime authority is granted. Generated355/356 deliveries must be bound separately from their input inventory."
+  ],
+  "testsBuildRuntimeNetworkModelBrowserGitContactsDelegationExecuted": false,
+  "storySourceOrHistoricalArtifactsModified": false,
+  "storyAppendAuthorized": false,
+  "fullStoryAccepted": false,
+  "sourcePinsSHA256": "e468e26ec83f43afdddf10a57403f8da5233f8958f1b00127e1725f94f0e0bac"
+}

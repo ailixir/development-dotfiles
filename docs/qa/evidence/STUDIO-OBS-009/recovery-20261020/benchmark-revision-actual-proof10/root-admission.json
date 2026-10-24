@@ -1,0 +1,72 @@
+{
+  "kind": "ROOT_FR06_01_AFFECTED_PROOF10_ADMISSION",
+  "sourceDigest": "827fa4c35712ac2267b6c71ac93089043abfd42bfa36cb289c59595d71e37f90",
+  "distDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+  "runner": {
+    "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "sha256": "edeaa3592eb85b60097c79a7577d2025027b53ebc3eba470c092e9c9cf2a009f",
+    "bytes": 4458
+  },
+  "corpusRootReceipt": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-execution06/corpus09-root-receipt.json",
+    "sha256": "1745f9ce1d4f37ad4456dee1ae6c5108304e5c94b0bc150586c582d02516818f",
+    "bytes": 7299
+  },
+  "candidateSourceQa": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-revision-candidate08-independent-review/manifest.json",
+    "sha256": "2ee555c7fbae6e9dda74620edb51df363bd8ef2ecfa10e569fdc1bafc28d7660",
+    "bytes": 788
+  },
+  "exactThreeCommands": [
+    {
+      "labelSuffix": "focused01",
+      "argv": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "test/evaluation/harnessSelfTest.test.ts",
+        "--coverage.enabled=false",
+        "--minWorkers=1",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "--testTimeout=5000",
+        "--hookTimeout=5000",
+        "--testNamePattern",
+        "FR06-01|group5:"
+      ]
+    },
+    {
+      "labelSuffix": "types01",
+      "argv": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "run",
+        "type-check"
+      ]
+    },
+    {
+      "labelSuffix": "lint01",
+      "argv": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eslint/bin/eslint.js",
+        "evaluation/observed-authoring/evaluate.mjs",
+        "evaluation/observed-authoring/evaluate.d.mts",
+        "test/evaluation/harnessSelfTest.test.ts"
+      ]
+    }
+  ],
+  "soleRuntimeOwner": "root",
+  "sourceWriters": [],
+  "privateBodiesToModel": false,
+  "noNativeProviderFull105OrRetry": true,
+  "onlyCacheOutput": "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+  "expectedSelectedAuthoredCases": 31,
+  "coverageScope": "focused only; no new full coverage claim",
+  "PythonOptimize": 0
+}

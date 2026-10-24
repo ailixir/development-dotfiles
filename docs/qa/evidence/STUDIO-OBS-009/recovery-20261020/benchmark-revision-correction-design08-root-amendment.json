@@ -1,0 +1,17 @@
+{
+  "kind": "MINIMAL_DESIGN07_SUCCESSOR_FOR_RD07_QA_01",
+  "atUtc": "2026-10-21T11:15:26.898889+00:00",
+  "design07ManifestSha256": "1047d9b2de9f1a5e7ca15117d143e58cd7bf0327b653bc132752a7f28201d5a8",
+  "independentReviewManifestSha256": "31884cc6f23afba6346ccc48d21871823e64e41803e7cd6ad3563a10a4efbdbe",
+  "unchangedAcceptedDesign": "All trusted current GET provenance, explicit fourth numeric tuple, serialization override order, single CAS/no409retry, base publication identity/guided strings/accounting, three-file scope and affected verification from design07 remain.",
+  "amendment": [
+    "Client readDraft and updateDraft must return the full successful decoded JSON body without response-tuple rejection, projection or mutation before the existing withTextCapture wrapper receives it. Declaration return types must not falsely promise an already validated response.",
+    "After awaiting each wrapped method in driveIncremental, validate the captured returned object at the driver boundary: matching id and positive Number.isSafeInteger for both revisions; derive the checked DraftSnapshot/tuple there. Input validation of the explicit update tuple before transport stays permitted.",
+    "The wrapped GET is awaited and captured before checking its tuple; an invalid GET reaches existing interruptedRun catch scan and prevents PUT. The wrapped PUT response is captured before checking; malformed PUT reaches catch scan and prevents suffix while preserving the attempted write. Keep full transient bodies for existing before-suffix/catch scans and do not add raw values to observations/errors.",
+    "Add focused combined malformed-revision plus planted-canary response cases for BOTH GET and PUT. Assert detected leak, raw canary absent from serialized record, zero PUT for invalid GET, exactly one PUT/no suffix for invalid PUT, no retry and one already charged base. Retain standalone valid-current-tuple/conflict/input-precision/group5 controls."
+  ],
+  "implementationAuthority": false,
+  "runtimeAuthority": false,
+  "requiresIndependentAmendedDesignAcceptance": true,
+  "noSourceChange": true
+}

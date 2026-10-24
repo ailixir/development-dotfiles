@@ -1,0 +1,137 @@
+{
+  "kind": "INDEPENDENT_CORPUS_MEMBERS08_MINIMAL_SUCCESSOR_SOURCE_REVIEW",
+  "atUtc": "2026-10-21T11:27:49.726646+00:00",
+  "disposition": "SOURCE_SAFE_FOR_SEPARATE_ROOT_READ_AND_CLI_ADMISSION",
+  "producerManifestSha256": "64ed1aa8a38979c4ebefb3091b9cdb22ce064cc3d0bfd4cbfdc9188975f04f89",
+  "priorAcceptedCorpus07ManifestSha256": "f262d9db402d5294e609752681353ed5db1f17f3148320d6efdeb1d1f08645ab",
+  "mandatoryFindings": [],
+  "scope": "Gateway corpus helper/membership data routing only; no evaluator candidate08 review/adoption or self-approval.",
+  "sourceDelta": {
+    "exactDiffMatchesSealedPatch": true,
+    "from": "49dc702fc2474db1b1dd364c0d097bffdedddb8bc09e3e721b744ecdefbb5152",
+    "to": "ef3e5b9ac8b0bc6d770c074b02a3a42643baa0c9d30daddd91945abd913a3e33",
+    "onlyHelperChanges": "Input authority field replacement; confined admitted-path finite member/ancestor lstat loop; measured true on successful completion and null on fixed unavailable result."
+  },
+  "membershipAssessment": [
+    {
+      "requirement": "Separate permission from unmeasured fact",
+      "evidence": "inventory requires authorizeFiniteMemberMetadataChecks:true instead of root allAdmittedPinMembersRegularNoSymlinks assertion. Admission draft authority flags remain false; no measured member claim is made in the source packet."
+    },
+    {
+      "requirement": "Confinement/catalogue before per-member metadata",
+      "evidence": "Original resolveInside(base,pin.path) confines root routes; catalogue.has(path) is required before lstat of that resolved path and its ancestors. Root-relative/corpus-relative and forced-corpus expected-JSON routes are unchanged."
+    },
+    {
+      "requirement": "Regular member and no-symlink chain",
+      "evidence": "For each admitted logical event, member lstat must be regular and nonsymlink; every ancestor throughR is checked nonsymlink. No directory enumeration, pin payload read or pin rehash is added. Finite enumeration is bounded by admitted manifest/input refs; no new global hash walk."
+    },
+    {
+      "requirement": "Complete truthful output",
+      "evidence": "All event checks and private membership artifact creation complete before measured allAdmittedPinMembersRegularNoSymlinks:true is returned. Any failed/unsafe/unavailable shape follows fixed catch with membershipComplete:null/measured:null, raw exit2 and no exception/path body export. Empty or incomplete facts are not relabeled zero/pass."
+    },
+    {
+      "requirement": "Privacy and authority limits",
+      "evidence": "Exact event member paths and declared/admitted hashes remain only in fresh mode0600 program-only artifact. Stdout exports closed flags/counts/opaque hashes/.next observation. Helper does not grant corpus validity, runtime authority, source adoption or actual member presence proof before execution."
+    }
+  ],
+  "preservedAcceptedSemantics": {
+    "originalResolversAndSemanticExpectedJsonRoute": true,
+    "conditionalLogicalMultiplicityNotSyscallProof": true,
+    "derivedMaskAndNonderivedKeyArrayOrderComparison": true,
+    "nextLstatOnlyEnoentAbsence": true,
+    "phaseOrder": [
+      "FREEZE",
+      "FREEZE_INTERNAL_VALIDATE",
+      "VALIDATE_AFTER"
+    ],
+    "originalCliOrder": [
+      "freeze-corpus",
+      "validate-corpus"
+    ],
+    "strictCheckFilesAndNoOriginalValidatorMutation": true,
+    "freezeMayMutateBeforeFailureAndNoAutomaticRecovery": true,
+    "private0600OutputAndOpaqueCapture": true,
+    "soleWriterNoSymlinkParentWindowStillRequired": true
+  },
+  "routingAssessment": {
+    "inlines": [
+      {
+        "id": "membershipProspect",
+        "sourceEqualsReviewedHelper": true,
+        "remainingOperationAdmissionArgumentsUnchanged": true,
+        "fixedNodePrefix": [
+          "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+          "--input-type=module"
+        ]
+      },
+      {
+        "id": "deltaProspect",
+        "sourceEqualsReviewedHelper": true,
+        "remainingOperationAdmissionArgumentsUnchanged": true,
+        "fixedNodePrefix": [
+          "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+          "--input-type=module"
+        ]
+      }
+    ],
+    "originalCliInvocations": [
+      {
+        "id": "freeze-actual",
+        "newArgv": [
+          "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+          "evaluation/cli.mjs",
+          "freeze-corpus",
+          "evaluation/observed-authoring/manifest.json"
+        ],
+        "originalCliArgumentsByteExact": true
+      },
+      {
+        "id": "validate-after",
+        "newArgv": [
+          "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+          "evaluation/cli.mjs",
+          "validate-corpus",
+          "evaluation/observed-authoring/manifest.json"
+        ],
+        "originalCliArgumentsByteExact": true
+      }
+    ],
+    "pythonProjectorByteIdentical": "3e9bfe3d738bf9b366128274d9bc481de8636f36dd26cbd14e2235fa29ed628a",
+    "pythonCommandOnlySameHashFilePathMovedToSuccessorDirectory": true,
+    "nodeBinary": {
+      "path": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+      "sha256": "9d050fd455b56426e25d4d603c7c501cbb2630348e836cf221dcce748e90588a",
+      "qualification": "Root-supplied fresh verified metadata; binary not read or invoked by reviewer"
+    },
+    "noNewPrefixNormalizationOrParser": true,
+    "pnpmRemainsPackageTypeLintVitestPath": true
+  },
+  "remainingPerOperationBindings": [
+    "Separate root preflight/admission and program-only manifest/source/full catalogue/code-load refs; candidate source approval is another reviewer scope.",
+    "Finite member metadata authority and fresh private membership output path; actual member facts remain UNMEASURED until original retained program runs under that admission.",
+    "Root sole-writer/no-symlink-parent window through original freeze, fresh no-follow.next absence, exact actual manifest/owned before-after bytes/modes and permitted mutation delta.",
+    "Pinned Node24/environment and Python optimization-disabled actual owner binding; original handle/raw exits/opaque stdout-stderr custody and strict closed outputs.",
+    "Original freeze0/errorCount0 plus strict internal validation, true nonderived equality/no.next then original final validate0/valid true/errorCount0; no automatic retry/cleanup/rollback on failure."
+  ],
+  "notAssessed": [
+    "Evaluator candidate08 implementation/test correctness",
+    "Actual private corpus member names/bodies/catalogues or semantic validity",
+    "Actual source adoption/current SDK measurement or CLI outcomes",
+    "Live routing/model/provider/SSO/security/human/pilot facts"
+  ],
+  "activity": {
+    "producerArtifactsRehashed": 7,
+    "priorArtifactsRehashed": 7,
+    "sourceComparedAsTextOnly": true,
+    "helperParsedImportedExecutedOrTestsRun": false,
+    "actualPrivateMembershipManifestCataloguePinBodiesOrSdkRead": false,
+    "onlyOwnReviewDirectoryWritten": true,
+    "sourceStoryGateLedgerPointerRuntimeAuthority": false
+  },
+  "actualApplicationGo": false,
+  "runtimeGo": false,
+  "newReadAuthority": false,
+  "sourceAdoptionOrLifecycleAuthority": false,
+  "sharedUsdCeiling": 500,
+  "providerHeadroom": "UNKNOWN"
+}

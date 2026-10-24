@@ -1,0 +1,43 @@
+--- correction07/io-membership-and-delta.mjs.txt
++++ members08/io-membership-and-delta.mjs.txt
+@@ -29,7 +29,7 @@
+ }
+ function writePrivate(p,value){need(p.startsWith(R+'/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-execution06/')&&!existsSync(p));let q=dirname(p);while(q!==R){need(!lstatSync(q).isSymbolicLink());q=dirname(q);}const bytes=Buffer.from(JSON.stringify(value,null,2)+'\n');writeFileSync(p,bytes,{flag:'wx',mode:0o600});return{bytes:bytes.length,sha256:H(bytes)};}
+ function inventory(a){
+-  need(resolve(R,a.manifestRef.path)===MANIFEST&&a.allAdmittedPinMembersRegularNoSymlinks===true);
++  need(resolve(R,a.manifestRef.path)===MANIFEST&&a.authorizeFiniteMemberMetadataChecks===true);
+   const m=json(a.manifestRef,1_048_576), source=json(a.sourceCatalogueRef), full=json(a.fullCatalogueRef);
+   need(Array.isArray(source.files)&&Array.isArray(full.copyProfileFiles));
+   const catalogue=new Map();for(const row of [...source.files,...full.copyProfileFiles]){
+@@ -40,7 +40,15 @@
+   const events=[];const add=(phase,category,pin,forcedCorpus=false)=>{
+     need(pin&&typeof pin==='object'&&typeof pin.path==='string'&&HEX.test(pin.sha256??''));
+     const base=forcedCorpus?CORPUS:pin.base==='repo'?R:CORPUS;const path=resolveInside(base,pin.path);
+-    need(catalogue.has(path));events.push({phase,category,path:relative(R,path),declaredSha256:pin.sha256,admittedCatalogueSha256:catalogue.get(path),hashOnly:category!=='EXPECTED_ORACLE_JSON'});
++    need(catalogue.has(path));
++    let memberPath=path;
++    while(true){
++      const memberStat=lstatSync(memberPath);need(!memberStat.isSymbolicLink());
++      if(memberPath===path)need(memberStat.isFile());
++      if(memberPath===R)break;
++      memberPath=dirname(memberPath);
++    }
++    events.push({phase,category,path:relative(R,path),declaredSha256:pin.sha256,admittedCatalogueSha256:catalogue.get(path),hashOnly:category!=='EXPECTED_ORACLE_JSON'});
+   };
+   const validation=(phase)=>{
+     for(const pin of Object.values(m.sources??{}))add(phase,'SOURCE_PIN',pin);
+@@ -63,7 +71,7 @@
+   const writes=[{operation:'WRITE_ORIGINAL_NEXT',path:relative(R,MANIFEST+'.next')},{operation:'RENAME_NEXT_TO_ACTUAL_MANIFEST',from:relative(R,MANIFEST+'.next'),path:relative(R,MANIFEST)}];
+   const result={kind:'PROGRAM_ONLY_ORIGINAL_CLI_IO_MEMBERSHIP_NOT_VALIDITY',manifestRef:a.manifestRef,manifestReadPhases:['FREEZE_READ_BEFORE_WRITE','VALIDATE_AFTER'],events,writes,importedCodeRefs:a.importedCodeRefs,sourceCatalogueRef:a.sourceCatalogueRef,fullCatalogueRef:a.fullCatalogueRef,successPathConditionalMembershipNotSyscallObservation:true,unknownOrUncataloguedPathHeld:true};
+   const fact=writePrivate(resolve(R,a.membershipOutput),result);const phaseCounts={};for(const row of events){phaseCounts[row.phase]??={};phaseCounts[row.phase][row.category]=(phaseCounts[row.phase][row.category]??0)+1;}
+-  return{scope:'CORPUS_DECLARED_IO_MEMBERSHIP_ONLY',membershipComplete:true,pinFileBodiesRead:false,codeLoadMembershipSupplied:Array.isArray(a.importedCodeRefs),manifestBytes:a.manifestRef.bytes,manifestSha256:a.manifestRef.sha256,declaredLogicalEvents:events.length,distinctDeclaredPaths:new Set(events.map(v=>v.path)).size,phaseCategoryCounts:phaseCounts,writeTargetCount:writes.length,nextPathAbsentAtProjection:nextPathAbsentNoFollow(),programOnlyMembershipArtifact:fact,notCorpusValidation:true};
++  return{scope:'CORPUS_DECLARED_IO_MEMBERSHIP_ONLY',membershipComplete:true,allAdmittedPinMembersRegularNoSymlinks:true,pinFileBodiesRead:false,codeLoadMembershipSupplied:Array.isArray(a.importedCodeRefs),manifestBytes:a.manifestRef.bytes,manifestSha256:a.manifestRef.sha256,declaredLogicalEvents:events.length,distinctDeclaredPaths:new Set(events.map(v=>v.path)).size,phaseCategoryCounts:phaseCounts,writeTargetCount:writes.length,nextPathAbsentAtProjection:nextPathAbsentNoFollow(),programOnlyMembershipArtifact:fact,notCorpusValidation:true};
+ }
+ function mask(doc){
+   const out=structuredClone(doc);need(out&&typeof out==='object'&&Array.isArray(out.cases));
+@@ -99,4 +107,4 @@
+   need(isAbsolute(admissionPath)&&admissionPath.startsWith(R+'/'));const s=lstatSync(admissionPath);const raw=safeRead({path:relative(R,admissionPath),sha256:expectedHash,bytes:s.size},1_048_576),a=JSON.parse(raw.toString('utf8'));
+   need(a.rootProgramReadReleased===true&&a.executionAuthority===true&&a.operation===operation);
+   const result=operation==='membership'?inventory(a):delta(a);process.stdout.write(JSON.stringify({...result,notQaVerdict:true}));
+-}catch{process.stdout.write(JSON.stringify({projectionComplete:false,membershipComplete:null,scope:'CORPUS_IO_OR_DELTA_UNAVAILABLE',reason:'REQUIRED_BOUND_INPUT_OR_SHAPE_UNAVAILABLE',notQaVerdict:true}));process.exitCode=2;}
++}catch{process.stdout.write(JSON.stringify({projectionComplete:false,membershipComplete:null,allAdmittedPinMembersRegularNoSymlinks:null,scope:'CORPUS_IO_OR_DELTA_UNAVAILABLE',reason:'REQUIRED_BOUND_INPUT_OR_SHAPE_UNAVAILABLE',notQaVerdict:true}));process.exitCode=2;}

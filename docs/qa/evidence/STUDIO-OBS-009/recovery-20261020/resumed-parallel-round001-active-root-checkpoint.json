@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-10-22T18:23:45.548820+00:00",
+  "phase": "PARALLEL_ROUND_001_DISPATCHED",
+  "statusOnlyNotAuthority": true,
+  "userExecutionResumed": true,
+  "goalApiObservedStatus": "paused",
+  "goalPolicyFile": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/parallel-execution-20261022/GOAL.md",
+  "goalStateFile": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/real-stack71/parallel-execution-20261022/goal-state.json",
+  "orcaRunId": "run_fda1dc8b2c82",
+  "round": 1,
+  "objective": "Complete pending STUDIO-OBS-009 and STUDIO-OBS-010 using pragmatic expert-led parallel waves; preserve STUDIO-OBS-011 Done. Reevaluate the plan at every wave boundary, keep three gpt-6.1-sol/high subagents busy on independent ready tasks when useful, verify changed work, run final expert visual UI validation, obtain the requesting user's authentic video review, and retain genuine outside-owner gates.",
+  "roundPolicy": {
+    "maxExpertWorkers": 3,
+    "model": "gpt-6.1-sol",
+    "effort": "high",
+    "noNestedWorkers": true,
+    "reviewEveryWave": true,
+    "refillReadySlots": true,
+    "oneWriterPerFileSet": true,
+    "oneRuntimeOwner": true,
+    "finalVisualExpertRequired": true,
+    "humanReview": "requesting-user-only"
+  },
+  "tasks": [
+    {
+      "key": "consumer",
+      "title": "E1 gate consumer investigation and focused correction",
+      "story": "009",
+      "state": "DISPATCHED",
+      "taskId": "task_84c9f458db0c",
+      "dispatchId": "ctx_6c0d2e99f37c",
+      "terminal": "term_0d47c798-fcc3-48f1-89f1-9ebee2d6308e",
+      "effectiveModel": "gpt-6.1-sol",
+      "effectiveEffort": "high",
+      "preflight": "PASSED_SAME_GOVERNANCE_GUARD_DIRECTLY"
+    },
+    {
+      "key": "producer",
+      "title": "E2 producer ledger investigation and bounded evidence preparation",
+      "story": "009",
+      "state": "DISPATCHED",
+      "taskId": "task_fbcaa9642611",
+      "dispatchId": "ctx_70f40c681c4b",
+      "terminal": "term_be5af157-690e-4dae-83d8-aaa759ef2381",
+      "effectiveModel": "gpt-6.1-sol",
+      "effectiveEffort": "high",
+      "preflight": "PASSED_SAME_GOVERNANCE_GUARD_DIRECTLY"
+    },
+    {
+      "key": "readiness",
+      "title": "E3 010 readiness reconciliation and owner evidence checklist",
+      "story": "010",
+      "state": "DISPATCHED",
+      "taskId": "task_925a08f679a0",
+      "dispatchId": "ctx_8ca8adb85e8c",
+      "terminal": "term_fc2c3822-93f6-42b9-8e96-48613b08ff25",
+      "effectiveModel": "gpt-6.1-sol",
+      "effectiveEffort": "high",
+      "preflight": "PASSED_SAME_GOVERNANCE_GUARD_DIRECTLY"
+    }
+  ],
+  "previousCheckpoint": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/resumed-ui420-partial-cleanup421-user-stop-root-checkpoint.json",
+  "actual420": "CONSUMED_TERMINAL_PARTIAL_CAUSE_UNKNOWN",
+  "cleanup421": "ORIGINAL_FALSE_LATER_BOUND_OWNED_GONE",
+  "newStackStarted": false,
+  "newRunGo": false,
+  "newProviderCall": false,
+  "actualPrivateReadsAuthorized": false,
+  "storyStatus": {
+    "009": "InProgress",
+    "010": "InProgress",
+    "011": "Done"
+  },
+  "fullGoalComplete": false,
+  "next": "SUPERVISE_DISJOINT_SOURCE_AND_READINESS_WORK_REPLAN_ON_RESULT"
+}

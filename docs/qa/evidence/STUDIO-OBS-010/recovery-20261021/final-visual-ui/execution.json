@@ -1,0 +1,934 @@
+{
+  "started": "2026-10-21T17:40:59.166Z",
+  "node": "v24.20.0",
+  "mode": "Vite standalone + Node MSW demo proxy (5173 -> 5174)",
+  "app": "http://127.0.0.1:5173",
+  "syntheticOnly": true,
+  "actions": [
+    {
+      "name": "Create independent synthetic test A through UI",
+      "status": "PASS",
+      "detail": "f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f",
+      "time": "2026-10-21T17:41:01.396Z"
+    },
+    {
+      "name": "First secret popup has disclaimer and no personal/input fields",
+      "status": "PASS",
+      "detail": {
+        "fields": 0,
+        "personalNameFields": 0
+      },
+      "time": "2026-10-21T17:41:01.794Z"
+    },
+    {
+      "name": "Cancel and reopen first disclaimer",
+      "status": "PASS",
+      "detail": null,
+      "time": "2026-10-21T17:41:02.425Z"
+    },
+    {
+      "name": "Continue shows unchanged required identifier value and allowed sites form",
+      "status": "PASS",
+      "detail": null,
+      "time": "2026-10-21T17:41:02.650Z"
+    },
+    {
+      "name": "Create dummy secret through Insert reference inserts token",
+      "status": "PASS",
+      "detail": null,
+      "time": "2026-10-21T17:41:02.776Z"
+    },
+    {
+      "name": "Next secret in test A skips initial disclaimer",
+      "status": "PASS",
+      "detail": null,
+      "time": "2026-10-21T17:41:03.186Z"
+    },
+    {
+      "name": "Edit add remove and save steps survives reload",
+      "status": "PASS",
+      "detail": null,
+      "time": "2026-10-21T17:41:04.118Z"
+    },
+    {
+      "name": "Variables entrypoint creates second secret without disclaimer",
+      "status": "PASS",
+      "detail": null,
+      "time": "2026-10-21T17:41:05.748Z"
+    },
+    {
+      "name": "Another synthetic test B independently receives first disclaimer via Variables",
+      "status": "PASS",
+      "detail": null,
+      "time": "2026-10-21T17:41:08.129Z"
+    },
+    {
+      "name": "Narrow authoring is usable with visible controls",
+      "status": "PASS",
+      "detail": {
+        "innerWidth": 390,
+        "scrollWidth": 390
+      },
+      "time": "2026-10-21T17:41:08.631Z"
+    },
+    {
+      "name": "One demo Run shows progress result proof and logs",
+      "status": "FAIL",
+      "error": "TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('tab', { name: 'LOGS', exact: true })\u001b[22m\n",
+      "time": "2026-10-21T17:41:31.519Z"
+    }
+  ],
+  "testIds": [
+    {
+      "suffix": "A",
+      "id": "f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f",
+      "url": "http://127.0.0.1:5173/checks/studio/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f"
+    },
+    {
+      "suffix": "B",
+      "id": "52ceb57d-a122-464b-b4eb-51fec845b506",
+      "url": "http://127.0.0.1:5173/checks/studio/52ceb57d-a122-464b-b4eb-51fec845b506"
+    }
+  ],
+  "screenshots": [
+    "01-first-secret-desktop.png",
+    "02-cancel-reopen.png",
+    "03-secret-form-empty.png",
+    "04-secret-form-synthetic.png",
+    "05-secret-inserted.png",
+    "06-next-secret-direct-form.png",
+    "07-authoring-saved.png",
+    "08-variables-secret-selected.png",
+    "09-independent-test-disclaimer.png",
+    "10-narrow-disclaimer.png",
+    "11-narrow-authoring.png",
+    "12-narrow-variables.png",
+    "13-demo-run-progress.png",
+    "14-demo-run-result-proof.png",
+    "FAILED-11.png"
+  ],
+  "runtimeErrors": [],
+  "failedRequests": [],
+  "http": [
+    {
+      "method": "GET",
+      "path": "/api/v1/checks/sources",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/features",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/csi",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/csi",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000009/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000016/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000003/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-00000000000c/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000008/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000013/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000011/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000001/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000005/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000002/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000007/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000014/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-00000000000f/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000019/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000004/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000015/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-00000000000d/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000006/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-00000000000e/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000012/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000017/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-00000000000a/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-00000000000b/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000010/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000018/schedule",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/studio/tests",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/schedule/capabilities",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/capabilities",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/checks/sources",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/features",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/capabilities",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/schedule/capabilities",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 201
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/checks/sources",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/features",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/csi",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/csi",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000009/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000016/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000003/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-00000000000c/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000008/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000013/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000011/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000001/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000005/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000002/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000007/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000014/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-00000000000f/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000004/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000019/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000015/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-00000000000d/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-00000000000e/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000006/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000012/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000017/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-00000000000a/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-00000000000b/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/d0000000-0000-4000-8000-000000000010/schedule",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/studio/tests",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/52ceb57d-a122-464b-b4eb-51fec845b506",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/52ceb57d-a122-464b-b4eb-51fec845b506/schedule/capabilities",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/52ceb57d-a122-464b-b4eb-51fec845b506/capabilities",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/52ceb57d-a122-464b-b4eb-51fec845b506",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/52ceb57d-a122-464b-b4eb-51fec845b506/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/52ceb57d-a122-464b-b4eb-51fec845b506/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/52ceb57d-a122-464b-b4eb-51fec845b506/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/52ceb57d-a122-464b-b4eb-51fec845b506/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/52ceb57d-a122-464b-b4eb-51fec845b506/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/checks/sources",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/features",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/capabilities",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/schedule/capabilities",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/secrets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/checks/sources",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/features",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/capabilities",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/schedule/capabilities",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/schedule",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f/capabilities",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/studio/guided-sessions",
+      "status": 202
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/guided-sessions/guided-session-1",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/guided-sessions/guided-session-1",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/guided-sessions/guided-session-1",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/guided-sessions/guided-session-1",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/guided-sessions/guided-session-1",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/guided-sessions/guided-session-1",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/guided-sessions/guided-session-1",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/studio/guided-sessions/guided-session-1/finalize",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/guided-sessions/guided-session-1",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/guided-sessions/guided-session-1/result",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/guided-sessions/guided-session-1/video",
+      "status": 206
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/tests/f9be71a1-5a87-4de1-b0c8-0f0b5725fa5f",
+      "status": 200
+    }
+  ],
+  "servedModules": [
+    {
+      "path": "/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+      "sha256": "1e245f8a009da60cacbc54880b1ad13d36b1746928dacf7262411bccb0811a51"
+    },
+    {
+      "path": "/src/components/studio/SecretInput.tsx",
+      "sha256": "7221e784540c0cb2668903991e7d2b54fae493b54e37ca920cffc1486cc1620f"
+    },
+    {
+      "path": "/src/components/studio/run/RunControl.tsx",
+      "sha256": "265d79d302504813319f56dfcc164568b1fa446f82b06188df530bc2ea2b5252"
+    },
+    {
+      "path": "/src/components/studio/evidence/VideoEvidencePanel.tsx",
+      "sha256": "a494d5da41a1c26a8004b79e77c7221993769cb15b63d147a3358399bdac4c46"
+    },
+    {
+      "path": "/src/components/studio/references/ReferencePicker.tsx",
+      "sha256": "400cd0649a0b9a9a2ac524db94e0f45b9c4d61a3f064c18dbc42ffb8e8bed8b9"
+    },
+    {
+      "path": "/src/components/studio/guided/guidedNarratives.ts",
+      "sha256": "c333fcf0db8baf0e130d11b6edda9d87a5aa191ec7d41cbde0fbc540e82ec390"
+    },
+    {
+      "path": "/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+      "sha256": "1e245f8a009da60cacbc54880b1ad13d36b1746928dacf7262411bccb0811a51"
+    },
+    {
+      "path": "/src/components/studio/SecretInput.tsx",
+      "sha256": "7221e784540c0cb2668903991e7d2b54fae493b54e37ca920cffc1486cc1620f"
+    },
+    {
+      "path": "/src/components/studio/run/RunControl.tsx",
+      "sha256": "265d79d302504813319f56dfcc164568b1fa446f82b06188df530bc2ea2b5252"
+    },
+    {
+      "path": "/src/components/studio/evidence/VideoEvidencePanel.tsx",
+      "sha256": "a494d5da41a1c26a8004b79e77c7221993769cb15b63d147a3358399bdac4c46"
+    },
+    {
+      "path": "/src/components/studio/guided/guidedNarratives.ts",
+      "sha256": "c333fcf0db8baf0e130d11b6edda9d87a5aa191ec7d41cbde0fbc540e82ec390"
+    },
+    {
+      "path": "/src/components/studio/references/ReferencePicker.tsx",
+      "sha256": "400cd0649a0b9a9a2ac524db94e0f45b9c4d61a3f064c18dbc42ffb8e8bed8b9"
+    }
+  ],
+  "sourceBefore": {
+    "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx": "47484d4fc65ed343d69aa2fed69309fde3f2ed6423c2b80ad30acf2f7b3d2d4d",
+    "frontend/src/components/studio/SecretInput.tsx": "1c8dc829c04adcdfe44868ac96bb9359e5be76b8fcb2e139634b394a9ba08ad6",
+    "frontend/src/components/studio/references/ReferencePicker.tsx": "e2d54d9e22aeb833fab6295fddfc90646450f521b38a74cfa6948062d0f8fd7d",
+    "frontend/src/components/studio/run/RunControl.tsx": "b4f28ce2a0efffb469a304e19d2869c7c8410805e5658a071887b857e5abc176",
+    "frontend/src/components/studio/guided/guidedNarratives.ts": "36aafba385644d20737d172072b01702095810441f781422c6992e987ee67ffa",
+    "frontend/src/components/studio/evidence/VideoEvidencePanel.tsx": "2ccd0fd4e3ffa032a028ad87feefde163001e5091c3a33eb2ba88915e25a1a86"
+  },
+  "browser": "153.0.8010.12",
+  "abort": "TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('tab', { name: 'LOGS', exact: true })\u001b[22m\n",
+  "finished": "2026-10-21T17:41:31.574Z",
+  "sourceAfter": {
+    "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx": "47484d4fc65ed343d69aa2fed69309fde3f2ed6423c2b80ad30acf2f7b3d2d4d",
+    "frontend/src/components/studio/SecretInput.tsx": "1c8dc829c04adcdfe44868ac96bb9359e5be76b8fcb2e139634b394a9ba08ad6",
+    "frontend/src/components/studio/references/ReferencePicker.tsx": "e2d54d9e22aeb833fab6295fddfc90646450f521b38a74cfa6948062d0f8fd7d",
+    "frontend/src/components/studio/run/RunControl.tsx": "b4f28ce2a0efffb469a304e19d2869c7c8410805e5658a071887b857e5abc176",
+    "frontend/src/components/studio/guided/guidedNarratives.ts": "36aafba385644d20737d172072b01702095810441f781422c6992e987ee67ffa",
+    "frontend/src/components/studio/evidence/VideoEvidencePanel.tsx": "2ccd0fd4e3ffa032a028ad87feefde163001e5091c3a33eb2ba88915e25a1a86"
+  },
+  "sourceStable": true
+}

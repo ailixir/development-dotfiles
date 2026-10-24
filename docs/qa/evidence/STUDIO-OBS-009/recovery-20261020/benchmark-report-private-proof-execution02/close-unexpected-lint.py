@@ -1,0 +1,20 @@
+from pathlib import Path
+import json,hashlib,runpy,shutil,subprocess,datetime
+R=Path.cwd();O=Path(__file__).resolve().parent;D=Path('/private/tmp/obs009-benchmark-report-adoption-20261020-proof01');N=Path('/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo');P=R/'docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-private-proof-preparation';V=R/'docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-adoption-interval-correction01';snap=runpy.run_path(str(R/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution01/input-snapshot.py'))['snapshot']
+def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def wj(n,d):(O/n).write_text(json.dumps(d,indent=2)+'\n')
+terminals={key:json.loads((O/(key+'-terminal.json')).read_text()) for key in ['types-green01','lint-green01']};assert terminals['types-green01']['rawOuterExit']==0 and terminals['lint-green01']['rawOuterExit']==1;assert all(x['ownedProcessGroupSignal0Observation']=='ESRCH/GONE' for x in terminals.values());assert not (O/'v1-c2-red01-start.json').exists()
+initial=json.loads((O/'initial-new-private-full-snapshots.json').read_text());before={n:snap(D/n) for n in ['before-repo','repo']};assert before==json.loads((O/'lint-green01-private-after.json').read_text());wj('restoration-before-full-snapshots.json',before)
+rows=json.loads((P/'phase-pins.json').read_text())['files'];restored=[]
+for row in rows:
+ current=D/'repo'/row['path'];seed=D/'before-repo'/row['path'];assert sha(current)==row['greenSha256'] and sha(seed)==row['beforeSha256'];archive=O/'executed-green-buffers'/row['path'];archive.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(current,archive);mode=current.stat().st_mode&0o777;shutil.copyfile(seed,current);assert sha(current)==row['beforeSha256'] and current.stat().st_mode&0o777==mode;restored.append({'path':row['path'],'executedGreenSha256':row['greenSha256'],'restoredBeforeSha256':sha(current)})
+after={n:snap(D/n) for n in ['before-repo','repo']};wj('restoration-after-full-snapshots.json',after);assert after==initial;assert snap(N)==json.loads((O/'accepted-post-native-snapshot.json').read_text())['repo'];assert snap(R)==json.loads((O/'initial-actual-full-selected.json').read_text());assert after['repo']['dist']['digest']=='e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1'
+for item in json.loads((P/'manifest.json').read_text())['artifacts']:assert sha(P/item['path'])==item['sha256']
+for item in json.loads((V/'manifest.json').read_text())['artifacts']:assert sha(V/item['path'])==item['sha256']
+old=R/'docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-private-proof-execution01';assert sha(old/'manifest.json')=='37dd1408d938be3071acc680cad883d076f752232dada2a48a86bd82df685482'
+for item in json.loads((old/'manifest.json').read_text())['artifacts']:assert sha(old/item['path'])==item['sha256']
+cap=R/'.aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py'
+with (O/'terminal-actual-capture.log').open('w') as log:p=subprocess.run(['python3',str(cap),str(O/'terminal-actual-capture.json')],cwd=R,stdout=log,stderr=subprocess.STDOUT)
+assert p.returncode==0;a=json.loads((O/'initial-actual-capture.json').read_text());b=json.loads((O/'terminal-actual-capture.json').read_text());assert a['files']==b['files'] and a['dist']==b['dist'] and a['digest']==b['digest']
+wj('restoration.json',{'atUtc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'newPrivateTenSourcesRestored':restored,'bothNewPrivateCatalogsExactlySeed':True,'complete238E19Stable':True,'cacheExactOriginalFailedNativeBytes':True,'frozenNativeBaseUnchanged':True,'actualFullSourceAnd238DistUnchanged':True,'oldFailureAndPreparationAndV2CandidateSealsUnchanged':True,'unexpectedLint3ErrorsRetainedNoFixOrRetry':True,'allThreeSemanticPhasesAndMetadataCommands':'UNEXECUTED','sourceRestorationOnlyNewNamespace':True,'lane':'RELEASED'})
+print(json.dumps({'restored':len(restored),'bothNewCatalogsExactSeed':True,'actualSource':b['digest'],'actualDist':b['dist']['digest'],'product238E19':after['repo']['dist']['digest'],'lane':'RELEASED'}))

@@ -1,0 +1,32 @@
+PUT Checks deployed successfully.
+
+Components:
+{{- if .Values.backend.enabled }}
+  API:      {{ include "put-checks.api.fullname" . }} (port {{ .Values.backend.service.port }})
+{{- end }}
+{{- if .Values.worker.enabled }}
+  Worker:   {{ include "put-checks.worker.fullname" . }} (port {{ .Values.worker.service.port }})
+{{- end }}
+{{- if .Values.frontend.enabled }}
+  Frontend: {{ include "put-checks.frontend.fullname" . }} (port {{ .Values.frontend.service.port }})
+{{- end }}
+
+{{- if and .Values.backend.enabled .Values.backend.ingress.enabled }}
+
+API endpoint:
+  {{- if .Values.backend.ingress.tls }}
+  https://{{ .Values.backend.ingress.host }}
+  {{- else }}
+  http://{{ .Values.backend.ingress.host }}
+  {{- end }}
+{{- end }}
+
+{{- if and .Values.frontend.enabled .Values.frontend.ingress.enabled }}
+
+Frontend URL:
+  {{- if .Values.frontend.ingress.tls }}
+  https://{{ .Values.frontend.ingress.host }}
+  {{- else }}
+  http://{{ .Values.frontend.ingress.host }}
+  {{- end }}
+{{- end }}

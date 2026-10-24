@@ -1,0 +1,369 @@
+{
+  "schemaVersion": 1,
+  "authority": "LOCAL_NATIVE_FIXTURE_NOT_CORE_OR_VAULT_PG",
+  "caseName": "partial-step",
+  "evidenceId": "8bf5428e-38a2-49f5-b3a8-04ccfbde8596",
+  "assertionPhaseStatus": "COMPLETED_NOT_FINAL_TEST_VERDICT",
+  "exportStatus": "VERIFIED_EXPORT",
+  "privateRecoveryDirectory": "partial-prefix-native-ols6pz",
+  "commitments": {
+    "artifactHash": "6b9560550179de539d9d2a857b766ab65b41bd128bca77b0f87f34c7687b0b5f",
+    "learnedPlanHash": "ccd21fcfdb7d11742bb9474b1d60fedfb89c8dc04275576453d38412b5b3eb12",
+    "publicationEvidenceHash": "c80adc39450c735ba2bc171ded43d7951f98b589c61098f56a87bd9d8087aea0",
+    "rawGraphHash": "a37c82a81453d96dc125855483cd8be57c97c52fa4a9adb037b67013fd4b7a54",
+    "producerHash": "d767bd704af1308b8c9bcbdcb106e1305c8867f0708e1f9c0f407c9c2c7fd9d3",
+    "excludedHash": "c86423f3e6fe9969fcd4d9d31d4fd89df585516e1af6b16c65f1231bdf7b0a9b",
+    "availabilityHash": "484f0905862505624795d583bb7580d2d0388e3e7e5146413e3cbc61b95e8806",
+    "recipeHash": "e1b8eac14faf860664edbc661fa6e759bb32846cfbed0f1060298f4c5adf0391",
+    "originHash": "183f1d4c3abea566406452bd4aff2a657658282a1bc891524e1fc9be2627fa01"
+  },
+  "records": [
+    {
+      "role": "base-guided",
+      "sessionId": "6e54e76b-519e-4d08-8841-38db749c49bd",
+      "contextId": "1a6bbad3-6694-4dd3-a23e-b9dca422ae9f",
+      "contextRevision": 1,
+      "recordingId": "802216d8-eab7-4df8-9471-da16a90621b8",
+      "state": "STORED",
+      "partial": false,
+      "timings": [
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000001",
+          "admissionId": "3634669a-1067-4b91-a085-17fcbafafa60",
+          "ordinal": 0,
+          "startMs": 29,
+          "endMs": 40
+        },
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "admissionId": "d521f718-540d-4f94-98c1-d199e0014c83",
+          "ordinal": 0,
+          "startMs": 67,
+          "endMs": 68
+        },
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "admissionId": "68ccbb4a-b47a-48a2-b70d-ff8fe3b017d7",
+          "ordinal": 1,
+          "startMs": 77,
+          "endMs": 78
+        },
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000003",
+          "admissionId": "a326a38e-fb1e-4056-bc5f-6f78044375b5",
+          "ordinal": 0,
+          "startMs": 91,
+          "endMs": 97
+        },
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000004",
+          "admissionId": "5a784118-656f-4810-8c0b-94ea392860e2",
+          "ordinal": 0,
+          "startMs": 106,
+          "endMs": 106
+        }
+      ]
+    },
+    {
+      "role": "base-guided",
+      "admissionId": "3634669a-1067-4b91-a085-17fcbafafa60",
+      "coordinate": {
+        "stepId": "00000000-0000-4000-8000-000000000001",
+        "ordinal": 0
+      },
+      "state": "SUCCEEDED",
+      "outcomeCode": "OK",
+      "attemptOrdinal": 0,
+      "contextRevision": 1,
+      "operationHash": "3d7a26f98f2571d3a0dc9188e13c8972ee64f8f579e0aafba53705f42c7b03c1",
+      "authoredInputsHash": "4d6f03117e2452fe2a0e6ba3c4754d397badeb9a2063b680905ca237b9868f27"
+    },
+    {
+      "role": "base-guided",
+      "admissionId": "d521f718-540d-4f94-98c1-d199e0014c83",
+      "coordinate": {
+        "stepId": "00000000-0000-4000-8000-000000000002",
+        "ordinal": 0
+      },
+      "state": "SUCCEEDED",
+      "outcomeCode": "OK",
+      "attemptOrdinal": 0,
+      "contextRevision": 1,
+      "operationHash": "7950c6556ba0715ae563759800b7b4b81ee987489db97c24fe9ea265bf2b2918",
+      "authoredInputsHash": "4d6f03117e2452fe2a0e6ba3c4754d397badeb9a2063b680905ca237b9868f27"
+    },
+    {
+      "role": "base-guided",
+      "admissionId": "68ccbb4a-b47a-48a2-b70d-ff8fe3b017d7",
+      "coordinate": {
+        "stepId": "00000000-0000-4000-8000-000000000002",
+        "ordinal": 1
+      },
+      "state": "SUCCEEDED",
+      "outcomeCode": "OK",
+      "attemptOrdinal": 0,
+      "contextRevision": 1,
+      "operationHash": "744c213eb9c6a2772814ed059c13896608a7f349e63beeb4d1e4ac48231fe16e",
+      "authoredInputsHash": "4d6f03117e2452fe2a0e6ba3c4754d397badeb9a2063b680905ca237b9868f27"
+    },
+    {
+      "role": "base-guided",
+      "admissionId": "a326a38e-fb1e-4056-bc5f-6f78044375b5",
+      "coordinate": {
+        "stepId": "00000000-0000-4000-8000-000000000003",
+        "ordinal": 0
+      },
+      "state": "SUCCEEDED",
+      "outcomeCode": "OK",
+      "attemptOrdinal": 0,
+      "contextRevision": 1,
+      "operationHash": "244f492c9aff4537497beb60239ceabd94f83a2fe4ab3e040223cee4cb97d8ae",
+      "authoredInputsHash": "4d6f03117e2452fe2a0e6ba3c4754d397badeb9a2063b680905ca237b9868f27"
+    },
+    {
+      "role": "base-guided",
+      "admissionId": "5a784118-656f-4810-8c0b-94ea392860e2",
+      "coordinate": {
+        "stepId": "00000000-0000-4000-8000-000000000004",
+        "ordinal": 0
+      },
+      "state": "SUCCEEDED",
+      "outcomeCode": "OK",
+      "attemptOrdinal": 0,
+      "contextRevision": 1,
+      "operationHash": "c07621945cc386d8e7fe41dc09b8fdf26f4d6cd6911e5575f05c07cf912ad623",
+      "authoredInputsHash": "4d6f03117e2452fe2a0e6ba3c4754d397badeb9a2063b680905ca237b9868f27"
+    },
+    {
+      "role": "mixed-guided",
+      "sessionId": "14f6721a-1ac2-4b53-be76-0329edd35d06",
+      "contextId": "85b9311b-ee89-4880-b9f3-07efab49f063",
+      "contextRevision": 2,
+      "recordingId": "447bb2fe-b52b-4302-94e3-861355fa0043",
+      "state": "STORED",
+      "partial": false,
+      "timings": [
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000001",
+          "admissionId": "a1feaa4f-f652-44c8-8e68-9d6d6648b751",
+          "ordinal": 0,
+          "startMs": 27,
+          "endMs": 41
+        },
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "admissionId": "239d97b3-2997-4e2c-9a46-b53ee6a22d26",
+          "ordinal": 0,
+          "startMs": 67,
+          "endMs": 68
+        },
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "admissionId": "3a0936d3-1a2a-4d74-b716-6e72e9790832",
+          "ordinal": 1,
+          "startMs": 119,
+          "endMs": 120
+        },
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000003",
+          "admissionId": "c72192f0-eb70-40d2-a350-23dc6b8f892a",
+          "ordinal": 0,
+          "startMs": 132,
+          "endMs": 144
+        },
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000004",
+          "admissionId": "cece6c06-c8ea-478c-9cec-1822b8090eb4",
+          "ordinal": 0,
+          "startMs": 154,
+          "endMs": 154
+        }
+      ]
+    },
+    {
+      "role": "mixed-guided",
+      "admissionId": "a1feaa4f-f652-44c8-8e68-9d6d6648b751",
+      "coordinate": {
+        "stepId": "00000000-0000-4000-8000-000000000001",
+        "ordinal": 0
+      },
+      "state": "SUCCEEDED",
+      "outcomeCode": "OK",
+      "attemptOrdinal": 0,
+      "contextRevision": 1,
+      "operationHash": "3d7a26f98f2571d3a0dc9188e13c8972ee64f8f579e0aafba53705f42c7b03c1",
+      "authoredInputsHash": "835018189974f385e13048dcf090e1a1c034f16de71098d5673f166b86669815"
+    },
+    {
+      "role": "mixed-guided",
+      "admissionId": "239d97b3-2997-4e2c-9a46-b53ee6a22d26",
+      "coordinate": {
+        "stepId": "00000000-0000-4000-8000-000000000002",
+        "ordinal": 0
+      },
+      "state": "SUCCEEDED",
+      "outcomeCode": "OK",
+      "attemptOrdinal": 0,
+      "contextRevision": 1,
+      "operationHash": "7950c6556ba0715ae563759800b7b4b81ee987489db97c24fe9ea265bf2b2918",
+      "authoredInputsHash": "835018189974f385e13048dcf090e1a1c034f16de71098d5673f166b86669815"
+    },
+    {
+      "role": "mixed-guided",
+      "admissionId": "3a0936d3-1a2a-4d74-b716-6e72e9790832",
+      "coordinate": {
+        "stepId": "00000000-0000-4000-8000-000000000002",
+        "ordinal": 1
+      },
+      "state": "SUCCEEDED",
+      "outcomeCode": "OK",
+      "attemptOrdinal": 1,
+      "contextRevision": 2,
+      "operationHash": "1ef48c79b65258e4858b193fbd52627c848aba37a822b33d5af9425a44f06c8d",
+      "authoredInputsHash": "c54c21628327fb21209b2bb3d1545ffc8cc9a4f68ebd75d2568c8183899405c5"
+    },
+    {
+      "role": "mixed-guided",
+      "admissionId": "c72192f0-eb70-40d2-a350-23dc6b8f892a",
+      "coordinate": {
+        "stepId": "00000000-0000-4000-8000-000000000003",
+        "ordinal": 0
+      },
+      "state": "SUCCEEDED",
+      "outcomeCode": "OK",
+      "attemptOrdinal": 0,
+      "contextRevision": 2,
+      "operationHash": "244f492c9aff4537497beb60239ceabd94f83a2fe4ab3e040223cee4cb97d8ae",
+      "authoredInputsHash": "c54c21628327fb21209b2bb3d1545ffc8cc9a4f68ebd75d2568c8183899405c5"
+    },
+    {
+      "role": "mixed-guided",
+      "admissionId": "cece6c06-c8ea-478c-9cec-1822b8090eb4",
+      "coordinate": {
+        "stepId": "00000000-0000-4000-8000-000000000004",
+        "ordinal": 0
+      },
+      "state": "SUCCEEDED",
+      "outcomeCode": "OK",
+      "attemptOrdinal": 0,
+      "contextRevision": 2,
+      "operationHash": "c07621945cc386d8e7fe41dc09b8fdf26f4d6cd6911e5575f05c07cf912ad623",
+      "authoredInputsHash": "c54c21628327fb21209b2bb3d1545ffc8cc9a4f68ebd75d2568c8183899405c5"
+    },
+    {
+      "role": "mixed-guided",
+      "admissionId": "7f4d7cf3-9239-4e3b-b872-1f58f9e755c7",
+      "coordinate": {
+        "stepId": "00000000-0000-4000-8000-000000000002",
+        "ordinal": 1
+      },
+      "state": "FAILED",
+      "outcomeCode": "TARGET_CHANGED",
+      "attemptOrdinal": 0,
+      "contextRevision": 1,
+      "operationHash": "744c213eb9c6a2772814ed059c13896608a7f349e63beeb4d1e4ac48231fe16e",
+      "authoredInputsHash": "835018189974f385e13048dcf090e1a1c034f16de71098d5673f166b86669815"
+    },
+    {
+      "role": "ordinary-one",
+      "kind": "FIXTURE_LOCAL_ADMISSION",
+      "runId": "e40f2dea-178a-4eea-8b28-6391a12a48fe",
+      "attemptId": "37c77a37-a06d-47e8-9206-446e9e41e708",
+      "admissionId": "55b7aa47-3b50-49e5-81ba-7f155f7ed50d"
+    },
+    {
+      "role": "ordinary-two",
+      "kind": "FIXTURE_LOCAL_ADMISSION",
+      "runId": "0bd5d10e-9ffc-44f1-8824-eaff116cc747",
+      "attemptId": "bc50d119-f47e-43c4-bc7c-5d3f21159b28",
+      "admissionId": "08240fa2-eed7-4c4a-8dbf-9d7dd7f948d0"
+    }
+  ],
+  "phases": [
+    {
+      "role": "base-guided",
+      "media": "REGISTERED",
+      "seekFrames": "NOT_REACHED"
+    },
+    {
+      "role": "mixed-guided",
+      "media": "REGISTERED",
+      "seekFrames": "NOT_REACHED"
+    },
+    {
+      "role": "ordinary-one",
+      "media": "REGISTERED",
+      "seekFrames": "NOT_REACHED"
+    },
+    {
+      "role": "ordinary-two",
+      "media": "REGISTERED",
+      "seekFrames": "NOT_REACHED"
+    }
+  ],
+  "files": [
+    {
+      "role": "base-guided",
+      "state": "COPIED_VERIFIED",
+      "path": "base-guided.webm",
+      "byteLength": 16184,
+      "sha256": "1d9f76babc9c0b3db576b24b00aaae0ee7e549e5f987b1881bf3422f50628f45",
+      "privacy": "NONSECRET_FIXTURE",
+      "checks": {
+        "assertions": "PASSED",
+        "decoder": "PASSED",
+        "seek": "NOT_REACHED"
+      }
+    },
+    {
+      "role": "mixed-guided",
+      "state": "COPIED_VERIFIED",
+      "path": "mixed-guided.webm",
+      "byteLength": 15972,
+      "sha256": "0d62b1ff06b6852ce828b5ea28df96c7761a6c282b0536dcdb7a50a227f7e8e1",
+      "privacy": "NONSECRET_FIXTURE",
+      "checks": {
+        "assertions": "PASSED",
+        "decoder": "PASSED",
+        "seek": "NOT_REACHED"
+      }
+    },
+    {
+      "role": "ordinary-one",
+      "state": "COPIED_VERIFIED",
+      "path": "ordinary-one.webm",
+      "byteLength": 15708,
+      "sha256": "a8d3c204cc8dfa1511e45a010fdc909a63ca29bae0e9df91d8800b5625d0a3d5",
+      "privacy": "NONSECRET_FIXTURE",
+      "checks": {
+        "assertions": "PASSED",
+        "decoder": "PASSED",
+        "seek": "NOT_REACHED"
+      }
+    },
+    {
+      "role": "ordinary-two",
+      "state": "COPIED_VERIFIED",
+      "path": "ordinary-two.webm",
+      "byteLength": 15883,
+      "sha256": "85290da587b9a1661744c79e8d31bcdc85fc929573aac161f2a3e0dbc59c0a64",
+      "privacy": "NONSECRET_FIXTURE",
+      "checks": {
+        "assertions": "PASSED",
+        "decoder": "PASSED",
+        "seek": "NOT_REACHED"
+      }
+    }
+  ],
+  "cleanupAllowed": true
+}

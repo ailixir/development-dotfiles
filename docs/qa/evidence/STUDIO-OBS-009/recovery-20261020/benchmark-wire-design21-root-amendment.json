@@ -1,0 +1,28 @@
+{
+  "kind": "MINIMAL_DESIGN18_SUCCESSOR_FOR_TWO_DESIGN20_FINDINGS",
+  "originalDesignManifestSha256": "b003fff84a28c3f9d9837582a235704b5db018c326f368e06c462135042d6c2b",
+  "independentDesign20ManifestSha256": "633e764c491c5e26be037ff14bd09ea6c66d5eaf1d1df1935972d1bf4086b33e",
+  "unchanged": "All accepted private per-run binding/raw transient capture/error privacy/interruption/accounting/all-attempt aggregation/scoped local report/type/test-plan mechanisms from design18. Four existing source targets only.",
+  "WD20_01": {
+    "configuration": "Take an immutable per-run copy of the final canary set. Sensitive inspection is complete only for a nonempty array of inspectable nonempty strings supported by existing variantsOf. Any empty/invalid/uninspectable configuration is explicitly UNAVAILABLE/UNKNOWN; it never supports known absence or local GATE_PASS. Do not silently filter invalid entries into a falsely complete set.",
+    "row": "Add a closed inspection-configuration status to details.canaryObservation and include it in the completeness predicate and additive scoped summary. No canary values or arbitrary invalid-value diagnostics are serialized.",
+    "retention": "Retain valid known hits even if another entry makes configuration incomplete. Do not fabricate leak counts or move the existing accounting/stop-latch order.",
+    "tests": "Direct-driver empty array, empty-string and invalid representative configuration cases; an otherwise passing all-local population with one missing/unavailable configuration cannot GATE_PASS, including an earlier excluded attempt."
+  },
+  "WD20_02": {
+    "binding": "runBenchmark maintains per-run required canaries from plantedSecrets and the exact selected/generated secret-login password actually passed to the fixture. Do not mutate shared plantedSecrets or leak a previous run password into another run.",
+    "override": "Construct the final per-run canary set after driveOptions handling as the union of the operator-requested inspected values and all required harness-known values. An override must never remove required values. Preserve invalid operator entries as unavailable configuration rather than silently making them valid. Undefined optional operator list uses the valid required set.",
+    "tests": "Exercise the actual runBenchmark secret-login branch with default-generated password and an attempted driveOptions.secretCanaries replacement. Capture the fixture factory password only in test memory; echo it through a scripted API response and assert a detected/redacted hit, no serialized raw password and correct closure/charge behavior. Do not test only a helper that mirrors the set construction."
+  },
+  "selfTestDependencySeam": {
+    "purpose": "Current runBenchmark always starts page/fixture hosts, so a minimal dependency seam is needed for the required pure loop-binding regression without replacing real host tests globally.",
+    "design": "Add an optional selfTestHosts object to runBenchmark with startCorpusPages and hostExistingFixture function dependencies, typed from existing host contracts and defaulting to the current production functions. Allow it only in HARNESS_SELF_TEST; D_C rejects a supplied override before host/provider work. No exported checker, separate fake fixture implementation, persisted business configuration or new module.",
+    "testOwnership": "Fake host handles and password observation exist only inside the focused test; test proves the original loop passes the same generated password to the selected host and the inspected set. Verify fake handles close. Existing actual-host tests retain their default dependencies and behavior.",
+    "scope": "All within evaluate.mjs/evaluate.d.mts/harnessSelfTest.test.ts/observedCorpus.ts; original fixtures and their HTML/data remain unchanged."
+  },
+  "resolvedScopeQuestion": "Preserve current gate.scope COMPLETION_AND_HARD_FACT_SUBGATE_ONLY, evidenceStatus COMPLETION_SUBGATE_ONLY_NOT_D_C_ACCEPTANCE, requiredActualEvidence, RAW_EMITTED_UNREVIEWED and globalWireComplete:null. NOT_CONFIGURED extraTexts may support only the already-explicit local subgate, never full AC7/AC10/D-C/pilot acceptance. No mandatory new global collector or attestation framework.",
+  "candidateImplementationAuthority": false,
+  "requiresIndependentAmendedDesignReview": true,
+  "runtimeAuthority": false,
+  "sourceChanged": false
+}

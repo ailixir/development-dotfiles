@@ -1,0 +1,64 @@
+{
+  "kind": "CLOSED_MULTILINE_LINT_DIAGNOSTIC43",
+  "atUtc": "2026-10-21T13:18:05.719373+00:00",
+  "originalLintRawExit": 1,
+  "inputLog": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-lint01.log",
+    "sha256": "70ef36abca8c73dc0e8c4aa4224f95aa8444531531d5ee821b53daee1fff34d3",
+    "bytes": 1001,
+    "mode": "0o600"
+  },
+  "projectionComplete": false,
+  "diagnostics": [
+    {
+      "path": "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+      "line": 1261,
+      "column": 164,
+      "severity": "error",
+      "rule": null
+    },
+    {
+      "path": "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+      "line": 1351,
+      "column": 48,
+      "severity": "error",
+      "rule": "@typescript-eslint/no-unused-vars"
+    },
+    {
+      "path": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+      "line": 540,
+      "column": 31,
+      "severity": "error",
+      "rule": "@typescript-eslint/no-invalid-void-type"
+    },
+    {
+      "path": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+      "line": 540,
+      "column": 66,
+      "severity": "error",
+      "rule": "@typescript-eslint/no-invalid-void-type"
+    },
+    {
+      "path": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+      "line": 540,
+      "column": 101,
+      "severity": "error",
+      "rule": "@typescript-eslint/no-invalid-void-type"
+    },
+    {
+      "path": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+      "line": 540,
+      "column": 136,
+      "severity": "error",
+      "rule": "@typescript-eslint/no-invalid-void-type"
+    }
+  ],
+  "summary": {
+    "problems": 6,
+    "errors": 6,
+    "warnings": 0
+  },
+  "rawMessagesDisclosed": false,
+  "noLintOrTestRerun": true,
+  "sourceChanged": false
+}

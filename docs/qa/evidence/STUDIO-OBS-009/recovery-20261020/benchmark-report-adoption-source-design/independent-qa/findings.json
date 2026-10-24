@@ -1,0 +1,44 @@
+{
+  "kind": "INDEPENDENT_SOURCE_DESIGN_QA_NOT_IMPLEMENTATION",
+  "verdict": "DESIGN_READY_WITH_CONDITIONS",
+  "designSha256": "26082d9b53c7e0a309a3fd0f669b96ddb00ebf8b45b601bfa3a691ae2cf7f2dc",
+  "designManifestSha256": "3d9049158a912897ec5db034f62b9e6e60ca638494daefdbc02feb51c6210fff",
+  "manifestMembersHashVerified": 3,
+  "readTimeInputsHashVerified": 25,
+  "conditions": [
+    {
+      "id": "C1",
+      "priority": "P1",
+      "subject": "Immutable original attempt set and bounded review overlay",
+      "required": "Bind raw input provenance and exact complete attempt multiset; preserve immutable hard-gate, completion, mode, exclusion, session and usage facts. Reject omissions and substitutions."
+    },
+    {
+      "id": "C2",
+      "priority": "P1",
+      "subject": "Actual independent causal review and execution-time admission",
+      "required": "A syntactic VERIFIED/hash/reviewer claim is not authentication or causality. Require actual hash-bound closed review and independent adoption; admission must predate original execution, never only later rescore time."
+    },
+    {
+      "id": "C3",
+      "priority": "P1",
+      "subject": "Incremental per-session stopping and truthful partial repetition",
+      "required": "Charge each started learn once, suppress suffix after base stop/failure/leak, preserve partial and unknown data, and distinguish successful base state from a claim that the whole incremental workflow succeeded."
+    },
+    {
+      "id": "C4",
+      "priority": "P2",
+      "subject": "Unknown usage totals and conservative charge labels",
+      "required": "Do not reduce missing model-proposal/session counters into complete zero totals. Publish known subtotals with missing denominators, separate raw/credited/session scopes and preserve actual-provider cost as unavailable without actual evidence."
+    }
+  ],
+  "sixExistingCounterexampleGroupsAcceptedWithConditions": true,
+  "allAttemptHardGateFixAlreadyActualPreserved": true,
+  "currentRunRecordHasLimitsIdentity": false,
+  "newFrameworkOrNativeMatrixRequired": false,
+  "new011ClosureGate": false,
+  "implementationOrParserOrTestsExecuted": false,
+  "nativeOrProviderCalls": 0,
+  "protectedPayloadsRead": false,
+  "actualSourceManifestStoryOrLifecycleEdited": false,
+  "actualReviewProviderCostAdmissionOrStoryCredit": false
+}

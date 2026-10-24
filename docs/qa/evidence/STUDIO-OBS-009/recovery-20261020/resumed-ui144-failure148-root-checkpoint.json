@@ -1,0 +1,166 @@
+{
+  "atUtc": "2026-10-21T22:34:40.603966+00:00",
+  "scope": "148: accepted137 buffer fix and138setup, actual143ready then144first-secretfailure, once146cleanup,147source diagnosis andactive149/152offlinework",
+  "goalStatus": "active",
+  "fullGoalComplete": false,
+  "noProgressAuditCount": 0,
+  "predecessor": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/resumed-ui132-failure136-root-checkpoint.json",
+  "predecessorSha256": "3e8b3a6f60cad72ab90d805e73e9f39ae3fba6bb702ee1925fa5cfff515c087a",
+  "stories": {
+    "009": {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+      "sha256": "d0c1d51190216566209450a0f9be34e26ccc345c37526d604c5a6bb3aae1d02a",
+      "openMarkers": 17
+    },
+    "010": {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+      "sha256": "0f4a64ea528df8648f0ea96296477488d74864905d11f75f054e74b34338f420",
+      "openMarkers": 12
+    },
+    "011": {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+      "sha256": "67b0c439a20e00b83ef572aa549c27c96d8c8301cd0de65b975aadd9f862bdc8",
+      "openMarkers": 0
+    }
+  },
+  "source87CurrentHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedAuthoredUriCandidates.java": "9d69e15805624955bf41fbe15f9daa7ef45c3bcd4392f6808e180cda42d691f8",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPromptAssembler.java": "0e9be5db8509e575d4ea03f5d32df85c9a56f509da76b986c156f885dba09a85",
+    "backend/src/main/resources/studio/guided-output-contract.md": "a04d50ea22929bfd3707896d3dbaf632ff9b1d6e98aec9d4f5ed848630120e91",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedAuthoredUriCandidatesTest.java": "09ac09aa33c096b4c710f4bd1f27c3183af1db57a5523f465729e89e66a26894",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedGatewayPrivacyTest.java": "53911b32f4c6a1d54c15e8234e96c74a2380d202ba879efb2d939c895a01a41d"
+  },
+  "productionSourceChanged": false,
+  "pins": {
+    "visual137-implementation/receipt.json": "b890878e83db87feceaae79cb08b7916dc8d4d0cd64cb4a9c63c0a4520eb26b0",
+    "visual140-review/receipt.json": "a64d4de8b4c9f5ff0ef1fdc3f918d8dc3f12c25c55824877de41d16e76c2edf9",
+    "visual138-preparation/receipt.json": "8d3bf83fe73dced8ad4a820092e4658f7dfbb91ff90bb70ff1a1d4108543758a",
+    "visual141-review/receipt.json": "fc5b0c10f015ae8a78fa4f11cc173fadf0d2589f304f33d22721035a904fbb1b",
+    "runtime143/receipt.json": "8d1bfd369bbfc7f6988c5080fecfd1e0d4a53b302a3f1c40d2fcd0764a18879f",
+    "runtime143/preservation.json": "dcfe0009b72bcdce388ac152fa4b1b5c9a4b298639edbbd8861ffbe9a8fa034c",
+    "runtime146-failure-cleanup/receipt.json": "e025a073e0aac164972189099bbad34f6bce9792d76381d1972f854eb286ff1a",
+    "diagnostic147-source/review.md": "7e8b0af4faa009ae87417371b00d28168f606b79c6b9b2722269420d75b64d93",
+    "traceability139/inventory.json": "3ae5fba12bfb7cc6cace63981fd60b3c4ec00127be5e1f0079eb24196c1d3281",
+    "traceability139/OWNER-INPUTS.md": "ec869cc4405c147c87910eca5746afabf893ffc3e72d9656a32f6ffe6e1cb444",
+    "docs/qa/evidence/STUDIO-OBS-009/recovery-20261021/real-vertex-login-ui144/REPORT.md": "f59a9ceb4f5d1d5ceb27720f11b832c8e95eaaf32bbe7d4f9f5f3dd2e39a1080"
+  },
+  "harness137": {
+    "manifestSha256": "3fac6aee43662f8f473837fbe23ce10567e6b98c8f680d0b404ed83592312871",
+    "receiptSha256": "b890878e83db87feceaae79cb08b7916dc8d4d0cd64cb4a9c63c0a4520eb26b0",
+    "functionalChanges": 2,
+    "focusedChecks": 10,
+    "existingPureGuards": 56,
+    "typePassed": true,
+    "syntaxChecks": 5,
+    "specific132Cause": "UNKNOWN",
+    "qa": "visual140-review/receipt.json ACCEPT_OFFLINE_HARNESS_CORRECTION"
+  },
+  "actual143": {
+    "schemaVersion": 1,
+    "status": "ACTUAL143_READY_FOR_SEPARATE_UX_NO_RUN_GO",
+    "runId": "184a4c7a-1366-4835-b134-33fb1a843011",
+    "A": "0ce40dfe236dacc1e59205401937765db6843e1ddd8766fc38f99f5b2176137b",
+    "B": "3fac6aee43662f8f473837fbe23ce10567e6b98c8f680d0b404ed83592312871",
+    "sourcePinsSha256": "04a588971c7c58782b10567cac5f6353716821b1de3ee0beb36014dcec4c9d68",
+    "rootGoSha256": "ad0802824aae1be2e62d4082c5d39a5db669d21c78c234d3a178b53dad34b343",
+    "commonDeadline": "2026-10-21T22:57:15.860Z",
+    "remainingSeconds": 1902,
+    "rolePids": {
+      "backstop": 4252,
+      "target": 5711,
+      "core": 5829,
+      "issuer": 5935,
+      "runner": 6017,
+      "frontend": 6222,
+      "backend": 6129,
+      "control": 7761
+    },
+    "vault": {
+      "runId": "184a4c7a-1366-4835-b134-33fb1a843011",
+      "cid": "a33e3c3250dec7f1b8472127f71a56b2da9c12f9c47730eb05b1402aec33eb26",
+      "name": "visual138-vault-184a4c7a",
+      "imageId": "sha256:eb701fb13f751648508f01c35687243fd52a3dd8edc2e1d4f7dfd6f708429c60",
+      "repoDigest": "hashicorp/vault@sha256:4e33b126a59c0c333b76fb4e894722462659a6bec7c48c9ee8cea56fccfd2569",
+      "hostPort": 18196,
+      "ownerLabel": "put-checks.visual.runId",
+      "deadline": "2026-10-21T22:57:15.860Z"
+    },
+    "actualVaultVersion": "1.21.4",
+    "actualKvVersion": 2,
+    "actualVaultLogDriver": "none",
+    "actualPolicy": {
+      "policyId": "4eb28b04-1b13-4d93-9859-af2e47047eac",
+      "version": 1,
+      "author": "visual106-author",
+      "approver": "visual106-approver",
+      "statuses": [
+        201,
+        200
+      ]
+    },
+    "ownIdleCounts": {
+      "tests": 0,
+      "sessions": 0,
+      "modelAttempts": 0,
+      "reservations": 0,
+      "policyVersions": 1
+    },
+    "actualControlWaitLoop": true,
+    "uiRoleUnstarted": true,
+    "rootRunGoAbsent": true,
+    "backendVaultTokenEmpty": true,
+    "modelCalls": 0,
+    "cleanupInvoked": false,
+    "sourceConfigGoDeadlineChanged": false
+  },
+  "actual144": {
+    "outcome": "STOPPED_FIRST_SECRET",
+    "specificCause": "UNKNOWN_RAW_ERROR_DISCARDED",
+    "drafts": 1,
+    "draftId": "0bcec68d-2e10-4840-b643-ae9f613b0a04",
+    "tokenInstalled": true,
+    "tokenProducerCompleted": 1,
+    "initialSecretListHttp": 200,
+    "secretCreates": 0,
+    "guidedStarts": 0,
+    "modelAttempts": 0,
+    "reservations": 0,
+    "executions": 0,
+    "safeImages": 0,
+    "expertVisualAssessment": "NOT_ASSESSED",
+    "rootRunGoCreated": false
+  },
+  "cleanup146": {
+    "receipt": "runtime146-failure-cleanup/receipt.json",
+    "sha256": "e025a073e0aac164972189099bbad34f6bce9792d76381d1972f854eb286ff1a",
+    "executions": 1,
+    "initialCleanupConfirmed": false,
+    "initialProbePort": 18196,
+    "laterReadonlyAllOwnedExitedAndAllSevenPortsFree": true,
+    "vaultCidAbsent": true,
+    "pgGone": true,
+    "guardedExportTables": 14,
+    "guardedExportRows": 4,
+    "extraCancelsSignalsRetries": 0,
+    "protectedStateUnchanged": true
+  },
+  "diagnostic147": {
+    "selectorOrCopyMismatchFound": false,
+    "cause144": "UNKNOWN_RAW_ERROR_DISCARDED",
+    "fontWaitHypothesis": "PinnedPlaywrightwaitsdocument.fonts.ready; frontendremoteGooglefonts. 10s interval notattribution.",
+    "requiredCorrection": "fixedoperation/errorcategory/boundedsourceID+line diagnostics beforefurtherexecution"
+  },
+  "activeExpertTasks": {
+    "sol61_high_visual106": "149OFFLINEdiagnostic-onlysuccessor, no flow/selector/timeout/gate change",
+    "sol61_high_qa140": "150onepubliccredential-freeassets/font/screenshotprobe, appAPI/mutationsblocked, noimagepersist/display ormodel",
+    "sol61_high_real_devops71": "152OFFLINEfreshconfigsuccessor pointing149, no launch/Go"
+  },
+  "newStackLaunchAuthorized": false,
+  "newRunAuthorized": false,
+  "allTemporaryServicesStoppedAfter146": true,
+  "originalUiAvailable": "http://127.0.0.1:5177",
+  "expertRequestedFinalVisualExecution": "STILL_OWED_ZERO_CURRENT_SAFE_IMAGES",
+  "remaining": "closure105 14-row audit: fullAC12/media+company D-C/canaries/live faults/shared operations/U13/C17/five consenting humans/final PM+QA acceptance remain owed. Gateway/budget owner choice is not required from user.",
+  "nextSafeAction": "Receive150closedpublicassetprobe,149diagnosticimplementation and152independentA; QA beforeanyseparatelyboundednewunit. No blindretry/oldmarkerreset; historical132/144causeunknown.",
+  "externalOwnerPacket": "traceability139/OWNER-INPUTS.md"
+}

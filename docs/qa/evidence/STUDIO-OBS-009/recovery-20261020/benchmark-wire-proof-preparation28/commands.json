@@ -1,0 +1,320 @@
+{
+  "scope": "SOURCE_ONLY_BOUNDED_WIRE_AFFECTED_PROOF28_PREPARATION",
+  "executionAuthority": false,
+  "release": false,
+  "rootRuntimeAdmissionRequired": true,
+  "candidate22AndQa23UninspectedUnbound": true,
+  "sequence": [
+    {
+      "order": 1,
+      "id": "harness01",
+      "label": "obs009-recovery-20261020-wire28-harness01",
+      "wrapperArgv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-wire28-harness01",
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "test/evaluation/harnessSelfTest.test.ts",
+        "--coverage.enabled=false",
+        "--minWorkers=1",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "--testTimeout=5000",
+        "--hookTimeout=5000",
+        "--testNamePattern",
+        "FR06-01|group5:|WIRE-OBS18"
+      ],
+      "childArgvBeforeWrapperReporters": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "test/evaluation/harnessSelfTest.test.ts",
+        "--coverage.enabled=false",
+        "--minWorkers=1",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "--testTimeout=5000",
+        "--hookTimeout=5000",
+        "--testNamePattern",
+        "FR06-01|group5:|WIRE-OBS18"
+      ],
+      "wrapperCwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "childCwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner",
+      "originalWrapperReportsAppended": [
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-harness01-vitest.json"
+      ],
+      "outputs": {
+        "beforeSourceCapture": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-harness01-before.json",
+        "afterSourceCapture": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-harness01-after.json",
+        "result": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-harness01-results.json",
+        "opaqueDefaultLog": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-harness01.log",
+        "opaqueVitestJson": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-harness01-vitest.json",
+        "beforeFullInputs": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-proof-execution28/harness01-before-full-inputs.json",
+        "afterFullInputs": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-proof-execution28/harness01-after-full-inputs.json"
+      },
+      "freshAllLabelPathsMustBeAbsentAtRelease": true,
+      "expectedPhysicalTestFiles": 1,
+      "outcomes": "UNEXECUTED_UNKNOWN",
+      "executionAuthority": false
+    },
+    {
+      "order": 2,
+      "id": "scoring01",
+      "label": "obs009-recovery-20261020-wire28-scoring01",
+      "wrapperArgv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-wire28-scoring01",
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "test/evaluation/benchmarkScoring.test.ts",
+        "--coverage.enabled=false",
+        "--minWorkers=1",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "--testTimeout=5000",
+        "--hookTimeout=5000"
+      ],
+      "childArgvBeforeWrapperReporters": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "test/evaluation/benchmarkScoring.test.ts",
+        "--coverage.enabled=false",
+        "--minWorkers=1",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "--testTimeout=5000",
+        "--hookTimeout=5000"
+      ],
+      "wrapperCwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "childCwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner",
+      "originalWrapperReportsAppended": [
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-scoring01-vitest.json"
+      ],
+      "outputs": {
+        "beforeSourceCapture": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-scoring01-before.json",
+        "afterSourceCapture": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-scoring01-after.json",
+        "result": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-scoring01-results.json",
+        "opaqueDefaultLog": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-scoring01.log",
+        "opaqueVitestJson": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-scoring01-vitest.json",
+        "beforeFullInputs": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-proof-execution28/scoring01-before-full-inputs.json",
+        "afterFullInputs": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-proof-execution28/scoring01-after-full-inputs.json"
+      },
+      "freshAllLabelPathsMustBeAbsentAtRelease": true,
+      "expectedPhysicalTestFiles": 1,
+      "outcomes": "UNEXECUTED_UNKNOWN",
+      "executionAuthority": false
+    },
+    {
+      "order": 3,
+      "id": "types01",
+      "label": "obs009-recovery-20261020-wire28-types01",
+      "wrapperArgv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-wire28-types01",
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "run",
+        "type-check"
+      ],
+      "childArgvBeforeWrapperReporters": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "run",
+        "type-check"
+      ],
+      "wrapperCwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "childCwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner",
+      "originalWrapperReportsAppended": [],
+      "outputs": {
+        "beforeSourceCapture": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-types01-before.json",
+        "afterSourceCapture": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-types01-after.json",
+        "result": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-types01-results.json",
+        "opaqueDefaultLog": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-types01.log",
+        "opaqueVitestJson": null,
+        "beforeFullInputs": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-proof-execution28/types01-before-full-inputs.json",
+        "afterFullInputs": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-proof-execution28/types01-after-full-inputs.json"
+      },
+      "freshAllLabelPathsMustBeAbsentAtRelease": true,
+      "expectedPhysicalTestFiles": null,
+      "outcomes": "UNEXECUTED_UNKNOWN",
+      "executionAuthority": false
+    },
+    {
+      "order": 4,
+      "id": "lint01",
+      "label": "obs009-recovery-20261020-wire28-lint01",
+      "wrapperArgv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-wire28-lint01",
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eslint/bin/eslint.js",
+        "evaluation/observed-authoring/evaluate.mjs",
+        "evaluation/observed-authoring/evaluate.d.mts",
+        "test/evaluation/harnessSelfTest.test.ts",
+        "test/evaluation/observedCorpus.ts"
+      ],
+      "childArgvBeforeWrapperReporters": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eslint/bin/eslint.js",
+        "evaluation/observed-authoring/evaluate.mjs",
+        "evaluation/observed-authoring/evaluate.d.mts",
+        "test/evaluation/harnessSelfTest.test.ts",
+        "test/evaluation/observedCorpus.ts"
+      ],
+      "wrapperCwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "childCwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner",
+      "originalWrapperReportsAppended": [],
+      "outputs": {
+        "beforeSourceCapture": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-lint01-before.json",
+        "afterSourceCapture": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-lint01-after.json",
+        "result": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-lint01-results.json",
+        "opaqueDefaultLog": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-wire28-lint01.log",
+        "opaqueVitestJson": null,
+        "beforeFullInputs": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-proof-execution28/lint01-before-full-inputs.json",
+        "afterFullInputs": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-proof-execution28/lint01-after-full-inputs.json"
+      },
+      "freshAllLabelPathsMustBeAbsentAtRelease": true,
+      "expectedPhysicalTestFiles": null,
+      "outcomes": "UNEXECUTED_UNKNOWN",
+      "executionAuthority": false
+    }
+  ],
+  "selectedRuntime": {
+    "PATHPrefix": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+    "nodeVersion": "v24.20.0",
+    "nodeBinarySha256": "9d050fd455b56426e25d4d603c7c501cbb2630348e836cf221dcce748e90588a",
+    "pnpmStrictFalseEveryChild": true,
+    "vitestCanonicalAbsolutePath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vitest/vitest.mjs",
+    "eslintCanonicalAbsolutePath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eslint/bin/eslint.js",
+    "noBinRepairOrInstall": true
+  },
+  "rootCallerBeforeAnyEvidenceWrite": {
+    "umask": "0o077",
+    "requiredNewEvidenceModes": "0o600 including wrapper/source/report/log/fullprofile/custody outputs",
+    "pythonOptimization": 0,
+    "exclusiveHeavyLaneAndFrozenSourceRequired": true,
+    "noLiveCurrentMeasurementPerformedByPreparation": true
+  },
+  "rootPrerequisiteBindings": {
+    "approvedWireCandidateAndExactSourceAfterApplication": null,
+    "independentCandidateQa23": null,
+    "actualFourTargetApplicationAndManifestGuardReceipt": null,
+    "legitimateNewActualOriginalFreezeFirstStrictCorpusReceipt": null,
+    "postFreezeSourceDigestAndRows": null,
+    "postFreezeActualManifestSha256Mode": null,
+    "freshFullSdkRuntimeCanonical5Bin21Protected11Env11NodeGuards": null,
+    "exactNewAuthoredTestIdentityCatalogueAndCounts": null,
+    "twoExistingCacheKeysBeforeValuesAndExpectedTypedPolicy": null,
+    "freshLabelAndOutputAbsence": null
+  },
+  "fullMetadataSnapshotBeforeAfterEachStep": {
+    "source": "Existing originalrun-runner.py calls originalcapturecc943 before/after everychild, without sourceexclusions.",
+    "profileSource": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution01/input-snapshot.py",
+      "sha256": "b6d962a6aaba1c0135e3cee63cb66341bfd42dba3238deef8a7187992ba01849"
+    },
+    "profileReference": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution01/fresh-copy-catalog.json",
+      "sha256": "2624360a76136f37b4e1bc267734eb1954aff16fbd54e56984356ed192eb33a2"
+    },
+    "prospectiveArgv": [
+      "python3",
+      "-c",
+      "from pathlib import Path; import runpy,json,hashlib,sys; r=Path.cwd(); p=r/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution01/input-snapshot.py'; assert hashlib.sha256(p.read_bytes()).hexdigest()=='b6d962a6aaba1c0135e3cee63cb66341bfd42dba3238deef8a7187992ba01849'; value=runpy.run_path(str(p))['snapshot'](r); output=Path(sys.argv[1]); handle=output.open('x'); handle.write(json.dumps(value,indent=2)); handle.close()",
+      "ROOT_BOUND_FRESH_STEP_FULL_INPUT_OUTPUT_PATH_FROM_SEQUENCE"
+    ],
+    "beforeAndAfterEachJob": true,
+    "noNewGuardHelperOrProfilePolicy": true,
+    "fullCatalogueBodiesProgrammeOnlyNotModelOutput": true
+  },
+  "interStepStopRule": "Originalwrapper/child raw0 AND freshresultmetadata AND sourceStable/testInputStable/distStable true AND freshcase/report checks AND completefullprofile/cache/runtime boundary checks before nextjob. Anyfailure or unavailablefact STOP with originalartifacts; no retry/fix/restore unless newly admitted.",
+  "predictionNotOutcomes": {
+    "harnessSelectedOriginalControlBaseline": 31,
+    "newWireSelectedCases": null,
+    "harnessTotalOrFilteredCounts": null,
+    "newAuthoredCountsSource": "Future actual candidateQA; never inferred fromunsealedcandidate or prior31run",
+    "scoringUnfilteredKnownBaseline": 31,
+    "scoringPredictionUnexecuted": true,
+    "typeScript": "Pinned package script tsc -p tsconfig.json --noEmit; no emit/build",
+    "lintFourTargetsOnly": true
+  },
+  "cacheCustody": {
+    "exactPath": "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+    "version": "3.2.7",
+    "orderedUniqueKeyCounter": 191,
+    "keySetOrderMultiplicityPreserved": true,
+    "onlyTwoMutableExistingEntryRoles": [
+      "test/evaluation/harnessSelfTest.test.ts",
+      "test/evaluation/benchmarkScoring.test.ts"
+    ],
+    "exactEncodedKeysAndBeforeValues": null,
+    "allowedValueFields": {
+      "duration": "finite int/float numeric, exclude booleans/nonfinite",
+      "failed": "exact bool"
+    },
+    "other189RowsAndAllOtherFieldsExact": true,
+    "perCommand": "Harness/score changes only ownexistingrole underrootboundkey mapping; types/lint should leave completecacheexact; anyunexpecteddeltaSTOP",
+    "noNewKeyDeletionResetRestoreRepairOrBroadExemption": true
+  },
+  "outputCustody": {
+    "originalRawExitAlwaysRetained": true,
+    "rawLogsReportsStdoutStderrOpaque0600": true,
+    "physicalFileCount": "Use actual testResults file records/unique expectedfile; numSuites countsdescribecontainers and is neverphysicalfilecount",
+    "routinePublicFieldsOnly": [
+      "exactfutureQA-boundprogramme-authoredfulltitles/ancestry andmultiplicity",
+      "selectedstatus/counts vs intentionalfilteromissions",
+      "wrapper rawexit/digests/sourceflags/reporthash",
+      "physicalfilecount andstructuredruntime-completionfacts"
+    ],
+    "fixedNameCatalogueRequiredBeforeProjection": true,
+    "unknownTitleOrUnboundCount": "INCOMPLETE/UNKNOWN; no prefix-onlyallowlist toexportarbitrarygeneratedtitle",
+    "doNotExport": [
+      "arbitraryfailureMessages",
+      "rawexpected/actual assertionvalues",
+      "suiteerror/messages",
+      "rawlogs or rawJSON",
+      "privatecorpus/source/oracle/manifest/auth/canaryvalues"
+    ],
+    "failurePolicy": "On any failure preserve originalrawexit/rawopaqueartifacts and STOP. Root must newly authorize minimaldiagnosticprojection/fix. Any sourceframeprojection must use fixedowned sourcepath enum plus positive integerline/column only, neverrawtrace/context/value.",
+    "noAutomaticDiagnosticsOrAssertionValueReader": true
+  },
+  "wrapperBranchProofFromPublicSource": {
+    "isVitestDetection": "AbsoluteVitest is childargvindex3, within unchangedfirst5 detection; no manualreporterflag sooriginaldefault+JSON appendapplies.",
+    "explicitUnitConfig": "--config vitest.config.ts onBOTHtestcommands, byteexact configcb110; no fixtureconfig so historicalprivatepayloadbackup branch notentered.",
+    "noStaleCoverageSummaryCopy": "Explicit--config means originalcoverage-summarycopy branch is notentered; focusedcoverage=false supplies no newfullcoveragecredit.",
+    "typesAndLintNotVitest": true
+  },
+  "noFull105OldRedNativeBackendCorpusCliProviderOrDiagnosticRepeat": true,
+  "freshnessAtPreparation": "UNMEASURED; no paths walked or commands executed"
+}

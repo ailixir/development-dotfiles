@@ -1,0 +1,57 @@
+{
+  "rootProgramReadReleased": true,
+  "executionAuthority": true,
+  "operation": "membership",
+  "manifestRef": {
+    "path": "studio-runner/evaluation/observed-authoring/manifest.json",
+    "sha256": "95287d56573f44fda8071ccd3e1d542bc5dac23984f006eeee52a8e710c9b0aa",
+    "bytes": 79287
+  },
+  "sourceCatalogueRef": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-adoption25/after-source.json",
+    "sha256": "87a935e865539a4e05b4232cb503a078cb15778ceadd547ff98a38d9faff7a80",
+    "bytes": 360050
+  },
+  "fullCatalogueRef": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-adoption25/after-full-inputs.json",
+    "sha256": "a86861753c9573f99fa4e085ef198db19b1eb5f3f5e8201580a45aee4676ccac",
+    "bytes": 5740238
+  },
+  "importedCodeRefs": [
+    {
+      "path": "studio-runner/evaluation/cli.mjs",
+      "sha256": "8a119c26eb16ed19cd5f1a5a46ed07a9d13eeb2f6e2a951dd2dc3d854795bcad",
+      "bytes": 15633
+    },
+    {
+      "path": "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+      "sha256": "15d2bcd0ee2bb227f0b54307b6a50608e720f68e89b6726d6cc57c55beb96523",
+      "bytes": 125912
+    },
+    {
+      "path": "studio-runner/evaluation/oracle.mjs",
+      "sha256": "7ad08d2bc19b84dd17cb2cac2d9edb57bb1e86a38b360f401f6a13da7b2de233",
+      "bytes": 6174
+    },
+    {
+      "path": "studio-runner/evaluation/report.mjs",
+      "sha256": "70d41a8fb146d23b2fedd566a762dd115db23dbe8d45b59ce0e14de5197b84c0",
+      "bytes": 18338
+    },
+    {
+      "path": "studio-runner/evaluation/observed-authoring/pages/server.mjs",
+      "sha256": "81d1673989f20ba236b5fb6a774ba33da87192983dd87956157227e1b3936d30",
+      "bytes": 7273
+    }
+  ],
+  "authorizeFiniteMemberMetadataChecks": true,
+  "membershipOutput": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-execution06/wire-successor26/declared-io-membership.private.json",
+  "actualSourceAdoptionReceipt": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-bound25/actual-adoption35-root-receipt.json",
+    "sha256": "75ceb79d707d0df087d8e84f3330d6bf0aaeacaad054b482593ea5324858b812",
+    "bytes": 9577
+  },
+  "rootSoleActualWriterWindow": true,
+  "pinPayloadReadsAuthorized": false,
+  "modelPrivateBodyDisclosureAuthorized": false
+}

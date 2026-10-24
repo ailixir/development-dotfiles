@@ -1,0 +1,48 @@
+{
+  "pageNetwork": {
+    "GET /api/v1/checks/sources 200": 1,
+    "GET /api/v1/features 200": 1,
+    "GET /api/v1/studio/tests 200": 5,
+    "GET /api/v1/csi 200": 2,
+    "POST /api/v1/studio/tests 201": 1,
+    "GET /api/v1/studio/tests/9b0b13ab-ef2d-478c-8638-3b9b3cd96d11 200": 6,
+    "GET /api/v1/studio/tests/9b0b13ab-ef2d-478c-8638-3b9b3cd96d11/schedule 200": 2,
+    "GET /api/v1/studio/tests/9b0b13ab-ef2d-478c-8638-3b9b3cd96d11/schedule/capabilities 200": 1,
+    "GET /api/v1/studio/tests/9b0b13ab-ef2d-478c-8638-3b9b3cd96d11/capabilities 200": 2,
+    "PUT /api/v1/studio/tests/9b0b13ab-ef2d-478c-8638-3b9b3cd96d11 200": 1,
+    "POST /api/v1/studio/guided-sessions 202": 1,
+    "GET /api/v1/studio/guided-sessions/cef6d254-0b33-44b3-b8a2-571e5c656289 200": 47,
+    "GET /api/v1/studio/guided-sessions/cef6d254-0b33-44b3-b8a2-571e5c656289/result 200": 3,
+    "GET /api/v1/studio/guided-sessions/cef6d254-0b33-44b3-b8a2-571e5c656289/video 206": 3,
+    "GET /api/v1/studio/guided-sessions/cef6d254-0b33-44b3-b8a2-571e5c656289/video requestfailed": 2
+  },
+  "guidedStarts": 1,
+  "finalizeRequests": 0,
+  "executeRequests": 0,
+  "additionalReadOnlyInspection": [
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/guided-sessions/cef6d254-0b33-44b3-b8a2-571e5c656289/result",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/studio/guided-sessions/cef6d254-0b33-44b3-b8a2-571e5c656289/video",
+      "status": 200,
+      "bytes": 243064
+    },
+    {
+      "method": "GET",
+      "origin": "http://127.0.0.1:18182",
+      "path": "/fixture",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "origin": "http://127.0.0.1:18182",
+      "path": "/",
+      "status": 200
+    }
+  ],
+  "videoRangeRequestAborts": "Video seek triggered206 responses followed by requestfailed events; playback subsequently readyState4,39.56seconds."
+}

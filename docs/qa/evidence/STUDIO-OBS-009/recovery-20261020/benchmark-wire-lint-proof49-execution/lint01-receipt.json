@@ -1,0 +1,205 @@
+{
+  "id": "lint01",
+  "originalPid": 91927,
+  "originalWrapperRawExit": 0,
+  "wrapperResult": {
+    "command": [
+      "pnpm",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eslint/bin/eslint.js",
+      "evaluation/observed-authoring/evaluate.mjs",
+      "evaluation/observed-authoring/evaluate.d.mts",
+      "test/evaluation/harnessSelfTest.test.ts",
+      "test/evaluation/observedCorpus.ts"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-21T13:40:04.689128+00:00",
+    "elapsedSeconds": 2.98,
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+    "testInputStable": true,
+    "testInputDigestBefore": "df860ccc1c6479e62320328b65f5e5bcaa1c431f863c543b7c07005b5654f8d2",
+    "testInputDigestAfter": "df860ccc1c6479e62320328b65f5e5bcaa1c431f863c543b7c07005b5654f8d2"
+  },
+  "wrapperOutputReferences": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261021-wirelint44-lint01-before.json",
+      "sha256": "33f4ad14a62ded45ae4d4cb7d5ddf38cdfe9084b5830c61653471ea192b05b23",
+      "bytes": 360050
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261021-wirelint44-lint01-after.json",
+      "sha256": "47014ee3b80b0266711aa5c8cd76df204e37f0f6a06559d693f504750116c8c4",
+      "bytes": 360050
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261021-wirelint44-lint01-results.json",
+      "sha256": "00390240a3fa368d52dc0d988a014a99f201736f1f0bbc3b99de0f127d7eaab3",
+      "bytes": 850
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261021-wirelint44-lint01.log",
+      "sha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+      "bytes": 49
+    }
+  ],
+  "freshFullInputsReferences": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-execution/lint01-before-full-inputs.json",
+      "sha256": "855efb13183a23fb52fa95c340dca78399bffcc43d21ed12b9ac10007b8b5356",
+      "bytes": 5740239
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-execution/lint01-after-full-inputs.json",
+      "sha256": "855efb13183a23fb52fa95c340dca78399bffcc43d21ed12b9ac10007b8b5356",
+      "bytes": 5740239
+    }
+  ],
+  "freshSourceReferences": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-execution/lint01-guard-before-source.json",
+      "sha256": "b6105fb0c2afa854ee5b31c7b027d2cb5294ff75d126d787d195318867954dd4",
+      "bytes": 360050
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-execution/lint01-guard-after-source.json",
+      "sha256": "aecde2e9b6c0d0abd5244c5b3e1445b9642bc8d3cbb4bbd311a553e8f22bad88",
+      "bytes": 360050
+    }
+  ],
+  "cacheBeforeReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-execution/lint01-cache-before.private.json",
+    "sha256": "6624130078a300fc4b0cf6a805189a69f898f463dbda02659d3605bfba0959ab",
+    "bytes": 16195
+  },
+  "cacheAfterReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-execution/lint01-cache-after.private.json",
+    "sha256": "6624130078a300fc4b0cf6a805189a69f898f463dbda02659d3605bfba0959ab",
+    "bytes": 16195
+  },
+  "cacheDelta": {
+    "changedKeys": [],
+    "allOtherRowsExact": true,
+    "typed191OrderedUniqueRows": true
+  },
+  "runtimeBefore": {
+    "nodeBinaryMatched": true,
+    "resolvedExistingPnpmMatched": true,
+    "canonicalFiveMatched": true,
+    "protectedElevenMatched": true,
+    "bin21Exact": true,
+    "environmentEleven": {
+      "HOME": {
+        "present": true,
+        "valueSha256": "6958a4bb3316e998038fc5dab074ab85f6bdd3263c975c32f9543e240c8b3a8a"
+      },
+      "TMPDIR": {
+        "present": true,
+        "valueSha256": "cb5886e4ce4b01487e374b730319694231aa677bcd455750f37e03dd36ead031"
+      },
+      "PLAYWRIGHT_BROWSERS_PATH": {
+        "present": false,
+        "valueSha256": null
+      },
+      "NODE_OPTIONS": {
+        "present": false,
+        "valueSha256": null
+      },
+      "NODE_DEBUG": {
+        "present": false,
+        "valueSha256": null
+      },
+      "DEBUG": {
+        "present": false,
+        "valueSha256": null
+      },
+      "PWDEBUG": {
+        "present": false,
+        "valueSha256": null
+      },
+      "GUIDED_CLOSE_BOUND_OUT": {
+        "present": false,
+        "valueSha256": null
+      },
+      "R13_DIAGNOSTICS": {
+        "present": false,
+        "valueSha256": null
+      },
+      "GUIDED_DIAGNOSTICS": {
+        "present": false,
+        "valueSha256": null
+      },
+      "IMAGE_TAG": {
+        "present": false,
+        "valueSha256": null
+      }
+    },
+    "fiveCurrentSourceAndOpaqueManifestPinsExact": true,
+    "nodeMode": "0o755",
+    "pnpmMode": "0o755"
+  },
+  "runtimeAfter": {
+    "nodeBinaryMatched": true,
+    "resolvedExistingPnpmMatched": true,
+    "canonicalFiveMatched": true,
+    "protectedElevenMatched": true,
+    "bin21Exact": true,
+    "environmentEleven": {
+      "HOME": {
+        "present": true,
+        "valueSha256": "6958a4bb3316e998038fc5dab074ab85f6bdd3263c975c32f9543e240c8b3a8a"
+      },
+      "TMPDIR": {
+        "present": true,
+        "valueSha256": "cb5886e4ce4b01487e374b730319694231aa677bcd455750f37e03dd36ead031"
+      },
+      "PLAYWRIGHT_BROWSERS_PATH": {
+        "present": false,
+        "valueSha256": null
+      },
+      "NODE_OPTIONS": {
+        "present": false,
+        "valueSha256": null
+      },
+      "NODE_DEBUG": {
+        "present": false,
+        "valueSha256": null
+      },
+      "DEBUG": {
+        "present": false,
+        "valueSha256": null
+      },
+      "PWDEBUG": {
+        "present": false,
+        "valueSha256": null
+      },
+      "GUIDED_CLOSE_BOUND_OUT": {
+        "present": false,
+        "valueSha256": null
+      },
+      "R13_DIAGNOSTICS": {
+        "present": false,
+        "valueSha256": null
+      },
+      "GUIDED_DIAGNOSTICS": {
+        "present": false,
+        "valueSha256": null
+      },
+      "IMAGE_TAG": {
+        "present": false,
+        "valueSha256": null
+      }
+    },
+    "fiveCurrentSourceAndOpaqueManifestPinsExact": true,
+    "nodeMode": "0o755",
+    "pnpmMode": "0o755"
+  },
+  "sourceAll1814DistAll238Exact": true,
+  "fullProfileOther13994InputOther13756Exact": true,
+  "orderedMembershipPreserved": true,
+  "onlyAllowedFullProfileDelta": true,
+  "sourceBoundCaseProjection": null
+}

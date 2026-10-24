@@ -1,0 +1,78 @@
+{
+  "kind": "ROOT_OBS009_ADOPTED_CORPUS_PASS_FOCUSED_PASS_LINT_FIXED_RECHECK_NEXT",
+  "atUtc": "2026-10-21T11:39:22.366496+00:00",
+  "previousGoalTurnClassification": "progress",
+  "goalState": "active",
+  "statusOnlyNotAuthority": true,
+  "allStoriesComplete": false,
+  "storyStatus": {
+    "009": "InProgress",
+    "010": "InProgress",
+    "011": "Done"
+  },
+  "sourceDigest": "0c59568e8e686c69703f650006edd70e8033db2906db7e434943735beebaff2d",
+  "sourceRows": 1814,
+  "distDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+  "distRows": 238,
+  "actualTenAdoption": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-actual-adoption-bound09/actual-adoption09-root-receipt.json",
+    "sha256": "84b6aa319f447b726401ee7d1d70a36128690cfd2b34e2f523525330b7f00c98",
+    "bytes": 5691
+  },
+  "execution05AlreadyAppliedNeverRepeat": true,
+  "actualCorpus": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-execution06/corpus09-root-receipt.json",
+    "sha256": "1745f9ce1d4f37ad4456dee1ae6c5108304e5c94b0bc150586c582d02516818f",
+    "bytes": 7299
+  },
+  "freezeValidatePassedNoRepeatForTestOnlyFix": true,
+  "manifestFileSha256": "95287d56573f44fda8071ccd3e1d542bc5dac23984f006eeee52a8e710c9b0aa",
+  "manifestDigest": "d1fb12903d54ee7671bbc605f85a727dce1b3333b7b0eff707992314ede21a7a",
+  "frozenAt": "2026-10-21T11:32:33.540Z",
+  "proof10Stop": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-revision-actual-proof10/root-stop.json",
+    "sha256": "c0fd582138bd975c096fb537404ef9b036a52b282028d583ebe3fd6886c6e69d",
+    "bytes": 5705
+  },
+  "proof10RawExits": [
+    0,
+    0,
+    1
+  ],
+  "actualFocusedPassed": 31,
+  "actualFiltered": 15,
+  "physicalFiles": 1,
+  "typesPassedBeforeFix": true,
+  "lintFinding": "two unbound-method references in unit adapter146; original failure preserved",
+  "fix11": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-revision-lint-fix11/root-receipt.json",
+    "sha256": "05591faafc443beed071f186113c5d052f758251007ad3660bf7f1ed7ad68456",
+    "bytes": 2331
+  },
+  "currentHarnessSha256": "a0fe522ce619b1e33a8b3a8db22b8cd9f50a9cb2f9066388f5c13ff8fe2d34e3",
+  "fixScope": "Only two argument-forwarding arrows in test adapter; production/declarations/frozen manifest unchanged",
+  "terminalSdkCache": "191 ordered keys/version3.2.7, one harness duration/failed value changed, other190 exact, all other full rows exact",
+  "nextActions": [
+    "Admit changed-helper focused31/type/lint successor12",
+    "Independent actual adoption/corpus/final proof QA",
+    "Update only OBS010 runbook provenance banner after accepted local PM10/QA11"
+  ],
+  "localPm10": {
+    "path": "docs/qa/evidence/STUDIO-OBS-010/recovery-20261020/local-runbook-pm10/manifest.json",
+    "sha256": "c2ac23c37155112616768eecbd23d20a2ba1114f2d49c9ab655cebe1cc38bc01",
+    "bytes": 761
+  },
+  "localQa11": {
+    "path": "docs/qa/evidence/STUDIO-OBS-010/recovery-20261020/local-runbook-qa11/manifest.json",
+    "sha256": "6367ba0128f36bdffa249a720f49583283eeddf45a07fe761e6e91592d4d3ba3",
+    "bytes": 761
+  },
+  "liveRuntimeSessions": [],
+  "session42762": "terminal exit2; do not restart or poll",
+  "nativeCallsConsumed": 6,
+  "diagnosticPayloadsCompleted": 12,
+  "noBackendOrDiagnosticRepeats": true,
+  "externalPacket": "pending existing question",
+  "applicationHeadroom": "UNKNOWN",
+  "old105": "historical old whole tuple; no full repeat"
+}

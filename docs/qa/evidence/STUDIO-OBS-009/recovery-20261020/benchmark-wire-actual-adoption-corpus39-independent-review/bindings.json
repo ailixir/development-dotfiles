@@ -1,0 +1,44 @@
+{
+  "reviewer": "/root/corpus_io06_independent_qa",
+  "primaryReceipts": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-bound25/actual-adoption35-root-receipt.json",
+      "sha256": "75ceb79d707d0df087d8e84f3330d6bf0aaeacaad054b482593ea5324858b812",
+      "bytes": 9577
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-execution06/wire-successor26/corpus26-root-receipt.json",
+      "sha256": "e269a112f0ef1b2572ee1103a8985b83355ea9cb1f2580557e22c5bf00c258be",
+      "bytes": 9709
+    }
+  ],
+  "nestedReferenceComparisons": {
+    "adoption": 20,
+    "corpus": 28,
+    "total": 48
+  },
+  "candidate30Manifest": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate30/manifest.json",
+    "sha256": "5f9bb7f662104f50d4b6c1c93b238954e7d3ab5e90632c45cc8e62c0a44e6022"
+  },
+  "candidateSourceQa33": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate33-independent-review/manifest.json",
+    "sha256": "1aedd460fdec26f8242f41aa8a04833b3eb4aeb4fe1225c544f37b6624ca5ed6"
+  },
+  "prefixProofSourceQa32": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-prefix-proof32-independent-review/manifest.json",
+    "sha256": "ff77f8ce9a12a5949f8cd8bf336f22f58b8994c399463db29650e7c62f161afa"
+  },
+  "fresh25Receipt": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-preflight25/fresh-metadata25-receipt.json",
+    "sha256": "5502faeeb91a972db159ab0690504d5aa159288f8bd3801a49c1e48531df02ab"
+  },
+  "contextRef": {
+    "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/obs009-wire-actual-adoption-corpus39-review-context.txt"
+  },
+  "method": "Immutable owned metadata/backup hash and finite row/derived-mask comparisons; no product code or validator execution",
+  "proof38Read": false,
+  "currentSdkOrCacheWalk": false,
+  "privateManifestComparisonScope": "Only exact owned before/after refs and previously approved derived mask/order; no body fields exported"
+}
+

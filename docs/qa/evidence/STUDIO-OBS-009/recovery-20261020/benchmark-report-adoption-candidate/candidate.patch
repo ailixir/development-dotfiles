@@ -1,0 +1,1798 @@
+--- a/studio-runner/evaluation/observed-authoring/evaluate.mjs
++++ b/studio-runner/evaluation/observed-authoring/evaluate.mjs
+@@ -60,8 +60,8 @@
+ const ceilRate = (n, pct) => Math.ceil((n * pct) / 100 - 1e-9);
+ 
+ // ---------------------------------------------------------------------------------------------
+-// Gate arithmetic (T0 QA B2/B7). The class-P denominator is a RECOMMENDATION, not a ruling (story
+-// "Not decided by @po": B2, B3), and every number below is computed from the manifest, never typed.
++// Gate arithmetic (adopted PO85506e3d / architectb602698e): class-P completion; all-class hard gates.
++// Every number is computed from the frozen prospective corpus, never from successful outcomes.
+ // ---------------------------------------------------------------------------------------------
+ export function gateArithmetic(classPCases, repetitions, thresholdPct = 90) {
+   const planned = classPCases * repetitions;
+@@ -105,7 +105,7 @@
+   if (manifest.comparisonClaim !== COMPARISON_CLAIM) err('COMPARISON_CLAIM_NOT_NONE');
+   if (manifest.cases.length < 20) err('FEWER_THAN_20_WORKFLOWS', String(manifest.cases.length));
+   const ids = new Set();
+-  const counts = { P: 0, F: 0, N: 0, total: 0, blockedExternal: 0, rs1Cases: 0 };
++  const counts = { P: 0, F: 0, N: 0, total: 0, blockedExternal: 0, rs1Cases: 0, rs1KnownLocalCases: 0, rs1UnknownStagingCases: 0 };
+   const checkPin = (label, pin) => {
+     if (!isRecord(pin) || typeof pin.path !== 'string' || !/^[a-f0-9]{64}$/u.test(pin.sha256 ?? '')) { err('PIN_MALFORMED', label); return; }
+     if (!checkFiles) return;
+@@ -115,6 +115,9 @@
+       if (sha256File(resolveInside(base, pin.path)) !== pin.sha256) err('PIN_HASH_MISMATCH', label);
+     } catch { err('PIN_UNREADABLE', label); }
+   };
++  for (const name of ['evaluator', 'evaluationCli', 'corpusPageServer']) {
++    if (manifest.sources?.[name]?.base !== 'repo') err('REQUIRED_CODE_PIN', name);
++  }
+   for (const [name, source] of Object.entries(manifest.sources ?? {})) checkPin(`sources.${name}`, source);
+   for (const entry of manifest.cases) {
+     const id = isRecord(entry) && typeof entry.id === 'string' ? entry.id : '<no id>';
+@@ -128,7 +131,7 @@
+     if (!blocked && entry.status !== 'READY_LOCAL') err('CASE_STATUS', id);
+     if (blocked) {
+       counts.blockedExternal += 1;
+-      if (!isRecord(entry.blockedBy) || typeof entry.blockedBy.owner !== 'string') err('BLOCKED_WITHOUT_OWNER', id);
++      if (!isRecord(entry.blockedBy) || typeof entry.blockedBy.owner !== 'string' || entry.blockedBy.owner.trim().length === 0) err('BLOCKED_WITHOUT_OWNER', id);
+     }
+     // B6: independent oracle, declared, with all four mutation controls.
+     const oracle = entry.oracle;
+@@ -140,10 +143,16 @@
+     }
+     // RS-1 (AC-7 obligation a): explicit on every case, [] written explicitly.
+     const rs1 = entry.rs1;
+-    if (!isRecord(rs1) || typeof rs1.isRs1Case !== 'boolean' || !Array.isArray(rs1.valueLocations)) err('RS1_MARK_MISSING', id);
++    if (rs1?.state === 'UNKNOWN_UNTIL_STAGING_PAGES_ARE_READ' && (!blocked || rs1.isRs1Case !== null)) err('RS1_UNKNOWN_INSPECTION', id);
++    if (!isRecord(rs1) || !Array.isArray(rs1.valueLocations)) err('RS1_MARK_MISSING', id);
++    else if (rs1.isRs1Case === null) {
++      if (!blocked || rs1.state !== 'UNKNOWN_UNTIL_STAGING_PAGES_ARE_READ' || rs1.valueLocations.length !== 0) err('RS1_UNKNOWN_INSPECTION', id);
++      else counts.rs1UnknownStagingCases += 1;
++    } else if (typeof rs1.isRs1Case !== 'boolean') err('RS1_MARK_MISSING', id);
+     else {
+       const unreachable = rs1.valueLocations.some((x) => x.reachableByGrant === false);
+-      if (rs1.isRs1Case !== unreachable) err('RS1_MARK_INCONSISTENT', id);
++      if (rs1.isRs1Case !== unreachable || rs1.valueLocations.some((x) => typeof x.elementKind !== 'string' || typeof x.reachableByGrant !== 'boolean')) err('RS1_MARK_INCONSISTENT', id);
++      if (!blocked) counts.rs1KnownLocalCases += 1;
+       if (rs1.isRs1Case) counts.rs1Cases += 1;
+     }
+     // B5: guided-dataflow fixtures declare their mode; `exact` is the RS-1 shape and never class P.
+@@ -428,6 +437,226 @@
+ // ---------------------------------------------------------------------------------------------
+ // Run records
+ // ---------------------------------------------------------------------------------------------
++const SHA256 = /^[a-f0-9]{64}$/u;
++const identity = (run) => ({ caseId: run?.caseId ?? null, rep: run?.rep ?? null, attempt: run?.attempt ?? null });
++const same = (a, b) => canonicalJson(a) === canonicalJson(b);
++const causeCoverage = new WeakMap();
++const isVerified = (run, field) => isRecord(run) && causeCoverage.get(run)?.has(field) === true;
++const unknownAssessments = (run) => Object.fromEntries(ZERO_FIELDS.map((field) => [field, {
++  status: 'UNKNOWN', evidenceSha256: null, manifestSha256: run.manifestSha256, ...identity(run),
++}]));
++
++function causeErrors(run, field) {
++  const errors = [];
++  const events = run.details?.[field] ?? [];
++  const keys = field === 'rs1NonScalarReadGaps' ? ['eventRef', 'elementKind']
++    : field === 'authoredEchoUnobservableTargets' ? ['eventRef', 'step', 'slot'] : ['eventRef', 'step'];
++  if (!Array.isArray(events) || events.length !== run[field]) return [`RUN_CAUSE_DETAILS_${field}`];
++  const refs = new Set();
++  for (const event of events) {
++    if (!isRecord(event) || Object.keys(event).some((key) => !keys.includes(key)) || !SHA256.test(event.eventRef ?? '')
++      || refs.has(event.eventRef) || (keys.includes('step') && (!Number.isInteger(event.step) || event.step < 1 || event.step > 1000))
++      || (keys.includes('slot') && !/^[A-Za-z][A-Za-z0-9_.:-]{0,63}$/u.test(event.slot ?? ''))
++      || (keys.includes('elementKind') && !/^[a-z][a-z0-9-]{0,31}$/u.test(event.elementKind ?? ''))) errors.push(`RUN_CAUSE_EVENT_${field}`);
++    refs.add(event?.eventRef);
++  }
++  const assessment = run.causeAssessment?.[field];
++  if (assessment !== undefined && (!isRecord(assessment) || Object.keys(assessment).some((key) => !['status', 'evidenceSha256', 'manifestSha256', 'caseId', 'rep', 'attempt'].includes(key)) || !['VERIFIED', 'UNKNOWN'].includes(assessment.status)
++    || assessment.manifestSha256 !== run.manifestSha256 || !same(identity(assessment), identity(run))
++    || (assessment.status === 'VERIFIED' && !SHA256.test(assessment.evidenceSha256 ?? '')) || (assessment.evidenceSha256 !== null && !SHA256.test(assessment.evidenceSha256 ?? '')))) errors.push(`RUN_CAUSE_ASSESSMENT_${field}`);
++  if (run.mode === 'D_C' && !isVerified(run, field)) errors.push(`RUN_CAUSE_UNREVIEWED_${field}`);
++  return errors;
++}
++
++/** Binding checks only: the existing independent QA process must establish the actual review's truth/authority. */
++const containsEvents = (events, prior) => {
++  const remaining = [...events];
++  for (const event of prior) { const index = remaining.findIndex((candidate) => same(candidate, event)); if (index < 0) return false; remaining.splice(index, 1); }
++  return true;
++};
++
++function projectReviewedInput(manifest, supplied, input) {
++  const problems = [];
++  const problem = (code) => { problems.push({ caseId: null, rep: null, code }); };
++  if (input === null) return { runs: supplied, problems, provenance: { status: 'UNREVIEWED', authenticatesReviewer: false } };
++  const rawHash = sha256Hex(input.rawRunsText);
++  const original = input.rawRunsText.split(/\r?\n/u).filter((line) => line.trim() !== '').map((line) => JSON.parse(line));
++  if (!same(original, supplied)) problem('REVIEW_RAW_POPULATION_OR_IMMUTABLE_FACT_MISMATCH');
++  for (const raw of original) for (const code of validateRunRecord(raw, manifest)) {
++    if (!code.startsWith('RUN_CAUSE_UNREVIEWED_')) problem(`ORIGINAL_${code}`);
++  }
++  const overlay = input.overlay;
++  if (!isRecord(overlay) || overlay.rawRunsSha256 !== rawHash || !Array.isArray(overlay.annotations)) {
++    problem('REVIEW_OVERLAY_HEADER');
++    return { runs: original, problems, provenance: { rawRunsSha256: rawHash, status: 'INVALID_OVERLAY', authenticatesReviewer: false } };
++  }
++  const bound = (ref) => {
++    try { return isRecord(ref) && SHA256.test(ref.sha256 ?? '') && typeof ref.fileText === 'string'
++      && sha256Hex(ref.fileText) === ref.sha256 && isRecord(ref.value) && same(JSON.parse(ref.fileText), ref.value); } catch { return false; }
++  };
++  const overlayHash = typeof input.overlayText === 'string' ? sha256Hex(input.overlayText) : null;
++  if (overlayHash === null || !same(JSON.parse(input.overlayText), overlay)) problem('REVIEW_OVERLAY_BYTES');
++  const reviewByHash = new Map((input.reviews ?? []).filter(bound).map((ref) => [ref.sha256, ref]));
++  const adoption = bound(input.adoption) ? input.adoption.value : null;
++  const execution = bound(input.execution) ? input.execution.value : null;
++  const ledger = bound(input.ledger) ? input.ledger.value : null;
++  // Exact document-byte hashes bind closed references; canonical hashes bind individual raw records/ledger entries.
++  let admission = null;
++  let originalAdmissionVerified = false;
++  if (ledger !== null && execution !== null && verifyLedger(ledger).length === 0 && isIso(execution.startedAt)) {
++    const effectiveAdmission = (at) => guardStart({ ledger: { ...ledger, admissions: ledger.admissions.filter((entry) => Date.parse(entry.decidedAt) <= Date.parse(at)) },
++      manifestSha256: manifest.manifestSha256, now: new Date(at) });
++    try {
++      admission = effectiveAdmission(execution.startedAt);
++      originalAdmissionVerified = execution.kind === 'STUDIO_OBS_009_EXECUTION_RECEIPT' && execution.mode === 'D_C'
++        && execution.rawRunsSha256 === rawHash && execution.manifestSha256 === manifest.manifestSha256
++        && execution.ledgerSha256 === input.ledger.sha256 && execution.admissionSeq === admission.seq
++        && execution.admissionEntrySha256 === entryDigest(admission)
++        && isRecord(admission.pinned) && Object.keys(admission.pinned).length > 0
++        && execution.configurationSha256 === sha256Hex(canonicalJson({ enforcedCaps: admission.enforcedCaps, pinned: admission.pinned }))
++        && typeof admission.priceSource?.source === 'string' && admission.priceSource.source.length > 0
++        && Number.isFinite(admission.priceSource.pInPerMTok) && Number.isFinite(admission.priceSource.pOutPerMTok)
++        && Number.isFinite(admission.remainingUsdAtAdmission?.value) && typeof admission.remainingUsdAtAdmission?.source === 'string'
++        && Number.isFinite(admission.allocationUsd) && admission.allocationUsd > 0 && admission.allocationUsd <= admission.ceilingUsd
++        && admission.allocationUsd <= admission.remainingUsdAtAdmission.value && admission.computed?.costBoundUsd <= admission.allocationUsd && typeof admission.admittedBy === 'string' && admission.admittedBy.length > 0
++        && original.every((run) => run?.mode === 'D_C' && run.manifestSha256 === manifest.manifestSha256 && isIso(run.runStartedAt)
++          && Date.parse(execution.startedAt) <= Date.parse(run.runStartedAt) && Date.parse(admission.admittedAt) < Date.parse(run.runStartedAt)
++          && entryDigest(effectiveAdmission(run.runStartedAt)) === entryDigest(admission));
++    } catch { originalAdmissionVerified = false; }
++  }
++  const adopted = adoption !== null && adoption.kind === 'INDEPENDENT_BENCHMARK_CAUSE_ADOPTION' && adoption.status === 'ADOPTED'
++    && adoption.rawRunsSha256 === rawHash && adoption.overlaySha256 === overlayHash
++    && adoption.manifestSha256 === manifest.manifestSha256 && adoption.executionReceiptSha256 === input.execution?.sha256
++    && adoption.ledgerSha256 === input.ledger?.sha256 && adoption.independentOfAuthor === true
++    && adoption.originalExecutionAndConfigurationReviewed === true && Array.isArray(adoption.accepted) && originalAdmissionVerified;
++  if (!adopted) problem('REVIEW_ADOPTION_OR_ORIGINAL_ADMISSION_UNBOUND');
++  const annotations = new Map();
++  for (const annotation of overlay.annotations) {
++    const ordinal = annotation?.rawOrdinal;
++    if (!Number.isInteger(ordinal) || ordinal < 1 || ordinal > original.length || annotations.has(ordinal)) { problem('REVIEW_ORDINAL_MULTISET'); continue; }
++    annotations.set(ordinal, annotation);
++  }
++  if (annotations.size !== original.length) problem('REVIEW_ORDINAL_MULTISET');
++  const referencedReviews = [];
++  const runs = original.map((raw, i) => {
++    if (!isRecord(raw)) return raw;
++    const run = clone(raw);
++    const annotation = annotations.get(i + 1);
++    const verified = new Set();
++    causeCoverage.set(run, verified);
++    run.causeAssessment = unknownAssessments(run);
++    if (!isRecord(annotation) || Object.keys(annotation).some((key) => !['rawOrdinal', 'rawRecordSha256', 'manifestSha256', 'caseId', 'rep', 'attempt', 'causes'].includes(key))
++      || annotation.rawRecordSha256 !== sha256Hex(canonicalJson(raw)) || annotation.manifestSha256 !== raw.manifestSha256
++      || !same(identity(annotation), identity(raw)) || !isRecord(annotation.causes) || Object.keys(annotation.causes).some((key) => !ZERO_FIELDS.includes(key))) {
++      problem('REVIEW_ANNOTATION_IDENTITY_OR_KEYS'); return run;
++    }
++    for (const field of ZERO_FIELDS) {
++      const cause = annotation.causes[field];
++      if (!isRecord(cause) || Object.keys(cause).some((key) => !['count', 'events', 'assessment'].includes(key))
++        || !Number.isInteger(cause.count) || cause.count < (Number.isInteger(raw[field]) ? raw[field] : 0) || !Array.isArray(cause.events)
++        || !Array.isArray(raw.details?.[field] ?? []) || !containsEvents(cause.events, raw.details?.[field] ?? [])) {
++        problem(`REVIEW_CAUSE_FACT_REMOVAL_OR_SHAPE_${field}`); continue;
++      }
++      const candidate = { ...run, [field]: cause.count, details: { ...run.details, [field]: clone(cause.events) } };
++      const assessment = cause.assessment;
++      const reviewRef = reviewByHash.get(assessment?.evidenceSha256);
++      const review = reviewRef?.value;
++      const entry = manifest.cases.find((candidate) => candidate.id === raw.caseId);
++      const accepted = adopted && adoption.accepted.some((row) => row.rawOrdinal === i + 1 && row.field === field && row.evidenceSha256 === reviewRef?.sha256);
++      const eventReviewBound = accepted && Object.keys(assessment ?? {}).every((key) => ['status', 'evidenceSha256', 'manifestSha256', 'caseId', 'rep', 'attempt'].includes(key))
++        && same(identity(assessment), identity(raw)) && assessment.manifestSha256 === raw.manifestSha256
++        && review?.kind === 'STUDIO_OBS_009_CLOSED_CAUSE_REVIEW' && review.rawRunsSha256 === rawHash
++        && review.rawOrdinal === i + 1 && review.rawRecordSha256 === annotation.rawRecordSha256 && review.manifestSha256 === raw.manifestSha256
++        && same(identity(review), identity(raw)) && review.field === field
++        && SHA256.test(review.scope?.observationEvidenceSha256 ?? '') && ['COMPLETE_REVIEWED_SCOPE', 'PARTIAL_REVIEWED_SCOPE'].includes(review.scope?.justificationCode)
++        && entry?.stepText?.sha256 !== null && entry?.stepText?.sha256 !== undefined && review.scope.stepTextSha256 === entry.stepText.sha256
++        && review.scope.expectedOutcomeSha256 === entry?.expectedOutcome?.sha256
++        && review.scope.valueLocationsSha256 === sha256Hex(canonicalJson(entry?.rs1?.valueLocations ?? [])) && same(review.events, cause.events)
++        && causeErrors(candidate, field).every((code) => code.startsWith('RUN_CAUSE_UNREVIEWED_'));
++      const unchangedClaim = cause.count === (raw[field] ?? 0) && same(cause.events, raw.details?.[field] ?? []);
++      if (!eventReviewBound && !unchangedClaim) { problem(`REVIEW_UNADOPTED_CAUSE_ADDITION_${field}`); continue; }
++      run[field] = candidate[field]; run.details = candidate.details;
++      if (eventReviewBound) {
++        referencedReviews.push(reviewRef.sha256);
++        if (assessment.status === 'VERIFIED' && review.scope.complete === true && review.scope.justificationCode === 'COMPLETE_REVIEWED_SCOPE') {
++          run.causeAssessment[field] = clone(assessment); verified.add(field);
++        }
++      }
++      // Incomplete scope still keeps confirmed count/events. It cannot acquire VERIFIED from a plausible hash.
++    }
++    return run;
++  });
++  const coverageComplete = runs.length > 0 && runs.every((run) => ZERO_FIELDS.every((field) => isVerified(run, field)));
++  return { runs, problems, admission, provenance: {
++    status: adopted && coverageComplete && problems.length === 0 ? 'BOUND_INDEPENDENT_QA_ADOPTION' : 'NON_ADOPTABLE_OR_PARTIAL_REVIEW', authenticatesReviewer: false,
++    boundIndependentAdoption: adopted, coverageComplete,
++    rawRunsSha256: rawHash, overlaySha256: overlayHash, adoptionSha256: input.adoption?.sha256 ?? null,
++    executionReceiptSha256: input.execution?.sha256 ?? null, ledgerSha256: input.ledger?.sha256 ?? null,
++    reviewRecordSha256: [...new Set(referencedReviews)], suppliedReviewRecordSha256: (input.reviews ?? []).map((ref) => ref?.sha256 ?? null), originalAdmissionVerified,
++    originalAttempts: original.map((run, i) => ({ rawOrdinal: i + 1, rawRecordSha256: sha256Hex(canonicalJson(run)), manifestSha256: run?.manifestSha256 ?? null, mode: run?.mode ?? null, terminal: run?.session?.terminal ?? null, published: run?.session?.published ?? null, infrastructureExcluded: run?.infrastructureFailure !== null, ...identity(run) })),
++    inputFileSha256: input.inputFileSha256 ?? null,
++  } };
++}
++
++function causeSummary(population, field) {
++  const items = population.flatMap((run) => (Array.isArray(run?.details?.[field]) ? run.details[field] : []).map((event, eventOrdinal) => {
++    const safe = {};
++    if (SHA256.test(event?.eventRef ?? '')) safe.eventRef = event.eventRef;
++    if (field === 'rs1NonScalarReadGaps' && /^[a-z][a-z0-9-]{0,31}$/u.test(event?.elementKind ?? '')) safe.elementKind = event.elementKind;
++    if (field !== 'rs1NonScalarReadGaps' && Number.isInteger(event?.step) && event.step >= 1 && event.step <= 1000) safe.step = event.step;
++    if (field === 'authoredEchoUnobservableTargets' && /^[A-Za-z][A-Za-z0-9_.:-]{0,63}$/u.test(event?.slot ?? '')) safe.slot = event.slot;
++    const expected = field === 'rs1NonScalarReadGaps' ? 2 : field === 'authoredEchoUnobservableTargets' ? 3 : 2;
++    return { ...safe, ...(Object.keys(safe).length !== expected || Object.keys(event ?? {}).length !== expected ? { rejectedDetailOrdinal: eventOrdinal + 1 } : {}), ...identity(run) };
++  }));
++  const unknownIdentities = population.filter((run) => !isVerified(run, field)).map(identity);
++  const confirmedTotal = population.reduce((sum, run) => sum + (Number.isInteger(run?.[field]) ? run[field] : 0), 0);
++  return { unit: 'classified-events', confirmedTotal, total: population.length > 0 && unknownIdentities.length === 0 ? confirmedTotal : null,
++    runsCounted: population.length, verifiedRuns: population.length - unknownIdentities.length, unknownRuns: unknownIdentities.length,
++    items, unknownIdentities, affectedRuns: population.filter((run) => (run?.[field] ?? 0) > 0).map(identity) };
++}
++
++const sessionScopeKnown = (run) => run?.learnSessionsComplete === true && Array.isArray(run.learnSessions)
++  && (run.learnSessions.length > 0 || (run.sessionId === undefined && run.session === undefined
++    && ['modelProposals', 'inputTokens', 'outputTokens'].every((field) => run.usage?.[field] === undefined || run.usage[field] === null || run.usage[field] === 0)));
++
++function chargeSummary(population, price) {
++  const sessions = population.flatMap((run) => (Array.isArray(run?.learnSessions) ? run.learnSessions : []).map((session) => ({ ...session, ...identity(run) })));
++  const references = new Map();
++  for (const session of sessions) references.set(session.sessionId, (references.get(session.sessionId) ?? 0) + 1);
++  const duplicateSessionIds = [...references].filter(([, count]) => count > 1).map(([id]) => id);
++  const unknownAttempts = population.filter((run) => !sessionScopeKnown(run)
++    || (run?.learnSessions ?? []).some((session) => duplicateSessionIds.includes(session.sessionId))).map(identity);
++  const metric = (field) => {
++    const known = sessions.filter((session) => Number.isInteger(session.usage?.[field]) && session.usage[field] >= 0);
++    const knownSubtotal = known.reduce((sum, session) => sum + session.usage[field], 0);
++    const complete = population.length > 0 && unknownAttempts.length === 0 && known.length === sessions.length && sessions.every((session) => TERMINAL.includes(session.session?.terminal));
++    return { total: complete ? knownSubtotal : null, knownSubtotal, complete, knownSessions: known.length, unknownSessions: sessions.filter((session) => !Number.isInteger(session.usage?.[field]) || session.usage[field] < 0 || !TERMINAL.includes(session.session?.terminal)).length,
++      unknownSessionIdentities: sessions.filter((session) => !Number.isInteger(session.usage?.[field]) || session.usage[field] < 0 || !TERMINAL.includes(session.session?.terminal)).map((session) => ({ ...identity(session), phase: session.phase, sessionId: session.sessionId })),
++      p50: complete ? nearestRank(known.map((session) => session.usage[field]).sort((a, b) => a - b), 0.5) : null,
++      p95: complete ? nearestRank(known.map((session) => session.usage[field]).sort((a, b) => a - b), 0.95) : null };
++  };
++  const logicalCounterClaims = Object.fromEntries(['modelProposals', 'inputTokens', 'outputTokens'].map((field) => {
++    const known = population.filter((run) => Number.isInteger(run?.usage?.[field]) && run.usage[field] >= 0);
++    return [field, { knownSubtotal: known.reduce((sum, run) => sum + run.usage[field], 0), knownAttempts: known.length,
++      unknownAttemptIdentities: population.filter((run) => !Number.isInteger(run?.usage?.[field]) || run.usage[field] < 0).map(identity), basis: 'supplied-logical-counter-claims-not-session-coverage' }];
++  }));
++  const protective = sessions.filter((session) => Number.isFinite(session.budgetCharge?.amountUsd) && session.budgetCharge.amountUsd >= 0
++    && ['PUBLIC_BUDGET_COUNTERS', 'recorded-reservations', 'reserved-ceiling'].includes(session.budgetCharge.basis));
++  const unresolvedCharges = population.flatMap((run) => Array.isArray(run?.details?.unresolvedSessionCharges) ? run.details.unresolvedSessionCharges : [])
++    .filter((charge) => Number.isFinite(charge.amountUsd) && charge.amountUsd >= 0 && ['PUBLIC_BUDGET_COUNTERS', 'recorded-reservations', 'reserved-ceiling'].includes(charge.basis));
++  const protectiveSubtotal = protective.reduce((sum, session) => sum + session.budgetCharge.amountUsd, 0) + unresolvedCharges.reduce((sum, charge) => sum + charge.amountUsd, 0);
++  const protectiveComplete = population.length > 0 && unknownAttempts.length === 0 && protective.length === sessions.length && unresolvedCharges.length === 0;
++  const proposals = metric('modelProposals'); const input = metric('inputTokens'); const output = metric('outputTokens');
++  const priceKnown = isRecord(price) && Number.isFinite(price.pInPerMTok) && price.pInPerMTok >= 0 && Number.isFinite(price.pOutPerMTok) && price.pOutPerMTok >= 0;
++  return { basis: 'PUBLIC_BUDGET_COUNTERS', logicalAttempts: population.length, knownStartedSessions: duplicateSessionIds.length > 0 ? null : sessions.length, knownSessionReferences: sessions.length, duplicateSessionIds, unknownAttempts,
++    proposals, input, output, logicalCounterClaims, knownConservativeChargeSubtotalUsd: priceKnown ? (input.knownSubtotal * price.pInPerMTok + output.knownSubtotal * price.pOutPerMTok) / 1_000_000 : null,
++    protectiveStopCharges: { knownSubtotalUsd: protectiveSubtotal, totalUsd: protectiveComplete ? protectiveSubtotal : null, complete: protectiveComplete,
++      unknownSessions: sessions.length - protective.length, unresolvedPotentialStarts: unresolvedCharges.length, bases: [...new Set([...protective.map((session) => session.budgetCharge.basis), ...unresolvedCharges.map((charge) => charge.basis)])] },
++    conservativeChargeUsd: priceKnown && proposals.complete && input.complete && output.complete ? (input.total * price.pInPerMTok + output.total * price.pOutPerMTok) / 1_000_000 : null,
++    actualWireCalls: null, actualProviderInputTokens: null, actualProviderOutputTokens: null, actualBilledCostUsd: null,
++    actualEvidence: 'UNAVAILABLE: public proposal/reservation counters do not measure provider calls, usage or billed cost' };
++}
++
+ export function validateRunRecord(run, manifest) {
+   const errors = [];
+   const err = (code) => { errors.push(code); };
+@@ -441,6 +670,15 @@
+   else if (isIso(run.runStartedAt) && Date.parse(run.runStartedAt) < Date.parse(manifest.manifestFrozenAt)) err('RUN_BEFORE_MANIFEST_FREEZE');
+   if (run.manifestSha256 !== manifest.manifestSha256) err('RUN_MANIFEST_SHA256');
+   for (const field of ZERO_FIELDS) if (!Number.isInteger(run[field]) || run[field] < 0) err(`RUN_ZERO_FIELD_MISSING_${field}`);
++  for (const field of ZERO_FIELDS) errors.push(...causeErrors(run, field));
++  if (run.learnSessionsComplete === true && !sessionScopeKnown(run)) err('RUN_LEARN_SESSION_COVERAGE');
++  if (run.learnSessionsComplete !== undefined && typeof run.learnSessionsComplete !== 'boolean') err('RUN_LEARN_SESSION_COVERAGE');
++  if (run.learnSessions !== undefined && (!Array.isArray(run.learnSessions) || run.learnSessions.length > 2
++    || new Set(run.learnSessions.map((session) => session.sessionId)).size !== run.learnSessions.length
++    || new Set(run.learnSessions.map((session) => session.phase)).size !== run.learnSessions.length
++    || run.learnSessions.some((session) => !['base', 'incremental'].includes(session.phase) || typeof session.sessionId !== 'string'
++      || (session.budgetCharge !== undefined && (!Number.isFinite(session.budgetCharge.amountUsd) || session.budgetCharge.amountUsd < 0 || !['PUBLIC_BUDGET_COUNTERS', 'recorded-reservations', 'reserved-ceiling'].includes(session.budgetCharge.basis)))
++      || session.usage?.basis !== 'PUBLIC_BUDGET_COUNTERS' || ['modelProposals', 'inputTokens', 'outputTokens'].some((field) => session.usage[field] !== null && (!Number.isInteger(session.usage[field]) || session.usage[field] < 0))))) err('RUN_LEARN_SESSIONS');
+   if (!['HARNESS_SELF_TEST', 'D_C'].includes(run.mode)) err('RUN_MODE');
+   if (run.infrastructureFailure !== null && typeof run.infrastructureFailure !== 'string') err('RUN_INFRA_FIELD');
+   if (run.infrastructureFailure === null && !isRecord(run.oracle)) err('RUN_ORACLE_MISSING');
+@@ -453,11 +691,18 @@
+ const isCompletion = (run) => run.infrastructureFailure === null && run.session?.terminal === 'SUCCEEDED' && run.session.published === true
+   && (run.session.clarifications ?? 0) === 0 && run.oracle?.correct === true && run.oracle.falseSuccess !== true;
+ 
+-export function buildBenchmark({ manifest, runs, mode, generatedAt = new Date().toISOString(), admission = null, price = null }) {
+-  const problems = [];
++export function buildBenchmark({ manifest, runs: suppliedRuns, mode, generatedAt = new Date().toISOString(), admission = null, price = null, reviewInput = null, root = HERE, repoRoot = repoRootFrom(root) }) {
++  const reviewed = projectReviewedInput(manifest, suppliedRuns, reviewInput);
++  const runs = reviewed.runs;
++  const problems = [...reviewed.problems];
++  if (reviewInput !== null && mode === 'D_C') {
++    for (const code of validateCorpusManifest(manifest, { root, repoRoot }).errors) problems.push({ caseId: null, rep: null, code: `REVIEW_MANIFEST_INVALID:${code}` });
++  }
++  if (reviewed.admission !== undefined && reviewed.admission !== null) { admission = reviewed.admission; price = reviewed.provenance.originalAdmissionVerified === true && isRecord(admission.priceSource) ? admission.priceSource : null; }
+   const byKey = new Map();
+   for (const run of runs) {
+-    for (const code of validateRunRecord(run, manifest)) problems.push({ caseId: run.caseId ?? null, rep: run.rep ?? null, code });
++    for (const code of validateRunRecord(run, manifest)) problems.push({ caseId: run?.caseId ?? null, rep: run?.rep ?? null, code });
++    if (!isRecord(run)) continue;
+     if (run.mode !== mode) problems.push({ caseId: run.caseId, rep: run.rep, code: 'RUN_MODE_MISMATCH' });
+     const key = `${String(run.caseId)}#${String(run.rep)}`;
+     if (!byKey.has(key)) byKey.set(key, []);
+@@ -494,12 +739,14 @@
+   const failedRuns = pRuns.length - completions;
+   const rate = pRuns.length === 0 ? null : completions / pRuns.length;
+   // An excluded earlier attempt can still hit a hard gate; retries never erase observed facts.
+-  const falsePasses = runs.filter((r) => r.oracle?.falseSuccess === true);
+-  const leaks = runs.filter((r) => (r.secretOrPiiLeak ?? 0) > 0);
+-  const zero = (field) => {
+-    const items = credited.flatMap((r) => (r.details?.[field] ?? []).map((d) => ({ caseId: r.caseId, rep: r.rep, ...d })));
+-    return { total: credited.reduce((n, r) => n + r[field], 0), runsCounted: credited.length, items };
+-  };
++  const falsePasses = runs.filter((r) => r?.oracle?.falseSuccess === true);
++  const leaks = runs.filter((r) => (r?.secretOrPiiLeak ?? 0) > 0);
++  const scopes = { gateP: pRuns, creditedAllClasses: credited, allAttempts: runs };
++  const accounting = Object.fromEntries(ZERO_FIELDS.map((field) => [field, Object.fromEntries(
++    Object.entries(scopes).map(([scope, population]) => [scope, { ...causeSummary(population, field),
++      ...(scope === 'gateP' ? { fullPlannedRuns: pPlannedAll.length * 3, runnablePlannedRuns: arithmeticRunnable.plannedRuns, missingRuns: missing, blockedUnrun } : {}) }]),
++  )]));
++  const charges = Object.fromEntries(Object.entries(scopes).map(([scope, population]) => [scope, chargeSummary(population, price)]));
+   const reasons = [];
+   let verdict;
+   if (mode !== 'D_C') { verdict = 'NOT_EVIDENCE'; reasons.push('mode is HARNESS_SELF_TEST: a scripted provider is never D-C evidence'); }
+@@ -510,14 +757,9 @@
+   else if (blockedUnrun.length > 0) { verdict = 'PARTIAL'; reasons.push(`externally blocked cases unrun: ${blockedUnrun.join(', ')}`); }
+   else verdict = 'GATE_PASS';
+   const durations = credited.map((r) => Date.parse(r.runFinishedAt) - Date.parse(r.runStartedAt)).filter((n) => Number.isFinite(n) && n >= 0).sort((a, b) => a - b);
+-  const calls = credited.map((r) => r.usage?.modelProposals).filter(Number.isInteger).sort((a, b) => a - b);
+-  const tokensKnown = credited.length > 0 && credited.every((r) => Number.isInteger(r.usage?.inputTokens) && Number.isInteger(r.usage?.outputTokens));
+-  const cost = price !== null && tokensKnown
+-    ? credited.reduce((n, r) => n + (r.usage.inputTokens * price.pInPerMTok + r.usage.outputTokens * price.pOutPerMTok) / 1_000_000, 0)
+-    : null;
+   const incrementalRuns = credited.filter((r) => manifest.cases.find((c) => c.id === r.caseId)?.block === 'incremental');
+   return {
+-    schemaVersion: 1,
++    schemaVersion: 2,
+     kind: 'STUDIO_OBS_009_BENCHMARK',
+     label: mode === 'D_C' ? 'D_C_CANDIDATE' : SELF_TEST_LABEL,
+     harnessVersion: HARNESS_VERSION,
+@@ -525,13 +767,26 @@
+     manifestSha256: manifest.manifestSha256,
+     comparisonClaim: COMPARISON_CLAIM,
+     admissionStatus: admission === null ? null : admission.status,
++    reviewProvenance: reviewed.provenance,
++    evidenceStatus: 'COMPLETION_SUBGATE_ONLY_NOT_D_C_ACCEPTANCE',
++    requiredActualEvidence: ['provider-wire-calls', 'provider-usage-and-billed-cost', 'MODEL-SIZING-section10', 'external-staging-security-human-proofs'],
++    corpusInspection: {
++      knownLocalCaseIds: manifest.cases.filter((c) => c.status === 'READY_LOCAL' && typeof c.rs1?.isRs1Case === 'boolean').map((c) => c.id),
++      confirmedRs1CaseIds: manifest.cases.filter((c) => c.rs1?.isRs1Case === true).map((c) => c.id),
++      unknownStagingCaseIds: manifest.cases.filter((c) => c.rs1?.isRs1Case === null || c.rs1?.state === 'UNKNOWN_UNTIL_STAGING_PAGES_ARE_READ').map((c) => c.id),
++      knownLocalCount: manifest.cases.filter((c) => c.status === 'READY_LOCAL' && typeof c.rs1?.isRs1Case === 'boolean').length,
++      confirmedRs1CaseCount: manifest.cases.filter((c) => c.rs1?.isRs1Case === true).length,
++      unknownStagingCount: manifest.cases.filter((c) => c.rs1?.isRs1Case === null || c.rs1?.state === 'UNKNOWN_UNTIL_STAGING_PAGES_ARE_READ').length,
++      globalRs1Total: manifest.cases.some((c) => c.rs1?.isRs1Case === null || c.rs1?.state === 'UNKNOWN_UNTIL_STAGING_PAGES_ARE_READ') ? null : manifest.cases.filter((c) => c.rs1?.isRs1Case === true).length,
++      disclosure: 'D3 and both incremental cases use mixedVisible by corpus design; exact non-scalar reads are not exercised. Uninspected staging is unknown, not zero.',
++    },
+     gate: {
+-      verdict, reasons,
++      scope: 'COMPLETION_AND_HARD_FACT_SUBGATE_ONLY', verdict, reasons,
+       classP: {
+         casesPlanned: pPlannedAll.length, casesRunnable: pPlannedRunnable.length, runsCredited: pRuns.length, completions, failedRuns,
+         rate, thresholdPct: manifest.gate.completionThresholdPct,
+         fullArithmetic: gateArithmetic(pPlannedAll.length, 3, manifest.gate.completionThresholdPct), runnableArithmetic: arithmeticRunnable,
+-        denominatorDefinition: 'class P runs, final non-infrastructure attempt, clarification-free completion with a correct independent oracle (B2 recommendation, not a ruling)',
++        denominatorDefinition: 'class P runs, final non-infrastructure attempt, clarification-free completion with a correct independent oracle (adopted PO85506e3d / architectb602698e)',
+       },
+       blockedUnrun,
+     },
+@@ -542,11 +797,12 @@
+       denominatorDefinition: 'class F/N runs; reported, not gated except through the false-pass hard gate',
+     },
+     denominatorLedger: { plannedRuns: planned.size, creditedRuns: credited.length, infrastructureFailures: infraLedger, missingRuns: missing, blockedUnrunCases: blockedUnrun, problems },
+-    accounting: { rs1NonScalarReadGaps: zero('rs1NonScalarReadGaps'), authoredEchoUnobservableTargets: zero('authoredEchoUnobservableTargets'), focusMutationRefusedFills: zero('focusMutationRefusedFills') },
+-    latency: { p50Ms: nearestRank(durations, 0.5), p95Ms: nearestRank(durations, 0.95), samples: durations.length, denominator: credited.length },
+-    modelCalls: { total: calls.reduce((a, b) => a + b, 0), p50: nearestRank(calls, 0.5), p95: nearestRank(calls, 0.95), samples: calls.length, denominator: credited.length },
+-    tokens: { input: tokensKnown ? credited.reduce((n, r) => n + r.usage.inputTokens, 0) : null, output: tokensKnown ? credited.reduce((n, r) => n + r.usage.outputTokens, 0) : null, denominator: credited.length, complete: tokensKnown },
+-    costUsd: { total: cost, basis: cost === null ? 'UNAVAILABLE: no price list or incomplete token usage' : 'provider-reported tokens x admitted price', denominator: credited.length },
++    accounting,
++    charges,
++    latency: { basis: 'known-valid-duration-samples', missingSamples: credited.length - durations.length, p50Ms: nearestRank(durations, 0.5), p95Ms: nearestRank(durations, 0.95), samples: durations.length, denominator: credited.length },
++    modelCalls: { total: null, p50: null, p95: null, samples: 0, denominator: credited.length, basis: 'UNAVAILABLE: proposals are not actual provider wire calls', proposals: charges.creditedAllClasses.proposals },
++    tokens: { input: charges.creditedAllClasses.input.total, output: charges.creditedAllClasses.output.total, denominator: credited.length, complete: charges.creditedAllClasses.input.complete && charges.creditedAllClasses.output.complete, basis: 'PUBLIC_BUDGET_COUNTERS' },
++    costUsd: { total: null, basis: 'UNAVAILABLE: actual provider usage/billed cost not supplied', conservativeChargeUsd: charges.creditedAllClasses.conservativeChargeUsd, denominator: credited.length },
+     incremental: incrementalRuns.map((r) => ({ caseId: r.caseId, rep: r.rep, prefixLearnedSteps: r.incremental?.prefixLearnedSteps ?? null, prefixReusedSteps: r.incremental?.prefixReusedSteps ?? null, relearnedFromStepNumber: r.incremental?.relearnedFromStepNumber ?? null, oracleCorrect: r.oracle?.correct ?? null })),
+   };
+ }
+@@ -738,7 +994,13 @@
+   let spent = 0;
+   let stopped = null;
+   let sessions = 0;
++  const observedReasons = new Set();
++  const observeHardGate = ({ falsePass = false, leak = false }) => {
++    if (falsePass || leak) { observedReasons.add('STOPPED_HARD_GATE'); stopped = 'STOPPED_HARD_GATE'; }
++    return { stop: stopped !== null, reason: stopped, spentUsd: spent };
++  };
+   return {
++    observeHardGate,
+     record(session) {
+       if (stopped !== null) throw new AdmissionError('SESSION_AFTER_STOP');
+       sessions += 1;
+@@ -747,12 +1009,12 @@
+       const input = known ? session.inputTokens : recorded ? Math.min(session.modelProposals * perCallCeiling.input, reservedCeiling.input) : reservedCeiling.input;
+       const output = known ? session.outputTokens : recorded ? Math.min(session.modelProposals * perCallCeiling.output, reservedCeiling.output) : reservedCeiling.output;
+       spent += (input * price.pInPerMTok + output * price.pOutPerMTok) / 1_000_000;
+-      if (session.falsePass === true || session.leak === true) stopped = 'STOPPED_HARD_GATE';
+-      else if (spent >= stopFraction * allocationUsd) stopped = 'STOPPED_BUDGET_80';
+-      return { stop: stopped !== null, reason: stopped, spentUsd: spent, costBasis: known ? 'reported' : recorded ? 'recorded-reservations' : 'reserved-ceiling' };
++      if (spent >= stopFraction * allocationUsd) { observedReasons.add('STOPPED_BUDGET_80'); stopped = 'STOPPED_BUDGET_80'; }
++      observeHardGate({ falsePass: session.falsePass === true, leak: session.leak === true });
++      return { stop: stopped !== null, reason: stopped, spentUsd: spent, costBasis: known ? 'PUBLIC_BUDGET_COUNTERS' : recorded ? 'recorded-reservations' : 'reserved-ceiling' };
+     },
+     nextSessionAllowed() { return stopped === null; },
+-    state() { return { sessions, spentUsd: spent, stopped, stopThresholdUsd: stopFraction * allocationUsd }; },
++    state() { return { sessions, spentUsd: spent, stopped, stopThresholdUsd: stopFraction * allocationUsd, observedReasons: [...observedReasons] }; },
+   };
+ }
+ 
+@@ -866,21 +1128,97 @@
+ }
+ 
+ function sessionObservation(learned, published) {
++  if (!isRecord(learned.view?.session) || typeof learned.view.session.state !== 'string') return undefined;
+   return {
+     terminal: learned.view.session.state, observedStates: learned.states, published, clarifications: learned.clarifications,
+     failureCode: learned.result?.failure?.code ?? learned.result?.errorCode ?? null, failedStepNumber: learned.result?.failure?.stepNumber ?? null,
+   };
+ }
+ 
+-function newRun({ entry, rep, attempt, mode, manifest, startedAt, finishedAt, observed, oracle, counters, sessionId, details = {}, incremental }) {
+-  return {
++const budgetUsage = (counters) => {
++  const value = (field) => Number.isInteger(counters?.[field]) && counters[field] >= 0 ? counters[field] : null;
++  return { basis: 'PUBLIC_BUDGET_COUNTERS', modelProposals: value('modelProposals'), inputTokens: value('modelInputTokens'), outputTokens: value('modelOutputTokens') };
++};
++const learnPhase = (learned, phase, published = false) => ({ phase, sessionId: learned.id, session: sessionObservation(learned, published), usage: budgetUsage(learned.view.session.counters), observationComplete: true, hardGates: { falsePass: false, secretOrPiiLeak: 0 } });
++const chargeLearn = (stopRule, session) => {
++  const before = stopRule.state().spentUsd;
++  const charge = stopRule.record({ ...session.usage, falsePass: session.hardGates.falsePass, leak: session.hardGates.secretOrPiiLeak > 0 });
++  session.budgetCharge = { amountUsd: charge.spentUsd - before, basis: charge.costBasis };
++  return charge;
++};
++const sumLearnUsage = (sessions) => Object.fromEntries(['modelProposals', 'inputTokens', 'outputTokens'].map((field) => [field,
++  sessions.every((session) => TERMINAL.includes(session.session?.terminal) && Number.isInteger(session.usage[field])) ? sessions.reduce((sum, session) => sum + session.usage[field], 0) : null]));
++
++function newRun({ entry, rep, attempt, mode, manifest, startedAt, finishedAt, observed, oracle, counters, sessionId, details = {}, incremental, learnSessions, learnSessionsComplete = true }) {
++  const run = {
+     caseId: entry.id, rep, attempt, mode, manifestSha256: manifest.manifestSha256,
+     runStartedAt: startedAt.toISOString(), runFinishedAt: finishedAt.toISOString(), sessionId,
+     session: observed.session, oracle, infrastructureFailure: null,
+-    usage: { modelProposals: counters.modelProposals ?? null, inputTokens: counters.modelInputTokens ?? null, outputTokens: counters.modelOutputTokens ?? null },
++    usage: learnSessionsComplete === false ? { basis: 'PUBLIC_BUDGET_COUNTERS', modelProposals: null, inputTokens: null, outputTokens: null }
++      : learnSessions === undefined ? budgetUsage(counters) : { basis: 'PUBLIC_BUDGET_COUNTERS', ...sumLearnUsage(learnSessions) },
++    learnSessionsComplete, learnSessions: learnSessions ?? [{ phase: 'base', sessionId, session: observed.session, usage: budgetUsage(counters), hardGates: { falsePass: oracle.falseSuccess, secretOrPiiLeak: 0 } }],
+     secretOrPiiLeak: 0, rs1NonScalarReadGaps: 0, authoredEchoUnobservableTargets: 0, focusMutationRefusedFills: 0, details,
+     ...(incremental === undefined ? {} : { incremental }),
+   };
++  run.causeAssessment = unknownAssessments(run);
++  return run;
++}
++
++/** Recover only public fields already held by the existing transient API capture. No new request/observer. */
++async function interruptedRun({ entry, rep, attempt, mode, manifest, startedAt, captured, phases, knownSessions, attemptedStarts,
++  chargedAtStart, spentAtStart, stopRule, now, secretCanaries, incremental = undefined, priorFindings = [], priorStopObservations = [] }) {
++  const rows = Object.entries(captured).map(([label, text]) => {
++    try { return { label, n: Number(label.split('#')[1]), body: JSON.parse(text) }; } catch { return { label, n: Number(label.split('#')[1]), body: null }; }
++  });
++  const starts = rows.filter((row) => row.label.startsWith('startSession#') && typeof row.body?.session?.sessionId === 'string');
++  const sessions = [...knownSessions];
++  for (let i = 0; i < starts.length; i += 1) {
++    const start = starts[i]; const end = starts[i + 1]?.n ?? Infinity;
++    const replies = rows.filter((row) => row.n >= start.n && row.n < end);
++    const views = replies.filter((row) => row.label.startsWith('readSession#') && row.body?.session?.sessionId === start.body.session.sessionId);
++    const view = views.at(-1)?.body ?? start.body;
++    const result = replies.filter((row) => row.label.startsWith('readResult#')).at(-1)?.body ?? null;
++    const learned = { id: start.body.session.sessionId, view, result,
++      states: views.map((row) => row.body.session.state).filter((state, index, states) => typeof state === 'string' && (index === 0 || states[index - 1] !== state)),
++      clarifications: replies.filter((row) => row.label.startsWith('readClarification#') && row.body !== null).length };
++    const prior = sessions.find((session) => session.sessionId === learned.id);
++    const recovered = learnPhase(learned, i === 0 ? 'base' : 'incremental', result?.publication?.status === 'PUBLISHED');
++    recovered.observationComplete = false;
++    if (prior === undefined) sessions.push(recovered);
++    else { prior.session = recovered.session; prior.usage = recovered.usage; prior.observationComplete = false; }
++  }
++  const scopeComplete = starts.length === attemptedStarts;
++  const unresolvedSessionCharges = [];
++  if (stopRule !== null) {
++    for (let i = 0; i < sessions.length; i += 1) {
++      if (sessions[i].budgetCharge === undefined && stopRule.state().sessions - chargedAtStart < i + 1 && stopRule.nextSessionAllowed()) chargeLearn(stopRule, sessions[i]);
++    }
++    // An unacknowledged start is possible consumption, not an invented observed session or zero charge.
++    if (!scopeComplete && stopRule.state().sessions - chargedAtStart < attemptedStarts && stopRule.nextSessionAllowed()) {
++      const before = stopRule.state().spentUsd;
++      const charge = stopRule.record({ inputTokens: null, outputTokens: null, modelProposals: null });
++      unresolvedSessionCharges.push({ phase: attemptedStarts > 1 ? 'incremental' : 'base', amountUsd: charge.spentUsd - before, basis: charge.costBasis });
++    }
++  }
++  const scan = await leakScan({ captured, phases, secretCanaries, extraTexts: null });
++  const retainedFindings = new Map();
++  for (const finding of [...priorFindings, ...scan.findings]) retainedFindings.set(`${finding.label}#${String(finding.canaryIndex)}#${finding.canarySha256Prefix}`, finding);
++  const leaks = Math.max(retainedFindings.size, ...sessions.map((session) => session.hardGates.secretOrPiiLeak), 0);
++  const falsePass = sessions.some((session) => session.hardGates.falsePass);
++  if (stopRule !== null) stopRule.observeHardGate({ falsePass, leak: leaks > 0 });
++  const partial = incremental === undefined ? undefined : { logicalStatus: 'INCOMPLETE', notCompletedBecause: null,
++    ...(attemptedStarts < 2 ? { suffixStarted: false } : scopeComplete ? { suffixStarted: true } : {}) };
++  const last = sessions.at(-1);
++  const observed = { session: last?.session === undefined ? undefined : { ...last.session, ...(partial === undefined ? {} : { published: false }) } };
++  const run = newRun({ entry, rep, attempt, mode, manifest, startedAt, finishedAt: now(), observed,
++    oracle: { correct: false, falseSuccess: falsePass, failures: [partial === undefined ? 'run-observation-incomplete' : 'incremental-not-completed'] },
++    counters: {}, sessionId: last?.sessionId, incremental: partial, learnSessions: sessions, learnSessionsComplete: scopeComplete });
++  run.secretOrPiiLeak = leaks;
++  run.details = { canaryFindings: [...retainedFindings.values()], driverObservations: [{ phase: attemptedStarts > 1 ? 'incremental' : 'base', code: 'OBSERVATION_UNAVAILABLE' }],
++    unresolvedSessionCharges, protectiveChargeScope: [{ chargedSessionOrPotentialStartCount: stopRule === null ? 0 : stopRule.state().sessions - chargedAtStart,
++      knownProtectiveSpendUsd: stopRule === null ? null : stopRule.state().spentUsd - spentAtStart }],
++    stopObservations: [...priorStopObservations, ...(stopRule?.state().observedReasons ?? []).filter((reason) => !priorStopObservations.some((row) => row.reason === reason)).map((reason) => ({ phase: reason === 'STOPPED_BUDGET_80' ? attemptedStarts > 1 ? 'incremental' : 'base' : 'final-oracle', reason }))] };
++  return run;
+ }
+ 
+ /**
+@@ -893,37 +1231,51 @@
+   if (stopRule !== null && !stopRule.nextSessionAllowed()) throw new AdmissionError('SESSION_AFTER_STOP');
+   const { client, texts: captured } = withTextCapture(rawClient);
+   const startedAt = now();
+-  const draft = await client.createDraft(`${entry.id} r${String(rep)}`, buildAuthoringRequest(stepText, vars));
+-  const learned = await learnSession({ client, draft, expected, receipts, cursorLabel: 'run', pollMs, timeoutMs, now, pause });
+-  const phases = { run: { actions: learned.phase.actions, views: learned.phase.views } };
+-  let result = learned.result;
+-  let published = false;
+-  if (learned.view.session.state === 'SUCCEEDED') {
+-    const cursor = receipts.mark();
+-    await client.finalize(learned.id, { sourceRevision: draft.sourceRevision, configurationRevision: draft.configurationRevision });
+-    phases.finalize = receipts.since(cursor);
+-    result = await client.readResult(learned.id);
+-    published = result.publication?.status === 'PUBLISHED';
+-    for (let i = 1; i <= replays && expected.receipts.phases[`replay${String(i)}`] !== undefined; i += 1) {
+-      const replayCursor = receipts.mark();
+-      const accepted = await client.execute(draft.id);
+-      for (let n = 0; n < 100; n += 1) {
+-        const execution = await client.readExecution(accepted.executionId);
+-        if (['PASSED', 'FAILED', 'ERROR', 'CANCELLED'].includes(execution.status)) break;
+-        await pause(pollMs);
++  const phases = {}; const knownSessions = []; let attemptedStarts = 0; let priorFindings = [];
++  const chargedAtStart = stopRule?.state().sessions ?? 0; const spentAtStart = stopRule?.state().spentUsd ?? 0;
++  try {
++    const draft = await client.createDraft(`${entry.id} r${String(rep)}`, buildAuthoringRequest(stepText, vars));
++    attemptedStarts = 1;
++    const learned = await learnSession({ client, draft, expected, receipts, cursorLabel: 'run', pollMs, timeoutMs, now, pause });
++    phases.run = { actions: learned.phase.actions, views: learned.phase.views };
++    knownSessions.push(learnPhase(learned, 'base', learned.result?.publication?.status === 'PUBLISHED'));
++    let result = learned.result;
++    let published = false;
++    if (learned.view.session.state === 'SUCCEEDED') {
++      const cursor = receipts.mark();
++      await client.finalize(learned.id, { sourceRevision: draft.sourceRevision, configurationRevision: draft.configurationRevision });
++      phases.finalize = receipts.since(cursor);
++      result = await client.readResult(learned.id);
++      published = result.publication?.status === 'PUBLISHED';
++      for (let i = 1; i <= replays && expected.receipts.phases[`replay${String(i)}`] !== undefined; i += 1) {
++        const replayCursor = receipts.mark();
++        const accepted = await client.execute(draft.id);
++        for (let n = 0; n < 100; n += 1) {
++          const execution = await client.readExecution(accepted.executionId);
++          if (['PASSED', 'FAILED', 'ERROR', 'CANCELLED'].includes(execution.status)) break;
++          await pause(pollMs);
++        }
++        phases[`replay${String(i)}`] = receipts.since(replayCursor);
+       }
+-      phases[`replay${String(i)}`] = receipts.since(replayCursor);
+-    }
+-  }
+-  if (expected.receipts.phases.finalize !== undefined && phases.finalize === undefined) phases.finalize = { actions: [], views: [] };
+-  const observed = { session: sessionObservation({ ...learned, result }, published), receipts: { phases } };
+-  const oracle = evaluateOutcome(expected, observed, vars);
+-  const scan = await leakScan({ captured, phases, secretCanaries, extraTexts });
+-  const run = newRun({ entry, rep, attempt, mode, manifest, startedAt, finishedAt: now(), observed, oracle, counters: learned.view.session.counters ?? {}, sessionId: learned.id });
+-  run.secretOrPiiLeak = scan.leaks;
+-  run.details = { canaryFindings: scan.findings };
+-  if (stopRule !== null) stopRule.record({ inputTokens: run.usage.inputTokens, outputTokens: run.usage.outputTokens, modelProposals: run.usage.modelProposals, falsePass: oracle.falseSuccess, leak: scan.leaks > 0 });
+-  return run;
++    }
++    if (expected.receipts.phases.finalize !== undefined && phases.finalize === undefined) phases.finalize = { actions: [], views: [] };
++    const observed = { session: sessionObservation({ ...learned, result }, published), receipts: { phases } };
++    const oracle = evaluateOutcome(expected, observed, vars);
++    knownSessions[0].session = observed.session; knownSessions[0].oracle = oracle; knownSessions[0].hardGates.falsePass = oracle.falseSuccess;
++    const scan = await leakScan({ captured, phases, secretCanaries, extraTexts });
++    priorFindings = scan.findings; knownSessions[0].hardGates.secretOrPiiLeak = scan.leaks;
++    const run = newRun({ entry, rep, attempt, mode, manifest, startedAt, finishedAt: now(), observed, oracle, counters: learned.view.session.counters ?? {}, sessionId: learned.id });
++    run.secretOrPiiLeak = scan.leaks;
++    run.learnSessions[0].hardGates.secretOrPiiLeak = scan.leaks;
++    run.details = { canaryFindings: scan.findings };
++    if (stopRule !== null) {
++      chargeLearn(stopRule, run.learnSessions[0]);
++      run.details.stopObservations = stopRule.state().observedReasons.map((reason) => ({ phase: 'base', reason }));
++    }
++    return run;
++  } catch {
++    return interruptedRun({ entry, rep, attempt, mode, manifest, startedAt, captured, phases, knownSessions, attemptedStarts, chargedAtStart, spentAtStart, stopRule, now, secretCanaries, priorFindings });
++  }
+ }
+ 
+ /**
+@@ -937,56 +1289,125 @@
+   if (stopRule !== null && !stopRule.nextSessionAllowed()) throw new AdmissionError('SESSION_AFTER_STOP');
+   const { client, texts: captured } = withTextCapture(rawClient);
+   const startedAt = now();
+-  const baseStep = { authoring: caseFile.base.authoring, variables: caseFile.base.variables, configuration: caseFile.base.configuration };
+-  const draft = await client.createDraft(`${entry.id} base r${String(rep)}`, buildAuthoringRequest(baseStep, vars));
+-  const base = await learnSession({ client, draft, expected, receipts, cursorLabel: 'base', pollMs, timeoutMs, now, pause });
+-  const phases = { base: { actions: base.phase.actions, views: base.phase.views } };
+-  const baseOk = base.view.session.state === 'SUCCEEDED';
+-  let published = false;
+-  let incremental;
+-  let edit = null;
+-  let result = base.result;
+-  if (baseOk) {
+-    await client.finalize(base.id, { sourceRevision: draft.sourceRevision, configurationRevision: draft.configurationRevision });
+-    const baseResult = await client.readResult(base.id);
+-    switchSourceValue();
+-    const current = { authoring: caseFile.current, variables: caseFile.base.variables, configuration: caseFile.base.configuration };
+-    const updated = await client.updateDraft(draft.id, `${entry.id} edit r${String(rep)}`, buildAuthoringRequest(current, vars));
+-    edit = await learnSession({
+-      client, draft: updated, expected, receipts, cursorLabel: 'incremental', pollMs, timeoutMs, now, pause,
+-      extra: { baseRevisionId: baseResult.publication?.receipt?.revisionId, firstLearnStepId: caseFile.expected.effectiveFirstLearnStepId },
+-    });
+-    phases.incremental = { actions: edit.phase.actions, views: edit.phase.views };
+-    const beforeFinalize = edit.view.session.counters?.modelProposals ?? null;
+-    if (edit.view.session.state === 'SUCCEEDED') {
++  const findings = new Map();
++  const scanPhase = async (observedPhases) => {
++    const scan = await leakScan({ captured, phases: observedPhases, secretCanaries, extraTexts });
++    for (const finding of scan.findings) {
++      const key = `${finding.label}#${String(finding.canaryIndex)}#${finding.canarySha256Prefix}`;
++      const prior = findings.get(key);
++      if (prior === undefined || prior.hits < finding.hits) findings.set(key, finding);
++    }
++    return scan;
++  };
++  const phases = {}; const sessions = []; const stopObservations = []; let attemptedStarts = 0;
++  const chargedAtStart = stopRule?.state().sessions ?? 0; const spentAtStart = stopRule?.state().spentUsd ?? 0;
++  try {
++    const baseStep = { authoring: caseFile.base.authoring, variables: caseFile.base.variables, configuration: caseFile.base.configuration };
++    const draft = await client.createDraft(`${entry.id} base r${String(rep)}`, buildAuthoringRequest(baseStep, vars));
++    attemptedStarts = 1;
++    const base = await learnSession({ client, draft, expected, receipts, cursorLabel: 'base', pollMs, timeoutMs, now, pause });
++    phases.base = { actions: base.phase.actions, views: base.phase.views };
++    sessions.push(learnPhase(base, 'base', base.result?.publication?.status === 'PUBLISHED'));
++    const rememberStop = (phase) => {
++      for (const reason of stopRule?.state().observedReasons ?? []) {
++        if (!stopObservations.some((row) => row.reason === reason)) stopObservations.push({ phase, reason });
++      }
++    };
++    // This independent base oracle expects only the base phase, not completion of the suffix.
++    const baseExpected = { ...expected, incremental: undefined, session: { ...expected.session, published: sessions[0].session.published }, receipts: { ...expected.receipts, phases: { base: expected.receipts.phases.base } } };
++    const baseVerdict = evaluateOutcome(baseExpected, { session: sessions[0].session, receipts: { phases } }, vars);
++    sessions[0].oracle = baseVerdict; sessions[0].hardGates.falsePass = baseVerdict.falseSuccess;
++    const baseScan = await scanPhase(phases);
++    sessions[0].hardGates = { falsePass: baseVerdict.falseSuccess, secretOrPiiLeak: baseScan.leaks };
++    sessions[0].oracle = baseVerdict;
++    if (stopRule !== null) { chargeLearn(stopRule, sessions[0]); rememberStop('base'); }
++    let published = false;
++    let edit = null;
++    let result = base.result;
++    let incremental = { logicalStatus: 'INCOMPLETE', suffixStarted: false,
++      notCompletedBecause: base.view.session.state !== 'SUCCEEDED' ? 'BASE_NOT_SUCCEEDED' : baseVerdict.falseSuccess || baseScan.leaks > 0 ? 'STOPPED_HARD_GATE' : stopRule?.state().stopped ?? null };
++    const canContinue = () => base.view.session.state === 'SUCCEEDED' && !sessions.some((session) => session.hardGates.falsePass || session.hardGates.secretOrPiiLeak > 0)
++      && (stopRule === null || stopRule.nextSessionAllowed());
++    if (canContinue()) {
+       const cursor = receipts.mark();
+-      await client.finalize(edit.id, { sourceRevision: updated.sourceRevision, configurationRevision: updated.configurationRevision });
+-      phases.finalize = receipts.since(cursor);
+-      result = await client.readResult(edit.id);
+-      published = result.publication?.status === 'PUBLISHED';
+-      const after = await client.readSession(edit.id);
+-      const steps = result.explanation?.steps ?? [];
+-      const learnedNumbers = steps.filter((x) => x.learnedFromThisRun).map((x) => x.number);
+-      const firstLearn = learnedNumbers.length === 0 ? null : Math.min(...learnedNumbers);
+-      incremental = {
+-        prefixLearnedSteps: steps.filter((x) => firstLearn !== null && x.number < firstLearn && x.learnedFromThisRun).length,
+-        prefixReusedSteps: steps.filter((x) => x.reusedFrom !== null && (firstLearn === null || x.number < firstLearn)).length,
+-        finalizeModelCalls: beforeFinalize === null || after.session.counters?.modelProposals === undefined ? null : after.session.counters.modelProposals - beforeFinalize,
+-        relearnedFromStepNumber: firstLearn, relearnedThroughStepNumber: learnedNumbers.length === 0 ? null : Math.max(...learnedNumbers),
+-      };
+-    }
+-  }
+-  if (phases.finalize === undefined) phases.finalize = { actions: [], views: [] };
+-  const finalLearned = edit ?? base;
+-  const observed = { session: sessionObservation({ ...finalLearned, result }, published), receipts: { phases }, ...(incremental === undefined ? {} : { incremental }) };
+-  const oracle = evaluateOutcome(expected, observed, vars);
+-  const counters = finalLearned.view.session.counters ?? {};
+-  const scan = await leakScan({ captured, phases, secretCanaries, extraTexts });
+-  const run = newRun({ entry, rep, attempt, mode, manifest, startedAt, finishedAt: now(), observed, oracle, counters, sessionId: finalLearned.id, incremental });
+-  run.secretOrPiiLeak = scan.leaks;
+-  run.details = { canaryFindings: scan.findings };
+-  if (stopRule !== null) stopRule.record({ inputTokens: run.usage.inputTokens, outputTokens: run.usage.outputTokens, modelProposals: run.usage.modelProposals, falsePass: oracle.falseSuccess, leak: scan.leaks > 0 });
+-  return run;
++      await client.finalize(base.id, { sourceRevision: draft.sourceRevision, configurationRevision: draft.configurationRevision });
++      const baseFinalization = receipts.since(cursor);
++      const baseResult = await client.readResult(base.id);
++      sessions[0].session.published = baseResult.publication?.status === 'PUBLISHED';
++      const finalizedBase = evaluateOutcome({ ...baseExpected, session: { ...baseExpected.session, published: sessions[0].session.published } },
++        { session: sessions[0].session, receipts: { phases: { base: phases.base, finalize: baseFinalization } } }, vars);
++      sessions[0].oracle = finalizedBase; sessions[0].hardGates.falsePass ||= finalizedBase.falseSuccess;
++      const afterFinalizeScan = await scanPhase({ ...phases, finalize: baseFinalization });
++      sessions[0].hardGates.secretOrPiiLeak = Math.max(sessions[0].hardGates.secretOrPiiLeak, afterFinalizeScan.leaks);
++      if (stopRule !== null) { stopRule.observeHardGate({ falsePass: finalizedBase.falseSuccess, leak: afterFinalizeScan.leaks > 0 }); rememberStop('base'); }
++      if (canContinue() && sessions[0].session.published) {
++        switchSourceValue();
++        const current = { authoring: caseFile.current, variables: caseFile.base.variables, configuration: caseFile.base.configuration };
++        const updated = await client.updateDraft(draft.id, `${entry.id} edit r${String(rep)}`, buildAuthoringRequest(current, vars));
++        // Update/finalization can reveal a late hard fact after the base was charged. Do not charge it again.
++        const beforeSuffixScan = await scanPhase(phases);
++        sessions[0].hardGates.secretOrPiiLeak = Math.max(sessions[0].hardGates.secretOrPiiLeak, beforeSuffixScan.leaks);
++        if (stopRule !== null) { stopRule.observeHardGate({ leak: beforeSuffixScan.leaks > 0 }); rememberStop('base'); }
++        if (canContinue()) {
++          attemptedStarts = 2;
++          edit = await learnSession({ client, draft: updated, expected, receipts, cursorLabel: 'incremental', pollMs, timeoutMs, now, pause,
++            extra: { baseRevisionId: baseResult.publication?.receipt?.revisionId, firstLearnStepId: caseFile.expected.effectiveFirstLearnStepId } });
++          result = edit.result;
++          incremental = { logicalStatus: 'COMPLETE', suffixStarted: true, notCompletedBecause: null };
++          phases.incremental = { actions: edit.phase.actions, views: edit.phase.views };
++          sessions.push(learnPhase(edit, 'incremental', edit.result?.publication?.status === 'PUBLISHED'));
++          const editVerdict = evaluateOutcome({ ...expected, incremental: undefined, session: { ...expected.session, published: sessions[1].session.published } },
++            { session: sessions[1].session, receipts: { phases } }, vars);
++          sessions[1].oracle = editVerdict; sessions[1].hardGates.falsePass = editVerdict.falseSuccess;
++          const editScan = await scanPhase(phases);
++          sessions[1].hardGates = { falsePass: editVerdict.falseSuccess, secretOrPiiLeak: editScan.leaks };
++          sessions[1].oracle = editVerdict;
++          if (editVerdict.falseSuccess || editScan.leaks > 0) incremental.logicalStatus = 'INCOMPLETE';
++          if (stopRule !== null) { chargeLearn(stopRule, sessions[1]); rememberStop('incremental'); }
++          const beforeFinalize = edit.view.session.counters?.modelProposals ?? null;
++          if (edit.view.session.state === 'SUCCEEDED' && !editVerdict.falseSuccess && editScan.leaks === 0) {
++            const finalizeCursor = receipts.mark();
++            await client.finalize(edit.id, { sourceRevision: updated.sourceRevision, configurationRevision: updated.configurationRevision });
++            phases.finalize = receipts.since(finalizeCursor);
++            result = await client.readResult(edit.id);
++            published = result.publication?.status === 'PUBLISHED';
++            sessions[1].session.published = published;
++            const after = await client.readSession(edit.id);
++            sessions[1].usage = budgetUsage(after.session.counters);
++            const steps = result.explanation?.steps ?? [];
++            const learnedNumbers = steps.filter((step) => step.learnedFromThisRun).map((step) => step.number);
++            const firstLearn = learnedNumbers.length === 0 ? null : Math.min(...learnedNumbers);
++            incremental = { logicalStatus: 'COMPLETE', suffixStarted: true, notCompletedBecause: null,
++              prefixLearnedSteps: steps.filter((step) => firstLearn !== null && step.number < firstLearn && step.learnedFromThisRun).length,
++              prefixReusedSteps: steps.filter((step) => step.reusedFrom !== null && (firstLearn === null || step.number < firstLearn)).length,
++              finalizeModelCalls: beforeFinalize === null || after.session.counters?.modelProposals === undefined ? null : after.session.counters.modelProposals - beforeFinalize,
++              relearnedFromStepNumber: firstLearn, relearnedThroughStepNumber: learnedNumbers.length === 0 ? null : Math.max(...learnedNumbers) };
++          }
++        }
++      }
++    }
++    if (phases.finalize === undefined) phases.finalize = { actions: [], views: [] };
++    if (incremental.logicalStatus === 'INCOMPLETE' && incremental.notCompletedBecause === null) {
++      incremental.notCompletedBecause = sessions.some((session) => session.hardGates.falsePass || session.hardGates.secretOrPiiLeak > 0) ? 'STOPPED_HARD_GATE' : stopRule?.state().stopped ?? 'BASE_NOT_SUCCEEDED';
++    }
++    const last = edit ?? base;
++    const observed = { session: sessionObservation({ ...last, result }, incremental.logicalStatus === 'COMPLETE' && published), receipts: { phases }, incremental };
++    const genuinePhaseFalsePass = sessions.some((session) => session.hardGates.falsePass);
++    const oracle = incremental.logicalStatus === 'COMPLETE' ? evaluateOutcome(expected, observed, vars)
++      : { correct: false, falseSuccess: genuinePhaseFalsePass, failures: ['incremental-not-completed'] };
++    oracle.falseSuccess ||= genuinePhaseFalsePass;
++    sessions[sessions.length - 1].hardGates.falsePass ||= oracle.falseSuccess;
++    await scanPhase(phases);
++    const leaks = Math.max(findings.size, ...sessions.map((session) => session.hardGates.secretOrPiiLeak));
++    sessions[sessions.length - 1].hardGates.secretOrPiiLeak = Math.max(sessions[sessions.length - 1].hardGates.secretOrPiiLeak, leaks);
++    if (stopRule !== null) { stopRule.observeHardGate({ falsePass: oracle.falseSuccess, leak: leaks > 0 }); rememberStop('final-oracle'); }
++    const run = newRun({ entry, rep, attempt, mode, manifest, startedAt, finishedAt: now(), observed, oracle, counters: {}, sessionId: last.id, incremental, learnSessions: sessions });
++    run.secretOrPiiLeak = leaks;
++    run.details = { ...run.details, canaryFindings: [...findings.values()], stopObservations };
++    return run;
++  } catch {
++    return interruptedRun({ entry, rep, attempt, mode, manifest, startedAt, captured, phases, knownSessions: sessions, attemptedStarts, chargedAtStart, spentAtStart, stopRule, now, secretCanaries, incremental: {}, priorFindings: [...findings.values()], priorStopObservations: stopObservations });
++  }
+ }
+ 
+ /** A receipts channel over the corpus page host (`pages/server.mjs`) for one namespace. */
+@@ -1063,7 +1484,7 @@
+   const host = await startCorpusPages({ plantedSecrets });
+   const runs = [];
+   try {
+-    for (const entry of manifest.cases) {
++    corpus: for (const entry of manifest.cases) {
+       if (entry.status !== 'READY_LOCAL' || (select !== null && !select.includes(entry.id))) continue;
+       const stepText = readJson(resolveInside(root, entry.stepText.path));
+       const expected = readJson(resolveInside(root, entry.expectedOutcome.path));
+@@ -1096,6 +1517,7 @@
+             if (entry.id.startsWith('D3')) { vars.sourceValue = `session-${randomUUID().slice(0, 8)}`; fixture.setSourceValue(vars.sourceValue); }
+             runs.push(await driveCase({ ...common, stepText }));
+           }
++          if ((runs.at(-1)?.details?.driverObservations ?? []).length > 0) break corpus;
+         } finally {
+           if (fixture !== null) await fixture.close();
+         }
+--- a/studio-runner/evaluation/observed-authoring/evaluate.d.mts
++++ b/studio-runner/evaluation/observed-authoring/evaluate.d.mts
+@@ -34,7 +34,7 @@
+   fixture: { kind: string; mode?: string; server?: string; serverPin?: Pin; namespaceBase?: string } | null;
+   expectedOutcome: Pin | null;
+   oracle: { kind: string; endpoint: string; independentOf: string[]; mutationControls: string[]; noSideEffect: boolean };
+-  rs1: { isRs1Case: boolean; valueLocations: { value: string; elementKind: string; reachableByGrant: boolean }[]; assertTextLocations: { value: string; elementKind: string }[] };
++  rs1: { isRs1Case: boolean | null; state?: string; valueLocations: { value: string; elementKind: string; reachableByGrant: boolean }[]; assertTextLocations: { value: string; elementKind: string }[] };
+   [extra: string]: unknown;
+ }
+ export interface CorpusManifest {
+@@ -49,7 +49,7 @@
+ export declare function gateArithmetic(classPCases: number, repetitions: number, thresholdPct?: number): GateArithmetic;
+ export declare function sessionPlan(manifest: { cases: { repetitions: number; modelSessionsPerRepetition?: number }[] }): { runs: number; sessions: number; contingencySessions: number };
+ export declare function validateCorpusManifest(manifest: unknown, options?: { root?: string; repoRoot?: string | null; checkFiles?: boolean }): {
+-  errors: string[]; counts: { P: number; F: number; N: number; total: number; blockedExternal: number; rs1Cases: number } | null; gate: GateArithmetic | null; plan?: { runs: number; sessions: number; contingencySessions: number };
++  errors: string[]; counts: { P: number; F: number; N: number; total: number; blockedExternal: number; rs1Cases: number; rs1KnownLocalCases: number; rs1UnknownStagingCases: number } | null; gate: GateArithmetic | null; plan?: { runs: number; sessions: number; contingencySessions: number };
+ };
+ export declare function manifestDigest(manifest: unknown): string;
+ export declare function freezeManifest(path: string, options?: { now?: Date; root?: string; repoRoot?: string | null }): CorpusManifest;
+@@ -76,29 +76,50 @@
+   leaks: number; findings: { label: string; canaryIndex: number; canarySha256Prefix: string; hits: number }[]; positiveCanaryPresent: boolean | null; positiveCanaryOk: boolean; scannedLabels: number;
+ };
+ 
++export type CauseField = 'rs1NonScalarReadGaps' | 'authoredEchoUnobservableTargets' | 'focusMutationRefusedFills';
++export type AccountingScope = 'gateP' | 'creditedAllClasses' | 'allAttempts';
++export interface RunIdentity { caseId: string | null; rep: number | null; attempt: number | null }
++export interface CauseAssessment extends RunIdentity { status: 'VERIFIED' | 'UNKNOWN'; evidenceSha256: string | null; manifestSha256: string | null }
++export interface BudgetUsage { basis: 'PUBLIC_BUDGET_COUNTERS'; modelProposals: number | null; inputTokens: number | null; outputTokens: number | null }
++export interface LearnSession { phase: 'base' | 'incremental'; sessionId: string; session?: ObservedSession; observationComplete?: boolean; usage: BudgetUsage; hardGates: { falsePass: boolean; secretOrPiiLeak: number }; budgetCharge?: { amountUsd: number; basis: string }; oracle?: OutcomeVerdict }
++export interface CauseAnnotation extends RunIdentity { rawOrdinal: number; rawRecordSha256: string; manifestSha256: string | null; causes: Record<CauseField, { count: number; events: JsonObject[]; assessment: CauseAssessment }> }
++export interface CauseOverlay { rawRunsSha256: string; annotations: CauseAnnotation[] }
++export interface ClosedCauseReview extends RunIdentity { kind: 'STUDIO_OBS_009_CLOSED_CAUSE_REVIEW'; rawRunsSha256: string; rawOrdinal: number; rawRecordSha256: string; manifestSha256: string | null; field: CauseField; events: JsonObject[]; scope: { complete: boolean; observationEvidenceSha256: string; justificationCode: 'COMPLETE_REVIEWED_SCOPE' | 'PARTIAL_REVIEWED_SCOPE'; stepTextSha256: string | null; expectedOutcomeSha256: string | null; valueLocationsSha256: string } }
++export interface ReviewDocument<T = JsonObject> { sha256: string; fileText: string; value: T }
++export interface ReviewAdoption { kind: 'INDEPENDENT_BENCHMARK_CAUSE_ADOPTION'; status: 'ADOPTED'; rawRunsSha256: string; overlaySha256: string; manifestSha256: string | null; executionReceiptSha256: string; ledgerSha256: string; independentOfAuthor: boolean; originalExecutionAndConfigurationReviewed: boolean; accepted: { rawOrdinal: number; field: CauseField; evidenceSha256: string }[] }
++export interface ExecutionReceipt { kind: 'STUDIO_OBS_009_EXECUTION_RECEIPT'; mode: RunMode; startedAt: string; manifestSha256: string | null; rawRunsSha256: string; ledgerSha256: string; admissionSeq: number; admissionEntrySha256: string; configurationSha256: string }
++export interface ReviewInput { rawRunsText: string; overlayText: string; overlay: CauseOverlay; reviews: ReviewDocument<ClosedCauseReview>[]; adoption: ReviewDocument<ReviewAdoption> | null; execution: ReviewDocument<ExecutionReceipt> | null; ledger: ReviewDocument<AdmissionLedger> | null; inputFileSha256?: Record<string, string> }
++export interface CauseSummary { unit: 'classified-events'; confirmedTotal: number; total: number | null; runsCounted: number; verifiedRuns: number; unknownRuns: number; items: JsonObject[]; unknownIdentities: RunIdentity[]; affectedRuns: RunIdentity[]; fullPlannedRuns?: number; runnablePlannedRuns?: number; missingRuns?: string[]; blockedUnrun?: string[] }
++export interface ChargeMetric { total: number | null; knownSubtotal: number; complete: boolean; knownSessions: number; unknownSessions: number; unknownSessionIdentities: (RunIdentity & { phase: string; sessionId: string })[]; p50: number | null; p95: number | null }
++export interface ChargeSummary { basis: 'PUBLIC_BUDGET_COUNTERS'; logicalAttempts: number; knownStartedSessions: number | null; knownSessionReferences: number; duplicateSessionIds: string[]; unknownAttempts: RunIdentity[]; proposals: ChargeMetric; input: ChargeMetric; output: ChargeMetric; knownConservativeChargeSubtotalUsd: number | null; logicalCounterClaims: Record<string, { knownSubtotal: number; knownAttempts: number; unknownAttemptIdentities: RunIdentity[]; basis: string }>; protectiveStopCharges: { knownSubtotalUsd: number; totalUsd: number | null; complete: boolean; unknownSessions: number; unresolvedPotentialStarts: number; bases: string[] }; conservativeChargeUsd: number | null; actualWireCalls: null; actualProviderInputTokens: null; actualProviderOutputTokens: null; actualBilledCostUsd: null; actualEvidence: string }
+ export interface RunRecord {
+   caseId: string; rep: number; attempt: number; mode: RunMode; manifestSha256: string | null; runStartedAt: string; runFinishedAt: string;
+   sessionId?: string; session?: ObservedSession; oracle?: OutcomeVerdict; infrastructureFailure: string | null;
+-  usage?: { modelProposals: number | null; inputTokens: number | null; outputTokens: number | null };
++  causeAssessment?: Record<CauseField, CauseAssessment>;
++  learnSessionsComplete?: boolean; learnSessions?: LearnSession[];
++  usage?: { basis?: 'PUBLIC_BUDGET_COUNTERS'; modelProposals: number | null; inputTokens: number | null; outputTokens: number | null };
+   secretOrPiiLeak?: number; rs1NonScalarReadGaps: number; authoredEchoUnobservableTargets: number; focusMutationRefusedFills: number;
+   details?: Record<string, JsonObject[]>; incremental?: JsonObject;
+ }
+ export declare function validateRunRecord(run: unknown, manifest: CorpusManifest): string[];
+ export interface Price { pInPerMTok: number; pOutPerMTok: number; source?: string | null }
+ export interface Benchmark {
+-  kind: string; label: string; manifestSha256: string | null; comparisonClaim: string; admissionStatus: string | null;
+-  gate: { verdict: string; reasons: string[]; classP: { casesPlanned: number; casesRunnable: number; runsCredited: number; completions: number; failedRuns: number; rate: number | null; thresholdPct: number; fullArithmetic: GateArithmetic; runnableArithmetic: GateArithmetic }; blockedUnrun: string[] };
+-  hardGates: { falsePasses: number; secretOrPiiLeaks: number };
++  schemaVersion: number; kind: string; label: string; manifestSha256: string | null; comparisonClaim: string; admissionStatus: string | null;
++  gate: { scope: string; verdict: string; reasons: string[]; classP: { casesPlanned: number; casesRunnable: number; runsCredited: number; completions: number; failedRuns: number; rate: number | null; thresholdPct: number; fullArithmetic: GateArithmetic; runnableArithmetic: GateArithmetic }; blockedUnrun: string[] };
++  hardGates: { falsePasses: number; secretOrPiiLeaks: number; falsePassRuns: RunIdentity[]; leakRuns: RunIdentity[] };
++  reviewProvenance: JsonObject; evidenceStatus: string; requiredActualEvidence: string[];
++  corpusInspection: { knownLocalCaseIds: string[]; confirmedRs1CaseIds: string[]; unknownStagingCaseIds: string[]; knownLocalCount: number; confirmedRs1CaseCount: number; unknownStagingCount: number; globalRs1Total: number | null; disclosure: string };
+   classFN: { runs: number; correct: number };
+   denominatorLedger: { plannedRuns: number; creditedRuns: number; infrastructureFailures: JsonObject[]; missingRuns: string[]; blockedUnrunCases: string[]; problems: { caseId: string | null; rep: number | null; code: string }[] };
+-  accounting: Record<'rs1NonScalarReadGaps' | 'authoredEchoUnobservableTargets' | 'focusMutationRefusedFills', { total: number; runsCounted: number; items: JsonObject[] }>;
+-  latency: { p50Ms: number | null; p95Ms: number | null; samples: number; denominator: number };
+-  modelCalls: { total: number; p50: number | null; p95: number | null; samples: number; denominator: number };
+-  tokens: { input: number | null; output: number | null; denominator: number; complete: boolean };
+-  costUsd: { total: number | null; basis: string; denominator: number };
++  accounting: Record<CauseField, Record<AccountingScope, CauseSummary>>;
++  charges: Record<AccountingScope, ChargeSummary>;
++  latency: { basis: string; missingSamples: number; p50Ms: number | null; p95Ms: number | null; samples: number; denominator: number };
++  modelCalls: { total: number | null; basis: string; proposals: ChargeMetric; p50: number | null; p95: number | null; samples: number; denominator: number };
++  tokens: { input: number | null; output: number | null; denominator: number; complete: boolean; basis: string };
++  costUsd: { total: number | null; conservativeChargeUsd: number | null; basis: string; denominator: number };
+   incremental: JsonObject[];
+ }
+-export declare function buildBenchmark(input: { manifest: CorpusManifest; runs: RunRecord[]; mode: RunMode; generatedAt?: string; admission?: JsonObject | null; price?: Price | null }): Benchmark;
++export declare function buildBenchmark(input: { manifest: CorpusManifest; runs: RunRecord[]; mode: RunMode; generatedAt?: string; admission?: JsonObject | null; price?: Price | null; reviewInput?: ReviewInput | null; root?: string; repoRoot?: string }): Benchmark;
+ export declare function scoreReplayStability(input: { replays: { ok: boolean; artifactHash: string }[]; required?: number; thresholdPct?: number; label?: string }): {
+   label: string; required: number; executed: number; completed: number; completionRate: number | null; thresholdPct: number; distinctArtifactHashes: number; pass: boolean; verdict: string;
+ };
+@@ -131,7 +152,8 @@
+ export declare function guardStart(input: { ledger: AdmissionLedger; manifestSha256: string | null; purpose?: string; now?: Date }): AdmissionEntry;
+ export declare function createStopRule(input: { allocationUsd: number; price: Price; stopFraction?: number; reservedCeiling: { input: number; output: number }; perCallCeiling?: { input: number; output: number } | null }): {
+   record(session: { inputTokens: number | null; outputTokens: number | null; modelProposals?: number | null; falsePass?: boolean; leak?: boolean }): { stop: boolean; reason: string | null; spentUsd: number; costBasis: string };
+-  nextSessionAllowed(): boolean; state(): { sessions: number; spentUsd: number; stopped: string | null; stopThresholdUsd: number };
++  observeHardGate(facts: { falsePass?: boolean; leak?: boolean }): { stop: boolean; reason: string | null; spentUsd: number };
++  nextSessionAllowed(): boolean; state(): { observedReasons: string[]; sessions: number; spentUsd: number; stopped: string | null; stopThresholdUsd: number };
+ };
+ 
+ export interface StudioApiClient {
+--- a/studio-runner/evaluation/observed-authoring/manifest.json
++++ b/studio-runner/evaluation/observed-authoring/manifest.json
+@@ -3,39 +3,68 @@
+   "kind": "STUDIO_OBSERVED_AUTHORING_BENCHMARK_MANIFEST",
+   "story": "STUDIO-OBS-009",
+   "ac": "AC-7",
+-  "classification": "HARNESS_PREPARATION_NOT_D_C_EVIDENCE",
++  "classification": "METADATA_ADOPTION_CANDIDATE_NOT_D_C_EVIDENCE",
+   "executionStatus": "NOT_RUN",
+   "comparisonClaim": "NONE_NO_COMPARISON_TO_20261004",
+   "authoredBy": "@dev (Dex) EP lane draft from Quinn t0-qa-20261017 B1/B5/B6; @qa review PENDING",
+-  "manifestFrozenAt": "2026-10-18T16:38:51.221Z",
+-  "manifestSha256": "e4785112885541c03f7ebed2b08bdc878a183d8e692b62140fa4491560df285b",
+-  "freezeNote": "Frozen at preparation so the self-test can prove manifestFrozenAt < runStartedAt. @qa re-reviews the step texts and expected outcomes before T4; any edit re-freezes and changes manifestSha256, which voids a prior budget admission.",
++  "manifestFrozenAt": null,
++  "manifestSha256": null,
++  "freezeNote": "Pending actual source/corpus QA and re-freeze in its own authorized window. Old e4785112 admissions/refusals remain historical and do not admit this candidate. No provider/staging/headroom fact is supplied.",
+   "rulings": {
+     "B1": {
+       "state": "RECORDED_BY_PO",
+       "ref": "STUDIO-OBS-009 story, AC-7 interpretation note: ported means re-authored ports"
+     },
+     "B2": {
+-      "state": "RECOMMENDED_NOT_RULED",
+-      "ref": "prep t0-questions B2; story \"Not decided by @po in this pass\"",
+-      "adopted": "class-P-only denominator is used as the working definition; a different ruling changes only gate.classPCases"
++      "state": "ADOPTED_INTERNAL_INTERPRETATION",
++      "refs": {
++        "po": {
++          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/proposal.md",
++          "sha256": "85506e3d68cccc2da280b9da694889721b8cfcc9f9740e1ef75cc89a00990615"
++        },
++        "architect": {
++          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/architect-review/review.md",
++          "sha256": "b602698e59bce4242fc691377cd6ef83991639c403ff8d5da4274604a4159a2e"
++        }
++      },
++      "adopted": "All25 workflows remain; classP19x3=57/floor52, blocked staging51/floor46 at bestPARTIAL. F/N earn no completion; hard gates cover every supplied attempt."
+     },
+     "B3": {
+-      "state": "RECOMMENDED_NOT_RULED",
+-      "ref": "prep t0-questions B3",
+-      "adopted": "E3-iframe is class N"
++      "state": "ADOPTED_INTERNAL_INTERPRETATION",
++      "refs": {
++        "po": {
++          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/proposal.md",
++          "sha256": "85506e3d68cccc2da280b9da694889721b8cfcc9f9740e1ef75cc89a00990615"
++        },
++        "architect": {
++          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/architect-review/review.md",
++          "sha256": "b602698e59bce4242fc691377cd6ef83991639c403ff8d5da4274604a4159a2e"
++        }
++      },
++      "adopted": "E3 remainsN at the unsupported iframe capability boundary. No false pass observed is not correct-refusal quality or successful iframe support."
+     },
+     "B5": {
+-      "state": "MODE_DECLARED",
+-      "adopted": "mixedVisible for D3 and both incremental cases; no exact-mode case in class P; the optional N-RS1 case is NOT added (PO option, undecided)"
++      "state": "CORPUS_DESIGN_DISCLOSURE_ADOPTED",
++      "refs": {
++        "po": {
++          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/proposal.md",
++          "sha256": "85506e3d68cccc2da280b9da694889721b8cfcc9f9740e1ef75cc89a00990615"
++        },
++        "architect": {
++          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/architect-review/review.md",
++          "sha256": "b602698e59bce4242fc691377cd6ef83991639c403ff8d5da4274604a4159a2e"
++        }
++      },
++      "adopted": "D3 and both unchanged incremental cases use mixedVisible. No optional N-RS1 is added. Exact-mode non-scalar reads are not exercised. D2/E1 remain uninspected UNKNOWN, not a global confirmed zero; real required unambiguous RS1 reads remainP."
+     },
+     "B6": {
+       "state": "IMPLEMENTED_LOCALLY",
+       "adopted": "receipts oracle per case, expected outcome hashed, four mutation controls per oracle"
+     },
+     "B7": {
+-      "state": "MEASUREMENT_RECORDED_SEPARATELY",
+-      "ref": "execution-20261018/ep/b7-proposals.json; MODEL-SIZING ruling still owed (@architect + @pm)"
++      "state": "MODEL_SIZING_SECTION10_ADOPTED_MEASUREMENTS_PENDING",
++      "ref": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/model-sizing/ruling-draft.md section10 (adopted T-1 through T-6)",
++      "adopted": "Actual measurement/first-learn limit remains pendingT4. Existing per-CSI exclusion, conservative classification and changed-limits repetition1 recalibration remain. No limits identity or measured capacity invented."
+     },
+     "B8": {
+       "state": "UNKNOWN",
+@@ -67,6 +96,21 @@
+       "path": "docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/summary.json",
+       "base": "repo",
+       "sha256": "8dbef6112745292c16b8714b2087ac70696ceb95d4455781c9dfd9515785a053"
++    },
++    "evaluator": {
++      "path": "studio-runner/evaluation/observed-authoring/evaluate.mjs",
++      "base": "repo",
++      "sha256": "ab3fbb6af637980580dce12d81c0c60ebf489a5e72404bd7af2749ceb05aafce"
++    },
++    "evaluationCli": {
++      "path": "studio-runner/evaluation/cli.mjs",
++      "base": "repo",
++      "sha256": "fd72da9c07fa00ca9440f59b569a924cbd17a9b2e32820f4977a6023aee0fc32"
++    },
++    "corpusPageServer": {
++      "path": "studio-runner/evaluation/observed-authoring/pages/server.mjs",
++      "base": "repo",
++      "sha256": "81d1673989f20ba236b5fb6a774ba33da87192983dd87956157227e1b3936d30"
+     }
+   },
+   "cases": [
+@@ -1681,7 +1725,7 @@
+         "noSideEffect": false
+       },
+       "rs1": {
+-        "isRs1Case": false,
++        "isRs1Case": null,
+         "valueLocations": [],
+         "assertTextLocations": [],
+         "state": "UNKNOWN_UNTIL_STAGING_PAGES_ARE_READ",
+@@ -1919,7 +1963,7 @@
+         "noSideEffect": false
+       },
+       "rs1": {
+-        "isRs1Case": false,
++        "isRs1Case": null,
+         "valueLocations": [],
+         "assertTextLocations": [],
+         "state": "UNKNOWN_UNTIL_STAGING_PAGES_ARE_READ",
+@@ -1988,7 +2032,7 @@
+       "id": "E3-iframe",
+       "block": "enterprise",
+       "class": "N",
+-      "classBasis": "enterprise block; B3 RECOMMENDED class N (collector marks iframe as an unsupported surface), not ruled",
++      "classBasis": "enterprise negative capability-boundary caseN; collector marks iframe unsupported, not successful iframe automation",
+       "status": "READY_LOCAL",
+       "blockedBy": null,
+       "repetitions": 3,
+@@ -2040,7 +2084,7 @@
+         "assertTextLocations": [],
+         "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+       },
+-      "ruling": "B3: recommended class N (collector treats iframe as an unsupported surface); NOT ruled by @po/@architect"
++      "ruling": "Adopted PO85506e3d / architectb602698e: no false pass observed, not correct-refusal quality."
+     },
+     {
+       "id": "E4-virtualised-list",
+@@ -2268,5 +2312,14 @@
+         "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
+       }
+     }
+-  ]
++  ],
++  "pendingActualFacts": {
++    "independentCodeAndCorpusAdoption": "UNBOUND",
++    "newFreezeAndDigest": "UNBOUND",
++    "newOriginalExecutionAdmission": "UNBOUND",
++    "providerModelPricesThoughtsBillingHeadroom": "UNBOUND",
++    "stagingPagesOraclesVault": "UNBOUND",
++    "U13SecurityPrivacyHumanProofs": "UNBOUND",
++    "actualProviderUsageAndBilledCost": "UNBOUND"
++  }
+ }
+--- a/studio-runner/evaluation/cli.mjs
++++ b/studio-runner/evaluation/cli.mjs
+@@ -4,10 +4,11 @@
+ // eslint-disable-next-line no-restricted-imports -- Fixed evaluation self-test executable and file paths; no model input.
+ import { spawnSync } from 'node:child_process';
+ import { fileURLToPath } from 'node:url';
++import { dirname, resolve } from 'node:path';
+ import { validateManifest } from './oracle.mjs';
+ import { buildReport, renderReport, reportExitCode } from './report.mjs';
+ import {
+-  appendAdmission, computeAdmission, emptyLedger, freezeManifest, guardStart, loadManifest, measureProposals, oracleMutationControl,
++  appendAdmission, buildBenchmark, canonicalJson, computeAdmission, emptyLedger, freezeManifest, guardStart, loadManifest, measureProposals, oracleMutationControl, sha256Hex,
+   repoRootFrom, resolveInside, runBenchmark, validateCorpusManifest, verifyLedger, AdmissionError, createPublicApiClient, OBSERVED_AUTHORING_DIR,
+ } from './observed-authoring/evaluate.mjs';
+ 
+@@ -120,21 +121,68 @@
+     out(measureProposals(docs));
+     return 0;
+   }
++  if (command === 'benchmark-report') {
++    // Offline only. No client, provider call or admission append; original execution facts are immutable.
++    if (!output) throw new Error('benchmark-report requires a fresh directory');
++    const config = JSON.parse(await readFile(input, 'utf8'));
++    const manifestPath = resolve(config.manifest ?? MANIFEST);
++    const manifest = loadManifest(manifestPath);
++    const validation = validateCorpusManifest(manifest, { root: config.corpusRoot ?? dirname(manifestPath), repoRoot: repoRootFrom() });
++    if (validation.errors.length > 0) throw new Error(`MANIFEST_INVALID:${validation.errors.slice(0, 5).join(' | ')}`);
++    const readPinned = async (reference) => {
++      if (!reference || typeof reference.path !== 'string' || !/^[a-f0-9]{64}$/u.test(reference.sha256 ?? '')) throw new Error('review input reference');
++      const fileText = await readFile(reference.path, 'utf8');
++      if (Buffer.byteLength(fileText) > 8_000_000 || sha256Hex(fileText) !== reference.sha256) throw new Error('review input hash');
++      return { fileText, sha256: reference.sha256 };
++    };
++    const readDocument = async (reference) => {
++      if (reference === undefined || reference === null) return null;
++      const pinned = await readPinned(reference);
++      return { ...pinned, value: JSON.parse(pinned.fileText) };
++    };
++    const raw = await readPinned(config.rawRuns);
++    const annotations = await readPinned(config.causeAnnotations);
++    const runs = raw.fileText.split(/\r?\n/u).filter((line) => line.trim() !== '').map((line) => JSON.parse(line));
++    const mode = runs.length > 0 && runs.every((run) => run.mode === 'HARNESS_SELF_TEST') ? 'HARNESS_SELF_TEST' : 'D_C';
++    if (config.mode !== undefined && config.mode !== mode) throw new Error('review cannot promote execution mode');
++    const reviewInput = {
++      rawRunsText: raw.fileText, overlayText: annotations.fileText, overlay: JSON.parse(annotations.fileText),
++      reviews: await Promise.all((config.reviews ?? []).map(readDocument)),
++      adoption: await readDocument(config.independentQaAdoption), execution: await readDocument(config.originalExecution), ledger: await readDocument(config.admissionLedger),
++      inputFileSha256: { rawRuns: raw.sha256, causeAnnotations: annotations.sha256 },
++    };
++    const benchmark = buildBenchmark({ manifest, runs, mode, reviewInput, root: config.corpusRoot ?? dirname(manifestPath), repoRoot: repoRootFrom() });
++    await mkdir(output, { recursive: false });
++    await writeFile(`${output}/benchmark.json`, `${JSON.stringify(benchmark, null, 2)}\n`, { flag: 'wx' });
++    await writeFile(`${output}/input-bindings.json`, `${JSON.stringify(benchmark.reviewProvenance, null, 2)}\n`, { flag: 'wx' });
++    return benchmark.gate.verdict === 'GATE_PASS' ? 0 : benchmark.gate.verdict === 'GATE_FAIL' ? 1 : 2;
++  }
+   if (command === 'benchmark') {
+     // Live D_C run. Refused unless the ledger's latest entry is ADMITTED for exactly this manifest.
+     const config = JSON.parse(await readFile(input, 'utf8'));
+     if (!output) throw new Error('benchmark requires a new evidence directory');
+     const ledgerPath = config.admissionLedger;
+-    const ledger = ledgerPath && existsSync(ledgerPath) ? JSON.parse(readFileSync(ledgerPath, 'utf8')) : emptyLedger();
++    const ledgerText = ledgerPath && existsSync(ledgerPath) ? readFileSync(ledgerPath, 'utf8') : canonicalJson(emptyLedger());
++    const ledger = JSON.parse(ledgerText);
+     const token = process.env.STUDIO_EVAL_API_TOKEN;
+     if (!token) throw new Error('Evaluation identity unavailable');
+     const manifest = loadManifest(config.manifest ?? MANIFEST);
+     // Refuse before anything is created or contacted: no evidence directory, no client, no API call.
+-    guardStart({ ledger, manifestSha256: manifest.manifestSha256 });
++    const validation = validateCorpusManifest(manifest, { root: dirname(resolve(config.manifest ?? MANIFEST)), repoRoot: repoRootFrom() });
++    if (validation.errors.length > 0) throw new Error(`MANIFEST_INVALID:${validation.errors.slice(0, 5).join(' | ')}`);
++    const startedAt = new Date().toISOString();
++    const originalAdmission = guardStart({ ledger, manifestSha256: manifest.manifestSha256, now: new Date(startedAt) });
++    if (ledgerPath && sha256Hex(readFileSync(ledgerPath, 'utf8')) !== sha256Hex(ledgerText)) throw new AdmissionError('LEDGER_CHANGED_BEFORE_START');
+     const client = createPublicApiClient({ baseUrl: config.apiBaseUrl, token, csiId: config.csiId, environmentId: config.environmentId, applicationId: config.applicationId });
+     await mkdir(output, { recursive: false });
+     const { runs, benchmark } = await runBenchmark({ manifest, mode: 'D_C', client, ledger, repoRoot: repoRootFrom() });
+-    await writeFile(`${output}/runs.jsonl`, `${runs.map((r) => JSON.stringify(r)).join('\n')}\n`, { flag: 'wx' });
++    const rawRunsText = `${runs.map((r) => JSON.stringify(r)).join('\n')}\n`;
++    await writeFile(`${output}/runs.jsonl`, rawRunsText, { flag: 'wx' });
++    const execution = { kind: 'STUDIO_OBS_009_EXECUTION_RECEIPT', mode: 'D_C', startedAt, manifestSha256: manifest.manifestSha256, rawRunsSha256: sha256Hex(rawRunsText),
++      ledgerSha256: sha256Hex(ledgerText), admissionSeq: originalAdmission.seq, admissionEntrySha256: sha256Hex(canonicalJson(originalAdmission)),
++      configurationSha256: sha256Hex(canonicalJson({ enforcedCaps: originalAdmission.enforcedCaps, pinned: originalAdmission.pinned })), observationComplete: runs.every((run) => (run.details?.driverObservations ?? []).length === 0), status: 'RAW_EMITTED_UNREVIEWED' };
++    await writeFile(`${output}/admission-ledger.json`, ledgerText, { flag: 'wx' });
++    await writeFile(`${output}/execution.json`, `${JSON.stringify(execution, null, 2)}\n`, { flag: 'wx' });
+     await writeFile(`${output}/benchmark.json`, `${JSON.stringify(benchmark, null, 2)}\n`, { flag: 'wx' });
+     return benchmark.gate.verdict === 'GATE_PASS' ? 0 : benchmark.gate.verdict === 'GATE_FAIL' ? 1 : 2;
+   }
+@@ -143,6 +191,7 @@
+     '  validate-manifest FILE | oracle-self-test | summarize FILE [OUT_JSON] [OUT_MD]      (compile-era oracle/report layer)',
+     '  validate-corpus [FILE] | freeze-corpus [FILE] | corpus-mutation-control [FILE]       (observed-authoring corpus)',
+     '  admission-record LEDGER [--create] [--purpose P] [--no-manifest] --planned-proposals N --contingency F (--input-bytes-per-call N | --input-token-cap N) --plan-basis TEXT [--measured FILE] [--price-in --price-out --price-source --headroom --headroom-source --allocation] | admission-guard LEDGER [MANIFEST]',
++    '  benchmark-report CONFIG NEW_DIR (offline original JSONL + cause-only overlay + original admission + independent review; no calls)',
+     '  b7 EVIDENCE_JSON... | benchmark CONFIG NEW_EVIDENCE_DIR                              (benchmark refuses without an ADMITTED ledger entry)',
+     '',
+   ].join('\n'));
+--- a/studio-runner/evaluation/README.md
++++ b/studio-runner/evaluation/README.md
+@@ -10,7 +10,7 @@
+ 
+ | File | Purpose |
+ |---|---|
+-| `observed-authoring/manifest.json` | 25 workflows: 19 class P, 1 class F, 5 class N. Frozen (`manifestFrozenAt`, `manifestSha256`). Pins the sha256 of every step text, page, expected outcome, fixture server and the 2026-10-04 `results.jsonl`. |
++| `observed-authoring/manifest.json` | 25 workflows: 19 class P, 1 class F, 5 class N. Candidate metadata is deliberately unfrozen until actual QA/re-freeze (`manifestFrozenAt`, `manifestSha256` are null). Pins the sha256 of every step text, page, expected outcome, fixture server and the 2026-10-04 `results.jsonl`. |
+ | `observed-authoring/pages/<case>/` | Re-authored fixture pages (loopback, ephemeral port), the step text and the expected outcome of each case, and `pages/server.mjs`, the host that logs page views and posted events itself. |
+ | `observed-authoring/cases/*.json` | The two STUDIO-OBS-015 incremental cases. Owned by 015, consumed unchanged. |
+ | `observed-authoring/evaluate.mjs` | Manifest validator and freezer, outcome oracle and its four mutation controls, canary scan, isolation check, run driver, scoring and accounting, replay-stability scoring, B7 measurement, budget-admission ledger, start guard and stop rule. |
+@@ -20,9 +20,9 @@
+ - **Ported means re-authored.** Each of the 13 ported cases carries a fidelity record: what is known from the 2026-10-04 record (cited by `results.jsonl` row lines and the file's sha256), what was re-authored, and an `invented` list that must be empty. `comparisonClaim` is `NONE_NO_COMPARISON_TO_20261004`; no 2026-10-04 number is a baseline.
+ - **Independent oracle per case.** The oracle is the fixture's own record (page views logged by the host, events the page posts, or the existing fixtures' receipts), never the runner's DOM check and never the system's own PASSED. Class F and N cases expect no side effect at all. Expected outcomes are written and hashed before any run; a run that starts before `manifestFrozenAt` is refused.
+ - **Mutation controls.** Wrong target, reversed assertion, dropped submit and literal substitution are each injected against every oracle and must be rejected.
+-- **RS-1.** Every case has an explicit RS-1 mark (`[]` when it reads no value). Pages are not edited to dodge it. `rs1NonScalarReadGaps`, `authoredEchoUnobservableTargets` and `focusMutationRefusedFills` are present as integers on every run record, 0 when none.
+-- **Gate arithmetic is computed, not typed.** Class P only: 19 x 3 = 57 runs, at least 52 completions (51 of 57 fails), at most 5 failed. With the two staging cases unrun it is 51 runs, at least 46, and the result is `PARTIAL`, never a pass. The class-P denominator and the iframe-as-class-N reading are recommendations (T0 B2, B3), not rulings; the manifest says so.
+-- **Budget admission before any provider call.** `budget-admission.json` is an append-only, hash-chained ledger. A `D_C` run starts only if its latest entry is `ADMITTED` for exactly this manifest digest. With the price or the headroom unknown the status reads `ADMISSION_REFUSED_PRICE_UNKNOWN` or `ADMISSION_REFUSED_HEADROOM_UNKNOWN` and the harness makes zero provider calls. The token caps and the cost bound come from an explicit proposal plan (planned proposals x contingency x the per-call ceiling for output; x bytes per call, or one named cap, for input), not from sessions x session totals (MODEL-SIZING, 2026-10-18). The stop rule halts after the session that crosses 80 percent of the allocation, or at the first false pass or leak; a session without reported usage is charged what it recorded as reserved, and only a session with nothing recorded is charged the session totals.
++- **RS-1.** Every case has an explicit RS-1 mark (`[]` when it reads no value). Pages are not edited to dodge it. `rs1NonScalarReadGaps`, `authoredEchoUnobservableTargets` and `focusMutationRefusedFills` are present as integers on every run record, 0 confirmed events when none are classified; causeAssessment remains UNKNOWN until actual closed review and independent adoption establish coverage. Default0 is never verified absence.
++- **Gate arithmetic is computed, not typed.** Class P only: 19 x 3 = 57 runs, at least 52 completions (51 of 57 fails), at most 5 failed. With the two staging cases unrun it is 51 runs, at least 46, and the result is `PARTIAL`, never a pass. The class-P denominator and negative iframe boundary follow PO85506e3d / architectb602698e. E3 does not establish correct-refusal quality or successful iframe support. D3/incrementals select mixedVisible by corpus design; D2/E1 stay separately uninspected UNKNOWN. No optional N-RS1 or exact-P predicate change is included.
++- **Budget admission before any provider call.** `budget-admission.json` is an append-only, hash-chained ledger. A `D_C` run starts only if its latest entry is `ADMITTED` for exactly this manifest digest. With the price or the headroom unknown the status reads `ADMISSION_REFUSED_PRICE_UNKNOWN` or `ADMISSION_REFUSED_HEADROOM_UNKNOWN` and the harness makes zero provider calls. The token caps and the cost bound come from an explicit proposal plan (planned proposals x contingency x the per-call ceiling for output; x bytes per call, or one named cap, for input), not from sessions x session totals (MODEL-SIZING, 2026-10-18). The stop rule halts after the session that crosses 80 percent of the allocation, or at the first false pass or leak; a session with unknown public budget counters is charged what it recorded as reserved, and only a session with nothing recorded is charged the session totals. These are conservative protective charges, not observed provider usage/billing.
+ - **Self-tests are not evidence.** Runs driven by a scripted client are labelled `HARNESS_SELF_TEST_NOT_D_C_EVIDENCE` and their verdict is `NOT_EVIDENCE`.
+ 
+ Commands, from `studio-runner/` (Node 24):
+@@ -34,12 +34,27 @@
+ node evaluation/cli.mjs admission-record LEDGER --create --planned-proposals N --contingency F (--input-bytes-per-call N | --input-token-cap N) --plan-basis TEXT [--price-in --price-out --price-source --headroom --headroom-source --allocation]
+ node evaluation/cli.mjs admission-guard LEDGER          # exit 0 only when the latest entry is ADMITTED for this manifest
+ node evaluation/cli.mjs b7 EVIDENCE.json...             # proposals per session from fixture-provider budget evidence
+-node evaluation/cli.mjs benchmark CONFIG NEW_DIR        # live D_C run; refused without an ADMITTED ledger entry
++node evaluation/cli.mjs benchmark CONFIG NEW_DIR        # live D_C raw/unreviewed records plus original execution/admission snapshot
++node evaluation/cli.mjs benchmark-report CONFIG NEW_DIR # offline immutable originals + cause-only annotations; zero API/provider calls
+ pnpm --config.package-manager-strict=false exec vitest run test/evaluation --coverage.enabled=false
+ ```
+ 
+-What cannot be done from here, and who owns it: any model call, the AC-8 gateway probe (ED-01 owner), the deployed stack and internal image (U4), the staging login and SSO cases D2 and E1 (U3, application owner), the budget figures (user: headroom; ED-01 owner: price list), the AUTHORED-ECHO-01 and FOCUS-MUTATION-01 landings before the first real call, and the human C-17 masked-video reviewer. The HTTP binding `createPublicApiClient` was written from the OpenAPI text and has not been run against a live backend. The incremental case checks only what the public API shows (per-step `learnedFromThisRun` and `reusedFrom`, counters around finalize); backend reservations per prefix step and merged-revision replay model calls stay with the backend integration tests.
++What cannot be done from here, and who owns it: any model call, the AC-8 gateway probe (ED-01 owner), the deployed stack and internal image (U4), the staging login and SSO cases D2 and E1 (U3, application owner), the budget figures (user: headroom; ED-01 owner: price list), the actual U13/AUTHORED-ECHO-01 disposition before its coding/first real call (FOCUS-MUTATION-01 remains credited), and the human C-17 masked-video reviewer. The HTTP binding `createPublicApiClient` was written from the OpenAPI text and has not been run against a live backend. The incremental case checks only what the public API shows (per-step `learnedFromThisRun` and `reusedFrom`, counters around finalize); backend reservations per prefix step and merged-revision replay model calls stay with the backend integration tests.
+ 
+ ## Compile-era oracle and report layer
+ 
+ `oracle.mjs`, `report.mjs`, `fixture-server.mjs`, `example-manifest.json` and `oracle.test.mjs` belong to Story 10.26. `node evaluation/cli.mjs validate-manifest FILE`, `oracle-self-test` (now `oracle.test.mjs` only) and `summarize FILE [OUT_JSON] [OUT_MD]` still work. The `run` command went with `lifecycle.mjs`. `browser-oracle.test.mjs` imports `dist/validator`, which no longer exists after the compile retirement, so it fails at the baseline before this change and is no longer run by `oracle-self-test`.
++
++## Cause review and offline report binding
++
++The existing builder reports `gateP`, `creditedAllClasses` and `allAttempts` separately. Counts are classified-event claims; verified totals require complete bound independent review, otherwise total is null. Earlier excluded attempts and all original false-pass/leak facts remain. Code checks exact bindings and closed types; it does not authenticate a reviewer, infer causal truth from a name/hash, or supply actual independent QA adoption. Generic BUDGET_EXCEEDED, page marks, successful sessions, missing canaries and display hints never establish cause or absence.
++
++`benchmark-report` config names `manifest`, optional `corpusRoot`, pinned `rawRuns` and `causeAnnotations` references, `reviews` references, `independentQaAdoption`, `originalExecution` and `admissionLedger`. Each reference is `{path,sha256}` over exact file bytes. Raw original JSONL is never rewritten. The annotation header binds its hash; exactly one ordinal/canonical-record-hash/manifest/case/rep/attempt annotation covers every original position, including UNKNOWN. Only cause counts, cause-event arrays and causeAssessment may differ; events/counts already present cannot decrease. Non-cause details, completion/oracle/hard facts, modes, infra, timestamps, sessions and counters stay original. Disputed raw facts need a separately authorized successor retaining their original claims.
++
++Closed review records bind each cause, original raw record, authored-goal/outcome/location pins and justified observation scope. Independent adoption must cover those exact records and actual original execution/configuration evidence. A hash-shaped claim alone stays UNKNOWN/non-adoptable. The CLI preserves original/refusal artifacts and writes only a fresh destination. HARNESS_SELF_TEST cannot become D_C. The admission reference must identify the immutable original-time ledger snapshot (future live output `admission-ledger.json`), not a later mutable ledger substituted as permission. It verifies the effective original entry and admittedAt before the execution start and every included D_C run. Legacy missing original receipt/snapshot/provenance remains UNBOUND/refused; no rescore-time timestamp or inferred limits identity repairs it. Later ledger entries neither admit earlier work nor rewrite its retained snapshot.
++
++Learn sessions preserve separate base/suffix facts. Each started learn is charged once; a base failure, leak or existing stop starts no suffix. A partial repetition retains real base SUCCEEDED with whole published:false and explicit incomplete oracle; base success alone is not a final false pass. Later hard facts share the existing latch without charging again. The three scopes expose logical attempts, known started sessions, unknown scope, per-value known subtotals and null incomplete totals. An empty population is not observed zero; an affirmative complete no-start record can establish zero. Public proposal/reservation counters and conservative/fallback stop charges remain `PUBLIC_BUDGET_COUNTERS`/named protective bases. Proposals are not actual wire calls. Actual provider tokens/cost remain null/UNAVAILABLE; this code does not manufacture ED-01 or MODEL-SIZING per-call evidence.
++
++An observation failure retains only public replies already captured by the existing driver. Known base/suffix session facts and protective charges survive; an unacknowledged start keeps `learnSessionsComplete:false`, unknown top-level counters, and an omitted `suffixStarted` rather than an invented not-started assertion. Its potential consumption uses the existing conservative fallback charge separately from observed session counts. The driver stops before another logical attempt. No backend state or infrastructure exclusion is fabricated. Process death or fixture cleanup failure before the original receipt is emitted still leaves original provenance UNKNOWN; this is not a durable crash journal. Actual independent review and deployed configuration evidence must be supplied by their existing owners: the current `admission-record` code-default/pinned:null record alone cannot establish the original deployed configuration for adoption.
++
++The numeric gate is only a completion/hard-fact subgate, not completed D-C or pilot acceptance while required usage, staging/security/U13/privacy/human evidence is missing. Required evaluator/CLI/page-server source pins, actual source QA, existing freezer and a new prior admission remain necessary after actual application; old e4785112 admissions do not transfer. All75 logical runs/81 model sessions/122 contingency sessions and the original25 workflow/page/outcome bytes remain unchanged. Actual provider prices, sharedUSD500 headroom, configuration/staging facts and independent review adoption are UNBOUND here.
+--- a/studio-runner/test/evaluation/benchmarkScoring.test.ts
++++ b/studio-runner/test/evaluation/benchmarkScoring.test.ts
+@@ -4,11 +4,16 @@
+  * are synthetic UNIT-TEST INPUTS; nothing here is a benchmark result and a HARNESS_SELF_TEST run is never D-C evidence.
+  */
+ import { describe, expect, it } from 'vitest';
+-import { SELF_TEST_LABEL, ZERO_FIELDS, buildBenchmark, scoreReplayStability, validateRunRecord, type RunRecord } from '../../evaluation/observed-authoring/evaluate.mjs';
+-import { frozenManifest, must, syntheticRuns } from './observedCorpus.js';
++import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
++import { tmpdir } from 'node:os';
++import { join } from 'node:path';
++// eslint-disable-next-line no-restricted-imports -- Unit-only existing offline CLI, no provider/backend/native call.
++import { spawnSync } from 'node:child_process';
++import { SELF_TEST_LABEL, ZERO_FIELDS, buildBenchmark, canonicalJson, guardStart, repoRootFrom, sha256Hex, scoreReplayStability, validateRunRecord, type Benchmark, type ReviewDocument, type ReviewInput, type RunRecord } from '../../evaluation/observed-authoring/evaluate.mjs';
++import { frozenManifest, must, reviewedInput, syntheticRuns } from './observedCorpus.js';
+ 
+ const manifest = frozenManifest();
+-const score = (runs: RunRecord[], mode: 'D_C' | 'HARNESS_SELF_TEST' = 'D_C') => buildBenchmark({ manifest, runs, mode, generatedAt: '2026-10-18T20:00:00.000Z' });
++const score = (runs: RunRecord[], mode: 'D_C' | 'HARNESS_SELF_TEST' = 'D_C') => buildBenchmark({ manifest, runs, mode, generatedAt: '2026-10-18T20:00:00.000Z', reviewInput: mode === 'D_C' ? reviewedInput(manifest, runs) : null });
+ 
+ describe('gate arithmetic on the corpus with the two staging cases unrun', () => {
+   it('is PARTIAL (never a pass) at 51 runs when every run completes: the denominator drops to 17 x 3 and the floor to 46', () => {
+@@ -76,6 +81,7 @@
+       oracle: { correct: false, falseSuccess: falsePass, failures: ['synthetic-earlier-attempt'] },
+       secretOrPiiLeak: leak,
+     };
++    if (infra.learnSessions) infra.learnSessions = infra.learnSessions.map((session) => ({ ...session, sessionId: `${session.sessionId}-earlier` }));
+     target.attempt = 2;
+     const result = score([infra, ...runs]);
+     expect(result.denominatorLedger.problems).toEqual([]);
+@@ -127,16 +133,16 @@
+ 
+   it('writes the three accounting fields as explicit zeros with their denominators', () => {
+     const accounting = score(syntheticRuns(manifest, { mode: 'D_C' })).accounting;
+-    for (const field of ZERO_FIELDS) expect(accounting[field as keyof typeof accounting]).toMatchObject({ total: 0, runsCounted: 69 });
++    for (const field of ZERO_FIELDS) expect(accounting[field as keyof typeof accounting]).toMatchObject({ gateP: { total: 0, runsCounted: 51 }, creditedAllClasses: { total: 0, runsCounted: 69 }, allAttempts: { total: 0, runsCounted: 69 } });
+   });
+ 
+   it('counts RS-1 gaps inside the gate denominator and lists them with case, element kind and run number', () => {
+     const runs = syntheticRuns(manifest, { mode: 'D_C' });
+     const hit = must(runs.find((r) => r.caseId === 'D3-dataflow-multistep' && r.rep === 2));
+     hit.rs1NonScalarReadGaps = 1;
+-    hit.details = { rs1NonScalarReadGaps: [{ elementKind: 'span' }] };
++    hit.details = { rs1NonScalarReadGaps: [{ elementKind: 'span', eventRef: 'a'.repeat(64) }] };
+     const result = score(runs);
+-    expect(result.accounting.rs1NonScalarReadGaps).toMatchObject({ total: 1, items: [{ caseId: 'D3-dataflow-multistep', rep: 2, elementKind: 'span' }] });
++    expect(result.accounting.rs1NonScalarReadGaps).toMatchObject({ gateP: { total: 1, items: [{ caseId: 'D3-dataflow-multistep', rep: 2, attempt: 1, elementKind: 'span' }] } });
+     expect(result.gate.classP.runsCredited).toBe(51);
+   });
+ 
+@@ -144,6 +150,7 @@
+     const runs = syntheticRuns(manifest, { mode: 'D_C' });
+     const target = must(runs.find((r) => r.caseId === 'C01-rf-example-url' && r.rep === 1));
+     const infra: RunRecord = { ...structuredClone(target), attempt: 1, infrastructureFailure: 'HOST_PORT_COLLISION' };
++    if (infra.learnSessions) infra.learnSessions = infra.learnSessions.map((session) => ({ ...session, sessionId: `${session.sessionId}-earlier` }));
+     target.attempt = 2;
+     const reported = score([infra, ...runs]);
+     expect(reported.denominatorLedger.infrastructureFailures).toEqual([expect.objectContaining({ caseId: 'C01-rf-example-url', infrastructureFailure: 'HOST_PORT_COLLISION', rerun: true })]);
+@@ -168,7 +175,9 @@
+     expect(result.costUsd.total).toBeNull();
+     expect(result.costUsd.basis).toContain('UNAVAILABLE');
+     const priced = buildBenchmark({ manifest, runs: syntheticRuns(manifest, { mode: 'D_C' }), mode: 'D_C', price: { pInPerMTok: 1, pOutPerMTok: 2 } });
+-    expect(priced.costUsd.total).toBeGreaterThan(0);
++    expect(priced.costUsd.total).toBeNull();
++    expect(priced.costUsd.conservativeChargeUsd).toBeGreaterThan(0);
++    expect(priced.tokens.basis).toBe('PUBLIC_BUDGET_COUNTERS');
+   });
+ 
+   it('reports class F and N separately, outside the completion denominator', () => {
+@@ -192,3 +201,186 @@
+     expect(scoreReplayStability({ replays: replays(100) })).toMatchObject({ label: SELF_TEST_LABEL, verdict: 'NOT_EVIDENCE', pass: true });
+   });
+ });
++
++const reseal = <T>(reference: ReviewDocument<T>): void => { reference.fileText = canonicalJson(reference.value); reference.sha256 = sha256Hex(reference.fileText); };
++const refreshOverlay = (input: ReviewInput): void => {
++  input.overlayText = canonicalJson(input.overlay);
++  if (input.adoption) { input.adoption.value.overlaySha256 = sha256Hex(input.overlayText); reseal(input.adoption); }
++};
++
++describe('reviewed cause accounting: groups 1, 2, 3 and 6 (synthetic inputs only)', () => {
++  it('group1: an unreviewed generic budget failure is UNKNOWN rather than an observed zero', () => {
++    const runs = syntheticRuns(manifest, { mode: 'D_C' });
++    const first = must(runs[0]);
++    if (first.session) { first.session.failureCode = 'BUDGET_EXCEEDED'; first.session.terminal = 'FAILED'; first.session.published = false; }
++    first.oracle = { correct: false, falseSuccess: false, failures: ['synthetic-budget'] };
++    const result = buildBenchmark({ manifest, runs, mode: 'D_C' });
++    expect(result.gate.verdict).toBe('INVALID'); // Defining old semantic RED: PARTIAL, despite no review.
++    expect(result.accounting.rs1NonScalarReadGaps.gateP).toMatchObject({ total: null, confirmedTotal: 0, unknownRuns: 51 });
++    expect(result.corpusInspection).toMatchObject({ knownLocalCount: 23, confirmedRs1CaseCount: 0, unknownStagingCount: 2, globalRs1Total: null, unknownStagingCaseIds: ['D2-login-staging-real', 'E1-sso-approved-origin'] });
++    expect(result.accounting.rs1NonScalarReadGaps.gateP.unknownIdentities).toContainEqual({ caseId: first.caseId, rep: first.rep, attempt: first.attempt });
++    const reviewed = score(runs);
++    expect(reviewed.accounting.rs1NonScalarReadGaps.gateP).toMatchObject({ total: 0, verifiedRuns: 51, unknownRuns: 0 });
++    expect(reviewed.gate.classP.completions).toBe(50);
++  });
++
++  it('group1: plausible VERIFIED hashes cannot replace actual bound independent adoption', () => {
++    const runs = syntheticRuns(manifest, { mode: 'D_C' });
++    const input = reviewedInput(manifest, runs);
++    input.adoption = null;
++    const result = buildBenchmark({ manifest, runs, mode: 'D_C', reviewInput: input });
++    expect(result.gate.verdict).toBe('INVALID');
++    expect(result.accounting.rs1NonScalarReadGaps.allAttempts.total).toBeNull();
++    const stale = reviewedInput(manifest, runs);
++    const annotation = must(stale.overlay.annotations[0]);
++    annotation.rawRecordSha256 = 'f'.repeat(64);
++    refreshOverlay(stale);
++    expect(buildBenchmark({ manifest, runs, mode: 'D_C', reviewInput: stale }).gate.verdict).toBe('INVALID');
++  });
++
++  it.each([
++    { field: 'rs1NonScalarReadGaps', event: { eventRef: 'a'.repeat(64), elementKind: 'span' } },
++    { field: 'authoredEchoUnobservableTargets', event: { eventRef: 'b'.repeat(64), step: 2, slot: 'value' } },
++    { field: 'focusMutationRefusedFills', event: { eventRef: 'c'.repeat(64), step: 2 } },
++  ] as const)('group2: $field binds real event references and preserves a failed class-P run', ({ field, event }) => {
++    const runs = syntheticRuns(manifest, { mode: 'D_C' });
++    const hit = must(runs.find((run) => run.caseId === 'D3-dataflow-multistep' && run.rep === 1));
++    hit[field] = 1; hit.details = { [field]: [event] };
++    if (hit.session) { hit.session.terminal = 'FAILED'; hit.session.published = false; hit.session.clarifications = 1; }
++    hit.oracle = { correct: false, falseSuccess: false, failures: ['synthetic-cause'] };
++    const malformed = structuredClone(hit); malformed.details = { [field]: [{ ...event, caseId: 'forged' }] };
++    expect(validateRunRecord(malformed, manifest)).toContain(`RUN_CAUSE_EVENT_${field}`); // Old validator accepts the forged identity.
++    const result = score(runs);
++    expect(result.gate.classP).toMatchObject({ runsCredited: 51, completions: 50, failedRuns: 1 });
++    expect(result.accounting[field].gateP).toMatchObject({ total: 1, runsCounted: 51, items: [{ ...event, caseId: hit.caseId, rep: 1, attempt: 1 }] });
++    expect(result.hardGates).toMatchObject({ falsePasses: 0 });
++  });
++
++  it('group2: distinct same-element events survive incomplete scope while count/ref inconsistencies are refused', () => {
++    const runs = syntheticRuns(manifest, { mode: 'D_C' });
++    const first = must(runs[0]); first.rs1NonScalarReadGaps = 2;
++    first.details = { rs1NonScalarReadGaps: [{ eventRef: 'a'.repeat(64), elementKind: 'span' }, { eventRef: 'b'.repeat(64), elementKind: 'span' }] };
++    const mismatch = structuredClone(first); mismatch.rs1NonScalarReadGaps = 1;
++    expect(validateRunRecord(mismatch, manifest)).toContain('RUN_CAUSE_DETAILS_rs1NonScalarReadGaps');
++    const repeated = structuredClone(first); repeated.details = { rs1NonScalarReadGaps: [must(first.details.rs1NonScalarReadGaps?.[0]), must(first.details.rs1NonScalarReadGaps?.[0])] };
++    expect(validateRunRecord(repeated, manifest)).toContain('RUN_CAUSE_EVENT_rs1NonScalarReadGaps');
++    const input = reviewedInput(manifest, runs);
++    const annotation = must(input.overlay.annotations[0]);
++    const cause = annotation.causes.rs1NonScalarReadGaps;
++    const review = must(input.reviews.find((ref) => ref.sha256 === cause.assessment.evidenceSha256));
++    review.value.scope.complete = false; review.value.scope.justificationCode = 'PARTIAL_REVIEWED_SCOPE'; reseal(review);
++    cause.assessment.status = 'UNKNOWN'; cause.assessment.evidenceSha256 = review.sha256;
++    if (input.adoption) { const accepted = must(input.adoption.value.accepted.find((row) => row.rawOrdinal === 1 && row.field === 'rs1NonScalarReadGaps')); accepted.evidenceSha256 = review.sha256; }
++    refreshOverlay(input);
++    const result = buildBenchmark({ manifest, runs, mode: 'D_C', reviewInput: input });
++    expect(result.accounting.rs1NonScalarReadGaps.gateP).toMatchObject({ confirmedTotal: 2, total: null, unknownRuns: 1 });
++    expect(result.accounting.rs1NonScalarReadGaps.gateP.items).toHaveLength(2);
++  });
++
++  it('group3: final-P, credited-all and every supplied attempt have separate cause denominators', () => {
++    const runs = syntheticRuns(manifest, { mode: 'D_C' });
++    const target = must(runs.find((run) => run.caseId === 'C01-rf-example-url' && run.rep === 1));
++    const earlier: RunRecord = { ...structuredClone(target), infrastructureFailure: 'HOST_PORT_COLLISION', rs1NonScalarReadGaps: 1,
++      details: { rs1NonScalarReadGaps: [{ eventRef: 'd'.repeat(64), elementKind: 'span' }] } };
++    if (earlier.learnSessions) earlier.learnSessions = earlier.learnSessions.map((session) => ({ ...session, sessionId: `${session.sessionId}-earlier` }));
++    target.attempt = 2;
++    const negative = must(runs.find((run) => run.caseId === 'C09-negation-trap' && run.rep === 1));
++    negative.rs1NonScalarReadGaps = 1; negative.details = { rs1NonScalarReadGaps: [{ eventRef: 'e'.repeat(64), elementKind: 'div' }] };
++    const result = score([earlier, ...runs]);
++    const represented = result.accounting.rs1NonScalarReadGaps as unknown as { allAttempts?: { items: unknown[] }; items?: unknown[] };
++    expect(represented.allAttempts?.items ?? represented.items).toHaveLength(2); // Old final-only reduction has only the F/N event.
++    expect(result.accounting.rs1NonScalarReadGaps).toMatchObject({
++      gateP: { total: 0, runsCounted: 51, fullPlannedRuns: 57, runnablePlannedRuns: 51 },
++      creditedAllClasses: { total: 1, runsCounted: 69 }, allAttempts: { total: 2, runsCounted: 70 },
++    });
++    expect(result.accounting.rs1NonScalarReadGaps.allAttempts.items).toContainEqual({ eventRef: 'd'.repeat(64), elementKind: 'span', caseId: target.caseId, rep: 1, attempt: 1 });
++    expect(result.gate.classP).toMatchObject({ runsCredited: 51, completions: 51 });
++  });
++
++  it('group6: immutable originals defeat hard-fact laundering and the offline branch writes fresh files without a client', () => {
++    const clean = syntheticRuns(manifest, { mode: 'D_C' });
++    const target = must(clean.find((run) => run.caseId === 'C01-rf-example-url' && run.rep === 1));
++    const bad: RunRecord = { ...structuredClone(target), attempt: 1, infrastructureFailure: 'HOST_PORT_COLLISION', secretOrPiiLeak: 1,
++      oracle: { correct: false, falseSuccess: true, failures: ['synthetic-earlier-hard-facts'] }, rs1NonScalarReadGaps: 1,
++      details: { rs1NonScalarReadGaps: [{ eventRef: 'f'.repeat(64), elementKind: 'span' }], canaryFindings: [{ label: 'synthetic-closed' }] } };
++    if (bad.learnSessions) bad.learnSessions = bad.learnSessions.map((session) => ({ ...session, sessionId: `${session.sessionId}-earlier` }));
++    target.attempt = 2;
++    const original = [bad, ...clean];
++    const input = reviewedInput(manifest, original);
++    const laundered = structuredClone(clean); must(laundered[0]).attempt = 1;
++    const result = buildBenchmark({ manifest, runs: laundered, mode: 'D_C', reviewInput: input });
++    expect(result.hardGates.falsePasses).toBe(1); // Defining old semantic RED: supplied cleaned records erase the original fact.
++    expect(result.hardGates.secretOrPiiLeaks).toBe(1);
++    expect(result.gate.verdict).toBe('INVALID');
++    const legitimate = buildBenchmark({ manifest, runs: original, mode: 'D_C', reviewInput: input });
++    expect(legitimate.gate.verdict).toBe('GATE_FAIL');
++    expect(legitimate.gate.classP.completions).toBe(51);
++    const duplicateOriginal = [bad, ...original];
++    const duplicated = buildBenchmark({ manifest, runs: duplicateOriginal, mode: 'D_C', reviewInput: reviewedInput(manifest, duplicateOriginal) });
++    expect(duplicated.gate.verdict).toBe('INVALID'); expect(duplicated.hardGates.falsePasses).toBe(2);
++    const changes: ((review: ReviewInput) => void)[] = [
++      (review) => { review.overlay.annotations.shift(); },
++      (review) => { review.overlay.annotations.push(structuredClone(must(review.overlay.annotations[0]))); },
++      (review) => { must(review.overlay.annotations[0]).rawOrdinal = 999; },
++      (review) => { must(review.overlay.annotations[0]).attempt = 9; },
++      (review) => { must(review.overlay.annotations[0]).causes.rs1NonScalarReadGaps = { ...must(review.overlay.annotations[0]).causes.rs1NonScalarReadGaps, count: 0, events: [] }; },
++      ...['oracle', 'secretOrPiiLeak', 'session', 'infrastructureFailure', 'mode', 'usage', 'learnSessionsComplete'].map((key) => (review: ReviewInput) => { Object.assign(must(review.overlay.annotations[0]), { [key]: null }); }),
++    ];
++    for (const change of changes) {
++      const altered = structuredClone(input); change(altered); refreshOverlay(altered);
++      const refused = buildBenchmark({ manifest, runs: original, mode: 'D_C', reviewInput: altered });
++      expect(refused.gate.verdict).toBe('INVALID');
++      expect(refused.hardGates).toMatchObject({ falsePasses: 1, secretOrPiiLeaks: 1 });
++    }
++    // GREEN wiring control follows the defining assertion above; absent-command/setup errors never count as RED.
++    const dir = mkdtempSync(join(tmpdir(), 'benchmark-review-'));
++    try {
++      const single = [must(syntheticRuns(manifest, { mode: 'D_C' })[0])];
++      const closed = reviewedInput(manifest, single);
++      const writeRef = (name: string, text: string) => { const path = join(dir, name); writeFileSync(path, text); return { path, sha256: sha256Hex(text) }; };
++      const raw = writeRef('raw.jsonl', closed.rawRunsText); const annotations = writeRef('annotations.json', closed.overlayText);
++      const manifestPath = join(dir, 'manifest.json'); writeFileSync(manifestPath, JSON.stringify(manifest));
++      const config = { manifest: manifestPath, corpusRoot: join(repoRootFrom(), 'studio-runner/evaluation/observed-authoring'), mode: 'D_C', apiBaseUrl: 'not-a-url', rawRuns: raw, causeAnnotations: annotations,
++        reviews: closed.reviews.map((review, i) => writeRef(`review-${String(i)}.json`, review.fileText)),
++        independentQaAdoption: writeRef('adoption.json', must(closed.adoption ?? undefined).fileText), originalExecution: writeRef('execution.json', must(closed.execution ?? undefined).fileText), admissionLedger: writeRef('ledger.json', must(closed.ledger ?? undefined).fileText) };
++      const configPath = join(dir, 'config.json'); writeFileSync(configPath, JSON.stringify(config)); const destination = join(dir, 'fresh');
++      const argv = [join(repoRootFrom(), 'studio-runner/evaluation/cli.mjs'), 'benchmark-report', configPath, destination];
++      const execute = () => spawnSync(process.execPath, argv, { encoding: 'utf8', env: { ...process.env, STUDIO_EVAL_API_TOKEN: '' }, timeout: 10_000 });
++      const first = execute(); expect(first.error).toBeUndefined(); expect(first.status).toBe(2);
++      const bytes = readFileSync(join(destination, 'benchmark.json'), 'utf8'); const offline = JSON.parse(bytes) as Benchmark;
++      expect(offline.gate.verdict).toBe('INCOMPLETE'); expect(offline.reviewProvenance.status).toBe('BOUND_INDEPENDENT_QA_ADOPTION');
++      expect(execute().status).toBe(2); expect(readFileSync(join(destination, 'benchmark.json'), 'utf8')).toBe(bytes);
++      expect(sha256Hex(readFileSync(raw.path, 'utf8'))).toBe(raw.sha256);
++      expect(offline.modelCalls.total).toBeNull(); expect(offline.costUsd.total).toBeNull();
++    } finally { rmSync(dir, { recursive: true, force: true }); }
++  });
++
++  it('group6: later admission cannot retroactively authorize original execution or promote a self-test', () => {
++    const runs = syntheticRuns(manifest, { mode: 'D_C' }); const input = reviewedInput(manifest, runs);
++    const ledger = must(input.ledger ?? undefined); const execution = must(input.execution ?? undefined); const adoption = must(input.adoption ?? undefined);
++    const entry = must(ledger.value.admissions[0]);
++    entry.decidedAt = '2026-10-18T20:00:00.000Z'; entry.admittedAt = entry.decidedAt; reseal(ledger);
++    execution.value.ledgerSha256 = ledger.sha256; execution.value.admissionEntrySha256 = sha256Hex(canonicalJson(entry)); reseal(execution);
++    adoption.value.ledgerSha256 = ledger.sha256; adoption.value.executionReceiptSha256 = execution.sha256; reseal(adoption);
++    expect(guardStart({ ledger: ledger.value, manifestSha256: manifest.manifestSha256, now: new Date('2026-10-18T21:00:00.000Z') }).status).toBe('ADMITTED');
++    expect(buildBenchmark({ manifest, runs, mode: 'D_C', reviewInput: input }).gate.verdict).toBe('INVALID');
++    for (const status of ['STOPPED_HARD_GATE', 'ADMISSION_REFUSED_PRICE_UNKNOWN', 'ADMITTED'] as const) {
++      const intervened = reviewedInput(manifest, runs);
++      const history = must(intervened.ledger ?? undefined); const receipt = must(intervened.execution ?? undefined); const accepted = must(intervened.adoption ?? undefined);
++      const first = must(history.value.admissions[0]); const decidedAt = new Date(Date.parse(receipt.value.startedAt) + 1000).toISOString();
++      history.value.admissions.push({ ...first, seq: 2, prevEntrySha256: sha256Hex(canonicalJson(first)), decidedAt, admittedAt: status === 'ADMITTED' ? decidedAt : null, status });
++      reseal(history); receipt.value.ledgerSha256 = history.sha256; reseal(receipt);
++      accepted.value.ledgerSha256 = history.sha256; accepted.value.executionReceiptSha256 = receipt.sha256; reseal(accepted);
++      expect(buildBenchmark({ manifest, runs, mode: 'D_C', reviewInput: intervened }).gate.verdict).toBe('INVALID');
++    }
++    const wrongManifest = reviewedInput(manifest, runs);
++    const oldLedger = must(wrongManifest.ledger ?? undefined); const oldExecution = must(wrongManifest.execution ?? undefined); const oldAdoption = must(wrongManifest.adoption ?? undefined);
++    const oldEntry = must(oldLedger.value.admissions[0]); oldEntry.manifestSha256 = 'e4785112885541c03f7ebed2b08bdc878a183d8e692b62140fa4491560df285b'; reseal(oldLedger);
++    oldExecution.value.ledgerSha256 = oldLedger.sha256; oldExecution.value.admissionEntrySha256 = sha256Hex(canonicalJson(oldEntry)); reseal(oldExecution);
++    oldAdoption.value.ledgerSha256 = oldLedger.sha256; oldAdoption.value.executionReceiptSha256 = oldExecution.sha256; reseal(oldAdoption);
++    expect(buildBenchmark({ manifest, runs, mode: 'D_C', reviewInput: wrongManifest }).gate.verdict).toBe('INVALID');
++    const self = syntheticRuns(manifest, { mode: 'HARNESS_SELF_TEST' });
++    expect(buildBenchmark({ manifest, runs: self, mode: 'D_C', reviewInput: reviewedInput(manifest, self) }).gate.verdict).toBe('INVALID');
++    expect(buildBenchmark({ manifest, runs: self, mode: 'HARNESS_SELF_TEST' }).gate.verdict).toBe('NOT_EVIDENCE');
++  });
++});
+--- a/studio-runner/test/evaluation/corpusManifest.test.ts
++++ b/studio-runner/test/evaluation/corpusManifest.test.ts
+@@ -72,7 +72,8 @@
+   it('marks RS-1 on every case, [] written explicitly, with the value location and reachability for the three dataflow cases', () => {
+     const manifest = frozenManifest();
+     for (const entry of manifest.cases) {
+-      expect(typeof entry.rs1.isRs1Case).toBe('boolean');
++      if (entry.status === 'EXTERNAL_BLOCKED' && entry.rs1.state === 'UNKNOWN_UNTIL_STAGING_PAGES_ARE_READ') expect(entry.rs1.isRs1Case).toBeNull();
++      else expect(typeof entry.rs1.isRs1Case).toBe('boolean');
+       expect(Array.isArray(entry.rs1.valueLocations)).toBe(true);
+     }
+     const d3 = byId(manifest, 'D3-dataflow-multistep');
+@@ -116,9 +117,37 @@
+ 
+   it('records the unratified rulings as RECOMMENDED_NOT_RULED rather than as decided', () => {
+     const rulings = frozenManifest().rulings as Record<string, { state: string }>;
+-    expect(rulings.B2?.state).toBe('RECOMMENDED_NOT_RULED');
+-    expect(rulings.B3?.state).toBe('RECOMMENDED_NOT_RULED');
++    // Retain the historical test identity; B2/B3 now have the actual internal PO/architect ruling, B8 remains unratified.
++    expect(rulings.B2?.state).toBe('ADOPTED_INTERNAL_INTERPRETATION');
++    expect(rulings.B3?.state).toBe('ADOPTED_INTERNAL_INTERPRETATION');
+     expect(rulings.B8?.state).toBe('UNKNOWN');
++  });
++});
++
++describe('inspection scope and source pins: groups 4 and 6', () => {
++  it('group4: explicitly blocked staging UNKNOWN is valid and never a known local zero', () => {
++    const manifest = frozenManifest();
++    for (const id of ['D2-login-staging-real', 'E1-sso-approved-origin']) byId(manifest, id).rs1.isRs1Case = null;
++    const errors = check(restamp(manifest));
++    expect(errors).not.toContain('RS1_MARK_MISSING: D2-login-staging-real');
++    expect(errors).not.toContain('RS1_MARK_MISSING: E1-sso-approved-origin');
++    expect(errors).toEqual([]);
++  });
++
++  it('group4: READY unknown and an inconsistent blocked unknown inspection are refused', () => {
++    const manifest = frozenManifest(); byId(manifest, 'C01-rf-example-url').rs1.isRs1Case = null;
++    expect(check(restamp(manifest))).toContain('RS1_UNKNOWN_INSPECTION: C01-rf-example-url');
++    const staging = frozenManifest(); const blocked = byId(staging, 'D2-login-staging-real');
++    blocked.rs1.isRs1Case = null; blocked.rs1.valueLocations = [{ value: 'unit-only', elementKind: 'span', reachableByGrant: false }];
++    expect(check(restamp(staging))).toContain('RS1_UNKNOWN_INSPECTION: D2-login-staging-real');
++  });
++
++  it('group6: missing or stale evaluator code pins refuse the existing validator before any client use', () => {
++    const missing = frozenManifest(); delete missing.sources.evaluator;
++    expect(check(restamp(missing))).toContain('REQUIRED_CODE_PIN: evaluator');
++    const stale = frozenManifest(); const pin = stale.sources.evaluator;
++    if (pin) pin.sha256 = 'f'.repeat(64);
++    expect(check(restamp(stale), true)).toContain('PIN_HASH_MISMATCH: sources.evaluator');
+   });
+ });
+ 
+@@ -227,6 +256,8 @@
+ 
+   it('leaves the committed manifest file untouched by these fixtures', () => {
+     const onDisk = JSON.parse(readFileSync(join(OBSERVED_AUTHORING_DIR, 'manifest.json'), 'utf8')) as CorpusManifest;
+-    expect(onDisk.manifestSha256).toBe(manifestDigest(onDisk));
++    if (onDisk.manifestFrozenAt === null) expect(onDisk.manifestSha256).toBeNull();
++    else expect(onDisk.manifestSha256).toBe(manifestDigest(onDisk));
++    expect(validateCorpusManifest(onDisk, { repoRoot }).errors).toEqual([]);
+   });
+ });
+--- a/studio-runner/test/evaluation/harnessSelfTest.test.ts
++++ b/studio-runner/test/evaluation/harnessSelfTest.test.ts
+@@ -7,10 +7,10 @@
+  */
+ import { describe, expect, it } from 'vitest';
+ import {
+-  runBenchmark, mutateObservation, idealObservation, SELF_TEST_LABEL,
+-  type CorpusManifest, type ExpectedOutcome, type JsonObject, type StudioApiClient,
++  runBenchmark, driveIncremental, createStopRule, buildBenchmark, mutateObservation, idealObservation, SELF_TEST_LABEL,
++  type CorpusManifest, type ExpectedOutcome, type JsonObject, type StudioApiClient, type RunRecord,
+ } from '../../evaluation/observed-authoring/evaluate.mjs';
+-import { expectedOf, frozenManifest } from './observedCorpus.js';
++import { expectedOf, frozenManifest, readJson } from './observedCorpus.js';
+ 
+ const manifest = frozenManifest();
+ const PASSWORD = 'planted-selftest-password-5521';
+@@ -97,6 +97,120 @@
+   terminal: expected.session.terminal[0] ?? 'SUCCEEDED', published: expected.session.published, ...(expected.session.failureCodes?.[0] === undefined ? {} : { failureCode: expected.session.failureCodes[0] }),
+   effects: effectsFor(expected, mutate),
+ });
++
++/** Group5 uses only memory receipts and a scripted object: no host, fetch, browser, model or backend. */
++async function memoryIncremental(options: { stopAfterBase?: boolean; failedBase?: boolean; leakedBase?: boolean; lateLeak?: boolean; unconfirmedSuffixStart?: boolean; missing?: 'baseProposal' | 'suffixProposal' | 'baseInput' | 'suffixOutput' } = {}) {
++  const entry = entryOf(manifest, 'incremental-edit-step-4');
++  const events: JsonObject[] = []; const order: string[] = []; const finalized = new Set<string>(); let starts = 0;
++  const counters: JsonObject[] = [
++    { modelProposals: 10, modelInputTokens: 100, modelOutputTokens: 20 },
++    { modelProposals: 3, modelInputTokens: 40, modelOutputTokens: 5 },
++  ];
++  if (options.missing === 'baseProposal') Object.assign(counters[0] ?? {}, { modelProposals: null });
++  if (options.missing === 'suffixProposal') Object.assign(counters[1] ?? {}, { modelProposals: null });
++  if (options.missing === 'baseInput') Object.assign(counters[0] ?? {}, { modelInputTokens: null });
++  if (options.missing === 'suffixOutput') Object.assign(counters[1] ?? {}, { modelOutputTokens: null });
++  const client: StudioApiClient = {
++    createDraft: () => Promise.resolve({ id: 'memory', sourceRevision: 1, configurationRevision: 1 }),
++    updateDraft: () => { order.push('update'); return Promise.resolve({ id: 'memory', sourceRevision: 2, configurationRevision: 1, diagnostics: options.lateLeak ? 'unit-canary-secret' : undefined }); },
++    startSession: () => {
++      starts += 1; order.push(`start-${String(starts)}`);
++      if (starts === 2 && options.unconfirmedSuffixStart) return Promise.reject(new Error('unit start observation unavailable'));
++      events.push({ type: 'receipt.post', body: starts === 1 ? 'base-reference-value' : 'fresh-current-session-reference' });
++      return Promise.resolve({ session: { sessionId: `m${String(starts)}`, state: 'PREPARING' } });
++    },
++    readSession: (id) => Promise.resolve({ session: { sessionId: id, state: id === 'm1' && options.failedBase ? 'FAILED' : 'SUCCEEDED', counters: counters[Number(id.slice(1)) - 1] ?? {} } }),
++    readResult: (id) => Promise.resolve({ publication: { status: finalized.has(id) ? 'PUBLISHED' : 'PENDING', receipt: finalized.has(id) ? { revisionId: 'memory-revision' } : null },
++      failure: options.failedBase && id === 'm1' ? { code: 'BUDGET_EXCEEDED' } : null,
++      explanation: { steps: Array.from({ length: 10 }, (_v, i) => ({ number: i + 1, learnedFromThisRun: i >= 3, reusedFrom: i < 3 ? { revisionId: 'memory-revision', stepId: String(i) } : null })) } }),
++    finalize: (id) => { finalized.add(id); order.push(`finalize-${id}`); return Promise.resolve({}); },
++    readClarification: () => Promise.resolve(null), clarify: () => Promise.reject(new Error('unexpected clarification')), cancel: () => Promise.resolve({}),
++    execute: () => Promise.resolve({ executionId: 'unused' }), readExecution: () => Promise.resolve({ status: 'PASSED' }),
++  };
++  const stop = createStopRule({ allocationUsd: options.stopAfterBase ? 125 : 1_000_000_000, price: { pInPerMTok: 1_000_000, pOutPerMTok: 0 }, reservedCeiling: { input: 1000, output: 1000 } });
++  const record = stop.record;
++  stop.record = (session) => { order.push(`charge-${String(stop.state().sessions + 1)}`); return record(session); };
++  const run = await driveIncremental({ manifest, entry, expected: expectedOf(entry), caseFile: readJson(entry.stepText?.path ?? '') as JsonObject,
++    client, receipts: { mark: () => events.length, since: (cursor) => ({ actions: events.slice(cursor), views: [] }) }, switchSourceValue: () => { order.push('switch'); },
++    vars: {}, mode: 'HARNESS_SELF_TEST', stopRule: stop, ...FAST, secretCanaries: ['unit-canary-secret'],
++    extraTexts: options.leakedBase ? () => Promise.resolve({ closedUnit: 'unit-canary-secret' }) : null });
++  return { run, starts, stop, order };
++}
++
++describe('group5: pure two-session and missing-charge controls', () => {
++  it('sums base10/100/20 plus suffix3/40/5 and charges each real learn once in order', async () => {
++    const { run, starts, stop, order } = await memoryIncremental();
++    expect(run.usage?.modelProposals).toBe(13); // Defining old semantic RED: suffix-only3.
++    expect(run.usage).toEqual({ basis: 'PUBLIC_BUDGET_COUNTERS', modelProposals: 13, inputTokens: 140, outputTokens: 25 });
++    expect(starts).toBe(2); expect(stop.state().sessions).toBe(2);
++    expect(order).toEqual(['start-1', 'charge-1', 'finalize-m1', 'switch', 'update', 'start-2', 'charge-2', 'finalize-m2']);
++    expect(run.learnSessions?.map((session) => session.phase)).toEqual(['base', 'incremental']);
++    expect(run.incremental).toMatchObject({ logicalStatus: 'COMPLETE', suffixStarted: true, notCompletedBecause: null });
++    expect(run.oracle).toMatchObject({ correct: true, falseSuccess: false });
++    const report = buildBenchmark({ manifest, runs: [run], mode: 'HARNESS_SELF_TEST', price: { pInPerMTok: 1, pOutPerMTok: 2 } });
++    expect(report.charges.allAttempts).toMatchObject({ logicalAttempts: 1, knownStartedSessions: 2, proposals: { total: 13 }, input: { total: 140 }, output: { total: 25 } });
++    expect(report.modelCalls.total).toBeNull(); expect(report.costUsd.total).toBeNull(); expect(report.costUsd.conservativeChargeUsd).toBeCloseTo(0.00019);
++  });
++
++  it.each([
++    { label: 'budget', options: { stopAfterBase: true }, reason: 'STOPPED_BUDGET_80', terminal: 'SUCCEEDED' },
++    { label: 'failed base', options: { failedBase: true }, reason: 'BASE_NOT_SUCCEEDED', terminal: 'FAILED' },
++    { label: 'base leak', options: { leakedBase: true }, reason: 'STOPPED_HARD_GATE', terminal: 'SUCCEEDED' },
++  ])('starts no suffix after $label, retaining one truthful partial session without a fabricated false pass', async ({ options, reason, terminal }) => {
++    const { run, starts, stop } = await memoryIncremental(options);
++    expect(starts).toBe(1); // Old budget/leak source starts the suffix; no missing-method RED.
++    expect(stop.state().sessions).toBe(1);
++    expect(run.usage).toMatchObject({ modelProposals: 10, inputTokens: 100, outputTokens: 20 });
++    expect(run.learnSessions).toHaveLength(1); expect(run.learnSessions?.[0]?.session?.terminal).toBe(terminal);
++    expect(run.session).toMatchObject({ terminal, published: false });
++    expect(run.incremental).toMatchObject({ logicalStatus: 'INCOMPLETE', suffixStarted: false, notCompletedBecause: reason });
++    expect(run.oracle).toEqual({ correct: false, falseSuccess: false, failures: ['incremental-not-completed'] });
++    expect(run.learnSessionsComplete).toBe(true);
++    if (reason === 'STOPPED_HARD_GATE') expect(run.secretOrPiiLeak).toBeGreaterThan(0);
++    expect(JSON.stringify(run)).not.toContain('unit-canary-secret');
++  });
++
++  it('keeps missing base/suffix counters, unknown histories and empty populations incomplete', async () => {
++    const empty = buildBenchmark({ manifest, runs: [], mode: 'HARNESS_SELF_TEST' });
++    expect(empty.modelCalls.total).toBeNull(); // Old reduction reports0 for no observations.
++    expect(empty.charges.allAttempts.proposals).toMatchObject({ total: null, knownSubtotal: 0, complete: false });
++    for (const missing of ['baseProposal', 'suffixProposal', 'baseInput', 'suffixOutput'] as const) {
++      const { run, stop } = await memoryIncremental({ missing });
++      const report = buildBenchmark({ manifest, runs: [run], mode: 'HARNESS_SELF_TEST', price: { pInPerMTok: 1, pOutPerMTok: 2 } });
++      expect(stop.state().sessions).toBe(2);
++      if (missing.endsWith('Proposal')) expect(report.charges.allAttempts.proposals).toMatchObject({ total: null, knownSubtotal: missing === 'baseProposal' ? 3 : 10, unknownSessions: 1 });
++      else expect(report.tokens.complete).toBe(false);
++      expect(report.modelCalls.total).toBeNull(); expect(report.costUsd.total).toBeNull(); expect(report.costUsd.conservativeChargeUsd).toBeNull();
++      const unknown: RunRecord = { ...structuredClone(run), learnSessionsComplete: false };
++      expect(buildBenchmark({ manifest, runs: [unknown], mode: 'HARNESS_SELF_TEST' }).charges.allAttempts.proposals.total).toBeNull();
++    }
++    const interrupted = await memoryIncremental({ unconfirmedSuffixStart: true });
++    expect(interrupted.run.learnSessions).toHaveLength(1);
++    expect(interrupted.run.learnSessions?.[0]?.session?.terminal).toBe('SUCCEEDED');
++    expect(interrupted.run.learnSessionsComplete).toBe(false);
++    expect(interrupted.run.incremental).toMatchObject({ logicalStatus: 'INCOMPLETE', notCompletedBecause: null });
++    expect(interrupted.run.incremental?.suffixStarted).toBeUndefined(); // UNKNOWN, never a false not-started assertion.
++    expect(interrupted.run.oracle).toMatchObject({ correct: false, falseSuccess: false });
++    expect(interrupted.stop.state().sessions).toBe(2); // One known session plus one conservative potential-start charge.
++    const interruptedReport = buildBenchmark({ manifest, runs: [interrupted.run], mode: 'HARNESS_SELF_TEST' });
++    expect(interruptedReport.charges.allAttempts.proposals).toMatchObject({ total: null, knownSubtotal: 10 });
++    expect(interruptedReport.charges.allAttempts.protectiveStopCharges).toMatchObject({ totalUsd: null, knownSubtotalUsd: 1100, unresolvedPotentialStarts: 1 });
++    const { run } = await memoryIncremental();
++    const noStart: RunRecord = { ...run, oracle: { correct: false, falseSuccess: false, failures: ['not-started'] }, incremental: { logicalStatus: 'INCOMPLETE', suffixStarted: false, notCompletedBecause: null }, usage: { basis: 'PUBLIC_BUDGET_COUNTERS', modelProposals: 0, inputTokens: 0, outputTokens: 0 }, learnSessions: [], learnSessionsComplete: true };
++    delete noStart.session; delete noStart.sessionId;
++    expect(buildBenchmark({ manifest, runs: [noStart], mode: 'HARNESS_SELF_TEST' }).charges.allAttempts.proposals.total).toBe(0);
++  });
++
++  it('latches a late update leak after the base charge without a suffix or a second charge', async () => {
++    const { run, starts, stop } = await memoryIncremental({ lateLeak: true });
++    expect(starts).toBe(1);
++    expect(stop.state()).toMatchObject({ sessions: 1, stopped: 'STOPPED_HARD_GATE' });
++    expect(run.incremental).toMatchObject({ suffixStarted: false, logicalStatus: 'INCOMPLETE' });
++    expect(run.secretOrPiiLeak).toBeGreaterThan(0);
++    expect(run.details?.stopObservations).toContainEqual({ phase: 'base', reason: 'STOPPED_HARD_GATE' });
++    expect(JSON.stringify(run)).not.toContain('unit-canary-secret');
++  });
++});
+ const entryOf = (m: CorpusManifest, id: string) => m.cases.find((c) => c.id === id) ?? (() => { throw new Error(id); })();
+ const FAST = { pollMs: 0, pause: () => Promise.resolve() };
+ 
+@@ -121,7 +235,7 @@
+       expect(Date.parse(run.runStartedAt)).toBeGreaterThan(Date.parse(manifest.manifestFrozenAt ?? ''));
+       expect(run.manifestSha256).toBe(manifest.manifestSha256);
+       expect([run.rs1NonScalarReadGaps, run.authoredEchoUnobservableTargets, run.focusMutationRefusedFills]).toEqual([0, 0, 0]);
+-      expect(run.usage).toEqual({ modelProposals: 4, inputTokens: 9000, outputTokens: 800 });
++      expect(run.usage).toEqual({ basis: 'PUBLIC_BUDGET_COUNTERS', modelProposals: 4, inputTokens: 9000, outputTokens: 800 });
+     }
+   });
+ 
+--- a/studio-runner/test/evaluation/budgetAdmission.test.ts
++++ b/studio-runner/test/evaluation/budgetAdmission.test.ts
+@@ -81,6 +81,8 @@
+     expect(entry.computed.costBoundUsd).toBeNull();
+   });
+ });
++
++
+ 
+ describe('append-only ledger', () => {
+   it('appends dated decisions with a digest chain and refuses a rewritten earlier entry', () => {
+@@ -208,7 +210,7 @@
+     // No recorded proposals and no usage: the session total, as before.
+     expect(recorded().record({ inputTokens: null, outputTokens: null, modelProposals: null })).toMatchObject({ costBasis: 'reserved-ceiling', spentUsd: 1 });
+     // Reported usage still wins.
+-    expect(recorded().record({ inputTokens: 200, outputTokens: 0, modelProposals: 50 })).toMatchObject({ costBasis: 'reported', spentUsd: 0.2 });
++    expect(recorded().record({ inputTokens: 200, outputTokens: 0, modelProposals: 50 })).toMatchObject({ costBasis: 'PUBLIC_BUDGET_COUNTERS', spentUsd: 0.2 });
+   });
+ 
+   it('resuming needs a new dated ledger entry: a STOPPED latest entry keeps the guard shut', () => {
+@@ -252,3 +254,16 @@
+     expect(measureProposals([doc(24, 2048)]).verdict).toBe('NOT_REFUTED_LOCALLY_NOT_CONFIRMED');
+   });
+ });
++
++describe('group5: later hard facts share the existing protective stop latch', () => {
++  it('retains a budget stop plus a later hard fact without charging a session twice', () => {
++    for (const fact of [{ leak: true }, { falsePass: true }]) {
++      const stop = createStopRule({ allocationUsd: 10, price: { pInPerMTok: 1000, pOutPerMTok: 0 }, reservedCeiling: { input: 10_000, output: 100 } });
++      stop.record({ inputTokens: 8000, outputTokens: 0 });
++      stop.observeHardGate?.(fact);
++      expect(stop.state().stopped).toBe('STOPPED_HARD_GATE'); // Old latch remains STOPPED_BUDGET_80: semantic RED, not absent-method credit.
++      expect(stop.state()).toMatchObject({ sessions: 1, spentUsd: 8, observedReasons: ['STOPPED_BUDGET_80', 'STOPPED_HARD_GATE'] });
++      expect(() => stop.record({ inputTokens: 1, outputTokens: 1 })).toThrow('SESSION_AFTER_STOP');
++    }
++  });
++});
+--- a/studio-runner/test/evaluation/observedCorpus.ts
++++ b/studio-runner/test/evaluation/observedCorpus.ts
+@@ -6,11 +6,58 @@
+ import { readFileSync } from 'node:fs';
+ import { join } from 'node:path';
+ import {
+-  OBSERVED_AUTHORING_DIR, loadManifest,
+-  type CorpusCase, type CorpusManifest, type ExpectedOutcome, type RunMode, type RunRecord,
++  OBSERVED_AUTHORING_DIR, canonicalJson, computeAdmission, loadManifest, manifestDigest, repoRootFrom, sha256File, sha256Hex,
++  type CauseField, type ClosedCauseReview, type CorpusCase, type CorpusManifest, type ExpectedOutcome, type ReviewDocument, type ReviewInput, type RunMode, type RunRecord, type AdmissionLedger,
+ } from '../../evaluation/observed-authoring/evaluate.mjs';
+ 
+-export const frozenManifest = (): CorpusManifest => structuredClone(loadManifest());
++export const frozenManifest = (): CorpusManifest => {
++  // Unit-only freeze of the candidate metadata; never writes/adopts the actual manifest.
++  const manifest = structuredClone(loadManifest());
++  for (const [name, path] of Object.entries({ evaluator: 'studio-runner/evaluation/observed-authoring/evaluate.mjs', evaluationCli: 'studio-runner/evaluation/cli.mjs', corpusPageServer: 'studio-runner/evaluation/observed-authoring/pages/server.mjs' })) {
++    manifest.sources[name] = { path, base: 'repo', sha256: sha256File(join(repoRootFrom(), path)) };
++  }
++  manifest.manifestFrozenAt = '2026-10-18T16:38:51.221Z';
++  manifest.manifestSha256 = manifestDigest(manifest);
++  return manifest;
++};
++
++/** Synthetic closed review inputs for pure scoring controls; no assertion of actual independent evidence. */
++export function reviewedInput(manifest: CorpusManifest, runs: RunRecord[]): ReviewInput {
++  const reference = <T>(value: T): ReviewDocument<T> => { const fileText = canonicalJson(value); return { fileText, sha256: sha256Hex(fileText), value }; };
++  const rawRunsText = runs.map((run) => JSON.stringify(run)).join('\n') + '\n';
++  const rawRunsSha256 = sha256Hex(rawRunsText);
++  const reviews: ReviewDocument<ClosedCauseReview>[] = [];
++  const annotations = runs.map((run, i) => {
++    const id = { caseId: run.caseId, rep: run.rep, attempt: run.attempt };
++    const rawRecordSha256 = sha256Hex(canonicalJson(run));
++    const entry = manifest.cases.find((item) => item.id === run.caseId);
++    const causes = Object.fromEntries(['rs1NonScalarReadGaps', 'authoredEchoUnobservableTargets', 'focusMutationRefusedFills'].map((name) => {
++      const field = name as CauseField;
++      const events = run.details?.[field] ?? [];
++      const review = reference<ClosedCauseReview>({ kind: 'STUDIO_OBS_009_CLOSED_CAUSE_REVIEW', ...id, rawRunsSha256, rawOrdinal: i + 1, rawRecordSha256,
++        manifestSha256: run.manifestSha256, field, events, scope: { complete: true, observationEvidenceSha256: sha256Hex('SYNTHETIC_UNIT_SCOPE'), justificationCode: 'COMPLETE_REVIEWED_SCOPE',
++          stepTextSha256: entry?.stepText?.sha256 ?? null, expectedOutcomeSha256: entry?.expectedOutcome?.sha256 ?? null, valueLocationsSha256: sha256Hex(canonicalJson(entry?.rs1.valueLocations ?? [])) } });
++      reviews.push(review);
++      return [field, { count: run[field], events, assessment: { status: 'VERIFIED', evidenceSha256: review.sha256, manifestSha256: run.manifestSha256, ...id } }];
++    })) as ReviewInput['overlay']['annotations'][number]['causes'];
++    return { rawOrdinal: i + 1, rawRecordSha256, manifestSha256: run.manifestSha256, ...id, causes };
++  });
++  const overlay = { rawRunsSha256, annotations };
++  const overlayText = canonicalJson(overlay);
++  const admitted = computeAdmission({ purpose: 'ac7-benchmark', manifest, now: new Date(Date.parse(manifest.manifestFrozenAt ?? '') + 1000),
++    price: { pInPerMTok: 1, pOutPerMTok: 2, source: 'SYNTHETIC_UNIT_PRICE' }, headroomUsd: { value: 500, source: 'SYNTHETIC_UNIT_HEADROOM' }, allocationUsd: 100,
++    enforcedCaps: { maxOutputTokensPerCall: 4096, maxModelInputTokensTotal: 786432, maxModelOutputTokensTotal: 98304 },
++    proposalPlan: { plannedProposals: 1, contingencyFactor: 1, inputTokenCap: 1000, basis: 'SYNTHETIC_UNIT_PLAN' }, pinned: { source: 'SYNTHETIC_UNIT_CONFIG' }, admittedBy: 'SYNTHETIC_UNIT_ONLY' });
++  const admission = { seq: 1, prevEntrySha256: null, ...admitted };
++  const ledger = reference<AdmissionLedger>({ schemaVersion: 1, kind: 'BUDGET_ADMISSION_LEDGER', appendOnly: true, admissions: [admission] });
++  const execution = reference<NonNullable<ReviewInput['execution']>['value']>({ kind: 'STUDIO_OBS_009_EXECUTION_RECEIPT', mode: 'D_C', startedAt: new Date(Date.parse(manifest.manifestFrozenAt ?? '') + 2000).toISOString(),
++    manifestSha256: manifest.manifestSha256, rawRunsSha256, ledgerSha256: ledger.sha256, admissionSeq: 1, admissionEntrySha256: sha256Hex(canonicalJson(admission)),
++    configurationSha256: sha256Hex(canonicalJson({ enforcedCaps: admission.enforcedCaps, pinned: admission.pinned })) });
++  const adoption = reference<NonNullable<ReviewInput['adoption']>['value']>({ kind: 'INDEPENDENT_BENCHMARK_CAUSE_ADOPTION', status: 'ADOPTED', rawRunsSha256, overlaySha256: sha256Hex(overlayText),
++    manifestSha256: manifest.manifestSha256, executionReceiptSha256: execution.sha256, ledgerSha256: ledger.sha256, independentOfAuthor: true, originalExecutionAndConfigurationReviewed: true,
++    accepted: reviews.map((review) => ({ rawOrdinal: review.value.rawOrdinal, field: review.value.field, evidenceSha256: review.sha256 })) });
++  return { rawRunsText, overlayText, overlay, reviews, adoption, execution, ledger };
++}
+ 
+ export const readJson = (relative: string): unknown => JSON.parse(readFileSync(join(OBSERVED_AUTHORING_DIR, relative), 'utf8'));
+ 
+@@ -63,6 +110,18 @@
+       });
+     }
+   }
++  for (const run of runs) {
++    const count = manifest.cases.find((entry) => entry.id === run.caseId)?.block === 'incremental' ? 2 : 1;
++    const usage = run.usage;
++    if (usage) run.usage = { ...usage, basis: 'PUBLIC_BUDGET_COUNTERS' };
++    run.learnSessionsComplete = true;
++    run.learnSessions = Array.from({ length: count }, (_v, i): NonNullable<RunRecord['learnSessions']>[number] => ({ phase: i === 0 ? 'base' : 'incremental', sessionId: `synthetic-${run.caseId}-${String(run.rep)}-${String(i)}`,
++      session: { ...(run.session ?? { terminal: 'FAILED', observedStates: [], published: false, clarifications: 0, failureCode: null, failedStepNumber: null }) },
++      usage: { basis: 'PUBLIC_BUDGET_COUNTERS', modelProposals: usage?.modelProposals == null ? null : i === 0 && count === 2 ? Math.floor(usage.modelProposals / 2) : count === 2 ? usage.modelProposals - Math.floor(usage.modelProposals / 2) : usage.modelProposals,
++        inputTokens: usage?.inputTokens == null ? null : i === 0 && count === 2 ? Math.floor(usage.inputTokens / 2) : count === 2 ? usage.inputTokens - Math.floor(usage.inputTokens / 2) : usage.inputTokens,
++        outputTokens: usage?.outputTokens == null ? null : i === 0 && count === 2 ? Math.floor(usage.outputTokens / 2) : count === 2 ? usage.outputTokens - Math.floor(usage.outputTokens / 2) : usage.outputTokens },
++      hardGates: { falsePass: run.oracle?.falseSuccess === true, secretOrPiiLeak: run.secretOrPiiLeak ?? 0 } }));
++  }
+   if ((options.dropP ?? 0) > 0) {
+     let drop = options.dropP ?? 0;
+     const classOf = new Map(manifest.cases.map((c) => [c.id, c.class]));

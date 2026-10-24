@@ -1,0 +1,39 @@
+--- execution01/prepare-execution.py
++++ execution02/prepare-execution.py
+@@ -1,5 +1,6 @@
+ from pathlib import Path
+ import os,json,hashlib,runpy,subprocess,shutil,datetime,stat,math
++from collections import Counter
+ R=Path.cwd();O=Path(__file__).resolve().parent;P=R/'docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-private-proof-preparation';V=R/'docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-adoption-interval-correction01';S=Path('/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo');D=Path('/private/tmp/obs009-benchmark-report-adoption-20261020-proof01');E=R/'docs/qa/evidence/STUDIO-OBS-011/execution'
+ def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+ def wj(n,d):(O/n).write_text(json.dumps(d,indent=2)+'\n')
+@@ -18,8 +19,27 @@
+ snap=runpy.run_path(str(R/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution01/input-snapshot.py'))['snapshot']
+ source=snap(S);actual=snap(R);wj('initial-actual-full-selected.json',actual);wj('accepted-post-native-snapshot.json',{'repo':source});assert len(source['copyProfileFiles'])==13995 and source['dist']['digest']=='e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1' and len(source['dist']['files'])==238
+ prior=json.loads((R/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution02/lint-green01-private-after.json').read_text())['repo'];x={r['path']:r for r in prior['copyProfileFiles']};y={r['path']:r for r in source['copyProfileFiles']};assert x.keys()==y.keys();delta=[{'path':p,'before':x[p],'after':y[p]} for p in x if x[p]!=y[p]];cache='studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json';assert {r['path'] for r in delta}<={cache};assert source['dist']==prior['dist'];wj('post-native-source-successor.json',{'completeDelta':delta,'priorFullSelectedSha256':sha(R/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution02/lint-green01-private-after.json'),'sourceProductCount':238,'sourceDigest':source['copyProfileDigest'],'nativeResult':'FAIL_5P1F_RETAINED','resourceLimitation':auth['resourceLimitationAccepted'],'historicalAllDescendantsGone':'NOT_ESTABLISHED','rootConditional':ref(root)})
+-cacheDoc=json.loads((S/cache).read_text());assert cacheDoc['version']=='3.2.7' and len(cacheDoc['results'])==191
+-for value in cacheDoc['results'].values():assert set(value)=={'duration','failed'} and isinstance(value['failed'],bool) and isinstance(value['duration'],(int,float)) and math.isfinite(value['duration'])
++cacheDoc=json.loads((S/cache).read_text())
++# Format-only continuation: established Vitest3.2.7 ordered list-pair semantics, no collapse before uniqueness.
++def checked_cache(document):
++ assert type(document) is dict and set(document)=={'version','results'} and document['version']=='3.2.7'
++ assert type(document['results']) is list and len(document['results'])==191
++ keys=[]
++ for pair in document['results']:
++  assert type(pair) is list and len(pair)==2 and type(pair[0]) is str
++  key,value=pair;keys.append(key)
++  assert type(value) is dict and set(value)=={'duration','failed'} and type(value['failed']) is bool
++  assert type(value['duration']) in [int,float] and math.isfinite(value['duration'])
++ assert len(set(keys))==191 and all(count==1 for count in Counter(keys).values())
++ return keys
++nativePacket=R/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-native-six-execution01'
++nativeCache=nativePacket/'generated-cache/fixtures-after.json';nativeSeal=json.loads((nativePacket/'manifest.json').read_text())
++cacheBinding=next(row for row in nativeSeal['artifacts'] if row['path']=='generated-cache/fixtures-after.json')
++assert sha(nativeCache)==cacheBinding['sha256'] and nativeCache.stat().st_size==cacheBinding['bytes']
++sealedCache=json.loads(nativeCache.read_text());keys=checked_cache(cacheDoc);sealedKeys=checked_cache(sealedCache)
++assert Counter(keys)==Counter(sealedKeys) and keys==sealedKeys and cacheDoc==sealedCache and sha(S/cache)==sha(nativeCache)
++assert dict(cacheDoc['results'])[':test/fixtures-tier/observed-bootstrap-process-tree.test.ts']['failed'] is True
++wj('initial-cache-list-pair-verification.json',{'schema':'Vitest3.2.7 ordered191uniquelistpairs','unique191':True,'sameSealedNativeEndKeyCounterAndOrder':True,'all191ValuesAndExactBytesMatchSealedNativeEnd':True,'failedBootstrapRetained':True,'sealedNativeCacheSha256':sha(nativeCache),'noDuplicateCollapseOrReset':True,'correctionCause':'READER_SHAPE_NOT_SOURCE_DRIFT_NOT_RED'})
+ (O/'generated-cache').mkdir();shutil.copy2(S/cache,O/'generated-cache/source-failed-native-before-copy.json')
+ node=Path('/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node');env=os.environ.copy();env['PATH']=str(node.parent)+':'+env['PATH'];pnpm=Path(shutil.which('pnpm',path=env['PATH'])).resolve();versions=[]
+ for binary,wanted in [(node,'v24.20.0'),(pnpm,'10.33.0')]:

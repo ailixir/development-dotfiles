@@ -1,0 +1,7 @@
+Request independent architecture/security source review only; no executionGO supplied.
+
+Review the exact product/two test-stage buffers and patches, capturedP=D+1000 scope, no rearm, cap/min/limiting-cause table, already-ended priority, caller guard after await/validation immediately before both authority writes, and unchanged epoch/fence/inflight/expiry/REVOKED paths. Explicit decision required on cadence winning the phase/lease-margin tie and on keeping C1 only for a strictly earlier genuine margin while the phase remains open.
+
+Validate the four controlled inputs against the real24/26baseline report Counter and untouched native4 source: intended old valid-grant authority assertion-red at the bound frame/count1 (not cap/setup), post-validation microtask isolating caller-continuation guard placement, ended-phase no-request inside session margin, and equal phase/margin endpoint. Original tests/fixtures and cleanup remain byte-preserved. No compiler/parser/test has run here; semantic correctness and old-red/new-green are proposals pending their later controlled execution.
+
+Review future-proof-plan.json for fresh current input admission/CLI pins, tests-only red then identical-test product-only green, focused54 complete units and four native modes once, canonical pnpm/Node24, honest generated-output/cache bindings, direct fixture collection avoiding unrelated historical payload backup, and stop/no-retry conditions. FinalRT/actualcopyback/build/full-tier/image/Replay routing is not authorized by source review or this package.

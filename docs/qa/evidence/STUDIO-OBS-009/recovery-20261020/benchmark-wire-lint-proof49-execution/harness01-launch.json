@@ -1,0 +1,28 @@
+{
+  "id": "harness01",
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs009-recovery-20261021-wirelint44-harness01",
+    "pnpm",
+    "--config.package-manager-strict=false",
+    "exec",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "test/evaluation/harnessSelfTest.test.ts",
+    "--coverage.enabled=false",
+    "--minWorkers=1",
+    "--maxWorkers=1",
+    "--no-file-parallelism",
+    "--testTimeout=5000",
+    "--hookTimeout=5000",
+    "--testNamePattern",
+    "FR06-01|group5:|WIRE-OBS18"
+  ],
+  "pid": 91440,
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "PATHPrefix": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+  "originalLabel": "obs009-recovery-20261021-wirelint44-harness01"
+}

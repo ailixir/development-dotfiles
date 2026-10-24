@@ -1,0 +1,226 @@
+{
+  "reviewer": "/root/corpus_io06_independent_qa",
+  "primaryReceiptRefs": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-actual-adoption-bound09/actual-adoption09-root-receipt.json",
+      "sha256": "84b6aa319f447b726401ee7d1d70a36128690cfd2b34e2f523525330b7f00c98",
+      "bytes": 5691
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-execution06/membership09-receipt.json",
+      "sha256": "91e90509204a5517989ae80dc8f5214e9421322720c60cbfa7579edc19a479ef",
+      "bytes": 1922
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-execution06/corpus09-root-receipt.json",
+      "sha256": "1745f9ce1d4f37ad4456dee1ae6c5108304e5c94b0bc150586c582d02516818f",
+      "bytes": 7299
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-revision-actual-proof10/root-stop.json",
+      "sha256": "c0fd582138bd975c096fb537404ef9b036a52b282028d583ebe3fd6886c6e69d",
+      "bytes": 5705
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-revision-lint-fix11/root-receipt.json",
+      "sha256": "05591faafc443beed071f186113c5d052f758251007ad3660bf7f1ed7ad68456",
+      "bytes": 2331
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-revision-actual-proof12/root-receipt.json",
+      "sha256": "f3dfe1c9215d898b1f2b3f0a02d1eb99bb82f06eb64c6f2c8a8a105c472cad41",
+      "bytes": 6650
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-input-applicability14/receipt.json",
+      "sha256": "2299b47971b06b29ce3de1f472d35a804f09580eba07f0c8f770f6f58b4e3033",
+      "bytes": 1192
+    }
+  ],
+  "nestedReceiptHashLengthComparisons": 34,
+  "originalProof10ResultFilesEqualRecordedClosedResults": true,
+  "independentComparisons": {
+    "sourceRows": 1814,
+    "adoptionChangedExactlyTen": true,
+    "backupsAndAllTenSourceBuffersHashLengthModeMatch": true,
+    "freezeChangedOnlyManifest": true,
+    "lintFixChangedOnlyHelper": true,
+    "lintFixExactForwardingArrowPatch": true,
+    "finalCapturedSourceStable": true,
+    "currentFourDirectFiles": {
+      "studio-runner/evaluation/observed-authoring/evaluate.mjs": {
+        "sha256": "3383b01c0ba1e95b0a48696c1f7fa0592bf7108a770ce2d3c010a76976ea9d68",
+        "bytes": 115084,
+        "mode": "0o644"
+      },
+      "studio-runner/evaluation/observed-authoring/evaluate.d.mts": {
+        "sha256": "16212e199fe7b0ecd065769414f6b5f296bdf2d8e4a912c174bd73c95d934734",
+        "bytes": 22992,
+        "mode": "0o644"
+      },
+      "studio-runner/test/evaluation/harnessSelfTest.test.ts": {
+        "sha256": "a0fe522ce619b1e33a8b3a8db22b8cd9f50a9cb2f9066388f5c13ff8fe2d34e3",
+        "bytes": 42158,
+        "mode": "0o644"
+      },
+      "studio-runner/evaluation/observed-authoring/manifest.json": {
+        "sha256": "95287d56573f44fda8071ccd3e1d542bc5dac23984f006eeee52a8e710c9b0aa",
+        "bytes": 79287,
+        "mode": "0o644"
+      }
+    },
+    "sourceDigests": {
+      "before": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+      "afterTen": "8fc894805c24a4137ed51e60628393114817813eaceaf35cf485ec2cef7de6ff",
+      "afterFreeze": "827fa4c35712ac2267b6c71ac93089043abfd42bfa36cb289c59595d71e37f90",
+      "final": "0c59568e8e686c69703f650006edd70e8033db2906db7e434943735beebaff2d"
+    },
+    "distRows": 238,
+    "distDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+    "allDistSnapshotsExact": true,
+    "fullProfileRows": 13995,
+    "inputRows": 13757,
+    "fullProfileMembershipAndOtherRowsExact": true,
+    "onlyKnownCacheChangeAcrossProof12": true,
+    "cache": {
+      "version": "3.2.7",
+      "orderedKeys": 191,
+      "changedExistingHarnessEntries": 1,
+      "otherEntriesExact": 190,
+      "onlyDurationFailedMayChange": true
+    },
+    "proof10RawExits": [
+      0,
+      0,
+      1
+    ],
+    "proof12RawExits": [
+      0,
+      0,
+      0
+    ],
+    "rawReportChecks": [
+      {
+        "sha256": "651b4ab6db2d47ef6a463692aa34f3c61620e1f6afebb1a6cf19a5447bcbc18e",
+        "physicalFiles": 1,
+        "selectedPassed": 31,
+        "selectedFailedPending": 0,
+        "filtered": 15,
+        "fr06Cases": 25,
+        "group5Cases": 6,
+        "distinctSelectedIdentities": 31,
+        "success": true,
+        "runtimeErrorPrimitiveCounters": {}
+      },
+      {
+        "sha256": "05e9886ef3d7bb03ca04850d04738b8214091bd7665c3bb51197290f749a7728",
+        "physicalFiles": 1,
+        "selectedPassed": 31,
+        "selectedFailedPending": 0,
+        "filtered": 15,
+        "fr06Cases": 25,
+        "group5Cases": 6,
+        "distinctSelectedIdentities": 31,
+        "success": true,
+        "runtimeErrorPrimitiveCounters": {}
+      }
+    ],
+    "selectedIdentityCountersSameAcrossSeparateInvocations": true,
+    "uniqueSelectedCasesNot62": 31,
+    "rawPrivateBodiesExported": false
+  },
+  "perCommandSourceAndOpaqueLogComparisons": [
+    {
+      "proof": "benchmark-revision-actual-proof10/root-stop.json",
+      "steps": 3,
+      "beforeAfterSourceRowsExactEach": true,
+      "sourceDigest": "827fa4c35712ac2267b6c71ac93089043abfd42bfa36cb289c59595d71e37f90",
+      "distE19ExactEach": true,
+      "opaqueLogsRehashed": 3,
+      "sourceCaptureRefs": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-revision08-focused01-before.json",
+          "sha256": "5baaa22fd0879f8e00c25839b3ce5b3c6c0bd68cbf6ee7cf2734b644c8984ca4",
+          "bytes": 360050
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-revision08-focused01-after.json",
+          "sha256": "a2e712884f625a0da675140cbb09acf52a73f4c7019ed7cad58249f398ae81b2",
+          "bytes": 360050
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-revision08-types01-before.json",
+          "sha256": "d684b4a112fc94e75be86e5366a46cad5b53d7742310f9511a68c692f7d243d1",
+          "bytes": 360050
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-revision08-types01-after.json",
+          "sha256": "b712255f49cc927ee41f1b209e108c09e185cabdfd1de8ec7d09e5319807ed9f",
+          "bytes": 360050
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-revision08-lint01-before.json",
+          "sha256": "b5c0a420354e0298668a16ec2a4af06ae9307a0ff75f9ea07b2f9ffea05f1458",
+          "bytes": 360050
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-revision08-lint01-after.json",
+          "sha256": "047661b0261ec4b6a642721a5fa05600fd57f30f460806df6f054b98dc14d170",
+          "bytes": 360050
+        }
+      ]
+    },
+    {
+      "proof": "benchmark-revision-actual-proof12/root-receipt.json",
+      "steps": 3,
+      "beforeAfterSourceRowsExactEach": true,
+      "sourceDigest": "0c59568e8e686c69703f650006edd70e8033db2906db7e434943735beebaff2d",
+      "distE19ExactEach": true,
+      "opaqueLogsRehashed": 3,
+      "sourceCaptureRefs": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-revision11-focused01-before.json",
+          "sha256": "97cd78c71e46c3baf15a9f2c9b94586b7549599e554bc6d299a5fcf873f2d1da",
+          "bytes": 360050
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-revision11-focused01-after.json",
+          "sha256": "08293f96295c5024406a8b469f77722e4d670f044fec774fcca207ff771a18d1",
+          "bytes": 360050
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-revision11-types01-before.json",
+          "sha256": "ff5a4356be2b1dccd010862770e7d89bb821dc19234a6936859c7f78fc76b83f",
+          "bytes": 360050
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-revision11-types01-after.json",
+          "sha256": "e86f1f8fe6407228d3bd525484dad052233d2ffe8c68d267ebafa2f7224fed92",
+          "bytes": 360050
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-revision11-lint01-before.json",
+          "sha256": "fd3c032f25884173d59f4187d8141f5445e4c14241bddff9003a2ca077976d0a",
+          "bytes": 360050
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-revision11-lint01-after.json",
+          "sha256": "6a7aabb38ebf15ff453ad1cbe11f043beb83810bb61efc5e12594a1415f9bbf7",
+          "bytes": 360050
+        }
+      ]
+    }
+  ],
+  "contextRef": {
+    "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/obs009-actual-execution-qa13-context.txt"
+  },
+  "privacy": {
+    "privateMembershipHashOnly": true,
+    "manifestHashOnly": true,
+    "rawCorpusStreamsAndLogsHashOnly": true,
+    "fullCataloguesCacheAndVitestReportsProgrammeOnlyClosedFields": true,
+    "noSemanticValidatorReplay": true
+  },
+  "corpusCurrentInputCarryBasis": "Producer-bound closed applicability14 plus independently compared complete relevant-input metadata; no second validation and no observed syscall claim"
+}
+

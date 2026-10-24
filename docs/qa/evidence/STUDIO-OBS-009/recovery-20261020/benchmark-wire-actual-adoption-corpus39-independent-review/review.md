@@ -1,0 +1,20 @@
+# Independent actual wire adoption35 / corpus26 QA39
+
+Disposition: LOCAL_ACTUAL_FOUR_TARGET_ADOPTION_AND_CORPUS26_ACCEPTED. No local adoption/corpus finding remains. This review excludes the separately owned proof38, affected test outcomes, whole-story QA and actual D-C acceptance.
+
+The two immutable primary receipts were hash/length verified, followed by all 48 directly nested artifact references. Programme-only comparison independently confirms the immediate pre-copy source/full metadata equals fresh25. Adoption changes exactly four of 1,814 source rows to candidate30, preserving row membership/order and the other 1,810 rows. All four backup preimages and current adopted candidate buffers match hashes, lengths and mode 0644. The approved prefix31 script is the exact separately reviewed successor; code-application records raw 0 and the original all-before-write/own-backup/after-verification custody. Old ten-target execution was not replayed.
+
+The 13,995 full-profile and 13,757 input rows preserve membership/order. Adoption changes exactly the four authorized paths; the other 13,991/13,753 rows, SDK/cache and product rows are exact. All 238 E19 product outputs remain equal. Manifest 95287 is unchanged by code copying. This is direct immutable metadata comparison, not a new current SDK/profile walk or a claim about global process absence.
+
+Corpus26 then changes only the manifest row, from source 08952340 to final 0cbbf175. The original freeze-first and final strict validate commands both return 0, with zero errors and final valid/frozen true in the closed projections. No stale preliminary validation, checkFiles bypass or alternative validator was used. Membership records 277 conditional logical payload events over 75 admitted paths, regular/no-symlink checks and five imported application refs; the private artifact is hash/mode verified only and was not decoded.
+
+Within the explicitly authorized owned-backup comparison, the approved derived mask independently shows exactly one SOURCE_PIN, one FREEZE_TIMESTAMP and one MANIFEST_DIGEST change; every other derived value and every nonderived business/seed/oracle/rate/status value, object-key order and array order remains exact. The changed evaluator pin matches the adopted 15d2 candidate. The actual file 6bc320ac / 79287 bytes/mode 0644 matches the immutable after backup, whose private mode is 0600. Its canonical digest 9f19bd1d and sampled 2026-10-21T13:00:39.247Z timestamp are distinct from its file hash. No new semantic digest/oracle/scoring validator was implemented or executed.
+
+All 16 original corpus stdout/stderr stream references match their hashes/lengths and mode 0600 without raw-body disclosure. Before/after manifest backups also remain 0600; the current four public code targets and manifest were checked only by finite hash/stat reads. The review did not inspect current SDK/cache contents or any unsealed proof38 output.
+
+Node 24/pnpm 10.33, canonical-five/protected-eleven/bin21/hashed-environment boundary facts remain producer-bound guard evidence; independent review verifies their sealed custody plus the complete immutable input comparisons rather than recreating past environments. The initial metadata25 wrong-pnpm-path stop is preserved as an earlier resolution failure; existing /opt/homebrew/bin/pnpm was resolved without installation before captures. It is not hidden as a product failure or relabeled as a successful original command.
+
+Candidate30/sourceQA33 and prefix/proof32 retain their proper roles. Historical QA13/31, lintfail10, proof12 and private105 are not promoted to current affected outcomes. Corpus counts 25/P19/F1/N5 with two external unknowns describe metadata, not real workflows or passes. This disposition supplies no 61/31/92 executed count, full AC7/AC10/privacy/staging/provider/human-video/model/pilot acceptance, budget headroom or D-C PASS. External prerequisites and lifecycle remain unchanged.
+
+Only this review directory was written. No product code, helper, parser of code, CLI, test, type-check, lint, native/backend or diagnostic command was run; no story, lifecycle, source, pointer or ledger was changed.
+

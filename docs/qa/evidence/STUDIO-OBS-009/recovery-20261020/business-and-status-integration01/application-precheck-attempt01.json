@@ -1,0 +1,9 @@
+{
+  "exit": 1,
+  "phase": "joint prewrite frozen-input recheck",
+  "error": "FileNotFoundError: dist rows are relative to studio-runner/dist, unlike root-relative source rows",
+  "failedRelativePath": "compat/index.d.ts",
+  "actualWrites": 0,
+  "candidateOrProductFailure": false,
+  "correction": "Prefix existing dist-row paths with studio-runner/dist; no input, assertion or guard relaxation"
+}

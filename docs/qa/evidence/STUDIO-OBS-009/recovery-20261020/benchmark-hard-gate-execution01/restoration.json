@@ -1,0 +1,37 @@
+{
+  "operations": [
+    {
+      "privateTree": "before-repo",
+      "path": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "fromSha256": "5769819380217737448766661d62e52445b6f166ef8cf6b8f0c05e9e631ce7be",
+      "restoredSha256": "fb26b89354d30274361a45996dccf74df3353cfd8d99f44d8584b92b8479a93b",
+      "source": "verified-original-private-RT-base",
+      "actualOrOriginalPrivateSourceWritten": false
+    },
+    {
+      "privateTree": "repo",
+      "path": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "fromSha256": "5769819380217737448766661d62e52445b6f166ef8cf6b8f0c05e9e631ce7be",
+      "restoredSha256": "fb26b89354d30274361a45996dccf74df3353cfd8d99f44d8584b92b8479a93b",
+      "source": "verified-original-private-RT-base",
+      "actualOrOriginalPrivateSourceWritten": false
+    },
+    {
+      "privateTree": "repo",
+      "path": "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+      "fromSha256": "c12fad22b810b92b0ce8dbc9f8f54da4540d6ad1de56d027b226acb3d047be56",
+      "restoredSha256": "2eb26bc99542c2e46ae6791b9e0269de93fe42dcd24a4b1cda4712421b0aa6a8",
+      "source": "verified-original-private-RT-base",
+      "actualOrOriginalPrivateSourceWritten": false
+    }
+  ],
+  "exactlyThreePrivateSourceWrites": true,
+  "bothRestoredBenchmarkTestSha256": "fb26b89354d30274361a45996dccf74df3353cfd8d99f44d8584b92b8479a93b",
+  "bothRestoredEvaluatorSha256": "2eb26bc99542c2e46ae6791b9e0269de93fe42dcd24a4b1cda4712421b0aa6a8",
+  "sameSevenNeutralRtSourcesAsReviewedBaseRetained": true,
+  "both238DistDigest": "52bc5a05cdd348c5f62c6bc181210c79f765d15d82dee0abcf01861f6e75cef7",
+  "onlyRemainingDifferenceFromPrivateBase": "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+  "generatedCachesPreservedNotCleaned": true,
+  "privateTreesPreservedNotDeleted": true,
+  "actualCopybackOrBuild": false
+}

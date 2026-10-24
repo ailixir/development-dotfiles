@@ -1,0 +1,23 @@
+{
+  "kind": "STUDIO_OBS_009_SOURCE_ONLY_LINT_CANDIDATE44_MANIFEST",
+  "status": "SEALED_FOR_INDEPENDENT_QA_NOT_ADOPTED",
+  "ownedDirectory": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-candidate44",
+  "bindingDocument": "bindings.json",
+  "files": [
+    { "path": "studio-runner/evaluation/observed-authoring/evaluate.mjs", "sha256": "b9c95ddcee770fe1b88ea56587627f7bb5c6dc461c9687df08229a786244a518", "bytes": 125913, "mode": "0644" },
+    { "path": "studio-runner/test/evaluation/harnessSelfTest.test.ts", "sha256": "9b3c5f987f98f8ec620daa88e2453ff3126551ea5687036bd2384f8c036fca64", "bytes": 66052, "mode": "0644" },
+    { "path": "candidate.patch", "sha256": "d46e12b1bee2ca76225b40e0d2aba7974caddfe7e17f7924fd33344ed185b1e2", "bytes": 3625, "mode": "0644" },
+    { "path": "bindings.json", "sha256": "94c59197695a84d8e902a35ec50ca99fa285516abab84c7aadc7f6781b9a0dba", "bytes": 2193, "mode": "0644" },
+    { "path": "plan.md", "sha256": "2c3805203c9e9f4f9e435a6a4da754d3bdeb22f4231b4bb49e24cb05267430c0", "bytes": 2795, "mode": "0644" }
+  ],
+  "sourceOnlyChecks": {
+    "beforeHashesBytesModesMatchedContextBeforeCopy": true,
+    "afterHashesBytesModesRecorded": true,
+    "exactTextDiff": "Two targets, three hunks, seven added and seven removed lines; all other bytes unchanged.",
+    "assertionLineComparison": "cmp of rg -n expect/assert output for actual and candidate harness exited 0",
+    "actualTargetHashesUnchangedAfterCandidateAuthoring": true,
+    "runtimeChecksExecuted": false,
+    "qaApprovalClaimed": false
+  },
+  "seal": "SHA256SUMS binds these five files and this manifest. Verify from ownedDirectory."
+}

@@ -1,0 +1,64 @@
+{
+  "kind": "FRESH_COMPOSED_TWO_COPY_SEED",
+  "catalogPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-final-composed-phase1-execution01/fresh-copy-catalog.json",
+  "catalogSha256": "e1a989972cd9a63e8dbae513447d213248ca508241d891a3cdcd5ed0ca924394",
+  "pins": {
+    "copyProfileSha256": "ab9105a7e6b0cf27a9d512b0a6fb84efd65f3f28425a56ee5208d0806b97d9b1",
+    "sevenFileBindingSha256": "0ceb51bb6ec7c21947bb61d80fb3e6fc2b25010bd78cc7902d7f554e2638ceb7",
+    "accepted009BindingSha256": "a8ece9d9f506d574ddd9ad1b629bb6541ee7b2d8911b4feb68dc916ec4fd852f",
+    "finalFoldRunnerPorts": {
+      "studio-runner/test/guided/runtime.test.ts": "53169404baaf3d8e2e52e87fdabd42f73e07566422a7017e74fb064720ae37ea",
+      "studio-runner/test/fixtures-tier/guidedCloseBound.test.ts": "940554cdb7499eac57d8eb0dbe36341336e2943e826abb8e2c7fa81eced15aea"
+    }
+  },
+  "sandbox": "/private/tmp/obs009-benchmark-hard-gates-20261020-rg01",
+  "filesPerInitialCopy": 13993,
+  "pathsOverlaid": [
+    {
+      "path": "studio-runner/src/guided/contracts.ts",
+      "beforeSha256": "ac79e4bfac089a04c9caf929a45979ac2c4e1febfca7b1cb1cba1a01b1f7016d",
+      "afterSha256": "aca6c15478449f55ea8d2e70b792d8f3b432bf49866a12e5c78788015a83e4af",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/runner-draft/repo/studio-runner/src/guided/contracts.ts"
+    },
+    {
+      "path": "studio-runner/src/guided/diagnostics.ts",
+      "beforeSha256": "df12988fdcc0b23c0915a57933c4798c868abded0ccb52e5926fdeec3a094683",
+      "afterSha256": "e24521cb6e6c6742ca8dc1f09ef0cd89e6f15c2381727c2b712d2829c18cfa63",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/runner-draft/repo/studio-runner/src/guided/diagnostics.ts"
+    },
+    {
+      "path": "studio-runner/src/guided/evidence.ts",
+      "beforeSha256": "b3f34f14d71a0668e63e90fd1415c3d3134ae521bd1d0e82c517496d33c15b50",
+      "afterSha256": "de432f3a64d6557d4813c646228388efbb67fb7419c83efc2c57215cae53d503",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/runner-draft/repo/studio-runner/src/guided/evidence.ts"
+    },
+    {
+      "path": "studio-runner/src/guided/json.ts",
+      "beforeSha256": "113713fd50d5eab8a49b0740e68ae6b12d55d150c459f4c135f317e78de7b39d",
+      "afterSha256": "66ccda992e3d59bc9d01a02665fa356383f54e04020315bff763e2f4262530e8",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/runner-draft/repo/studio-runner/src/guided/json.ts"
+    },
+    {
+      "path": "studio-runner/src/guided/transport.ts",
+      "beforeSha256": "527471dfbe446c3fc2396c71158bd339d9bb33f73f5139994d7e58e7d84190ed",
+      "afterSha256": "c02401d3f99bdf317220634250f54ad8b7ff0eb3a69ab70c68c18925c5585b1c",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/runner-draft/repo/studio-runner/src/guided/transport.ts"
+    },
+    {
+      "path": "studio-runner/src/run/guidedBrowser.ts",
+      "beforeSha256": "63f899ef688df31f3608c4a0b10f86ea5e63b710410bb32eb7f4d374cd2d63ae",
+      "afterSha256": "59b4d23a2b06e9ffdf3371221970371c5fd8d4e4fe2df4b9acaf51dd2a0a72f0",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/runner-draft/repo/studio-runner/src/run/guidedBrowser.ts"
+    },
+    {
+      "path": "studio-runner/test/deferred.test.ts",
+      "beforeSha256": "ddcf66b2d50bdbf2be169138868db406a84ec1bacc54dcedf929ac87ec4c431f",
+      "afterSha256": "90f886fa3edd85f3a4246d40e097fe1ff1bd7863830c47dd81a74247ad539461",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-execution/empty-wrapper-correction/candidate/studio-runner/test/deferred.test.ts"
+    }
+  ],
+  "actualInputsUnchanged": true,
+  "dependenciesDereferenced": true,
+  "testsOrCompilersExecuted": false,
+  "privateEvidenceCopied": false
+}

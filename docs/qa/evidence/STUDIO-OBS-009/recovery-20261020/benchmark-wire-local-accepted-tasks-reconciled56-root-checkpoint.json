@@ -1,0 +1,149 @@
+{
+  "kind": "LOCAL_WIRE_UNIT_ACCEPTED_20_TASKS_COMPLETE_EXTERNAL_PREREQUISITES_PENDING",
+  "atUtc": "2026-10-21T14:09:14.071943+00:00",
+  "statusOnlyNotAuthority": true,
+  "goalState": "active",
+  "allStoriesComplete": false,
+  "previousGoalTurnClassification": "progress",
+  "consecutiveNoProgressBlockedAuditCount": 0,
+  "previousCheckpoint": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-applied-corpus-valid-proof49-qa50-active52-root-checkpoint.json",
+    "sha256": "2409be5b1fe212cc367b33e987bc5698eb75743ea521a658b71849da85c9230f",
+    "bytes": 6777
+  },
+  "fullOriginalObjectivePreserved": true,
+  "storyStatus": {
+    "009": "InProgress",
+    "010": "InProgress",
+    "011": "Done"
+  },
+  "story009": {
+    "sha256": "638eecb87ec213187f595c1e17231d9b029a49eeea6d38ba38f816aa962b2795",
+    "bytes": 271198,
+    "adminVersion": "0.3.32",
+    "checkedTaskMarkers": 20,
+    "openMarkers": 17,
+    "all3QualityGatesOpen": true
+  },
+  "story010Sha256": "6363b2b1053fab69cd840998e1cff0e7683e6f0080839df74c6af5f05788d41c",
+  "story011Sha256": "67b0c439a20e00b83ef572aa549c27c96d8c8301cd0de65b975aadd9f862bdc8",
+  "story011SdcVerified": "completed/currentPhase null",
+  "epicReadmeSha256": "f76e66891ef1ba393e305c184604ce0311de41255507191a2e79ff3241767823",
+  "lastMeasuredSourceDigest": "df860ccc1c6479e62320328b65f5e5bcaa1c431f863c543b7c07005b5654f8d2",
+  "sourceRows": 1814,
+  "distDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+  "distRows": 238,
+  "currentCriticalFiveCodePinsRehashed": {
+    "studio-runner/evaluation/observed-authoring/evaluate.mjs": [
+      "b9c95ddcee770fe1b88ea56587627f7bb5c6dc461c9687df08229a786244a518",
+      125913
+    ],
+    "studio-runner/evaluation/observed-authoring/evaluate.d.mts": [
+      "714b60cb2f5c7de01d3504095a8c0340060b3683a3e26e8e296593119fb99f05",
+      23546
+    ],
+    "studio-runner/test/evaluation/harnessSelfTest.test.ts": [
+      "9b3c5f987f98f8ec620daa88e2453ff3126551ea5687036bd2384f8c036fca64",
+      66052
+    ],
+    "studio-runner/test/evaluation/observedCorpus.ts": [
+      "6631c807b5ead597ffa64ac816d2fe90f9694a647afe48be30b814d48f84902e",
+      10728
+    ],
+    "studio-runner/test/evaluation/benchmarkScoring.test.ts": [
+      "bc49947549e2e9d8d2338cb064ec5f823efc437232f2d0e60d7213d819a2fb1a",
+      35575
+    ]
+  },
+  "actualManifest": {
+    "fileSha256": "36a50789c442df65dc27d0a3c2695574b65009ec3e6d844c60edfa7a0355b000",
+    "bytes": 79287,
+    "mode": "0644",
+    "canonicalDigest": "ef3cac512987faeece662a0c423c1b943eb742862f4584813c8747dd70e707d6",
+    "actualFrozenAt": "2026-10-21T13:34:23.444Z"
+  },
+  "actualProof49": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-execution/manifest.json",
+    "sha256": "1fa26cee7ee45c3740b829637ddcb02bb3e731c09c5a199f8583634b083bf93a",
+    "bytes": 23902
+  },
+  "actualProof49Receipt": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-execution/receipt.json",
+    "sha256": "13405c1bbd04f87d105470ee4ed1e07f2b209266757d118e2763a4742e372572",
+    "bytes": 6633
+  },
+  "actualProof49All94ArtifactsRootVerified": true,
+  "actualProof49RawExits": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "harnessSelectedPassed": 61,
+  "harnessIntentionallyFiltered": 15,
+  "scoringSelectedPassed": 31,
+  "selectedCaseInstances": 92,
+  "physicalTestInvocations": 2,
+  "typesPassed": true,
+  "lintFourFilesPassed": true,
+  "not92DistinctStringsOr184UniqueClaim": true,
+  "actualIndependentQa50": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-actual50-independent-review/manifest.json",
+    "sha256": "3a97d674f3ef4255a2c0dd4489b4781b7835b1acc1d7cb3888f5a93591b63d7b",
+    "bytes": 1133
+  },
+  "actualQa50Verdict": "LOCAL_WIRE_CAPTURE_LINT_FIX_ADOPTION_CORPUS_AND_AFFECTED_PROOF_ACCEPTED",
+  "actualQa50FindingCount": 0,
+  "developerProgress51": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/local-wire-progress51/manifest.json",
+    "sha256": "7be8f7b6edd14a97cf425ab53a4a79a84ef305612aefc7eec57898189ae46139",
+    "bytes": 1238
+  },
+  "developerProgress51RootAccepted": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/local-wire-progress51/root-independent-acceptance.json",
+    "sha256": "e124bfc5bf674b4c1efc43106a9d8656c632c4fdd2d8e8c050f4b81319dce685",
+    "bytes": 690
+  },
+  "poEligibility53": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/task-eligibility53-po-review/manifest.json",
+    "sha256": "52b75551c154f9c45684c1f3d68181c5b2970eeaf46b25a886812cba802f586f",
+    "bytes": 1687
+  },
+  "poBookkeeping54": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/task-bookkeeping54-po/manifest.json",
+    "sha256": "86db8597a5da711f10fe7e7659c0223bb343584f144cbd1578c0593d17080259",
+    "bytes": 2159
+  },
+  "poBookkeeping54RootAccepted": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/task-bookkeeping54-po/root-independent-acceptance.json",
+    "sha256": "ca0752e86b5f4820b37d79c0aa49f725596786a5f7570c5eab57caae08b2a6f2",
+    "bytes": 866
+  },
+  "epicCurrentBannerSync55": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/epic-current-banner-sync55.json",
+    "sha256": "1da8e4fc50d7cbf0da419c0297599aecb70931ce26ed72e4a97a03d1cdf54224",
+    "bytes": 2248
+  },
+  "allStoryAdminChangesOutsideSourceAndFullProfileMembership": true,
+  "allSubagentModelPolicy": {
+    "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/subagent-model-policy-20261021-sol61-high.json",
+    "sha256": "e9af3453806ff9edbff10ecf4192e7b2413a237c1cd40ee6dedfcdf01f439024",
+    "bytes": 505
+  },
+  "requiredEverySubagentModel": "gpt-6.1-sol",
+  "requiredReasoningEffort": "high",
+  "newSpawnsForkTurns": "none",
+  "oldInheritedModelWorkers": "Completed; do not reuse. Followups may reuse explicitly configured sol61_high workers.",
+  "allOwnedExpertJobsCompleted": true,
+  "allOwnedRuntimeJobsTerminal": true,
+  "latestProof49Session": "57288 terminal raw0",
+  "runtimeNoRestartPolicy": "All old17379/8955/47059/29632/95212/49718/42762/62728 and old native jobs terminal; no poll/restart/replay. Actual35 and47 execution dirs exist; never replay.",
+  "nativeFullCallsConsumed": 6,
+  "originalIpcDiagnosticsCompleted": 12,
+  "noExtraNative105OrIpcReplay": true,
+  "applicationProviderHeadroom": "UNKNOWN",
+  "externalPrerequisitePacket": "Existing single coordinator-owned approved-reference request remains pending; no new question/outreach/real provider calls",
+  "remainingWork": "009 actual U13 ack before AE implementation, approved staging/SSO/accounts/secret refs/oracles, ED01 exact rates/model/provider/spend/headroom/admission, ED02 Vault/TLS/DBA/SIEM/NTP/internal image/SRE D-B, C17 named human masking reviewer, real schema/20x3 workflows/100replay/model-sizing/canary/fault/security/video/T4-D-C-T6; 010 actual009Done AND D-CPASS then Live remeasure/PM/per-app-dist focus/five real consenting pilots/outcomes/remediation/final readiness.",
+  "remainingHistoricalCarries": "C-OBS008-4 exactly3reachable+unreachablecontrol/Variables dialog and P4P5 NOT_RETAINED listing/PIDs are explicitly mapped open atT6, not manufactured; all17marker holds remain.",
+  "nextSafeAction": "Incorporate any actual approved external packet/user facts when supplied. Do not implement AE before U13 or run provider calls with unknown rates/headroom. No additional generic local audit/test campaign justified by accepted unchanged unit. Preserve whole objective; if same genuine external impasse recurs without meaningful action for3consecutive goal turns, follow blocked-audit rule rather than endless status-only turns."
+}

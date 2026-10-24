@@ -1,0 +1,2501 @@
+{
+  "kind": "INDEPENDENT_GATEWAY_RETAINED_CONTROLS_PREPARATION",
+  "status": "PREPARED_AWAITING_ROOT_GO_NO_RUNTIME",
+  "atUtc": "2026-10-20T14:33:23.274470+00:00",
+  "inputFiles": [
+    {
+      "path": "helm-chart/put-checks/.helmignore",
+      "sha256": "78de72013f6064b5b01e524a172af3ecf800bea996f63d3751ad3472d0ed73a6",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/Chart.yaml",
+      "sha256": "529d7115a0a5c72d032948fcdf845a355bc619ae3d9030a96207fddc9a5dcdd4",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/NOTES.txt",
+      "sha256": "68d0da5e190ab3fd2ce9de7738a7c8920ed5461f806945050197f1e34714013b",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/_helpers.tpl",
+      "sha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/api-guided-tls-networkpolicy.yaml",
+      "sha256": "d34344cc3a264f2de71cc65693a31a606f3f14e7cd2a85279267a799587c76e9",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/configmap.yaml",
+      "sha256": "6ea290fb3b98d582748cf0c9ac2000e8e30c32a099c6cbede8a89348f19fd260",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/deployment.yaml",
+      "sha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/hpa.yaml",
+      "sha256": "3bb66fff3c03bc515e4b878313d0038d4cd185a0fab6fe5a9b7bcc53773be958",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/ingress.yaml",
+      "sha256": "27f7db6543703347fdeb0c5a82cab2ec2774c217a88b6f422c2622b48877aabe",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/pdb.yaml",
+      "sha256": "3d5e77c81eccbbf90e181c852b498644bd623fea1968d0de9112b8ec910aac26",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/service.yaml",
+      "sha256": "3b80e6c53136e530bbcc49e6b284246bf807dda529b639e4428f914b3e8171bc",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/serviceaccount.yaml",
+      "sha256": "3182a386e41fae23bd69d1749bb1cf1dc5de5c985dabc549974e2888e2fc2f95",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/studio-object-store-pvc.yaml",
+      "sha256": "46c3ea74c9abe70342e859b200e9e6ad6bc389c2fa709b70d4de7bfad0ebd114",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/studio-runner-deployment.yaml",
+      "sha256": "aa4a96d5922f6a01558c3785712e56c9017b1b62139bd20e812e777d1190c0c7",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/studio-runner-networkpolicy.yaml",
+      "sha256": "c3bc1ac53c224ffb88448a9015f5d77d8e141c268c804efe28310149191ec59e",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/studio-runner-scaledobject.yaml",
+      "sha256": "11bd0472999a2adfe5fc70629514254688b6c5bee95911f6f8e6208dad769172",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/studio-runner-service.yaml",
+      "sha256": "945fb9dacff1e99c418a3d7f82ebe83f5a4320495718dbe41b6f01a019f49dd9",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/studio-sse-ingress.yaml",
+      "sha256": "df2be610db0ca3984236810773299041aa3f10728609ed84f2ad19007f882d06",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/values-dev.yaml",
+      "sha256": "cc241dc9394885234c426fa9bf73564d4b69ebdea65cce14c508318c8af78fb1",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/values-prod.yaml",
+      "sha256": "9a330dc518420bc06ab8f63804efff04855ea9a49081dad1502332c0dcda60f9",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/values-uat.yaml",
+      "sha256": "7cb2ef4aaa5a61f3c4599acdcfef4bb757e397e06a922c42cef46beb537cce33",
+      "mode": "0o644"
+    },
+    {
+      "path": "helm-chart/put-checks/values.yaml",
+      "sha256": "51c680d4ff1863c43d5138cc10e3a696ae78ba32cb4dbf72b9ab60c3bc9a1a80",
+      "mode": "0o644"
+    },
+    {
+      "path": "package.json",
+      "sha256": "c3c3bcc1b29673be14836815dbedc2404220353da80164d953d51bdd898934e1",
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/package.json",
+      "sha256": "2a7926800745772854c8bcecb9eba8d0136103c4a281e21afa598b347524f19e",
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/package-lock.json",
+      "sha256": "71d287538cf4659d75b965f57937b41bbe7540bb81a3a8c40a66edbb76e13613",
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/.npmrc",
+      "sha256": "ef226ebbcd0001fe1be85367b791411e5bc20a58551c9809be9885ea5bc37d6d",
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/.nvmrc",
+      "sha256": "68ca3fba3b7e864770cb61aeb306d4bd4354b68ab4dd38450860c5d823e42a53",
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/tsconfig.json",
+      "sha256": "723196d470e796a3638c23d794004b30053e0e334a0bb3f1fa270a0a75075046",
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/vitest.deployment.config.ts",
+      "sha256": "8e629004020797f3058aa376960125d99bd35ea1f576fb449ffd57bd8e41870b",
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/test/deployment/integrations.test.ts",
+      "sha256": "38c101be9a0d466d12ac7fc6c08b4614b4e918e189feabce7059ac6ca7d29907",
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/test/deployment/helm.ts",
+      "sha256": "0a3a32b68b4276bc7da20a1c37d08026d8f9696d1030b479cf93228be13aa3b0",
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/test/helpers/corpus.ts",
+      "sha256": "63c091d87319035db1673bfbca75d31a02206697ed454f52b3e8f21093dfab79",
+      "mode": "0o644"
+    }
+  ],
+  "inputFileCount": 32,
+  "mutants": [
+    {
+      "id": "recursion",
+      "copyRoot": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/gateway-independent/private/recursion/repo",
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/gateway-independent/private/recursion/repo/studio-runner",
+      "command": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.deployment.config.ts",
+        "test/deployment/integrations.test.ts",
+        "--testNamePattern=(backend|worker) rejects (flat|nested|relaxed)",
+        "--minWorkers=1",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/gateway-independent/recursion-vitest.json"
+      ],
+      "nodePathPrefix": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+      "log": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/gateway-independent/recursion.log",
+      "jsonReport": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/gateway-independent/recursion-vitest.json",
+      "helperOriginalSha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+      "helperMutantSha256": "f444f16f59e8ae0abbe6494eb30ee204939e07c8b520ebd9299a1e4f6638a305",
+      "patch": "recursion.patch",
+      "patchSha256": "67ee161a4fa6573bab4242a7a4f471df1f33957b8d4133ab80bb49e64125e4a6",
+      "scopeDefine": "put-checks.springConfig.validateProperties",
+      "uniqueScopedAnchor": "{{- include \"put-checks.springConfig.validateProperties\" (dict \"values\" $value \"path\" $path) -}}",
+      "replacement": "",
+      "scopedAnchorCount": 1,
+      "selectedCases": 48,
+      "expectedRefusalAssertionLine": 310,
+      "expectedMinimumFailureShape": "nested",
+      "predictedFailed": 16,
+      "predictedPassed": 32,
+      "predictedFilterOmissions": 47,
+      "predictionIsNotObservedProof": true,
+      "sharedInstalledDependencyLinks": [
+        {
+          "name": ".bin",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/.bin"
+        },
+        {
+          "name": ".package-lock.json",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/.package-lock.json"
+        },
+        {
+          "name": "@ampproject",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@ampproject"
+        },
+        {
+          "name": "@aws",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@aws"
+        },
+        {
+          "name": "@aws-sdk",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@aws-sdk"
+        },
+        {
+          "name": "@babel",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@babel"
+        },
+        {
+          "name": "@bcoe",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@bcoe"
+        },
+        {
+          "name": "@esbuild",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@esbuild"
+        },
+        {
+          "name": "@eslint",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@eslint"
+        },
+        {
+          "name": "@eslint-community",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@eslint-community"
+        },
+        {
+          "name": "@humanfs",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@humanfs"
+        },
+        {
+          "name": "@humanwhocodes",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@humanwhocodes"
+        },
+        {
+          "name": "@isaacs",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@isaacs"
+        },
+        {
+          "name": "@istanbuljs",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@istanbuljs"
+        },
+        {
+          "name": "@jridgewell",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@jridgewell"
+        },
+        {
+          "name": "@napi-rs",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@napi-rs"
+        },
+        {
+          "name": "@pkgjs",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@pkgjs"
+        },
+        {
+          "name": "@rollup",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@rollup"
+        },
+        {
+          "name": "@rtsao",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@rtsao"
+        },
+        {
+          "name": "@smithy",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@smithy"
+        },
+        {
+          "name": "@types",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@types"
+        },
+        {
+          "name": "@typescript-eslint",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@typescript-eslint"
+        },
+        {
+          "name": "@vitest",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest"
+        },
+        {
+          "name": "acorn",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/acorn"
+        },
+        {
+          "name": "acorn-jsx",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/acorn-jsx"
+        },
+        {
+          "name": "ajv",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/ajv"
+        },
+        {
+          "name": "ansi-regex",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/ansi-regex"
+        },
+        {
+          "name": "ansi-styles",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/ansi-styles"
+        },
+        {
+          "name": "argparse",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/argparse"
+        },
+        {
+          "name": "array-buffer-byte-length",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/array-buffer-byte-length"
+        },
+        {
+          "name": "array-includes",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/array-includes"
+        },
+        {
+          "name": "array.prototype.findlastindex",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/array.prototype.findlastindex"
+        },
+        {
+          "name": "array.prototype.flat",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/array.prototype.flat"
+        },
+        {
+          "name": "array.prototype.flatmap",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/array.prototype.flatmap"
+        },
+        {
+          "name": "arraybuffer.prototype.slice",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/arraybuffer.prototype.slice"
+        },
+        {
+          "name": "assertion-error",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/assertion-error"
+        },
+        {
+          "name": "ast-v8-to-istanbul",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/ast-v8-to-istanbul"
+        },
+        {
+          "name": "async-function",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/async-function"
+        },
+        {
+          "name": "available-typed-arrays",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/available-typed-arrays"
+        },
+        {
+          "name": "balanced-match",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/balanced-match"
+        },
+        {
+          "name": "bowser",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/bowser"
+        },
+        {
+          "name": "brace-expansion",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/brace-expansion"
+        },
+        {
+          "name": "cac",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/cac"
+        },
+        {
+          "name": "call-bind",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/call-bind"
+        },
+        {
+          "name": "call-bind-apply-helpers",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/call-bind-apply-helpers"
+        },
+        {
+          "name": "call-bound",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/call-bound"
+        },
+        {
+          "name": "callsites",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/callsites"
+        },
+        {
+          "name": "chai",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/chai"
+        },
+        {
+          "name": "chalk",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/chalk"
+        },
+        {
+          "name": "check-error",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/check-error"
+        },
+        {
+          "name": "color-convert",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/color-convert"
+        },
+        {
+          "name": "color-name",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/color-name"
+        },
+        {
+          "name": "concat-map",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/concat-map"
+        },
+        {
+          "name": "cross-spawn",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/cross-spawn"
+        },
+        {
+          "name": "data-view-buffer",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/data-view-buffer"
+        },
+        {
+          "name": "data-view-byte-length",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/data-view-byte-length"
+        },
+        {
+          "name": "data-view-byte-offset",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/data-view-byte-offset"
+        },
+        {
+          "name": "debug",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/debug"
+        },
+        {
+          "name": "deep-eql",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/deep-eql"
+        },
+        {
+          "name": "deep-is",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/deep-is"
+        },
+        {
+          "name": "define-data-property",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/define-data-property"
+        },
+        {
+          "name": "define-properties",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/define-properties"
+        },
+        {
+          "name": "doctrine",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/doctrine"
+        },
+        {
+          "name": "dunder-proto",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/dunder-proto"
+        },
+        {
+          "name": "eastasianwidth",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eastasianwidth"
+        },
+        {
+          "name": "emoji-regex",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/emoji-regex"
+        },
+        {
+          "name": "es-abstract",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/es-abstract"
+        },
+        {
+          "name": "es-abstract-get",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/es-abstract-get"
+        },
+        {
+          "name": "es-define-property",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/es-define-property"
+        },
+        {
+          "name": "es-errors",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/es-errors"
+        },
+        {
+          "name": "es-module-lexer",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/es-module-lexer"
+        },
+        {
+          "name": "es-object-atoms",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/es-object-atoms"
+        },
+        {
+          "name": "es-set-tostringtag",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/es-set-tostringtag"
+        },
+        {
+          "name": "es-shim-unscopables",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/es-shim-unscopables"
+        },
+        {
+          "name": "es-to-primitive",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/es-to-primitive"
+        },
+        {
+          "name": "esbuild",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/esbuild"
+        },
+        {
+          "name": "escape-string-regexp",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/escape-string-regexp"
+        },
+        {
+          "name": "eslint",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eslint"
+        },
+        {
+          "name": "eslint-import-resolver-node",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eslint-import-resolver-node"
+        },
+        {
+          "name": "eslint-module-utils",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eslint-module-utils"
+        },
+        {
+          "name": "eslint-plugin-import",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eslint-plugin-import"
+        },
+        {
+          "name": "eslint-scope",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eslint-scope"
+        },
+        {
+          "name": "eslint-visitor-keys",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eslint-visitor-keys"
+        },
+        {
+          "name": "espree",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/espree"
+        },
+        {
+          "name": "esquery",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/esquery"
+        },
+        {
+          "name": "esrecurse",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/esrecurse"
+        },
+        {
+          "name": "estraverse",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/estraverse"
+        },
+        {
+          "name": "estree-walker",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/estree-walker"
+        },
+        {
+          "name": "esutils",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/esutils"
+        },
+        {
+          "name": "expect-type",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/expect-type"
+        },
+        {
+          "name": "fast-deep-equal",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/fast-deep-equal"
+        },
+        {
+          "name": "fast-json-stable-stringify",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/fast-json-stable-stringify"
+        },
+        {
+          "name": "fast-levenshtein",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/fast-levenshtein"
+        },
+        {
+          "name": "fdir",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/fdir"
+        },
+        {
+          "name": "file-entry-cache",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/file-entry-cache"
+        },
+        {
+          "name": "find-up",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/find-up"
+        },
+        {
+          "name": "flat-cache",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/flat-cache"
+        },
+        {
+          "name": "flatted",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/flatted"
+        },
+        {
+          "name": "for-each",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/for-each"
+        },
+        {
+          "name": "foreground-child",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/foreground-child"
+        },
+        {
+          "name": "fsevents",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/fsevents"
+        },
+        {
+          "name": "function-bind",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/function-bind"
+        },
+        {
+          "name": "function.prototype.name",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/function.prototype.name"
+        },
+        {
+          "name": "functions-have-names",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/functions-have-names"
+        },
+        {
+          "name": "generator-function",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/generator-function"
+        },
+        {
+          "name": "get-intrinsic",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/get-intrinsic"
+        },
+        {
+          "name": "get-proto",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/get-proto"
+        },
+        {
+          "name": "get-symbol-description",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/get-symbol-description"
+        },
+        {
+          "name": "glob",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/glob"
+        },
+        {
+          "name": "glob-parent",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/glob-parent"
+        },
+        {
+          "name": "globals",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/globals"
+        },
+        {
+          "name": "globalthis",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/globalthis"
+        },
+        {
+          "name": "gopd",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/gopd"
+        },
+        {
+          "name": "has-bigints",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/has-bigints"
+        },
+        {
+          "name": "has-flag",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/has-flag"
+        },
+        {
+          "name": "has-property-descriptors",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/has-property-descriptors"
+        },
+        {
+          "name": "has-proto",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/has-proto"
+        },
+        {
+          "name": "has-symbols",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/has-symbols"
+        },
+        {
+          "name": "has-tostringtag",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/has-tostringtag"
+        },
+        {
+          "name": "hasown",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/hasown"
+        },
+        {
+          "name": "html-escaper",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/html-escaper"
+        },
+        {
+          "name": "ignore",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/ignore"
+        },
+        {
+          "name": "import-fresh",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/import-fresh"
+        },
+        {
+          "name": "imurmurhash",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/imurmurhash"
+        },
+        {
+          "name": "internal-slot",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/internal-slot"
+        },
+        {
+          "name": "is-array-buffer",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-array-buffer"
+        },
+        {
+          "name": "is-async-function",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-async-function"
+        },
+        {
+          "name": "is-bigint",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-bigint"
+        },
+        {
+          "name": "is-boolean-object",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-boolean-object"
+        },
+        {
+          "name": "is-callable",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-callable"
+        },
+        {
+          "name": "is-core-module",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-core-module"
+        },
+        {
+          "name": "is-data-view",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-data-view"
+        },
+        {
+          "name": "is-date-object",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-date-object"
+        },
+        {
+          "name": "is-document.all",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-document.all"
+        },
+        {
+          "name": "is-extglob",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-extglob"
+        },
+        {
+          "name": "is-finalizationregistry",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-finalizationregistry"
+        },
+        {
+          "name": "is-fullwidth-code-point",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-fullwidth-code-point"
+        },
+        {
+          "name": "is-generator-function",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-generator-function"
+        },
+        {
+          "name": "is-glob",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-glob"
+        },
+        {
+          "name": "is-map",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-map"
+        },
+        {
+          "name": "is-negative-zero",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-negative-zero"
+        },
+        {
+          "name": "is-number-object",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-number-object"
+        },
+        {
+          "name": "is-regex",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-regex"
+        },
+        {
+          "name": "is-set",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-set"
+        },
+        {
+          "name": "is-shared-array-buffer",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-shared-array-buffer"
+        },
+        {
+          "name": "is-string",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-string"
+        },
+        {
+          "name": "is-symbol",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-symbol"
+        },
+        {
+          "name": "is-typed-array",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-typed-array"
+        },
+        {
+          "name": "is-weakmap",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-weakmap"
+        },
+        {
+          "name": "is-weakref",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-weakref"
+        },
+        {
+          "name": "is-weakset",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-weakset"
+        },
+        {
+          "name": "isarray",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/isarray"
+        },
+        {
+          "name": "isexe",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/isexe"
+        },
+        {
+          "name": "istanbul-lib-coverage",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/istanbul-lib-coverage"
+        },
+        {
+          "name": "istanbul-lib-report",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/istanbul-lib-report"
+        },
+        {
+          "name": "istanbul-lib-source-maps",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/istanbul-lib-source-maps"
+        },
+        {
+          "name": "istanbul-reports",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/istanbul-reports"
+        },
+        {
+          "name": "jackspeak",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/jackspeak"
+        },
+        {
+          "name": "js-tokens",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/js-tokens"
+        },
+        {
+          "name": "js-yaml",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/js-yaml"
+        },
+        {
+          "name": "json-buffer",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/json-buffer"
+        },
+        {
+          "name": "json-schema-traverse",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/json-schema-traverse"
+        },
+        {
+          "name": "json-stable-stringify-without-jsonify",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/json-stable-stringify-without-jsonify"
+        },
+        {
+          "name": "json5",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/json5"
+        },
+        {
+          "name": "keyv",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/keyv"
+        },
+        {
+          "name": "levn",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/levn"
+        },
+        {
+          "name": "locate-path",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/locate-path"
+        },
+        {
+          "name": "lodash.merge",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/lodash.merge"
+        },
+        {
+          "name": "loupe",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/loupe"
+        },
+        {
+          "name": "lru-cache",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/lru-cache"
+        },
+        {
+          "name": "magic-string",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/magic-string"
+        },
+        {
+          "name": "magicast",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/magicast"
+        },
+        {
+          "name": "make-dir",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/make-dir"
+        },
+        {
+          "name": "math-intrinsics",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/math-intrinsics"
+        },
+        {
+          "name": "minimatch",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/minimatch"
+        },
+        {
+          "name": "minimist",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/minimist"
+        },
+        {
+          "name": "minipass",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/minipass"
+        },
+        {
+          "name": "ms",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/ms"
+        },
+        {
+          "name": "nanoid",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/nanoid"
+        },
+        {
+          "name": "natural-compare",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/natural-compare"
+        },
+        {
+          "name": "node-exports-info",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/node-exports-info"
+        },
+        {
+          "name": "object-inspect",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/object-inspect"
+        },
+        {
+          "name": "object-keys",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/object-keys"
+        },
+        {
+          "name": "object.assign",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/object.assign"
+        },
+        {
+          "name": "object.entries",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/object.entries"
+        },
+        {
+          "name": "object.fromentries",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/object.fromentries"
+        },
+        {
+          "name": "object.groupby",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/object.groupby"
+        },
+        {
+          "name": "object.values",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/object.values"
+        },
+        {
+          "name": "optionator",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/optionator"
+        },
+        {
+          "name": "own-keys",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/own-keys"
+        },
+        {
+          "name": "p-limit",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/p-limit"
+        },
+        {
+          "name": "p-locate",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/p-locate"
+        },
+        {
+          "name": "package-json-from-dist",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/package-json-from-dist"
+        },
+        {
+          "name": "parent-module",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/parent-module"
+        },
+        {
+          "name": "path-exists",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/path-exists"
+        },
+        {
+          "name": "path-key",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/path-key"
+        },
+        {
+          "name": "path-parse",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/path-parse"
+        },
+        {
+          "name": "path-scurry",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/path-scurry"
+        },
+        {
+          "name": "pathe",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/pathe"
+        },
+        {
+          "name": "pathval",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/pathval"
+        },
+        {
+          "name": "picocolors",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/picocolors"
+        },
+        {
+          "name": "picomatch",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/picomatch"
+        },
+        {
+          "name": "playwright",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/playwright"
+        },
+        {
+          "name": "playwright-core",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/playwright-core"
+        },
+        {
+          "name": "possible-typed-array-names",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/possible-typed-array-names"
+        },
+        {
+          "name": "postcss",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/postcss"
+        },
+        {
+          "name": "prelude-ls",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/prelude-ls"
+        },
+        {
+          "name": "punycode",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/punycode"
+        },
+        {
+          "name": "reflect.getprototypeof",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/reflect.getprototypeof"
+        },
+        {
+          "name": "regexp.prototype.flags",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/regexp.prototype.flags"
+        },
+        {
+          "name": "resolve",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/resolve"
+        },
+        {
+          "name": "resolve-from",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/resolve-from"
+        },
+        {
+          "name": "rollup",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/rollup"
+        },
+        {
+          "name": "safe-array-concat",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/safe-array-concat"
+        },
+        {
+          "name": "safe-push-apply",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/safe-push-apply"
+        },
+        {
+          "name": "safe-regex-test",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/safe-regex-test"
+        },
+        {
+          "name": "semver",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/semver"
+        },
+        {
+          "name": "set-function-length",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/set-function-length"
+        },
+        {
+          "name": "set-function-name",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/set-function-name"
+        },
+        {
+          "name": "set-proto",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/set-proto"
+        },
+        {
+          "name": "shebang-command",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/shebang-command"
+        },
+        {
+          "name": "shebang-regex",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/shebang-regex"
+        },
+        {
+          "name": "side-channel",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/side-channel"
+        },
+        {
+          "name": "side-channel-list",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/side-channel-list"
+        },
+        {
+          "name": "side-channel-map",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/side-channel-map"
+        },
+        {
+          "name": "side-channel-weakmap",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/side-channel-weakmap"
+        },
+        {
+          "name": "siginfo",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/siginfo"
+        },
+        {
+          "name": "signal-exit",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/signal-exit"
+        },
+        {
+          "name": "source-map-js",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/source-map-js"
+        },
+        {
+          "name": "stackback",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/stackback"
+        },
+        {
+          "name": "std-env",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/std-env"
+        },
+        {
+          "name": "stop-iteration-iterator",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/stop-iteration-iterator"
+        },
+        {
+          "name": "string-width",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/string-width"
+        },
+        {
+          "name": "string-width-cjs",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/string-width-cjs"
+        },
+        {
+          "name": "string.prototype.trim",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/string.prototype.trim"
+        },
+        {
+          "name": "string.prototype.trimend",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/string.prototype.trimend"
+        },
+        {
+          "name": "string.prototype.trimstart",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/string.prototype.trimstart"
+        },
+        {
+          "name": "strip-ansi",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/strip-ansi"
+        },
+        {
+          "name": "strip-ansi-cjs",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/strip-ansi-cjs"
+        },
+        {
+          "name": "strip-bom",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/strip-bom"
+        },
+        {
+          "name": "strip-json-comments",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/strip-json-comments"
+        },
+        {
+          "name": "strip-literal",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/strip-literal"
+        },
+        {
+          "name": "supports-color",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/supports-color"
+        },
+        {
+          "name": "supports-preserve-symlinks-flag",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/supports-preserve-symlinks-flag"
+        },
+        {
+          "name": "test-exclude",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/test-exclude"
+        },
+        {
+          "name": "tinybench",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/tinybench"
+        },
+        {
+          "name": "tinyexec",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/tinyexec"
+        },
+        {
+          "name": "tinyglobby",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/tinyglobby"
+        },
+        {
+          "name": "tinypool",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/tinypool"
+        },
+        {
+          "name": "tinyrainbow",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/tinyrainbow"
+        },
+        {
+          "name": "tinyspy",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/tinyspy"
+        },
+        {
+          "name": "ts-api-utils",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/ts-api-utils"
+        },
+        {
+          "name": "tsconfig-paths",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/tsconfig-paths"
+        },
+        {
+          "name": "tslib",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/tslib"
+        },
+        {
+          "name": "type-check",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/type-check"
+        },
+        {
+          "name": "typed-array-buffer",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/typed-array-buffer"
+        },
+        {
+          "name": "typed-array-byte-length",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/typed-array-byte-length"
+        },
+        {
+          "name": "typed-array-byte-offset",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/typed-array-byte-offset"
+        },
+        {
+          "name": "typed-array-length",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/typed-array-length"
+        },
+        {
+          "name": "typescript",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/typescript"
+        },
+        {
+          "name": "typescript-eslint",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/typescript-eslint"
+        },
+        {
+          "name": "unbox-primitive",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/unbox-primitive"
+        },
+        {
+          "name": "undici-types",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/undici-types"
+        },
+        {
+          "name": "uri-js",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/uri-js"
+        },
+        {
+          "name": "vite",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vite"
+        },
+        {
+          "name": "vite-node",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vite-node"
+        },
+        {
+          "name": "vitest",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vitest"
+        },
+        {
+          "name": "which",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/which"
+        },
+        {
+          "name": "which-boxed-primitive",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/which-boxed-primitive"
+        },
+        {
+          "name": "which-builtin-type",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/which-builtin-type"
+        },
+        {
+          "name": "which-collection",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/which-collection"
+        },
+        {
+          "name": "which-typed-array",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/which-typed-array"
+        },
+        {
+          "name": "why-is-node-running",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/why-is-node-running"
+        },
+        {
+          "name": "word-wrap",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/word-wrap"
+        },
+        {
+          "name": "wrap-ansi",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/wrap-ansi"
+        },
+        {
+          "name": "wrap-ansi-cjs",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/wrap-ansi-cjs"
+        },
+        {
+          "name": "yaml",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/yaml"
+        },
+        {
+          "name": "yocto-queue",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/yocto-queue"
+        }
+      ],
+      "privateCacheParent": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/gateway-independent/private/recursion/repo/studio-runner/node_modules",
+      "restoration": {
+        "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/gateway-independent/private/recursion/repo/helm-chart/put-checks/templates/_helpers.tpl",
+        "expectedOriginalSha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+        "restoreAfterResultAndBeforeFinalVerification": true,
+        "productionHelperNeverModified": true
+      }
+    },
+    {
+      "id": "normalization",
+      "copyRoot": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/gateway-independent/private/normalization/repo",
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/gateway-independent/private/normalization/repo/studio-runner",
+      "command": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.deployment.config.ts",
+        "test/deployment/integrations.test.ts",
+        "--testNamePattern=(backend|worker) rejects (flat|nested|relaxed)",
+        "--minWorkers=1",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/gateway-independent/normalization-vitest.json"
+      ],
+      "nodePathPrefix": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+      "log": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/gateway-independent/normalization.log",
+      "jsonReport": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/gateway-independent/normalization-vitest.json",
+      "helperOriginalSha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+      "helperMutantSha256": "602614d7c463ae5db21505cd6deee22c330aaf502a691c715a6bc575dd418fe3",
+      "patch": "normalization.patch",
+      "patchSha256": "bc8c9598fc06a4a3d87ff0e0ee4d9e3c20071b417b1409fee338c38207bd0876",
+      "scopeDefine": "put-checks.springConfig.validateProperties",
+      "uniqueScopedAnchor": "regexReplaceAll \"[^a-z0-9]\" (lower $path) \"\"",
+      "replacement": "$path",
+      "scopedAnchorCount": 1,
+      "selectedCases": 48,
+      "expectedRefusalAssertionLine": 310,
+      "expectedMinimumFailureShape": "relaxed",
+      "predictedFailed": 48,
+      "predictedPassed": 0,
+      "predictedFilterOmissions": 47,
+      "predictionIsNotObservedProof": true,
+      "sharedInstalledDependencyLinks": [
+        {
+          "name": ".bin",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/.bin"
+        },
+        {
+          "name": ".package-lock.json",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/.package-lock.json"
+        },
+        {
+          "name": "@ampproject",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@ampproject"
+        },
+        {
+          "name": "@aws",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@aws"
+        },
+        {
+          "name": "@aws-sdk",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@aws-sdk"
+        },
+        {
+          "name": "@babel",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@babel"
+        },
+        {
+          "name": "@bcoe",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@bcoe"
+        },
+        {
+          "name": "@esbuild",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@esbuild"
+        },
+        {
+          "name": "@eslint",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@eslint"
+        },
+        {
+          "name": "@eslint-community",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@eslint-community"
+        },
+        {
+          "name": "@humanfs",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@humanfs"
+        },
+        {
+          "name": "@humanwhocodes",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@humanwhocodes"
+        },
+        {
+          "name": "@isaacs",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@isaacs"
+        },
+        {
+          "name": "@istanbuljs",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@istanbuljs"
+        },
+        {
+          "name": "@jridgewell",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@jridgewell"
+        },
+        {
+          "name": "@napi-rs",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@napi-rs"
+        },
+        {
+          "name": "@pkgjs",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@pkgjs"
+        },
+        {
+          "name": "@rollup",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@rollup"
+        },
+        {
+          "name": "@rtsao",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@rtsao"
+        },
+        {
+          "name": "@smithy",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@smithy"
+        },
+        {
+          "name": "@types",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@types"
+        },
+        {
+          "name": "@typescript-eslint",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@typescript-eslint"
+        },
+        {
+          "name": "@vitest",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest"
+        },
+        {
+          "name": "acorn",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/acorn"
+        },
+        {
+          "name": "acorn-jsx",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/acorn-jsx"
+        },
+        {
+          "name": "ajv",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/ajv"
+        },
+        {
+          "name": "ansi-regex",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/ansi-regex"
+        },
+        {
+          "name": "ansi-styles",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/ansi-styles"
+        },
+        {
+          "name": "argparse",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/argparse"
+        },
+        {
+          "name": "array-buffer-byte-length",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/array-buffer-byte-length"
+        },
+        {
+          "name": "array-includes",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/array-includes"
+        },
+        {
+          "name": "array.prototype.findlastindex",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/array.prototype.findlastindex"
+        },
+        {
+          "name": "array.prototype.flat",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/array.prototype.flat"
+        },
+        {
+          "name": "array.prototype.flatmap",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/array.prototype.flatmap"
+        },
+        {
+          "name": "arraybuffer.prototype.slice",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/arraybuffer.prototype.slice"
+        },
+        {
+          "name": "assertion-error",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/assertion-error"
+        },
+        {
+          "name": "ast-v8-to-istanbul",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/ast-v8-to-istanbul"
+        },
+        {
+          "name": "async-function",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/async-function"
+        },
+        {
+          "name": "available-typed-arrays",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/available-typed-arrays"
+        },
+        {
+          "name": "balanced-match",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/balanced-match"
+        },
+        {
+          "name": "bowser",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/bowser"
+        },
+        {
+          "name": "brace-expansion",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/brace-expansion"
+        },
+        {
+          "name": "cac",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/cac"
+        },
+        {
+          "name": "call-bind",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/call-bind"
+        },
+        {
+          "name": "call-bind-apply-helpers",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/call-bind-apply-helpers"
+        },
+        {
+          "name": "call-bound",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/call-bound"
+        },
+        {
+          "name": "callsites",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/callsites"
+        },
+        {
+          "name": "chai",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/chai"
+        },
+        {
+          "name": "chalk",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/chalk"
+        },
+        {
+          "name": "check-error",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/check-error"
+        },
+        {
+          "name": "color-convert",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/color-convert"
+        },
+        {
+          "name": "color-name",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/color-name"
+        },
+        {
+          "name": "concat-map",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/concat-map"
+        },
+        {
+          "name": "cross-spawn",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/cross-spawn"
+        },
+        {
+          "name": "data-view-buffer",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/data-view-buffer"
+        },
+        {
+          "name": "data-view-byte-length",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/data-view-byte-length"
+        },
+        {
+          "name": "data-view-byte-offset",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/data-view-byte-offset"
+        },
+        {
+          "name": "debug",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/debug"
+        },
+        {
+          "name": "deep-eql",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/deep-eql"
+        },
+        {
+          "name": "deep-is",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/deep-is"
+        },
+        {
+          "name": "define-data-property",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/define-data-property"
+        },
+        {
+          "name": "define-properties",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/define-properties"
+        },
+        {
+          "name": "doctrine",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/doctrine"
+        },
+        {
+          "name": "dunder-proto",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/dunder-proto"
+        },
+        {
+          "name": "eastasianwidth",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eastasianwidth"
+        },
+        {
+          "name": "emoji-regex",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/emoji-regex"
+        },
+        {
+          "name": "es-abstract",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/es-abstract"
+        },
+        {
+          "name": "es-abstract-get",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/es-abstract-get"
+        },
+        {
+          "name": "es-define-property",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/es-define-property"
+        },
+        {
+          "name": "es-errors",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/es-errors"
+        },
+        {
+          "name": "es-module-lexer",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/es-module-lexer"
+        },
+        {
+          "name": "es-object-atoms",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/es-object-atoms"
+        },
+        {
+          "name": "es-set-tostringtag",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/es-set-tostringtag"
+        },
+        {
+          "name": "es-shim-unscopables",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/es-shim-unscopables"
+        },
+        {
+          "name": "es-to-primitive",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/es-to-primitive"
+        },
+        {
+          "name": "esbuild",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/esbuild"
+        },
+        {
+          "name": "escape-string-regexp",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/escape-string-regexp"
+        },
+        {
+          "name": "eslint",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eslint"
+        },
+        {
+          "name": "eslint-import-resolver-node",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eslint-import-resolver-node"
+        },
+        {
+          "name": "eslint-module-utils",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eslint-module-utils"
+        },
+        {
+          "name": "eslint-plugin-import",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eslint-plugin-import"
+        },
+        {
+          "name": "eslint-scope",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eslint-scope"
+        },
+        {
+          "name": "eslint-visitor-keys",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/eslint-visitor-keys"
+        },
+        {
+          "name": "espree",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/espree"
+        },
+        {
+          "name": "esquery",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/esquery"
+        },
+        {
+          "name": "esrecurse",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/esrecurse"
+        },
+        {
+          "name": "estraverse",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/estraverse"
+        },
+        {
+          "name": "estree-walker",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/estree-walker"
+        },
+        {
+          "name": "esutils",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/esutils"
+        },
+        {
+          "name": "expect-type",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/expect-type"
+        },
+        {
+          "name": "fast-deep-equal",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/fast-deep-equal"
+        },
+        {
+          "name": "fast-json-stable-stringify",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/fast-json-stable-stringify"
+        },
+        {
+          "name": "fast-levenshtein",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/fast-levenshtein"
+        },
+        {
+          "name": "fdir",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/fdir"
+        },
+        {
+          "name": "file-entry-cache",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/file-entry-cache"
+        },
+        {
+          "name": "find-up",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/find-up"
+        },
+        {
+          "name": "flat-cache",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/flat-cache"
+        },
+        {
+          "name": "flatted",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/flatted"
+        },
+        {
+          "name": "for-each",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/for-each"
+        },
+        {
+          "name": "foreground-child",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/foreground-child"
+        },
+        {
+          "name": "fsevents",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/fsevents"
+        },
+        {
+          "name": "function-bind",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/function-bind"
+        },
+        {
+          "name": "function.prototype.name",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/function.prototype.name"
+        },
+        {
+          "name": "functions-have-names",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/functions-have-names"
+        },
+        {
+          "name": "generator-function",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/generator-function"
+        },
+        {
+          "name": "get-intrinsic",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/get-intrinsic"
+        },
+        {
+          "name": "get-proto",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/get-proto"
+        },
+        {
+          "name": "get-symbol-description",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/get-symbol-description"
+        },
+        {
+          "name": "glob",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/glob"
+        },
+        {
+          "name": "glob-parent",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/glob-parent"
+        },
+        {
+          "name": "globals",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/globals"
+        },
+        {
+          "name": "globalthis",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/globalthis"
+        },
+        {
+          "name": "gopd",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/gopd"
+        },
+        {
+          "name": "has-bigints",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/has-bigints"
+        },
+        {
+          "name": "has-flag",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/has-flag"
+        },
+        {
+          "name": "has-property-descriptors",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/has-property-descriptors"
+        },
+        {
+          "name": "has-proto",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/has-proto"
+        },
+        {
+          "name": "has-symbols",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/has-symbols"
+        },
+        {
+          "name": "has-tostringtag",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/has-tostringtag"
+        },
+        {
+          "name": "hasown",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/hasown"
+        },
+        {
+          "name": "html-escaper",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/html-escaper"
+        },
+        {
+          "name": "ignore",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/ignore"
+        },
+        {
+          "name": "import-fresh",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/import-fresh"
+        },
+        {
+          "name": "imurmurhash",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/imurmurhash"
+        },
+        {
+          "name": "internal-slot",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/internal-slot"
+        },
+        {
+          "name": "is-array-buffer",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-array-buffer"
+        },
+        {
+          "name": "is-async-function",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-async-function"
+        },
+        {
+          "name": "is-bigint",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-bigint"
+        },
+        {
+          "name": "is-boolean-object",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-boolean-object"
+        },
+        {
+          "name": "is-callable",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-callable"
+        },
+        {
+          "name": "is-core-module",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-core-module"
+        },
+        {
+          "name": "is-data-view",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-data-view"
+        },
+        {
+          "name": "is-date-object",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-date-object"
+        },
+        {
+          "name": "is-document.all",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-document.all"
+        },
+        {
+          "name": "is-extglob",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-extglob"
+        },
+        {
+          "name": "is-finalizationregistry",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-finalizationregistry"
+        },
+        {
+          "name": "is-fullwidth-code-point",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-fullwidth-code-point"
+        },
+        {
+          "name": "is-generator-function",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-generator-function"
+        },
+        {
+          "name": "is-glob",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-glob"
+        },
+        {
+          "name": "is-map",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-map"
+        },
+        {
+          "name": "is-negative-zero",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-negative-zero"
+        },
+        {
+          "name": "is-number-object",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-number-object"
+        },
+        {
+          "name": "is-regex",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-regex"
+        },
+        {
+          "name": "is-set",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-set"
+        },
+        {
+          "name": "is-shared-array-buffer",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-shared-array-buffer"
+        },
+        {
+          "name": "is-string",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-string"
+        },
+        {
+          "name": "is-symbol",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-symbol"
+        },
+        {
+          "name": "is-typed-array",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-typed-array"
+        },
+        {
+          "name": "is-weakmap",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-weakmap"
+        },
+        {
+          "name": "is-weakref",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-weakref"
+        },
+        {
+          "name": "is-weakset",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/is-weakset"
+        },
+        {
+          "name": "isarray",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/isarray"
+        },
+        {
+          "name": "isexe",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/isexe"
+        },
+        {
+          "name": "istanbul-lib-coverage",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/istanbul-lib-coverage"
+        },
+        {
+          "name": "istanbul-lib-report",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/istanbul-lib-report"
+        },
+        {
+          "name": "istanbul-lib-source-maps",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/istanbul-lib-source-maps"
+        },
+        {
+          "name": "istanbul-reports",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/istanbul-reports"
+        },
+        {
+          "name": "jackspeak",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/jackspeak"
+        },
+        {
+          "name": "js-tokens",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/js-tokens"
+        },
+        {
+          "name": "js-yaml",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/js-yaml"
+        },
+        {
+          "name": "json-buffer",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/json-buffer"
+        },
+        {
+          "name": "json-schema-traverse",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/json-schema-traverse"
+        },
+        {
+          "name": "json-stable-stringify-without-jsonify",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/json-stable-stringify-without-jsonify"
+        },
+        {
+          "name": "json5",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/json5"
+        },
+        {
+          "name": "keyv",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/keyv"
+        },
+        {
+          "name": "levn",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/levn"
+        },
+        {
+          "name": "locate-path",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/locate-path"
+        },
+        {
+          "name": "lodash.merge",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/lodash.merge"
+        },
+        {
+          "name": "loupe",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/loupe"
+        },
+        {
+          "name": "lru-cache",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/lru-cache"
+        },
+        {
+          "name": "magic-string",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/magic-string"
+        },
+        {
+          "name": "magicast",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/magicast"
+        },
+        {
+          "name": "make-dir",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/make-dir"
+        },
+        {
+          "name": "math-intrinsics",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/math-intrinsics"
+        },
+        {
+          "name": "minimatch",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/minimatch"
+        },
+        {
+          "name": "minimist",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/minimist"
+        },
+        {
+          "name": "minipass",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/minipass"
+        },
+        {
+          "name": "ms",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/ms"
+        },
+        {
+          "name": "nanoid",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/nanoid"
+        },
+        {
+          "name": "natural-compare",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/natural-compare"
+        },
+        {
+          "name": "node-exports-info",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/node-exports-info"
+        },
+        {
+          "name": "object-inspect",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/object-inspect"
+        },
+        {
+          "name": "object-keys",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/object-keys"
+        },
+        {
+          "name": "object.assign",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/object.assign"
+        },
+        {
+          "name": "object.entries",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/object.entries"
+        },
+        {
+          "name": "object.fromentries",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/object.fromentries"
+        },
+        {
+          "name": "object.groupby",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/object.groupby"
+        },
+        {
+          "name": "object.values",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/object.values"
+        },
+        {
+          "name": "optionator",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/optionator"
+        },
+        {
+          "name": "own-keys",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/own-keys"
+        },
+        {
+          "name": "p-limit",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/p-limit"
+        },
+        {
+          "name": "p-locate",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/p-locate"
+        },
+        {
+          "name": "package-json-from-dist",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/package-json-from-dist"
+        },
+        {
+          "name": "parent-module",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/parent-module"
+        },
+        {
+          "name": "path-exists",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/path-exists"
+        },
+        {
+          "name": "path-key",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/path-key"
+        },
+        {
+          "name": "path-parse",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/path-parse"
+        },
+        {
+          "name": "path-scurry",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/path-scurry"
+        },
+        {
+          "name": "pathe",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/pathe"
+        },
+        {
+          "name": "pathval",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/pathval"
+        },
+        {
+          "name": "picocolors",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/picocolors"
+        },
+        {
+          "name": "picomatch",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/picomatch"
+        },
+        {
+          "name": "playwright",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/playwright"
+        },
+        {
+          "name": "playwright-core",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/playwright-core"
+        },
+        {
+          "name": "possible-typed-array-names",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/possible-typed-array-names"
+        },
+        {
+          "name": "postcss",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/postcss"
+        },
+        {
+          "name": "prelude-ls",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/prelude-ls"
+        },
+        {
+          "name": "punycode",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/punycode"
+        },
+        {
+          "name": "reflect.getprototypeof",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/reflect.getprototypeof"
+        },
+        {
+          "name": "regexp.prototype.flags",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/regexp.prototype.flags"
+        },
+        {
+          "name": "resolve",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/resolve"
+        },
+        {
+          "name": "resolve-from",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/resolve-from"
+        },
+        {
+          "name": "rollup",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/rollup"
+        },
+        {
+          "name": "safe-array-concat",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/safe-array-concat"
+        },
+        {
+          "name": "safe-push-apply",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/safe-push-apply"
+        },
+        {
+          "name": "safe-regex-test",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/safe-regex-test"
+        },
+        {
+          "name": "semver",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/semver"
+        },
+        {
+          "name": "set-function-length",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/set-function-length"
+        },
+        {
+          "name": "set-function-name",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/set-function-name"
+        },
+        {
+          "name": "set-proto",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/set-proto"
+        },
+        {
+          "name": "shebang-command",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/shebang-command"
+        },
+        {
+          "name": "shebang-regex",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/shebang-regex"
+        },
+        {
+          "name": "side-channel",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/side-channel"
+        },
+        {
+          "name": "side-channel-list",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/side-channel-list"
+        },
+        {
+          "name": "side-channel-map",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/side-channel-map"
+        },
+        {
+          "name": "side-channel-weakmap",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/side-channel-weakmap"
+        },
+        {
+          "name": "siginfo",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/siginfo"
+        },
+        {
+          "name": "signal-exit",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/signal-exit"
+        },
+        {
+          "name": "source-map-js",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/source-map-js"
+        },
+        {
+          "name": "stackback",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/stackback"
+        },
+        {
+          "name": "std-env",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/std-env"
+        },
+        {
+          "name": "stop-iteration-iterator",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/stop-iteration-iterator"
+        },
+        {
+          "name": "string-width",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/string-width"
+        },
+        {
+          "name": "string-width-cjs",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/string-width-cjs"
+        },
+        {
+          "name": "string.prototype.trim",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/string.prototype.trim"
+        },
+        {
+          "name": "string.prototype.trimend",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/string.prototype.trimend"
+        },
+        {
+          "name": "string.prototype.trimstart",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/string.prototype.trimstart"
+        },
+        {
+          "name": "strip-ansi",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/strip-ansi"
+        },
+        {
+          "name": "strip-ansi-cjs",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/strip-ansi-cjs"
+        },
+        {
+          "name": "strip-bom",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/strip-bom"
+        },
+        {
+          "name": "strip-json-comments",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/strip-json-comments"
+        },
+        {
+          "name": "strip-literal",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/strip-literal"
+        },
+        {
+          "name": "supports-color",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/supports-color"
+        },
+        {
+          "name": "supports-preserve-symlinks-flag",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/supports-preserve-symlinks-flag"
+        },
+        {
+          "name": "test-exclude",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/test-exclude"
+        },
+        {
+          "name": "tinybench",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/tinybench"
+        },
+        {
+          "name": "tinyexec",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/tinyexec"
+        },
+        {
+          "name": "tinyglobby",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/tinyglobby"
+        },
+        {
+          "name": "tinypool",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/tinypool"
+        },
+        {
+          "name": "tinyrainbow",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/tinyrainbow"
+        },
+        {
+          "name": "tinyspy",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/tinyspy"
+        },
+        {
+          "name": "ts-api-utils",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/ts-api-utils"
+        },
+        {
+          "name": "tsconfig-paths",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/tsconfig-paths"
+        },
+        {
+          "name": "tslib",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/tslib"
+        },
+        {
+          "name": "type-check",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/type-check"
+        },
+        {
+          "name": "typed-array-buffer",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/typed-array-buffer"
+        },
+        {
+          "name": "typed-array-byte-length",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/typed-array-byte-length"
+        },
+        {
+          "name": "typed-array-byte-offset",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/typed-array-byte-offset"
+        },
+        {
+          "name": "typed-array-length",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/typed-array-length"
+        },
+        {
+          "name": "typescript",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/typescript"
+        },
+        {
+          "name": "typescript-eslint",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/typescript-eslint"
+        },
+        {
+          "name": "unbox-primitive",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/unbox-primitive"
+        },
+        {
+          "name": "undici-types",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/undici-types"
+        },
+        {
+          "name": "uri-js",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/uri-js"
+        },
+        {
+          "name": "vite",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vite"
+        },
+        {
+          "name": "vite-node",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vite-node"
+        },
+        {
+          "name": "vitest",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vitest"
+        },
+        {
+          "name": "which",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/which"
+        },
+        {
+          "name": "which-boxed-primitive",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/which-boxed-primitive"
+        },
+        {
+          "name": "which-builtin-type",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/which-builtin-type"
+        },
+        {
+          "name": "which-collection",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/which-collection"
+        },
+        {
+          "name": "which-typed-array",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/which-typed-array"
+        },
+        {
+          "name": "why-is-node-running",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/why-is-node-running"
+        },
+        {
+          "name": "word-wrap",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/word-wrap"
+        },
+        {
+          "name": "wrap-ansi",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/wrap-ansi"
+        },
+        {
+          "name": "wrap-ansi-cjs",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/wrap-ansi-cjs"
+        },
+        {
+          "name": "yaml",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/yaml"
+        },
+        {
+          "name": "yocto-queue",
+          "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/yocto-queue"
+        }
+      ],
+      "privateCacheParent": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/gateway-independent/private/normalization/repo/studio-runner/node_modules",
+      "restoration": {
+        "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/gateway-independent/private/normalization/repo/helm-chart/put-checks/templates/_helpers.tpl",
+        "expectedOriginalSha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+        "restoreAfterResultAndBeforeFinalVerification": true,
+        "productionHelperNeverModified": true
+      }
+    }
+  ],
+  "executeSequentiallyOnly": true,
+  "existingCollectorApplicable": false,
+  "directCommandReason": "Existing collector hardcodes actual repository studio-runner cwd and source-capture scope; these immutable copied-chart tests require their own repo-shaped cwd. Preserve exact argv/cwd/raw exit/log+JSON hashes and named before/after input pins directly; no new execution wrapper.",
+  "runtimeExecuted": false,
+  "testsAddedOrModified": false,
+  "productionSourceOrDistModified": false,
+  "dependencyInstallOrPackageChange": false,
+  "baselineRepeatOrPermanentTokenControlsSelected": false,
+  "filteredTestsAreDiagnosticOmissionsNotApprovedGateSkips": true,
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN"
+}

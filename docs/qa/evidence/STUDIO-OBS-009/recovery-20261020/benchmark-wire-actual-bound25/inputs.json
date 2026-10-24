@@ -1,0 +1,112 @@
+{
+  "scope": "ROOT_BOUND_EXACT_FOUR_TARGET_WIRE_ADOPTION25_INPUTS",
+  "candidateSealedAndQaAccepted": true,
+  "targets": [
+    {
+      "target": "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+      "capturedBeforeSha256": "3383b01c0ba1e95b0a48696c1f7fa0592bf7108a770ce2d3c010a76976ea9d68",
+      "expectedBeforeBytes": 115084,
+      "capturedBeforeModeNow": "0o644",
+      "observationReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-preflight25/pre-copy35-qualification.json",
+        "sha256": "ea28132a33400902d03917f8c73d54cef6b4504bb40ff219dd72591a338f6a32",
+        "bytes": 1661
+      },
+      "notFutureFreshAdmission": false,
+      "sourceBuffer": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate30/studio-runner/evaluation/observed-authoring/evaluate.mjs",
+        "sha256": "15d2bcd0ee2bb227f0b54307b6a50608e720f68e89b6726d6cc57c55beb96523",
+        "bytes": 125912
+      },
+      "candidateState": "SEALED_CANDIDATE30_INDEPENDENT_SOURCE_QA33_ACCEPTED"
+    },
+    {
+      "target": "studio-runner/evaluation/observed-authoring/evaluate.d.mts",
+      "capturedBeforeSha256": "16212e199fe7b0ecd065769414f6b5f296bdf2d8e4a912c174bd73c95d934734",
+      "expectedBeforeBytes": 22992,
+      "capturedBeforeModeNow": "0o644",
+      "observationReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-preflight25/pre-copy35-qualification.json",
+        "sha256": "ea28132a33400902d03917f8c73d54cef6b4504bb40ff219dd72591a338f6a32",
+        "bytes": 1661
+      },
+      "notFutureFreshAdmission": false,
+      "sourceBuffer": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate30/studio-runner/evaluation/observed-authoring/evaluate.d.mts",
+        "sha256": "714b60cb2f5c7de01d3504095a8c0340060b3683a3e26e8e296593119fb99f05",
+        "bytes": 23546
+      },
+      "candidateState": "SEALED_CANDIDATE30_INDEPENDENT_SOURCE_QA33_ACCEPTED"
+    },
+    {
+      "target": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+      "capturedBeforeSha256": "a0fe522ce619b1e33a8b3a8db22b8cd9f50a9cb2f9066388f5c13ff8fe2d34e3",
+      "expectedBeforeBytes": 42158,
+      "capturedBeforeModeNow": "0o644",
+      "observationReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-preflight25/pre-copy35-qualification.json",
+        "sha256": "ea28132a33400902d03917f8c73d54cef6b4504bb40ff219dd72591a338f6a32",
+        "bytes": 1661
+      },
+      "notFutureFreshAdmission": false,
+      "sourceBuffer": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate30/studio-runner/test/evaluation/harnessSelfTest.test.ts",
+        "sha256": "09d68060f6f0c3fafc27dea6a7938d950d050940a1522511a0742065e14b09b7",
+        "bytes": 65996
+      },
+      "candidateState": "SEALED_CANDIDATE30_INDEPENDENT_SOURCE_QA33_ACCEPTED"
+    },
+    {
+      "target": "studio-runner/test/evaluation/observedCorpus.ts",
+      "capturedBeforeSha256": "da02ccfa128c3a7d5a77bda9085201e0b714244ffcc327bc6ff9f884bcbc4381",
+      "expectedBeforeBytes": 10292,
+      "capturedBeforeModeNow": "0o644",
+      "observationReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-preflight25/pre-copy35-qualification.json",
+        "sha256": "ea28132a33400902d03917f8c73d54cef6b4504bb40ff219dd72591a338f6a32",
+        "bytes": 1661
+      },
+      "notFutureFreshAdmission": false,
+      "sourceBuffer": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate30/studio-runner/test/evaluation/observedCorpus.ts",
+        "sha256": "6631c807b5ead597ffa64ac816d2fe90f9694a647afe48be30b814d48f84902e",
+        "bytes": 10728
+      },
+      "candidateState": "SEALED_CANDIDATE30_INDEPENDENT_SOURCE_QA33_ACCEPTED"
+    }
+  ],
+  "whitelistExact": [
+    "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+    "studio-runner/evaluation/observed-authoring/evaluate.d.mts",
+    "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+    "studio-runner/test/evaluation/observedCorpus.ts"
+  ],
+  "manifestGuard": {
+    "path": "studio-runner/evaluation/observed-authoring/manifest.json",
+    "sha256": "95287d56573f44fda8071ccd3e1d542bc5dac23984f006eeee52a8e710c9b0aa",
+    "bytes": 79287,
+    "mode": "0o644",
+    "targetOfCodeCopy": false,
+    "beforeAndAfterCopyHashRegularMetadataOnly": true,
+    "jsonBodyDecode": false
+  },
+  "capturedActualBase": {
+    "sourceDigest": "0c59568e8e686c69703f650006edd70e8033db2906db7e434943735beebaff2d",
+    "sourceRows": 1814,
+    "distDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+    "distRows": 238,
+    "provenance": "Prior accepted actual QA13/proof12 closed metadata; no sourceprofile read/capture in this preparation."
+  },
+  "candidateSealReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate30/manifest.json",
+    "sha256": "5f9bb7f662104f50d4b6c1c93b238954e7d3ab5e90632c45cc8e62c0a44e6022",
+    "bytes": 2975
+  },
+  "newWireCandidateQaReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate33-independent-review/manifest.json",
+    "sha256": "1aedd460fdec26f8242f41aa8a04833b3eb4aeb4fe1225c544f37b6624ca5ed6",
+    "bytes": 889
+  },
+  "actualCodeCopyGo": true,
+  "executionAuthority": true
+}

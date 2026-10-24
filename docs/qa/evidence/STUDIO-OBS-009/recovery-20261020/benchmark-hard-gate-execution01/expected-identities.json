@@ -1,0 +1,436 @@
+{
+  "baselineReportSha256": "c3c3465272a9c6fd494b2f12432ba27757628f6a5eabe22df1a7c2cfe79b123e",
+  "baselineExecutedCases": 20,
+  "originalDirectDeclarations": 17,
+  "originalAssertionStatements": 49,
+  "newLiteralRows": [
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "hard gates"
+      ],
+      "title": "retains an earlier 'false pass' after a clean final attempt is credited",
+      "fullName": "hard gates retains an earlier 'false pass' after a clean final attempt is credited",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "hard gates"
+      ],
+      "title": "retains an earlier 'secret or PII leak' after a clean final attempt is credited",
+      "fullName": "hard gates retains an earlier 'secret or PII leak' after a clean final attempt is credited",
+      "status": "passed"
+    }
+  ],
+  "red": [
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "gate arithmetic on the corpus with the two staging cases unrun"
+      ],
+      "title": "is PARTIAL (never a pass) at 51 runs when every run completes: the denominator drops to 17 x 3 and the floor to 46",
+      "fullName": "gate arithmetic on the corpus with the two staging cases unrun is PARTIAL (never a pass) at 51 runs when every run completes: the denominator drops to 17 x 3 and the floor to 46",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "gate arithmetic on the corpus with the two staging cases unrun"
+      ],
+      "title": "still reports PARTIAL at exactly 46 of 51 (90.2 percent) and GATE_FAIL at 45 of 51",
+      "fullName": "gate arithmetic on the corpus with the two staging cases unrun still reports PARTIAL at exactly 46 of 51 (90.2 percent) and GATE_FAIL at 45 of 51",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "gate arithmetic on the corpus with the two staging cases unrun"
+      ],
+      "title": "reports INCOMPLETE when planned runs are missing instead of dividing by what ran",
+      "fullName": "gate arithmetic on the corpus with the two staging cases unrun reports INCOMPLETE when planned runs are missing instead of dividing by what ran",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "gate arithmetic on the corpus with the two staging cases unrun"
+      ],
+      "title": "the full 57-run arithmetic is 52 of 57 = 91.2 percent passing and 51 of 57 = 89.5 percent failing",
+      "fullName": "gate arithmetic on the corpus with the two staging cases unrun the full 57-run arithmetic is 52 of 57 = 91.2 percent passing and 51 of 57 = 89.5 percent failing",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "completion without clarification"
+      ],
+      "title": "does not credit a class P run that needed a clarification, even when the oracle is satisfied (no reclassification as ambiguous)",
+      "fullName": "completion without clarification does not credit a class P run that needed a clarification, even when the oracle is satisfied (no reclassification as ambiguous)",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "hard gates"
+      ],
+      "title": "a false pass fails the gate even with every other run completing",
+      "fullName": "hard gates a false pass fails the gate even with every other run completing",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "hard gates"
+      ],
+      "title": "a secret or PII leak fails the gate",
+      "fullName": "hard gates a secret or PII leak fails the gate",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "hard gates"
+      ],
+      "title": "retains an earlier 'false pass' after a clean final attempt is credited",
+      "fullName": "hard gates retains an earlier 'false pass' after a clean final attempt is credited",
+      "status": "failed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "hard gates"
+      ],
+      "title": "retains an earlier 'secret or PII leak' after a clean final attempt is credited",
+      "fullName": "hard gates retains an earlier 'secret or PII leak' after a clean final attempt is credited",
+      "status": "failed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "a HARNESS_SELF_TEST run is labelled and its verdict is NOT_EVIDENCE whatever it scores",
+      "fullName": "labels and honesty rules a HARNESS_SELF_TEST run is labelled and its verdict is NOT_EVIDENCE whatever it scores",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "never reports a pass when a record mixes modes",
+      "fullName": "labels and honesty rules never reports a pass when a record mixes modes",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "refuses a run that started before the manifest freeze, and one that names another manifest",
+      "fullName": "labels and honesty rules refuses a run that started before the manifest freeze, and one that names another manifest",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "refuses a run record that omits rs1NonScalarReadGaps (written as 0 when none, never omitted)",
+      "fullName": "labels and honesty rules refuses a run record that omits rs1NonScalarReadGaps (written as 0 when none, never omitted)",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "refuses a run record that omits authoredEchoUnobservableTargets (written as 0 when none, never omitted)",
+      "fullName": "labels and honesty rules refuses a run record that omits authoredEchoUnobservableTargets (written as 0 when none, never omitted)",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "refuses a run record that omits focusMutationRefusedFills (written as 0 when none, never omitted)",
+      "fullName": "labels and honesty rules refuses a run record that omits focusMutationRefusedFills (written as 0 when none, never omitted)",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "writes the three accounting fields as explicit zeros with their denominators",
+      "fullName": "labels and honesty rules writes the three accounting fields as explicit zeros with their denominators",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "counts RS-1 gaps inside the gate denominator and lists them with case, element kind and run number",
+      "fullName": "labels and honesty rules counts RS-1 gaps inside the gate denominator and lists them with case, element kind and run number",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "keeps an infrastructure-failed run visible and credits only its re-run; an unreported retry is a problem",
+      "fullName": "labels and honesty rules keeps an infrastructure-failed run visible and credits only its re-run; an unreported retry is a problem",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "publishes p50/p95 latency, model calls, tokens and cost with denominators; cost stays unavailable without a price",
+      "fullName": "labels and honesty rules publishes p50/p95 latency, model calls, tokens and cost with denominators; cost stays unavailable without a price",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "reports class F and N separately, outside the completion denominator",
+      "fullName": "labels and honesty rules reports class F and N separately, outside the completion denominator",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "replay stability (consensus plan s11): >= 98 percent over 100 replays with one artifact hash"
+      ],
+      "title": "passes at 98 of 100 with one hash, fails at 97, fails when the hash drifts, fails when fewer than 100 replays ran",
+      "fullName": "replay stability (consensus plan s11): >= 98 percent over 100 replays with one artifact hash passes at 98 of 100 with one hash, fails at 97, fails when the hash drifts, fails when fewer than 100 replays ran",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "replay stability (consensus plan s11): >= 98 percent over 100 replays with one artifact hash"
+      ],
+      "title": "labels a self-test run NOT_EVIDENCE even when it passes",
+      "fullName": "replay stability (consensus plan s11): >= 98 percent over 100 replays with one artifact hash labels a self-test run NOT_EVIDENCE even when it passes",
+      "status": "passed"
+    }
+  ],
+  "green": [
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "gate arithmetic on the corpus with the two staging cases unrun"
+      ],
+      "title": "is PARTIAL (never a pass) at 51 runs when every run completes: the denominator drops to 17 x 3 and the floor to 46",
+      "fullName": "gate arithmetic on the corpus with the two staging cases unrun is PARTIAL (never a pass) at 51 runs when every run completes: the denominator drops to 17 x 3 and the floor to 46",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "gate arithmetic on the corpus with the two staging cases unrun"
+      ],
+      "title": "still reports PARTIAL at exactly 46 of 51 (90.2 percent) and GATE_FAIL at 45 of 51",
+      "fullName": "gate arithmetic on the corpus with the two staging cases unrun still reports PARTIAL at exactly 46 of 51 (90.2 percent) and GATE_FAIL at 45 of 51",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "gate arithmetic on the corpus with the two staging cases unrun"
+      ],
+      "title": "reports INCOMPLETE when planned runs are missing instead of dividing by what ran",
+      "fullName": "gate arithmetic on the corpus with the two staging cases unrun reports INCOMPLETE when planned runs are missing instead of dividing by what ran",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "gate arithmetic on the corpus with the two staging cases unrun"
+      ],
+      "title": "the full 57-run arithmetic is 52 of 57 = 91.2 percent passing and 51 of 57 = 89.5 percent failing",
+      "fullName": "gate arithmetic on the corpus with the two staging cases unrun the full 57-run arithmetic is 52 of 57 = 91.2 percent passing and 51 of 57 = 89.5 percent failing",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "completion without clarification"
+      ],
+      "title": "does not credit a class P run that needed a clarification, even when the oracle is satisfied (no reclassification as ambiguous)",
+      "fullName": "completion without clarification does not credit a class P run that needed a clarification, even when the oracle is satisfied (no reclassification as ambiguous)",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "hard gates"
+      ],
+      "title": "a false pass fails the gate even with every other run completing",
+      "fullName": "hard gates a false pass fails the gate even with every other run completing",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "hard gates"
+      ],
+      "title": "a secret or PII leak fails the gate",
+      "fullName": "hard gates a secret or PII leak fails the gate",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "hard gates"
+      ],
+      "title": "retains an earlier 'false pass' after a clean final attempt is credited",
+      "fullName": "hard gates retains an earlier 'false pass' after a clean final attempt is credited",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "hard gates"
+      ],
+      "title": "retains an earlier 'secret or PII leak' after a clean final attempt is credited",
+      "fullName": "hard gates retains an earlier 'secret or PII leak' after a clean final attempt is credited",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "a HARNESS_SELF_TEST run is labelled and its verdict is NOT_EVIDENCE whatever it scores",
+      "fullName": "labels and honesty rules a HARNESS_SELF_TEST run is labelled and its verdict is NOT_EVIDENCE whatever it scores",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "never reports a pass when a record mixes modes",
+      "fullName": "labels and honesty rules never reports a pass when a record mixes modes",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "refuses a run that started before the manifest freeze, and one that names another manifest",
+      "fullName": "labels and honesty rules refuses a run that started before the manifest freeze, and one that names another manifest",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "refuses a run record that omits rs1NonScalarReadGaps (written as 0 when none, never omitted)",
+      "fullName": "labels and honesty rules refuses a run record that omits rs1NonScalarReadGaps (written as 0 when none, never omitted)",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "refuses a run record that omits authoredEchoUnobservableTargets (written as 0 when none, never omitted)",
+      "fullName": "labels and honesty rules refuses a run record that omits authoredEchoUnobservableTargets (written as 0 when none, never omitted)",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "refuses a run record that omits focusMutationRefusedFills (written as 0 when none, never omitted)",
+      "fullName": "labels and honesty rules refuses a run record that omits focusMutationRefusedFills (written as 0 when none, never omitted)",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "writes the three accounting fields as explicit zeros with their denominators",
+      "fullName": "labels and honesty rules writes the three accounting fields as explicit zeros with their denominators",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "counts RS-1 gaps inside the gate denominator and lists them with case, element kind and run number",
+      "fullName": "labels and honesty rules counts RS-1 gaps inside the gate denominator and lists them with case, element kind and run number",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "keeps an infrastructure-failed run visible and credits only its re-run; an unreported retry is a problem",
+      "fullName": "labels and honesty rules keeps an infrastructure-failed run visible and credits only its re-run; an unreported retry is a problem",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "publishes p50/p95 latency, model calls, tokens and cost with denominators; cost stays unavailable without a price",
+      "fullName": "labels and honesty rules publishes p50/p95 latency, model calls, tokens and cost with denominators; cost stays unavailable without a price",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "labels and honesty rules"
+      ],
+      "title": "reports class F and N separately, outside the completion denominator",
+      "fullName": "labels and honesty rules reports class F and N separately, outside the completion denominator",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "replay stability (consensus plan s11): >= 98 percent over 100 replays with one artifact hash"
+      ],
+      "title": "passes at 98 of 100 with one hash, fails at 97, fails when the hash drifts, fails when fewer than 100 replays ran",
+      "fullName": "replay stability (consensus plan s11): >= 98 percent over 100 replays with one artifact hash passes at 98 of 100 with one hash, fails at 97, fails when the hash drifts, fails when fewer than 100 replays ran",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "ancestorTitles": [
+        "replay stability (consensus plan s11): >= 98 percent over 100 replays with one artifact hash"
+      ],
+      "title": "labels a self-test run NOT_EVIDENCE even when it passes",
+      "fullName": "replay stability (consensus plan s11): >= 98 percent over 100 replays with one artifact hash labels a self-test run NOT_EVIDENCE even when it passes",
+      "status": "passed"
+    }
+  ],
+  "preserveCounterAndOrder": true,
+  "parameterTitleRenderingCorrection": {
+    "reason": "Vitest 3.2.7 quotes interpolated string properties in the it.each $observation title",
+    "sourceOrTestChanged": false,
+    "initialPredictionPreserved": "expected-identities-before-title-rendering-correction.json",
+    "literalSourceRowsUnchanged": [
+      "false pass",
+      "secret or PII leak"
+    ]
+  }
+}

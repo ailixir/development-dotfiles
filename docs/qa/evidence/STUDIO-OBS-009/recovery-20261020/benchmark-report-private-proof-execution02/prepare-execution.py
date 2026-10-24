@@ -1,0 +1,64 @@
+from pathlib import Path
+import os,json,hashlib,runpy,subprocess,shutil,datetime,stat,math
+from collections import Counter
+R=Path.cwd();O=Path(__file__).resolve().parent;P=R/'docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-private-proof-preparation';V=R/'docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-adoption-interval-correction01';S=Path('/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo');D=Path('/private/tmp/obs009-benchmark-report-adoption-20261020-proof01');E=R/'docs/qa/evidence/STUDIO-OBS-011/execution'
+def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def wj(n,d):(O/n).write_text(json.dumps(d,indent=2)+'\n')
+def ref(p):return {'path':str(p),'sha256':sha(p)}
+root=R/'docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-root-conditional-execution-admission01.json';assert sha(root)=='f10481f8d7ec9672c56ae9fab9f232880019e74ad972e276836d53242a10aa98';auth=json.loads(root.read_text());assert auth['authorized'] and not auth['nativeGo'];assert sha(Path(auth['qaBinding']['path']))==auth['qaBinding']['sha256'];assert sha(Path(auth['rootRoute']['path']))==auth['rootRoute']['sha256']
+assert not D.exists()
+for packet,expected in [(P,'e5b069410211d10f31a44a1c68e41c773ed46216022dc874a2f2127941808648'),(V,'d32e682b0d9f21b054670993ada828f79944ebefc8d7e4baad4262fd72481331')]:
+ assert sha(packet/'manifest.json')==expected
+ for row in json.loads((packet/'manifest.json').read_text())['artifacts']:assert sha(packet/row['path'])==row['sha256']
+for item in json.loads((P/'input-pins.json').read_text())['files']:assert sha(R/item['path'])==item['sha256']
+for stage in json.loads((P/'commands.json').read_text())['sequence']:assert not list(E.glob(stage['label']+'*')),stage['label']
+cap=R/'.aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py'
+with (O/'initial-actual-capture.log').open('w') as log:run=subprocess.run(['python3',str(cap),str(O/'initial-actual-capture.json')],cwd=R,stdout=log,stderr=subprocess.STDOUT)
+assert run.returncode==0
+actual_capture=json.loads((O/'initial-actual-capture.json').read_text());assert actual_capture['digest']=='3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f' and len(actual_capture['files'])==1812;assert actual_capture['dist']['digest']=='698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210' and len(actual_capture['dist']['files'])==238
+snap=runpy.run_path(str(R/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution01/input-snapshot.py'))['snapshot']
+source=snap(S);actual=snap(R);wj('initial-actual-full-selected.json',actual);wj('accepted-post-native-snapshot.json',{'repo':source});assert len(source['copyProfileFiles'])==13995 and source['dist']['digest']=='e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1' and len(source['dist']['files'])==238
+prior=json.loads((R/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution02/lint-green01-private-after.json').read_text())['repo'];x={r['path']:r for r in prior['copyProfileFiles']};y={r['path']:r for r in source['copyProfileFiles']};assert x.keys()==y.keys();delta=[{'path':p,'before':x[p],'after':y[p]} for p in x if x[p]!=y[p]];cache='studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json';assert {r['path'] for r in delta}<={cache};assert source['dist']==prior['dist'];wj('post-native-source-successor.json',{'completeDelta':delta,'priorFullSelectedSha256':sha(R/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution02/lint-green01-private-after.json'),'sourceProductCount':238,'sourceDigest':source['copyProfileDigest'],'nativeResult':'FAIL_5P1F_RETAINED','resourceLimitation':auth['resourceLimitationAccepted'],'historicalAllDescendantsGone':'NOT_ESTABLISHED','rootConditional':ref(root)})
+cacheDoc=json.loads((S/cache).read_text())
+# Format-only continuation: established Vitest3.2.7 ordered list-pair semantics, no collapse before uniqueness.
+def checked_cache(document):
+ assert type(document) is dict and set(document)=={'version','results'} and document['version']=='3.2.7'
+ assert type(document['results']) is list and len(document['results'])==191
+ keys=[]
+ for pair in document['results']:
+  assert type(pair) is list and len(pair)==2 and type(pair[0]) is str
+  key,value=pair;keys.append(key)
+  assert type(value) is dict and set(value)=={'duration','failed'} and type(value['failed']) is bool
+  assert type(value['duration']) in [int,float] and math.isfinite(value['duration'])
+ assert len(set(keys))==191 and all(count==1 for count in Counter(keys).values())
+ return keys
+nativePacket=R/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-native-six-execution01'
+nativeCache=nativePacket/'generated-cache/fixtures-after.json';nativeSeal=json.loads((nativePacket/'manifest.json').read_text())
+cacheBinding=next(row for row in nativeSeal['artifacts'] if row['path']=='generated-cache/fixtures-after.json')
+assert sha(nativeCache)==cacheBinding['sha256'] and nativeCache.stat().st_size==cacheBinding['bytes']
+sealedCache=json.loads(nativeCache.read_text());keys=checked_cache(cacheDoc);sealedKeys=checked_cache(sealedCache)
+assert Counter(keys)==Counter(sealedKeys) and keys==sealedKeys and cacheDoc==sealedCache and sha(S/cache)==sha(nativeCache)
+assert dict(cacheDoc['results'])[':test/fixtures-tier/observed-bootstrap-process-tree.test.ts']['failed'] is True
+wj('initial-cache-list-pair-verification.json',{'schema':'Vitest3.2.7 ordered191uniquelistpairs','unique191':True,'sameSealedNativeEndKeyCounterAndOrder':True,'all191ValuesAndExactBytesMatchSealedNativeEnd':True,'failedBootstrapRetained':True,'sealedNativeCacheSha256':sha(nativeCache),'noDuplicateCollapseOrReset':True,'correctionCause':'READER_SHAPE_NOT_SOURCE_DRIFT_NOT_RED'})
+(O/'generated-cache').mkdir();shutil.copy2(S/cache,O/'generated-cache/source-failed-native-before-copy.json')
+node=Path('/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node');env=os.environ.copy();env['PATH']=str(node.parent)+':'+env['PATH'];pnpm=Path(shutil.which('pnpm',path=env['PATH'])).resolve();versions=[]
+for binary,wanted in [(node,'v24.20.0'),(pnpm,'10.33.0')]:
+ p=subprocess.run([str(binary),'--version'],env=env,capture_output=True,text=True);assert p.returncode==0 and p.stdout.strip()==wanted;versions.append({'path':str(binary),'sha256':sha(binary),'mode':oct(binary.stat().st_mode&0o777),'version':p.stdout.strip()})
+cliPins=json.loads((R/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution02/terminal-canonical-cli-pins.json').read_text());wanted={r['relativePath']:r for r in cliPins if r['tree']==str(R)};current=[]
+for tree in [R,S]:
+ for rel,row in wanted.items():
+  p=tree/'studio-runner/node_modules'/rel;assert sha(p)==row['sha256'] and oct(p.stat().st_mode&0o777)==row['mode'];current.append({'tree':str(tree),'relativePath':rel,'sha256':sha(p),'mode':oct(p.stat().st_mode&0o777)})
+wj('initial-canonical-cli-pins.json',{'runtime':versions,'clis':current})
+stamp=json.loads((S/'studio-runner/dist/runtime-versions.json').read_text());provenance=stamp['observedBrowserProvenance'];browserRoot=Path(os.environ.get('PLAYWRIGHT_BROWSERS_PATH',str(Path.home()/'Library/Caches/ms-playwright')));browser=browserRoot/('chromium-'+provenance['revision'])/provenance['executableRelativePath'];assert provenance['revision']=='1243' and sha(browser)==provenance['executableSha256']=='8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a';wj('browser-and-env-binding.json',{'browserRoot':str(browserRoot),'executable':str(browser),'sha256':sha(browser),'revision':'1243','stampSha256':sha(S/'studio-runner/dist/runtime-versions.json'),'IMAGE_TAG':os.environ.get('IMAGE_TAG'),'PLAYWRIGHT_BROWSERS_PATH':os.environ.get('PLAYWRIGHT_BROWSERS_PATH'),'browserLaunched':False})
+carry={'kind':'DELEGATED_ROOT_CONDITIONAL_FRESH_CARRY_FACTS','rootConditional':ref(root),'atUtc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'sourceEndCatalogSha256':sha(O/'accepted-post-native-snapshot.json'),'sourceCompleteRows':13995,'product':source['dist'],'allProductBuildReferenceDependencyRowsUnchangedFromAcceptedV2Pure':'exactfullrowscomparisononlyknownnativecachechanged','prodEmit':False,'canonicalCli':ref(O/'initial-canonical-cli-pins.json'),'browser':ref(O/'browser-and-env-binding.json'),'actual':ref(O/'initial-actual-capture.json'),'independentNewSignatureClaimed':False};wj('fresh-product-source-dependency-reference-browser-carry.json',carry)
+admission=json.loads((P/'root-admission-template.json').read_text());admission.update(kind='DELEGATED_FACTS_UNDER_IMMUTABLE_ROOT_CONDITIONAL_NONNATIVE_ADMISSION',authorized=True,nativeCollectorTerminalAndRootReleased=True,admittedAtUtc=datetime.datetime.now(datetime.timezone.utc).isoformat(),nativeTerminalReceipt=ref(R/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-native-six-execution01/receipt.md'),rootLaneRelease=ref(root),currentResourceAdmission=auth['qaBinding'],actualSourceBeforeCapture={**ref(O/'initial-actual-capture.json'),'digest':actual_capture['digest'],'count':1812},actualDistBeforeDigest=actual_capture['dist']['digest'],acceptedPostNativeSnapshot={**ref(O/'accepted-post-native-snapshot.json'),'sourceKey':'repo'},postNativeSelectedCatalogDigest=source['copyProfileDigest'],postNativeSelectedCatalogCount=13995,freshProductSourceDependencyReferenceBrowserCarry=ref(O/'fresh-product-source-dependency-reference-browser-carry.json'),canonicalNode=versions[0],canonicalPnpm=versions[1],sourceWindowAndTenActualPreimagesFreshlyBound=True,collectorOutputLabelsAbsent=True);admission['phaseGo']={k:True for k in admission['phaseGo']};admission['authority']=ref(root);admission['attribution']='delegatedRootConditional observed facts, no invented QA/root signature';wj('current-admission.json',admission)
+# The reviewed adapter performs its own strict regularity/preimage/layer/end guards.
+admissionSha=sha(O/'current-admission.json');catalog=Path(str(D)+'-source-catalog.json');env['OBS009_BENCHMARK_PRIVATE_PROOF']='ROOT_POST_NATIVE_RELEASED_SOURCE_BOUND';records=[]
+for mode in ['capture','seed']:
+ argv=['python3',str(P/'prepare-benchmark-private.py'),mode,str(O/'current-admission.json'),admissionSha,str(catalog)]
+ if mode=='seed':argv.append(sha(catalog))
+ with (O/('copy-'+mode+'.log')).open('w') as log:run=subprocess.run(argv,cwd=R,env=env,stdout=log,stderr=subprocess.STDOUT)
+ records.append({'mode':mode,'argv':argv,'exit':run.returncode});wj('copy-commands.json',records);assert run.returncode==0
+wj('initial-new-private-full-snapshots.json',{name:snap(D/name) for name in ['before-repo','repo']});assert snap(S)==source and snap(R)==actual
+wj('copy-complete.json',{'atUtc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'selectedCatalog':ref(catalog),'seedReceipt':ref(D/'seed-receipt.json'),'nativeSourceReadOnlyAndStableThroughCopy':True,'actualFullSelectedStable':True,'twoCopiesExact':True,'rootConditional':ref(root),'nativeResultRetained':'FAIL_5P1F','historicalCleanupPass':False})
+print(json.dumps({'copyComplete':True,'pid':os.getpid(),'catalogSha256':sha(catalog),'seedReceiptSha256':sha(D/'seed-receipt.json'),'admissionSha256':admissionSha,'source13995':source['copyProfileDigest'],'product238':source['dist']['digest']}))

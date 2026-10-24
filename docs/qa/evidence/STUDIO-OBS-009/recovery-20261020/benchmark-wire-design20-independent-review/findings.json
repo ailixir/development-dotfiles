@@ -1,0 +1,72 @@
+{
+  "scope": "INDEPENDENT_WIRE_CAPTURE_DESIGN20_REVIEW",
+  "disposition": "REVISE_BEFORE_SCOPED_IMPLEMENTATION",
+  "blockingFindingCount": 2,
+  "findings": [
+    {
+      "id": "WD20-01",
+      "severity": "HIGH",
+      "title": "Inspectable nonempty canary configuration missing from completeness predicate",
+      "source": [
+        "evaluate.mjs:414-437",
+        "design18 findings minimalCoverageAndReport.completeness"
+      ],
+      "failure": "Empty list or empty-string canary searches no sensitive variant but can report COMPLETE and known zero.",
+      "requiredChange": "Valid nonempty copied set of nonempty strings is necessary for complete local inspection; empty/invalid/uninspectable config yields explicit unknown/unavailable, null total and non-PASS.",
+      "requiredTests": [
+        "Direct driver empty/invalid canary configuration",
+        "Otherwise-passing aggregate population cannot pass with unknown canary configuration"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "id": "WD20-02",
+      "severity": "HIGH",
+      "title": "Generated login fixture password omitted from default run canaries and required values are overridable",
+      "source": [
+        "evaluate.mjs:1503",
+        "evaluate.mjs:1540-1546"
+      ],
+      "failure": "Default plantedSecrets contains c05; secret-login generates d1 fallback but common uses only Object.values(plantedSecrets); trailing driveOptions can replace even that list.",
+      "requiredChange": "Per-run set includes actual selected/generated harness-known fixture canaries; admitted extras may extend but cannot replace required values. Required unavailable values imply unknown scope.",
+      "requiredTests": [
+        "Real runBenchmark-to-driver binding with d1 absent includes the generated fixture password",
+        "driveOptions cannot remove required harness-known canaries; raw value not exported"
+      ],
+      "status": "OPEN"
+    }
+  ],
+  "scopeResolution": {
+    "extraTextsNotConfiguredAllowedForLocalSubgate": true,
+    "requiredPreservedQualifiers": [
+      "gate.scope COMPLETION_AND_HARD_FACT_SUBGATE_ONLY",
+      "evidenceStatus COMPLETION_SUBGATE_ONLY_NOT_D_C_ACCEPTANCE",
+      "requiredActualEvidence remains",
+      "CLI execution RAW_EMITTED_UNREVIEWED",
+      "Local summary scope and globalWireComplete null",
+      "Numeric hard gates remain confirmed lower bounds, not global hard-zero"
+    ],
+    "doesNotProve": [
+      "Full D-C PASS",
+      "Canonical AC7 zero secret/PII across required scope",
+      "AC10 actual gateway/all-text/positive canary/manual video",
+      "Story or pilot completion"
+    ],
+    "newGlobalCollectorFrameworkRequiredByThisReview": false
+  },
+  "acceptedDesignAreas": [
+    "Private run-local immutable-client factory identity and isolation",
+    "Transient complete consumed-text scan before unchanged bounds/parse/status",
+    "Closed error vocabulary and no raw/parser/cause retention",
+    "Successful full-body capture before checked revisions and no409 retry",
+    "Protective accounting before hard-stop latch",
+    "Stage-owned interrupted collectors and awaited cleanup",
+    "All-attempt unknown capture prevents local aggregate PASS",
+    "Four-target scope and targeted affected verification"
+  ],
+  "implementationAuthority": false,
+  "runtimeAuthority": false,
+  "storyQaVerdict": false,
+  "codeUnderReviewParsedImportedExecuted": false,
+  "privateBusinessBodiesRead": false
+}

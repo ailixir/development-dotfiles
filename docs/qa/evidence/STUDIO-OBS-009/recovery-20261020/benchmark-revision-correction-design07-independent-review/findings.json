@@ -1,0 +1,51 @@
+{
+  "scope": "INDEPENDENT_FR06_01_DESIGN07_REVIEW",
+  "verdict": "REVISE_BEFORE_IMPLEMENTATION",
+  "blockingFindingCount": 1,
+  "findings": [
+    {
+      "id": "RD07-QA-01",
+      "severity": "HIGH",
+      "title": "Client response validation rejects before transient capture",
+      "designLocations": [
+        "findings.json candidateScope evaluate.mjs readDraft/updateDraft changes",
+        "fieldRules.readDraft",
+        "fieldRules.updateResponse",
+        "errorBudgetAndObservation.newReadCanary"
+      ],
+      "sourceEvidence": {
+        "withTextCaptureLines": [
+          1098,
+          1108
+        ],
+        "interruptedRunLines": [
+          1186,
+          1241
+        ],
+        "captureBehavior": "Only a fulfilled client return is serialized; rejected method bodies are unavailable to catch recovery."
+      },
+      "failureCase": "2xx response has malformed tuple or id and contains planted canary; validation throws inside client before wrapper captures it.",
+      "requiredChange": "Capture complete successful GET/PUT response transiently before rejecting its tuple; enforce matching id and safe positive numeric revisions before PUT/suffix respectively.",
+      "requiredFocusedRegressions": [
+        "Malformed GET tuple plus canary: detected by catch scan, no PUT or suffix, no raw canary record",
+        "Malformed PUT response plus canary: detected by catch scan, one attempted PUT/no retry, no suffix, no raw canary record",
+        "Both retain one known base charge, no extra model/session charge, and incomplete observation"
+      ],
+      "status": "OPEN"
+    }
+  ],
+  "accepted": [
+    "Explicit authenticated post-publication current-draft GET",
+    "Positive safe integer numeric tuple and identity validation without coercion/default/increments",
+    "Tuple serialized after untrusted authoring.request spread",
+    "One GET/PUT with server optimistic CAS and no409 retry/rebase",
+    "Original base frozen tuple and publication identity retained; suffix uses updated tuple",
+    "Focused changed-behavior verification plus existing group5/type-check/changed-file lint only"
+  ],
+  "implementationAuthority": false,
+  "runtimeAuthority": false,
+  "storyQaVerdict": false,
+  "sourceMutation": false,
+  "privateBodyRead": false,
+  "codeUnderReviewParsedImportedExecuted": false
+}

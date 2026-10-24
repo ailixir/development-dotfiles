@@ -1,0 +1,54 @@
+{
+  "id": "focused01",
+  "wrapperExit": 0,
+  "wrapperStdoutSha256": "fc5bf8234514aec08d46bea032c8d7a84b91cc438f55077f422b81589c23468a",
+  "wrapperStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "closedWrapperResult": {
+    "command": [
+      "pnpm",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vitest/vitest.mjs",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "test/evaluation/harnessSelfTest.test.ts",
+      "--coverage.enabled=false",
+      "--minWorkers=1",
+      "--maxWorkers=1",
+      "--no-file-parallelism",
+      "--testTimeout=5000",
+      "--hookTimeout=5000",
+      "--testNamePattern",
+      "FR06-01|group5:",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-revision08-focused01-vitest.json"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-21T11:35:17.176586+00:00",
+    "elapsedSeconds": 0.98,
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "982131630ca2a6e28b58793b8148f0112405ac2ae1cf327de91a58a38c4c1665",
+    "testInputStable": true,
+    "testInputDigestBefore": "827fa4c35712ac2267b6c71ac93089043abfd42bfa36cb289c59595d71e37f90",
+    "testInputDigestAfter": "827fa4c35712ac2267b6c71ac93089043abfd42bfa36cb289c59595d71e37f90",
+    "vitest": {
+      "success": true,
+      "numPassedTests": 31,
+      "numFailedTests": 0,
+      "numPendingTests": 15,
+      "numTotalTests": 46,
+      "numPassedTestSuites": 4,
+      "numFailedTestSuites": 0
+    },
+    "vitestReportSha256": "651b4ab6db2d47ef6a463692aa34f3c61620e1f6afebb1a6cf19a5447bcbc18e"
+  },
+  "resultReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-revision08-focused01-results.json",
+    "sha256": "6676de8b5f2ccdc67633d5d8e4a826b44a2141fb18aa2dd07439dc931f44a4fd",
+    "bytes": 1478
+  }
+}

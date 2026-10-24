@@ -1,0 +1,47 @@
+{
+  "originalProfilePath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/T0-DEV/sandbox-runner-copy-list.txt",
+  "originalProfileSha256": "ab9105a7e6b0cf27a9d512b0a6fb84efd65f3f28425a56ee5208d0806b97d9b1",
+  "copyPaths": [
+    "studio-runner",
+    "docs/specs/studio/openapi.yaml",
+    "docs/specs/studio-observed-authoring/contracts/v3",
+    "tools/build-studio-observed-schemas.cjs",
+    "tools/check-studio-observed-contracts.cjs",
+    "tools/studio-current-vector-factory.cjs",
+    "tools/studio-snapshot-contract-oracle.cjs",
+    "node_modules/ajv",
+    "node_modules/ajv-formats",
+    "node_modules/yaml",
+    "node_modules/fast-deep-equal",
+    "node_modules/fast-uri",
+    "node_modules/json-schema-traverse",
+    "node_modules/require-from-string",
+    "helm-chart/put-checks/values-uat.yaml",
+    "helm-chart/put-checks/values-prod.yaml",
+    "docs/runbooks/studio-runner.md",
+    "docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/results.jsonl",
+    "docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/summary.json",
+    "backend/src/main/resources/application.yml"
+  ],
+  "emptyPaths": [
+    "docs/qa/evidence/STUDIO-OBS-007",
+    "docs/qa/evidence/STUDIO-OBS-007/runner-isolation-source-repair",
+    "docs/qa/evidence/STUDIO-OBS-007/runner-guided-renew-execution-2",
+    "docs/qa/evidence/STUDIO-OBS-007/r-stale-grant-candidate",
+    "docs/qa/evidence/STUDIO-OBS-007/runner-control-focus-candidate",
+    "docs/qa/evidence/STUDIO-OBS-007/runner-login-collision-candidate",
+    "docs/qa/evidence/STUDIO-OBS-013/r13",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation"
+  ],
+  "topLevelRunnerOmissions": [
+    ".claude",
+    "coverage",
+    "short.webm"
+  ],
+  "opaqueHashAndRegularCopyOnly": [
+    "docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/results.jsonl",
+    "docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/summary.json"
+  ],
+  "privateEvidenceCopy": false,
+  "sourceRule": "approved COPY entries+knownapplication.yml only; docs/qa/evidence nevercopied, only empty MKDIR paths; no private-root recursivecopy"
+}

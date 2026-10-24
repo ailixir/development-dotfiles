@@ -1,0 +1,43 @@
+{
+  "kind": "SOURCE_DERIVED_COUNTEREXAMPLES_UNEXECUTED",
+  "finding": "BR-C2-01",
+  "commonBinding": "Existing reviewedInput synthetic composition; all original raw run starts before t3; canonical entry hashes, immutable raw hash, ledger/execution/adoption document hashes coherently bound; cause reviews remain valid.",
+  "chronology": [
+    {
+      "at": "t0",
+      "event": "original admission1 ADMITTED"
+    },
+    {
+      "at": "t1",
+      "event": "original execution started"
+    },
+    {
+      "at": "t2",
+      "event": "latest included run started"
+    },
+    {
+      "at": "t3",
+      "event": "same-purpose STOP/refusal/changed admission appended"
+    },
+    {
+      "at": "t4 optional",
+      "event": "same-purpose new ADMITTED entry appended after STOP"
+    },
+    {
+      "at": "t5",
+      "event": "latest included run finished"
+    }
+  ],
+  "currentLookups": [
+    "effectiveAdmission(t1)",
+    "effectiveAdmission(each raw runStartedAt <= t2)"
+  ],
+  "excludedEntries": [
+    "t3",
+    "t4"
+  ],
+  "currentSourcePrediction": "originalAdmissionVerified can remain true; independent adoption can remain bound if all other inputs satisfy existing checks.",
+  "requiredCorrection": "Qualify full relevant interval and its actual authoritative end/history; no intervening same-purpose change; UNKNOWN/non-adoptable when end/history unbound. Do not use terminal ADMITTED status alone.",
+  "missingRunEndCurrentBehavior": "validateRunRecord already emits RUN_TIMESTAMPS; retain refusal. No claim that missing raw runFinishedAt currently passes.",
+  "runtimeExecuted": false
+}

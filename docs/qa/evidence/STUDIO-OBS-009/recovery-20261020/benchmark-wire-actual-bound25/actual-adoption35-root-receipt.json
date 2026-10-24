@@ -1,0 +1,188 @@
+{
+  "kind": "ACTUAL_GUARDED_FOUR_TARGET_WIRE_SOURCE_ADOPTION35",
+  "atUtc": "2026-10-21T12:58:19.227778+00:00",
+  "admissionReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-bound25/root-admission35.json",
+    "sha256": "fd8b2c080165d38ac01738156fca68f3251823431a1a33ac2f8e685b37598bae",
+    "bytes": 2966
+  },
+  "inputsReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-bound25/inputs.json",
+    "sha256": "33d2458989a05516ea60a208a0395ad8fe431ae0738b14fa79d70fdc1a0bf001",
+    "bytes": 5486
+  },
+  "candidateReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate30/manifest.json",
+    "sha256": "5f9bb7f662104f50d4b6c1c93b238954e7d3ab5e90632c45cc8e62c0a44e6022",
+    "bytes": 2975
+  },
+  "sourceQaReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-candidate33-independent-review/manifest.json",
+    "sha256": "1aedd460fdec26f8242f41aa8a04833b3eb4aeb4fe1225c544f37b6624ca5ed6",
+    "bytes": 889
+  },
+  "prefixAndProofQaReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-prefix-proof32-independent-review/manifest.json",
+    "sha256": "ff77f8ce9a12a5949f8cd8bf336f22f58b8994c399463db29650e7c62f161afa",
+    "bytes": 973
+  },
+  "immediateBeforeQualification": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-preflight25/pre-copy35-qualification.json",
+    "sha256": "ea28132a33400902d03917f8c73d54cef6b4504bb40ff219dd72591a338f6a32",
+    "bytes": 1661
+  },
+  "scriptReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-adoption-prefix31/apply-reviewed-four.py.txt",
+    "sha256": "658b71531116171e34a1390a46002780e984768cb66f8a7b7f67579d86fbef87",
+    "bytes": 6368
+  },
+  "steps": [
+    {
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-preflight25/pre-copy35-source.json"
+      ],
+      "rawExit": 0,
+      "stdout": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-preflight25/pre-copy35-capture0.stdout.private",
+        "sha256": "e4dec99ac75e5b2de5c1d9e3c1b62e0bd12211a68390bde7566b8313fd5f274b",
+        "bytes": 182
+      },
+      "stderr": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-preflight25/pre-copy35-capture0.stderr.private",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "-c",
+        "from pathlib import Path; import runpy,json,hashlib,sys; r=Path.cwd(); p=r/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution01/input-snapshot.py'; assert hashlib.sha256(p.read_bytes()).hexdigest()=='b6d962a6aaba1c0135e3cee63cb66341bfd42dba3238deef8a7187992ba01849'; value=runpy.run_path(str(p))['snapshot'](r); output=Path(sys.argv[1]); handle=output.open('x'); handle.write(json.dumps(value,indent=2)); handle.close()",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-preflight25/pre-copy35-full-inputs.json"
+      ],
+      "rawExit": 0,
+      "stdout": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-preflight25/pre-copy35-capture1.stdout.private",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "stderr": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-preflight25/pre-copy35-capture1.stderr.private",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-adoption-prefix31/apply-reviewed-four.py.txt",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-bound25/root-admission35.json",
+        "fd8b2c080165d38ac01738156fca68f3251823431a1a33ac2f8e685b37598bae"
+      ],
+      "rawExit": 0,
+      "stdout": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-bound25/actual-copy35.stdout.private",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "stderr": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-bound25/actual-copy35.stderr.private",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-adoption25/after-source.json"
+      ],
+      "rawExit": 0,
+      "stdout": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-bound25/after-copy35-capture2.stdout.private",
+        "sha256": "63158e127475b33d93cc6e3de81a22e32a50b0efaab78c3fc090aeba258a0ce7",
+        "bytes": 182
+      },
+      "stderr": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-bound25/after-copy35-capture2.stderr.private",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "-c",
+        "from pathlib import Path; import runpy,json,hashlib,sys; r=Path.cwd(); p=r/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution01/input-snapshot.py'; assert hashlib.sha256(p.read_bytes()).hexdigest()=='b6d962a6aaba1c0135e3cee63cb66341bfd42dba3238deef8a7187992ba01849'; value=runpy.run_path(str(p))['snapshot'](r); output=Path(sys.argv[1]); handle=output.open('x'); handle.write(json.dumps(value,indent=2)); handle.close()",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-adoption25/after-full-inputs.json"
+      ],
+      "rawExit": 0,
+      "stdout": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-bound25/after-copy35-capture3.stdout.private",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "stderr": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-bound25/after-copy35-capture3.stderr.private",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    }
+  ],
+  "actualApplicationReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-adoption25/code-application.json",
+    "sha256": "881217d3a89dcb8815ef7953172501291f7edd481bb4ad6e3cbb37bfea93f85b",
+    "bytes": 944
+  },
+  "sourceBeforeDigest": "0c59568e8e686c69703f650006edd70e8033db2906db7e434943735beebaff2d",
+  "sourceAfterDigest": "089523404f1100f6185fed1f8292044c8ea8a5f773f33a147b37f6e9be4c6154",
+  "sourceRows": 1814,
+  "distDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+  "distRows": 238,
+  "exactFourChanged": [
+    "studio-runner/evaluation/observed-authoring/evaluate.d.mts",
+    "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+    "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+    "studio-runner/test/evaluation/observedCorpus.ts"
+  ],
+  "allOther1810SourceRowsExact": true,
+  "fullRows": 13995,
+  "inputRows": 13757,
+  "allOther13991FullRowsExact": true,
+  "allOther13753InputRowsExact": true,
+  "allSdkAndProductRowsExact": true,
+  "beforeRuntimeGuards": {
+    "nodeBinaryMatched": true,
+    "resolvedExistingPnpmMatched": true,
+    "canonicalFiveMatched": true,
+    "protectedElevenMatched": true,
+    "bin21Exact": true,
+    "environmentElevenHashedFactsMatched": true
+  },
+  "afterRuntimeGuards": {
+    "nodeBinaryMatched": true,
+    "resolvedExistingPnpmMatched": true,
+    "canonicalFiveMatched": true,
+    "protectedElevenMatched": true,
+    "bin21Exact": true,
+    "environmentElevenHashedFactsMatched": true
+  },
+  "actualManifest95287HashBytesModeUnchanged": true,
+  "sourceAfterReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-adoption25/after-source.json",
+    "sha256": "87a935e865539a4e05b4232cb503a078cb15778ceadd547ff98a38d9faff7a80",
+    "bytes": 360050
+  },
+  "fullInputsAfterReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-actual-adoption25/after-full-inputs.json",
+    "sha256": "a86861753c9573f99fa4e085ef198db19b1eb5f3f5e8201580a45aee4676ccac",
+    "bytes": 5740238
+  },
+  "oldTenTransactionNotReplayed": true,
+  "privateBusinessBodyDisclosed": false,
+  "testsOrCorpusCliExecuted": false,
+  "lifecycleChanged": false,
+  "independentActualQaOwed": true
+}

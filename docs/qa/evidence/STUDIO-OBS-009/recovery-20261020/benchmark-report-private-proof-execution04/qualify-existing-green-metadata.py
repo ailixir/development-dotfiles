@@ -1,0 +1,28 @@
+from pathlib import Path
+import json,re,hashlib
+from collections import Counter
+R=Path.cwd();B=R/'docs/qa/evidence/STUDIO-OBS-009/recovery-20261020';O=B/'benchmark-report-private-proof-execution04';V=B/'benchmark-report-adoption-lint-correction01';E=R/'docs/qa/evidence/STUDIO-OBS-011/execution';sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();s=next(x for x in json.loads((O/'commands.json').read_text())['sequence'] if x['id']=='green105-01');rp=E/(s['label']+'-vitest.json');lp=E/(s['label']+'.log');r=json.loads(rp.read_text());expected=json.loads((V/'expected-cases.json').read_text());original=json.loads((V/'original-case-projection.json').read_text());actual=[];perfile={}
+for f in r['testResults']:
+ file='studio-runner/test/evaluation/'+Path(f['name']).name;assert not f.get('message');rows=[]
+ for i,a in enumerate(f['assertionResults']):
+  assert a['status']=='passed' and not a.get('failureMessages');row={'file':file,'order':i+1,'ancestorTitles':a['ancestorTitles'],'title':a['title'],'fullName':a['fullName'],'status':a['status']};actual.append(row);rows.append(row)
+ perfile[file]=rows
+wanted=[]
+for f in expected['files']:
+ rows=[{k:a[k] for k in ['file','order','ancestorTitles','title','fullName','status']} for a in f['cases']];assert perfile[f['file']]==rows;wanted.extend(rows)
+ident=lambda x:(x['file'],tuple(x['ancestorTitles']),x['title'],x['fullName'],x['status']);assert Counter(map(ident,actual))==Counter(map(ident,wanted));assert [r[k] for k in ['numTotalTests','numPassedTests','numFailedTests','numPendingTests','numTodoTests']]==[105,105,0,0,0]
+originalCounts={}
+for f in original['files']:
+ current=perfile[f['file']];position=0
+ for old in f['cases']:
+  while position<len(current) and tuple(current[position][k] for k in ['ancestorTitles','title','fullName'])!=tuple(old[k] for k in ['ancestorTitles','title','fullName']):position+=1
+  assert position<len(current) and current[position]['status']=='passed';position+=1
+ originalCounts[f['file']]=len(f['cases'])
+assert sum(originalCounts.values())==86
+log=re.sub(r'\x1b\[[0-9;]*m','',lp.read_text());assert not any(t in log for t in ['Unhandled Errors','Unhandled Rejection','Uncaught Exception']);terminal=json.loads((O/'green105-01-terminal.json').read_text());assert terminal['rawOuterExit']==terminal['actualCollectorResult']['exit']==0 and terminal['ownedProcessGroupSignal0Observation']=='ESRCH/GONE'
+q={'qualified':True,'kind':'FULL_AFFECTED_CORRECTED_GREEN_105_ACTUAL_PASS','rawOuterCollectorExit':0,'rawChildExit':0,'actualCases':105,'passed':105,'failed':0,'skipped':0,'todo':0,'physicalFiles':len(perfile),'perFileCounts':{k:len(v) for k,v in perfile.items()},'exactFullIdentityStatusCounterAndPerFileOrder':True,'original86PassedAndRelativeOrderRetained':originalCounts,'existing19AdditionsAllPassed':True,'allCaseFailureMessagesAndSuiteMessagesEmpty':True,'controlledUnhandledBannerAbsent':True,'runtimeErrorSummary':r.get('numRuntimeErrorTestSuites','NOT_EMITTED'),'sourceAndProductStable':True,'nativeReport':{'path':str(rp.relative_to(R)),'sha256':sha(rp)},'defaultLog':{'path':str(lp.relative_to(R)),'sha256':sha(lp)},'scope':'LOCAL_SYNTHETIC_UNIT_ONLY_NOT_REAL_D_C_T4_ACCEPTANCE','independentExecutionQa':'PENDING'}
+(O/'green105-01-qualification.json').write_text(json.dumps(q,indent=2)+'\n');(O/'green105-01-case-projection.json').write_text(json.dumps({'caseMetadataOnly':actual,'rawBodiesExported':False},indent=2)+'\n')
+
+COPY_RECORD_PROPERTIES = {'copyUsedOnlyExistingPrivateCli': True, 'realFactsInvented': False}
+(O/'metadata-copy-record-properties.json').write_text(json.dumps(COPY_RECORD_PROPERTIES,indent=2)+'\n')
+print(json.dumps({'qualified':True,'passed':105,'original86Retained':True,'qualificationSha256':sha(O/'green105-01-qualification.json'),'reportSha256':sha(rp),'copyPerformedByHelper':False}))

@@ -1,0 +1,131 @@
+--- a/studio-runner/src/guided/ownership.ts
++++ b/studio-runner/src/guided/ownership.ts
+@@ -84,17 +84,14 @@
+     }
+     return structuredClone(grant);
+   }
+-  private async requestClaim(entry: OwnedAssignment, initial: boolean, phaseEnd?: number): Promise<Session> {
++  private async requestClaim(entry: OwnedAssignment, initial: boolean): Promise<Session> {
+     this.live(entry); insist(!entry.inFlight, 'BUSY');
+     const epoch = entry.epoch; const lease = Date.parse(entry.grant?.owner.leaseExpiresAt ?? entry.assignment.expiresAt);
+-    const cap = entry.runtime?.hasSecretInputs ? 1000 : 10_000, now = Date.now(), budget = lease - now - CLAIM_MARGIN_MS;
+-    const phaseBudget = phaseEnd === undefined ? Infinity : phaseEnd - now;
+-    if (phaseBudget <= 0) throw new Error('LEASE_LOST');
++    const cap = entry.runtime?.hasSecretInputs ? 1000 : 10_000, budget = lease - Date.now() - CLAIM_MARGIN_MS;
+     // Fixed from the instants at claim start, never from a latency constant: with the lease at the expiry, a claim the margin bounds is cut at E - margin by construction.
+-    // Cadence ties end as LEASE_LOST; only a strictly earlier session-lease margin may defer to EXPIRED.
+-    const marginBound = lease >= Date.parse(entry.assignment.expiresAt) && budget < cap && budget < phaseBudget;
+-    const lost = (): Error => marginBound && (phaseEnd === undefined || Date.now() < phaseEnd) ? new ClaimMarginExhausted() : new Error('LEASE_LOST');
+-    const timeout = Math.min(cap,budget,phaseBudget); if (timeout <= 0) throw lost();
++    const marginBound = lease >= Date.parse(entry.assignment.expiresAt) && budget < cap;
++    const lost = (): Error => marginBound ? new ClaimMarginExhausted() : new Error('LEASE_LOST');
++    const timeout = Math.min(cap,budget); if (timeout <= 0) throw lost();
+     const controller = new AbortController(); entry.inFlight = controller;
+     const timer = setTimeout(() => { controller.abort(); },timeout); timer.unref();
+     let abortListener: (() => void) | undefined;
+@@ -132,15 +129,7 @@
+   }
+   private async renew(entry: OwnedAssignment): Promise<void> {
+     try {
+-      this.live(entry);
+-      let phaseEnd: number | undefined;
+-      if (entry.runtime?.hasSecretInputs === true) {
+-        insist(entry.nextRenewal !== undefined, 'LEASE_LOST');
+-        phaseEnd = entry.nextRenewal + 1000;
+-      }
+-      const grant = await this.requestClaim(entry,false,phaseEnd); this.live(entry);
+-      // The same captured phase still bounds a validated reply after await, immediately before authority installation.
+-      if (phaseEnd !== undefined) insist(Date.now() < phaseEnd, 'LEASE_LOST');
++      this.live(entry); const grant = await this.requestClaim(entry,false); this.live(entry);
+       entry.runtime?.applyAcknowledgedLease(grant.owner.leaseExpiresAt);
+       entry.grant = grant; if (entry.nextRenewal !== undefined) entry.nextRenewal += 1000; this.schedule(entry);
+     } catch (error) {
+--- a/studio-runner/test/guided/ownership.test.ts
++++ b/studio-runner/test/guided/ownership.test.ts
+@@ -277,86 +277,3 @@
+     expect(w.terminate).toHaveBeenCalledOnce();expect(w.graceful).not.toHaveBeenCalled();
+   });
+ });
+-
+-
+-describe('009 secret renewal keeps its original claim-phase endpoint',()=>{
+-  it('does not install an otherwise valid late grant after a delayed renewal phase has ended',async()=>{
+-    const h=await setup(undefined,true);await h.manager.assign(h.assignment);await h.manager.context(h.context);
+-    const runtime=h.manager.getRuntime(h.context),installed=vi.spyOn(runtime,'applyAcknowledgedLease'),began=Date.now();
+-    const action=proposal(h.context,h.browser.evidence,'nav',{kind:'navigate',destinationInputId:'input-nav'});
+-    const proof=await runtime.prepare({...identity(h.context),proposal:action,requestDigest:hash(action),expiresAt:h.context.expiresAt}),request=dispatch(h.context,action,proof);
+-    let release:((grant:Session)=>void)|undefined;const claims:{at:number;timeout:number}[]=[];
+-    h.options.claim=(_command,_key,timeout)=>{claims.push({at:Date.now(),timeout});return new Promise<Session>(resolve=>{release=resolve;});};
+-    try{
+-      // setSystemTime shifts pending relative timers, not the stored nextRenewal epoch.
+-      vi.setSystemTime(began+500);await vi.advanceTimersByTimeAsync(1000);
+-      expect(claims).toHaveLength(1);expect((claims[0]?.at??0)-began).toBe(1500);expect(release).toBeTypeOf('function');
+-      await vi.advanceTimersByTimeAsync(600);
+-      release?.({...structuredClone(h.grant),owner:{...h.grant.owner,leaseExpiresAt:new Date(Date.now()+30000).toISOString()}});
+-      await vi.advanceTimersByTimeAsync(0);
+-      // Defining old-product red: the old fresh1000 budget installs this valid grant atB+2100.
+-      expect(runtime.accepting,'phase-end authority; acknowledged lease installs='+String(installed.mock.calls.length)).toBe(false);
+-      expect(installed).not.toHaveBeenCalled();expect(h.browser.close).toHaveBeenCalledOnce();
+-      expect(h.messages.filter(m=>m.route==='lifecycle').at(-1)?.body).toHaveProperty('reason','LEASE_LOST');
+-      expect(()=>h.manager.getRuntime(h.context)).toThrow('CONTEXT_LOST');
+-      await expect(runtime.dispatch(request)).rejects.toThrow('CONTEXT_LOST');expect(h.browser.navigateBlank).not.toHaveBeenCalled();
+-      await expect(h.manager.context(h.context)).rejects.toThrow('CONTEXT_LOST');await expect(h.manager.assign(h.assignment)).rejects.toThrow('CONTEXT_LOST');
+-      await vi.advanceTimersByTimeAsync(1000);expect(claims).toHaveLength(1);expect(installed).not.toHaveBeenCalled();
+-    }finally{
+-      try{release?.({...structuredClone(h.grant),owner:{...h.grant.owner,leaseExpiresAt:new Date(Date.now()+30000).toISOString()}});await vi.advanceTimersByTimeAsync(0);await h.manager.close();expect(vi.getTimerCount()).toBe(0);}finally{installed.mockRestore();}
+-    }
+-  });
+-  it('rechecks the captured phase after grant validation and a delayed caller continuation',async()=>{
+-    const h=await setup(undefined,true);await h.manager.assign(h.assignment);await h.manager.context(h.context);
+-    const runtime=h.manager.getRuntime(h.context),installed=vi.spyOn(runtime,'applyAcknowledgedLease'),began=Date.now();
+-    let release:((grant:Session)=>void)|undefined,restoreCheck=():void=>undefined;const starts:number[]=[];
+-    h.options.claim=()=>{starts.push(Date.now());return new Promise<Session>(resolve=>{release=resolve;});};
+-    try{
+-      type GrantCheck=(entry:unknown,value:unknown,initial:boolean)=>Session;
+-      const prototype=GuidedOwnership.prototype as unknown as {checkGrant:GrantCheck};
+-      const original=Object.getOwnPropertyDescriptor(GuidedOwnership.prototype,'checkGrant')?.value as GrantCheck|undefined;
+-      if(typeof original!=='function')throw Error('CHECK_GRANT');
+-      const checked=vi.spyOn(prototype,'checkGrant').mockImplementation(function(this:GuidedOwnership,entry,value,initial){
+-        const grant=original.call(this,entry,value,initial);
+-        // The original checks finish beforeP; this microtask runs after requestClaim's finally and before renew resumes.
+-        if(!initial)queueMicrotask(()=>{vi.setSystemTime(began+2100);});return grant;
+-      });restoreCheck=()=>{checked.mockRestore();};
+-      vi.setSystemTime(began+500);await vi.advanceTimersByTimeAsync(1000);expect(starts).toEqual([began+1500]);expect(release).toBeTypeOf('function');
+-      await vi.advanceTimersByTimeAsync(100);
+-      release?.({...structuredClone(h.grant),owner:{...h.grant.owner,leaseExpiresAt:new Date(Date.now()+30000).toISOString()}});
+-      await vi.advanceTimersByTimeAsync(0);
+-      expect(Date.now()-began).toBe(2100);expect(runtime.accepting).toBe(false);expect(installed).not.toHaveBeenCalled();
+-      expect(h.messages.filter(m=>m.route==='lifecycle').at(-1)?.body).toHaveProperty('reason','LEASE_LOST');
+-      await expect(h.manager.assign(h.assignment)).rejects.toThrow('CONTEXT_LOST');await expect(h.manager.context(h.context)).rejects.toThrow('CONTEXT_LOST');
+-    }finally{
+-      try{release?.({...structuredClone(h.grant),owner:{...h.grant.owner,leaseExpiresAt:new Date(Date.now()+30000).toISOString()}});await vi.advanceTimersByTimeAsync(0);await h.manager.close();expect(vi.getTimerCount()).toBe(0);}finally{restoreCheck();installed.mockRestore();}
+-    }
+-  });
+-  it('starts no claim and loses authority when the delayed phase has ended inside the session margin',async()=>{
+-    const h=await setup(undefined,true),began=Date.now(),expiry=new Date(began+2050).toISOString();
+-    h.context.expiresAt=expiry;h.context.leaseExpiresAt=expiry;h.grant.expiresAt=expiry;h.grant.owner.leaseExpiresAt=expiry;
+-    const assignment={...h.assignment,expiresAt:expiry};await h.manager.assign(assignment);await h.manager.context(h.context);
+-    const claim=vi.fn(()=>Promise.resolve(structuredClone(h.grant)));h.options.claim=claim;
+-    try{
+-      vi.setSystemTime(began+1000);await vi.advanceTimersByTimeAsync(1000);
+-      expect(Date.now()-began).toBe(2000);expect(Date.now()).toBeLessThan(Date.parse(expiry));expect(claim).not.toHaveBeenCalled();expect(h.browser.close).toHaveBeenCalledOnce();
+-      expect(h.messages.filter(m=>m.route==='lifecycle').at(-1)?.body).toHaveProperty('reason','LEASE_LOST');expect(()=>h.manager.getRuntime(h.context)).toThrow('CONTEXT_LOST');
+-      await expect(h.manager.assign(assignment)).rejects.toThrow('CONTEXT_LOST');
+-    }finally{await h.manager.close();expect(vi.getTimerCount()).toBe(0);}
+-  });
+-  it('treats a cadence and session-lease-margin tie as LEASE_LOST rather than deferring it to expiry',async()=>{
+-    const h=await setup(undefined,true),began=Date.now(),expiry=new Date(began+2100).toISOString();
+-    h.context.expiresAt=expiry;h.context.leaseExpiresAt=expiry;h.grant.expiresAt=expiry;h.grant.owner.leaseExpiresAt=expiry;
+-    const assignment={...h.assignment,expiresAt:expiry};await h.manager.assign(assignment);await h.manager.context(h.context);
+-    let release:((grant:Session)=>void)|undefined;const timeouts:number[]=[];
+-    h.options.claim=(_command,_key,timeout)=>{timeouts.push(timeout);return new Promise<Session>(resolve=>{release=resolve;});};
+-    try{
+-      vi.setSystemTime(began+500);await vi.advanceTimersByTimeAsync(1000);expect(timeouts).toEqual([500]);
+-      await vi.advanceTimersByTimeAsync(499);expect(h.browser.close).not.toHaveBeenCalled();
+-      await vi.advanceTimersByTimeAsync(1);expect(Date.now()-began).toBe(2000);expect(h.browser.close).toHaveBeenCalledOnce();
+-      expect(Date.now()).toBeLessThan(Date.parse(expiry));expect(h.messages.filter(m=>m.route==='lifecycle').at(-1)?.body).toHaveProperty('reason','LEASE_LOST');
+-      expect(()=>h.manager.getRuntime(h.context)).toThrow('CONTEXT_LOST');
+-      await vi.advanceTimersByTimeAsync(601);expect(h.messages.filter(m=>m.route==='lifecycle')).toHaveLength(1);expect(timeouts).toEqual([500]);
+-    }finally{release?.(structuredClone(h.grant));await vi.advanceTimersByTimeAsync(0);await h.manager.close();expect(vi.getTimerCount()).toBe(0);}
+-  });
+-});

@@ -1,0 +1,119 @@
+--- a/studio-runner/evaluation/observed-authoring/evaluate.mjs
++++ b/studio-runner/evaluation/observed-authoring/evaluate.mjs
+@@ -500,11 +500,13 @@
+   const adoption = bound(input.adoption) ? input.adoption.value : null;
+   const execution = bound(input.execution) ? input.execution.value : null;
+   const ledger = bound(input.ledger) ? input.ledger.value : null;
++  const intervalLedger = bound(input.intervalLedger) ? input.intervalLedger.value : null;
+   // Exact document-byte hashes bind closed references; canonical hashes bind individual raw records/ledger entries.
+   let admission = null;
+   let originalAdmissionVerified = false;
++  let originalIntervalVerified = false;
+   if (ledger !== null && execution !== null && verifyLedger(ledger).length === 0 && isIso(execution.startedAt)) {
+-    const effectiveAdmission = (at) => guardStart({ ledger: { ...ledger, admissions: ledger.admissions.filter((entry) => Date.parse(entry.decidedAt) <= Date.parse(at)) },
++    const effectiveAdmission = (at, history = ledger) => guardStart({ ledger: { ...history, admissions: history.admissions.filter((entry) => Date.parse(entry.decidedAt) <= Date.parse(at)) },
+       manifestSha256: manifest.manifestSha256, now: new Date(at) });
+     try {
+       admission = effectiveAdmission(execution.startedAt);
+@@ -522,13 +524,28 @@
+         && original.every((run) => run?.mode === 'D_C' && run.manifestSha256 === manifest.manifestSha256 && isIso(run.runStartedAt)
+           && Date.parse(execution.startedAt) <= Date.parse(run.runStartedAt) && Date.parse(admission.admittedAt) < Date.parse(run.runStartedAt)
+           && entryDigest(effectiveAdmission(run.runStartedAt)) === entryDigest(admission));
+-    } catch { originalAdmissionVerified = false; }
++      // The start snapshot is retained. A separately bound original terminal history must extend it and
++      // cover the actual original end; an endpoint ADMITTED cannot erase a STOP/re-admission in between.
++      originalIntervalVerified = originalAdmissionVerified && intervalLedger !== null && isIso(execution.finishedAt)
++        && Date.parse(execution.finishedAt) >= Date.parse(execution.startedAt) && verifyLedger(intervalLedger).length === 0
++        && execution.intervalLedgerSha256 === input.intervalLedger.sha256
++        && intervalLedger.admissions.length >= ledger.admissions.length
++        && ledger.admissions.every((entry, i) => same(entry, intervalLedger.admissions[i]))
++        && ledger.admissions.every((entry) => Date.parse(entry.decidedAt) <= Date.parse(execution.startedAt))
++        && entryDigest(effectiveAdmission(execution.startedAt, intervalLedger)) === entryDigest(admission)
++        && original.length > 0 && original.every((run) => isIso(run.runFinishedAt)
++          && Date.parse(run.runStartedAt) <= Date.parse(run.runFinishedAt) && Date.parse(run.runFinishedAt) <= Date.parse(execution.finishedAt)
++          && entryDigest(effectiveAdmission(run.runStartedAt, intervalLedger)) === entryDigest(admission))
++        && !intervalLedger.admissions.some((entry) => entry.purpose === admission.purpose && entry.seq > admission.seq
++          && Date.parse(entry.decidedAt) >= Date.parse(execution.startedAt) && Date.parse(entry.decidedAt) <= Date.parse(execution.finishedAt));
++    } catch { originalAdmissionVerified = false; originalIntervalVerified = false; }
+   }
+   const adopted = adoption !== null && adoption.kind === 'INDEPENDENT_BENCHMARK_CAUSE_ADOPTION' && adoption.status === 'ADOPTED'
+     && adoption.rawRunsSha256 === rawHash && adoption.overlaySha256 === overlayHash
+     && adoption.manifestSha256 === manifest.manifestSha256 && adoption.executionReceiptSha256 === input.execution?.sha256
+     && adoption.ledgerSha256 === input.ledger?.sha256 && adoption.independentOfAuthor === true
+-    && adoption.originalExecutionAndConfigurationReviewed === true && Array.isArray(adoption.accepted) && originalAdmissionVerified;
++    && adoption.originalExecutionAndConfigurationReviewed === true && adoption.originalIntervalHistoryReviewed === true
++    && adoption.intervalLedgerSha256 === input.intervalLedger?.sha256 && Array.isArray(adoption.accepted) && originalAdmissionVerified && originalIntervalVerified;
+   if (!adopted) problem('REVIEW_ADOPTION_OR_ORIGINAL_ADMISSION_UNBOUND');
+   const annotations = new Map();
+   for (const annotation of overlay.annotations) {
+@@ -592,6 +609,7 @@
+     boundIndependentAdoption: adopted, coverageComplete,
+     rawRunsSha256: rawHash, overlaySha256: overlayHash, adoptionSha256: input.adoption?.sha256 ?? null,
+     executionReceiptSha256: input.execution?.sha256 ?? null, ledgerSha256: input.ledger?.sha256 ?? null,
++    intervalLedgerSha256: input.intervalLedger?.sha256 ?? null, originalIntervalEnd: execution?.finishedAt ?? null, originalIntervalVerified,
+     reviewRecordSha256: [...new Set(referencedReviews)], suppliedReviewRecordSha256: (input.reviews ?? []).map((ref) => ref?.sha256 ?? null), originalAdmissionVerified,
+     originalAttempts: original.map((run, i) => ({ rawOrdinal: i + 1, rawRecordSha256: sha256Hex(canonicalJson(run)), manifestSha256: run?.manifestSha256 ?? null, mode: run?.mode ?? null, terminal: run?.session?.terminal ?? null, published: run?.session?.published ?? null, infrastructureExcluded: run?.infrastructureFailure !== null, ...identity(run) })),
+     inputFileSha256: input.inputFileSha256 ?? null,
+@@ -698,7 +716,7 @@
+   if (reviewInput !== null && mode === 'D_C') {
+     for (const code of validateCorpusManifest(manifest, { root, repoRoot }).errors) problems.push({ caseId: null, rep: null, code: `REVIEW_MANIFEST_INVALID:${code}` });
+   }
+-  if (reviewed.admission !== undefined && reviewed.admission !== null) { admission = reviewed.admission; price = reviewed.provenance.originalAdmissionVerified === true && isRecord(admission.priceSource) ? admission.priceSource : null; }
++  if (reviewed.admission !== undefined && reviewed.admission !== null) { admission = reviewed.admission; price = reviewed.provenance.originalAdmissionVerified === true && reviewed.provenance.originalIntervalVerified === true && isRecord(admission.priceSource) ? admission.priceSource : null; }
+   const byKey = new Map();
+   for (const run of runs) {
+     for (const code of validateRunRecord(run, manifest)) problems.push({ caseId: run?.caseId ?? null, rep: run?.rep ?? null, code });
+--- a/studio-runner/evaluation/observed-authoring/manifest.json
++++ b/studio-runner/evaluation/observed-authoring/manifest.json
+@@ -100,12 +100,12 @@
+     "evaluator": {
+       "path": "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+       "base": "repo",
+-      "sha256": "ab3fbb6af637980580dce12d81c0c60ebf489a5e72404bd7af2749ceb05aafce"
++      "sha256": "d55dbbe9b7f9ca791ec1322abe3ef67d5bb4ac58ec1f717ab56a73dcfe046e28"
+     },
+     "evaluationCli": {
+       "path": "studio-runner/evaluation/cli.mjs",
+       "base": "repo",
+-      "sha256": "fd72da9c07fa00ca9440f59b569a924cbd17a9b2e32820f4977a6023aee0fc32"
++      "sha256": "8a119c26eb16ed19cd5f1a5a46ed07a9d13eeb2f6e2a951dd2dc3d854795bcad"
+     },
+     "corpusPageServer": {
+       "path": "studio-runner/evaluation/observed-authoring/pages/server.mjs",
+--- a/studio-runner/evaluation/cli.mjs
++++ b/studio-runner/evaluation/cli.mjs
+@@ -1,6 +1,7 @@
+ #!/usr/bin/env node
+ import { readFile, writeFile, mkdir } from 'node:fs/promises';
+ import { existsSync, readFileSync } from 'node:fs';
++import { Buffer } from 'node:buffer';
+ // eslint-disable-next-line no-restricted-imports -- Fixed evaluation self-test executable and file paths; no model input.
+ import { spawnSync } from 'node:child_process';
+ import { fileURLToPath } from 'node:url';
+@@ -148,7 +149,7 @@
+     const reviewInput = {
+       rawRunsText: raw.fileText, overlayText: annotations.fileText, overlay: JSON.parse(annotations.fileText),
+       reviews: await Promise.all((config.reviews ?? []).map(readDocument)),
+-      adoption: await readDocument(config.independentQaAdoption), execution: await readDocument(config.originalExecution), ledger: await readDocument(config.admissionLedger),
++      adoption: await readDocument(config.independentQaAdoption), execution: await readDocument(config.originalExecution), ledger: await readDocument(config.admissionLedger), intervalLedger: await readDocument(config.intervalAdmissionLedger),
+       inputFileSha256: { rawRuns: raw.sha256, causeAnnotations: annotations.sha256 },
+     };
+     const benchmark = buildBenchmark({ manifest, runs, mode, reviewInput, root: config.corpusRoot ?? dirname(manifestPath), repoRoot: repoRootFrom() });
+@@ -178,10 +179,16 @@
+     const { runs, benchmark } = await runBenchmark({ manifest, mode: 'D_C', client, ledger, repoRoot: repoRootFrom() });
+     const rawRunsText = `${runs.map((r) => JSON.stringify(r)).join('\n')}\n`;
+     await writeFile(`${output}/runs.jsonl`, rawRunsText, { flag: 'wx' });
+-    const execution = { kind: 'STUDIO_OBS_009_EXECUTION_RECEIPT', mode: 'D_C', startedAt, manifestSha256: manifest.manifestSha256, rawRunsSha256: sha256Hex(rawRunsText),
++    // Actual future measurement only: preserve the prior snapshot and capture append-only history after
++    // the original end. These unreviewed bytes do not themselves authenticate complete interval history.
++    const finishedAt = new Date().toISOString();
++    const intervalLedgerText = ledgerPath && existsSync(ledgerPath) ? readFileSync(ledgerPath, 'utf8') : null;
++    const execution = { kind: 'STUDIO_OBS_009_EXECUTION_RECEIPT', mode: 'D_C', startedAt, finishedAt,
++      intervalLedgerSha256: intervalLedgerText === null ? null : sha256Hex(intervalLedgerText), manifestSha256: manifest.manifestSha256, rawRunsSha256: sha256Hex(rawRunsText),
+       ledgerSha256: sha256Hex(ledgerText), admissionSeq: originalAdmission.seq, admissionEntrySha256: sha256Hex(canonicalJson(originalAdmission)),
+       configurationSha256: sha256Hex(canonicalJson({ enforcedCaps: originalAdmission.enforcedCaps, pinned: originalAdmission.pinned })), observationComplete: runs.every((run) => (run.details?.driverObservations ?? []).length === 0), status: 'RAW_EMITTED_UNREVIEWED' };
+     await writeFile(`${output}/admission-ledger.json`, ledgerText, { flag: 'wx' });
++    if (intervalLedgerText !== null) await writeFile(`${output}/admission-ledger-interval.json`, intervalLedgerText, { flag: 'wx' });
+     await writeFile(`${output}/execution.json`, `${JSON.stringify(execution, null, 2)}\n`, { flag: 'wx' });
+     await writeFile(`${output}/benchmark.json`, `${JSON.stringify(benchmark, null, 2)}\n`, { flag: 'wx' });
+     return benchmark.gate.verdict === 'GATE_PASS' ? 0 : benchmark.gate.verdict === 'GATE_FAIL' ? 1 : 2;

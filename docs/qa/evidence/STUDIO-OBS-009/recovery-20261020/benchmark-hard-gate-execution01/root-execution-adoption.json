@@ -1,0 +1,38 @@
+{
+  "kind": "INDEPENDENT_ROOT_BOUNDED_BENCHMARK_EXECUTION_ADOPTION",
+  "atUtc": "2026-10-20T23:04:04.054553+00:00",
+  "decision": "ACCEPT_GENUINE_PRIVATE_RED_GREEN_FOR_EXACT_TWO_FILE_CANDIDATE",
+  "sourceQaReviewSha256": "9ea60b391d75e56bc7142fb856f361be2f7ceee3c22c5a6615e0b6c669d6aebd",
+  "manifestSha256": "230df9d4ac754b886a658dc3259a3f3e3cc5c32af6203079a597dfc48273d9b5",
+  "manifestArtifactCountRehashed": 52,
+  "phases": [
+    {
+      "phase": "red",
+      "reportSha256": "e1260c69f7c607f236bf73d3f5b4cf32edfa9405b7ab6c71f6e0d952ef579a40",
+      "counts": {
+        "passed": 20,
+        "failed": 2
+      },
+      "orderedCounterExact": true,
+      "actualSourceDistInputStable": true,
+      "exit": 1
+    },
+    {
+      "phase": "green",
+      "reportSha256": "e3d111a802cee09479372f40a2571bace2429d00969cb32c8be0d19522ba8e68",
+      "counts": {
+        "passed": 22
+      },
+      "orderedCounterExact": true,
+      "actualSourceDistInputStable": true,
+      "exit": 0
+    }
+  ],
+  "candidateEvaluatorSha256": "c12fad22b810b92b0ce8dbc9f8f54da4540d6ad1de56d027b226acb3d047be56",
+  "candidateTestSha256": "5769819380217737448766661d62e52445b6f166ef8cf6b8f0c05e9e631ce7be",
+  "actualApplication": false,
+  "readyForLaterQuietIntegration": true,
+  "noDCOrMixedLimitsOrLifecycleCredit": true,
+  "nativeFixtureGateStillFailed": true,
+  "scope": "Earlier supplied hard-gate observations retained; finalPcompletion and original20cases preserved. OtherT4classification/adoption/headroom/staging/security/human obligations remain."
+}

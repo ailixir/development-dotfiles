@@ -1,0 +1,157 @@
+{
+  "kind": "STOPPED_UNEXPECTED_LINT_FAILURE_AFTER_TYPES_PASS",
+  "atUtc": "2026-10-21T01:48:44.163171+00:00",
+  "rootAuthority": "f10481f8d7ec9672c56ae9fab9f232880019e74ad972e276836d53242a10aa98",
+  "formatContinuationAuthority": "continuation-authority.json",
+  "sourceCandidate": "intervalv2d32e682b/evald55dbbe9/CLI10d01f20",
+  "setup": {
+    "toolSession": 56883,
+    "rawExit": 0,
+    "preparationPid": 19321,
+    "copySelectedCatalogSha256": "7360b12da87b164cb7c8fd244fc7645d0c066793de658d6fc8a529e9f9774bed",
+    "seedReceiptSha256": "a2ce2318a68421852d19310467ec5c99e40279b6062b5390bdb3db8c68c3783c",
+    "delegatedCurrentAdmissionSha256": "9febc2e3b5acd31daf2d203ecae97cf8e40a908e4d4c098fb2132c6c59ec933c",
+    "cacheSchema": "3.2.7 orderedlist191uniqueidentities, exactsealednativeendCounter/order/values/bytes, failedbootstraptrue"
+  },
+  "types": {
+    "toolSession": 58734,
+    "collectorPid": 21532,
+    "rawOuterExit": 0,
+    "rawChildExit": 0
+  },
+  "lint": {
+    "toolSession": 36144,
+    "collectorPid": 22576,
+    "rawOuterExit": 1,
+    "rawChildExit": 1,
+    "errors": 3,
+    "warnings": 0,
+    "closedSitesProjectionSha256": "d0a57c29a5a176bd0504a45fc0f1447fa687eb8c66d10c37c25591da2c205935",
+    "sites": [
+      {
+        "file": "studio-runner/evaluation/cli.mjs",
+        "line": 135,
+        "column": 11,
+        "severity": "error",
+        "rule": "no-undef"
+      },
+      {
+        "file": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+        "line": 263,
+        "column": 27,
+        "severity": "error",
+        "rule": "@typescript-eslint/no-unnecessary-condition"
+      },
+      {
+        "file": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+        "line": 131,
+        "column": 18,
+        "severity": "error",
+        "rule": "@typescript-eslint/unbound-method"
+      }
+    ]
+  },
+  "futureCommandsNotRun": [
+    "v1-c2-red01",
+    "c12-red01",
+    "green105-01",
+    "validate-unfrozen01",
+    "freeze-copy01",
+    "validate-frozen01"
+  ],
+  "semanticCounters": "All8c12RED/1v1C2RED/105GREENforecasts remainUNEXECUTED; no testcase identities measured here",
+  "preservation": {
+    "atUtc": "2026-10-21T01:47:47.047672+00:00",
+    "newPrivateTenSourcesRestored": [
+      {
+        "path": "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+        "executedGreenSha256": "d55dbbe9b7f9ca791ec1322abe3ef67d5bb4ac58ec1f717ab56a73dcfe046e28",
+        "restoredBeforeSha256": "c12fad22b810b92b0ce8dbc9f8f54da4540d6ad1de56d027b226acb3d047be56"
+      },
+      {
+        "path": "studio-runner/evaluation/observed-authoring/evaluate.d.mts",
+        "executedGreenSha256": "f6fb085f391151f4bdb06018a48d23fe3ae1e540644ec957f13ca04d09d80f85",
+        "restoredBeforeSha256": "e202c36be92007fd22e4bb01636e23b95028471b732a47d369ac569a04c2b2de"
+      },
+      {
+        "path": "studio-runner/evaluation/observed-authoring/manifest.json",
+        "executedGreenSha256": "bf2fad9919be9260fac85cbc1b0d329bdb8b8d3f6072fd14e7277edb7038ebbc",
+        "restoredBeforeSha256": "9858fc11b2086a50762c7334b5fa0e88f2a3370ffc166a62075b771d7bc70f16"
+      },
+      {
+        "path": "studio-runner/evaluation/cli.mjs",
+        "executedGreenSha256": "10d01f207187d9502c0d183e9f23f5d3b742ba6aa47f7b00c79eefedda0729c2",
+        "restoredBeforeSha256": "ec074937ae648792143b44b9013d8b17f13b105bb206caa9250ca2843d65f524"
+      },
+      {
+        "path": "studio-runner/evaluation/README.md",
+        "executedGreenSha256": "f6dc3f539ee3e6eb672644596ac2c7c57f2433c7997df89942ed70233481c5f5",
+        "restoredBeforeSha256": "fcf738f8899d59255a13fea0b55e1919c0d7337d06321a4020d47137e9d9c207"
+      },
+      {
+        "path": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+        "executedGreenSha256": "bc49947549e2e9d8d2338cb064ec5f823efc437232f2d0e60d7213d819a2fb1a",
+        "restoredBeforeSha256": "5769819380217737448766661d62e52445b6f166ef8cf6b8f0c05e9e631ce7be"
+      },
+      {
+        "path": "studio-runner/test/evaluation/corpusManifest.test.ts",
+        "executedGreenSha256": "4b60d6bc0e82fa27b15ffc5e0c218101d5eda4b17f5c61eaa31220d0eb346d3a",
+        "restoredBeforeSha256": "db7189d40e751949ef8714a880a5e9ff8d743f51c0e34637e37e2b44a541da6a"
+      },
+      {
+        "path": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+        "executedGreenSha256": "afb60f4dc934de8d5931ce0558d7f3033f9e45a2c5c1dbb3ed55ba3e08233ac4",
+        "restoredBeforeSha256": "4e6b86e4bf1a09eee46570eca97a8f2e8504a1756a1c91636459e9d77884e7dd"
+      },
+      {
+        "path": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+        "executedGreenSha256": "733a318a347efd6581fccabc2d6b8d5eb4245ed4d8f6ffcf736727201b74c556",
+        "restoredBeforeSha256": "0217f2b5230ad5a81d22ec90bc229ee54fa1550868a0f933c2bce736e580d549"
+      },
+      {
+        "path": "studio-runner/test/evaluation/observedCorpus.ts",
+        "executedGreenSha256": "da02ccfa128c3a7d5a77bda9085201e0b714244ffcc327bc6ff9f884bcbc4381",
+        "restoredBeforeSha256": "be1a3630ac7a466f86542977890c7410197830350e7599ff28e436ae2865a746"
+      }
+    ],
+    "bothNewPrivateCatalogsExactlySeed": true,
+    "complete238E19Stable": true,
+    "cacheExactOriginalFailedNativeBytes": true,
+    "frozenNativeBaseUnchanged": true,
+    "actualFullSourceAnd238DistUnchanged": true,
+    "oldFailureAndPreparationAndV2CandidateSealsUnchanged": true,
+    "unexpectedLint3ErrorsRetainedNoFixOrRetry": true,
+    "allThreeSemanticPhasesAndMetadataCommands": "UNEXECUTED",
+    "sourceRestorationOnlyNewNamespace": true,
+    "lane": "RELEASED"
+  },
+  "originalReaderFailure": "execution01/37dd1408 stillimmutable/raw1, FORMAT-ONLYcorrection02 delta recorded withoutbusiness/native retry",
+  "originalToolHandles": [
+    {
+      "session": 56883,
+      "rawExit": 0,
+      "purpose": "freshguards/COPY"
+    },
+    {
+      "session": 58734,
+      "rawExit": 0,
+      "purpose": "GREENtypes"
+    },
+    {
+      "session": 36144,
+      "rawExit": 1,
+      "purpose": "GREENlint"
+    },
+    {
+      "session": 32007,
+      "rawExit": 0,
+      "purpose": "authorizednewprivate10restoration/closure"
+    }
+  ],
+  "ownedCollectorGroups": "21532/22576 strictsignal0ESRCH/GONE; no signalsGT0",
+  "lane": "RELEASED",
+  "unexpectedHandling": "No source/candidate/rule/config/test fix, no retry or additional command. Projection format refinement preserved initial output; lintnotrerun.",
+  "actualApplicationOrRealProviderOrNative": false,
+  "historicalNativeFailure": "5P1F/failed-phasecompletecleanupNOT_ESTABLISHED unchanged",
+  "independentExecutionQa": "PENDING_NO_SELF_APPROVAL"
+}

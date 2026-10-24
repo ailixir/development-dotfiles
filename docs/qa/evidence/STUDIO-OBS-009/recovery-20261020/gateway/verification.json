@@ -1,0 +1,787 @@
+{
+  "recordedAt": "2026-10-20T04:41:52.994441+00:00",
+  "scope": "STUDIO-OBS-009 T1/T2 bounded recovery gateway implementation",
+  "targets": [
+    {
+      "path": "helm-chart/put-checks/templates/_helpers.tpl",
+      "originalSha256": "976cc0e8cd9a97240fa18651481172d89354fbd59b8131bb47437973ad45962f",
+      "draftSha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+      "patch": "helper.patch",
+      "patchSha256": "5b0bb527c18523253d11299ae8a49355387c5ff075cb97f63a02ec9b11db7b5a",
+      "originalBytes": 43936,
+      "draftBytes": 44353,
+      "afterSha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+      "exactReviewedCandidate": true
+    },
+    {
+      "path": "studio-runner/test/deployment/integrations.test.ts",
+      "originalSha256": "6358d5d008ea3545df78719d5c2e66bc16f5cdf564e17af8056bd9d3e57d302b",
+      "draftSha256": "38c101be9a0d466d12ac7fc6c08b4614b4e918e189feabce7059ac6ca7d29907",
+      "patch": "tests.patch",
+      "patchSha256": "8533a8f371e367fc56903d7cbc5f3f3a55204d5dfbe7a617913edbc8454dedfb",
+      "originalBytes": 9999,
+      "draftBytes": 16086,
+      "afterSha256": "38c101be9a0d466d12ac7fc6c08b4614b4e918e189feabce7059ac6ca7d29907",
+      "exactReviewedCandidate": true
+    }
+  ],
+  "draftManifestSha256": "2fb7008ce20c4a5de47c17b790daa0bfb66e25a00452351b4b08ed6a944ea516",
+  "combinedPatchSha256": "30080476f4b6fdf3a7c1ec3dd7ad06ef050ff6342f5cca6a73000110bff68b0d",
+  "reviews": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway-config-protection-gap-20261020/manifest.json",
+      "sha256": "990b104e59214fb4aa5f725ef1ce10d32edb1ef1a1d56f7de767bf1e4415635d",
+      "payloadPinsMatch": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway-config-draft-source-review-20261020/manifest.json",
+      "sha256": "1fee73cd3b4d9e776df4c99c94a7262a79907c4012d75ed09a7c58d0ad5f9198",
+      "payloadPinsMatch": true
+    }
+  ],
+  "versions": {
+    "node": "v24.20.0",
+    "pnpm": "10.33.0",
+    "helm": "v4.2.0+g0646808"
+  },
+  "results": {
+    "red01": {
+      "command": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.deployment.config.ts",
+        "test/deployment/integrations.test.ts",
+        "--testNamePattern=(backend|worker) rejects (flat|nested|relaxed)",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-gateway-red01-vitest.json"
+      ],
+      "cwd": "studio-runner",
+      "started": "2026-10-20T04:40:06.253303+00:00",
+      "elapsedSeconds": 4.77,
+      "exit": 1,
+      "sourceStable": true,
+      "distStable": true,
+      "logSha256": "a072404a32bfc44dae2a8e3bbd64974d58f78b22abc1d442deb873ac30c752fb",
+      "testInputStable": true,
+      "testInputDigestBefore": "eea0bd1380b216d8211c2af396e0896af867bc0eb3f68ca88382fc6b10993d4b",
+      "testInputDigestAfter": "eea0bd1380b216d8211c2af396e0896af867bc0eb3f68ca88382fc6b10993d4b",
+      "vitest": {
+        "success": false,
+        "numPassedTests": 0,
+        "numFailedTests": 48,
+        "numPendingTests": 47,
+        "numTotalTests": 95,
+        "numPassedTestSuites": 1,
+        "numFailedTestSuites": 2
+      },
+      "vitestReportSha256": "d9e8221df63644acde586c54224fb9f34a03fd26c89e418750a8001aee58f80c"
+    },
+    "green01": {
+      "command": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.deployment.config.ts",
+        "test/deployment/integrations.test.ts",
+        "test/deployment/envfrom-keys.test.ts",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-gateway-green01-vitest.json"
+      ],
+      "cwd": "studio-runner",
+      "started": "2026-10-20T04:40:40.436905+00:00",
+      "elapsedSeconds": 14.23,
+      "exit": 0,
+      "sourceStable": true,
+      "distStable": true,
+      "logSha256": "2fbebcf5c8857341a8bf8b9a7dadaf887997cd506956da3e7802936107937bae",
+      "testInputStable": true,
+      "testInputDigestBefore": "eea0bd1380b216d8211c2af396e0896af867bc0eb3f68ca88382fc6b10993d4b",
+      "testInputDigestAfter": "eea0bd1380b216d8211c2af396e0896af867bc0eb3f68ca88382fc6b10993d4b",
+      "vitest": {
+        "success": true,
+        "numPassedTests": 134,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTotalTests": 134,
+        "numPassedTestSuites": 5,
+        "numFailedTestSuites": 0
+      },
+      "vitestReportSha256": "1359a0f57028b0172c1cca15d1cf3a6baa807896f6582bd5f207c6b09a5a520f"
+    },
+    "types01": {
+      "command": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "tsc",
+        "-p",
+        "tsconfig.json",
+        "--noEmit"
+      ],
+      "cwd": "studio-runner",
+      "started": "2026-10-20T04:41:06.192236+00:00",
+      "elapsedSeconds": 7.71,
+      "exit": 0,
+      "sourceStable": true,
+      "distStable": true,
+      "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+      "testInputStable": true,
+      "testInputDigestBefore": "eea0bd1380b216d8211c2af396e0896af867bc0eb3f68ca88382fc6b10993d4b",
+      "testInputDigestAfter": "eea0bd1380b216d8211c2af396e0896af867bc0eb3f68ca88382fc6b10993d4b"
+    },
+    "lint01": {
+      "command": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "eslint",
+        "test/deployment/integrations.test.ts"
+      ],
+      "cwd": "studio-runner",
+      "started": "2026-10-20T04:41:17.061976+00:00",
+      "elapsedSeconds": 2.54,
+      "exit": 0,
+      "sourceStable": true,
+      "distStable": true,
+      "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+      "testInputStable": true,
+      "testInputDigestBefore": "eea0bd1380b216d8211c2af396e0896af867bc0eb3f68ca88382fc6b10993d4b",
+      "testInputDigestAfter": "eea0bd1380b216d8211c2af396e0896af867bc0eb3f68ca88382fc6b10993d4b"
+    }
+  },
+  "red": {
+    "collected": 95,
+    "executed": 48,
+    "expectedFailures": 48,
+    "filteredSkips": 47,
+    "infrastructureFailures": 0,
+    "cases": [
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.provider",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.provider",
+        "expectedMessage": "configOverrides property studio.gateway.provider is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.endpoint",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.endpoint",
+        "expectedMessage": "configOverrides property studio.gateway.endpoint is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.project",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.project",
+        "expectedMessage": "configOverrides property studio.gateway.project is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.location",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.location",
+        "expectedMessage": "configOverrides property studio.gateway.location is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.model",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.model",
+        "expectedMessage": "configOverrides property studio.gateway.model is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.credentials.mode",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.credentials.mode",
+        "expectedMessage": "configOverrides property studio.gateway.credentials.mode is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.credentials.service-account-key-file",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.credentials.service-account-key-file",
+        "expectedMessage": "configOverrides property studio.gateway.credentials.service-account-key-file is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects flat STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+        "status": "failed",
+        "expectedManagedPropertyPath": "STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+        "expectedMessage": "configOverrides property STUDIO_GATEWAY_CREDENTIALS_KEY_FILE is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.provider",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.provider",
+        "expectedMessage": "configOverrides property studio.gateway.provider is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.endpoint",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.endpoint",
+        "expectedMessage": "configOverrides property studio.gateway.endpoint is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.project",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.project",
+        "expectedMessage": "configOverrides property studio.gateway.project is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.location",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.location",
+        "expectedMessage": "configOverrides property studio.gateway.location is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.model",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.model",
+        "expectedMessage": "configOverrides property studio.gateway.model is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.credentials.mode",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.credentials.mode",
+        "expectedMessage": "configOverrides property studio.gateway.credentials.mode is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.credentials.service-account-key-file",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.credentials.service-account-key-file",
+        "expectedMessage": "configOverrides property studio.gateway.credentials.service-account-key-file is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects nested STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.credentials.key-file",
+        "expectedMessage": "configOverrides property studio.gateway.credentials.key-file is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.provider",
+        "status": "failed",
+        "expectedManagedPropertyPath": "STUDIO_GATEWAY_PROVIDER",
+        "expectedMessage": "configOverrides property STUDIO_GATEWAY_PROVIDER is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.endpoint",
+        "status": "failed",
+        "expectedManagedPropertyPath": "STUDIO_GATEWAY_ENDPOINT",
+        "expectedMessage": "configOverrides property STUDIO_GATEWAY_ENDPOINT is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.project",
+        "status": "failed",
+        "expectedManagedPropertyPath": "STUDIO_GATEWAY_PROJECT",
+        "expectedMessage": "configOverrides property STUDIO_GATEWAY_PROJECT is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.location",
+        "status": "failed",
+        "expectedManagedPropertyPath": "STUDIO_GATEWAY_LOCATION",
+        "expectedMessage": "configOverrides property STUDIO_GATEWAY_LOCATION is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.model",
+        "status": "failed",
+        "expectedManagedPropertyPath": "STUDIO_GATEWAY_MODEL",
+        "expectedMessage": "configOverrides property STUDIO_GATEWAY_MODEL is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.credentials.mode",
+        "status": "failed",
+        "expectedManagedPropertyPath": "STUDIO_GATEWAY_CREDENTIALS_MODE",
+        "expectedMessage": "configOverrides property STUDIO_GATEWAY_CREDENTIALS_MODE is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.credentials.service-account-key-file",
+        "status": "failed",
+        "expectedManagedPropertyPath": "STUDIO_GATEWAY_CREDENTIALS_SERVICE_ACCOUNT_KEY_FILE",
+        "expectedMessage": "configOverrides property STUDIO_GATEWAY_CREDENTIALS_SERVICE_ACCOUNT_KEY_FILE is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+        "status": "failed",
+        "expectedManagedPropertyPath": "STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+        "expectedMessage": "configOverrides property STUDIO_GATEWAY_CREDENTIALS_KEY_FILE is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.provider",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.provider",
+        "expectedMessage": "configOverrides property studio.gateway.provider is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.endpoint",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.endpoint",
+        "expectedMessage": "configOverrides property studio.gateway.endpoint is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.project",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.project",
+        "expectedMessage": "configOverrides property studio.gateway.project is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.location",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.location",
+        "expectedMessage": "configOverrides property studio.gateway.location is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.model",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.model",
+        "expectedMessage": "configOverrides property studio.gateway.model is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.credentials.mode",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.credentials.mode",
+        "expectedMessage": "configOverrides property studio.gateway.credentials.mode is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.credentials.service-account-key-file",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.credentials.service-account-key-file",
+        "expectedMessage": "configOverrides property studio.gateway.credentials.service-account-key-file is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects flat STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+        "status": "failed",
+        "expectedManagedPropertyPath": "STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+        "expectedMessage": "configOverrides property STUDIO_GATEWAY_CREDENTIALS_KEY_FILE is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.provider",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.provider",
+        "expectedMessage": "configOverrides property studio.gateway.provider is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.endpoint",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.endpoint",
+        "expectedMessage": "configOverrides property studio.gateway.endpoint is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.project",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.project",
+        "expectedMessage": "configOverrides property studio.gateway.project is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.location",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.location",
+        "expectedMessage": "configOverrides property studio.gateway.location is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.model",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.model",
+        "expectedMessage": "configOverrides property studio.gateway.model is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.credentials.mode",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.credentials.mode",
+        "expectedMessage": "configOverrides property studio.gateway.credentials.mode is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.credentials.service-account-key-file",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.credentials.service-account-key-file",
+        "expectedMessage": "configOverrides property studio.gateway.credentials.service-account-key-file is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects nested STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+        "status": "failed",
+        "expectedManagedPropertyPath": "studio.gateway.credentials.key-file",
+        "expectedMessage": "configOverrides property studio.gateway.credentials.key-file is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.provider",
+        "status": "failed",
+        "expectedManagedPropertyPath": "STUDIO_GATEWAY_PROVIDER",
+        "expectedMessage": "configOverrides property STUDIO_GATEWAY_PROVIDER is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.endpoint",
+        "status": "failed",
+        "expectedManagedPropertyPath": "STUDIO_GATEWAY_ENDPOINT",
+        "expectedMessage": "configOverrides property STUDIO_GATEWAY_ENDPOINT is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.project",
+        "status": "failed",
+        "expectedManagedPropertyPath": "STUDIO_GATEWAY_PROJECT",
+        "expectedMessage": "configOverrides property STUDIO_GATEWAY_PROJECT is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.location",
+        "status": "failed",
+        "expectedManagedPropertyPath": "STUDIO_GATEWAY_LOCATION",
+        "expectedMessage": "configOverrides property STUDIO_GATEWAY_LOCATION is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.model",
+        "status": "failed",
+        "expectedManagedPropertyPath": "STUDIO_GATEWAY_MODEL",
+        "expectedMessage": "configOverrides property STUDIO_GATEWAY_MODEL is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.credentials.mode",
+        "status": "failed",
+        "expectedManagedPropertyPath": "STUDIO_GATEWAY_CREDENTIALS_MODE",
+        "expectedMessage": "configOverrides property STUDIO_GATEWAY_CREDENTIALS_MODE is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.credentials.service-account-key-file",
+        "status": "failed",
+        "expectedManagedPropertyPath": "STUDIO_GATEWAY_CREDENTIALS_SERVICE_ACCOUNT_KEY_FILE",
+        "expectedMessage": "configOverrides property STUDIO_GATEWAY_CREDENTIALS_SERVICE_ACCOUNT_KEY_FILE is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      },
+      {
+        "name": "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+        "status": "failed",
+        "expectedManagedPropertyPath": "STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+        "expectedMessage": "configOverrides property STUDIO_GATEWAY_CREDENTIALS_KEY_FILE is managed by the chart",
+        "actualFailure": "AssertionError: expected true to be false // Object.is equality\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deployment/integrations.test.ts:310:28\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:863:59\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)",
+        "meaning": "renderOutcome.ok was true; refusal assertion failed before message assertion; no infrastructure failure"
+      }
+    ]
+  },
+  "green": {
+    "passed": 134,
+    "failed": 0,
+    "skipped": 0,
+    "integrationOriginal": 15,
+    "integrationAdded": 80,
+    "envfromUnchanged": 39,
+    "addedGroupCounts": {
+      "currentRefusals": 48,
+      "legacyRefusals": 14,
+      "tuningControls": 2,
+      "tokenRemovalControls": 8,
+      "manifestEqualityControls": 8
+    },
+    "caseNames": [
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery values.yaml: all consumed envFrom keys are valid environment names",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery values.yaml: every configured Spring key reaches the read-only mounted source unchanged",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery values-dev.yaml: all consumed envFrom keys are valid environment names",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery values-dev.yaml: every configured Spring key reaches the read-only mounted source unchanged",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery values-uat.yaml: all consumed envFrom keys are valid environment names",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery values-uat.yaml: every configured Spring key reaches the read-only mounted source unchanged",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery values-prod.yaml: all consumed envFrom keys are valid environment names",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery values-prod.yaml: every configured Spring key reaches the read-only mounted source unchanged",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery new dotted property studio.sse.heartbeat is delivered without env-name conversion",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery new dotted property checks.studio.qa-probe-7255 is delivered without env-name conversion",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery detects invalid envFrom names outside any Studio prefix (negative control)",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery preserves nested maps, lists and escaped scalar content in the mounted source",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery backend: mounted-source selector cannot be replaced through generic environment",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery backend: mounted-source selector cannot be replaced through secret environment",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery worker: mounted-source selector cannot be replaced through generic environment",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery worker: mounted-source selector cannot be replaced through secret environment",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery changing mounted properties changes the workload rollout checksum",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery additional properties cannot override chart-managed checks.cors.allowed-origins",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery additional properties cannot override chart-managed checks.core-service.base-url",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery additional properties cannot override chart-managed checks.security.bypass.core-service",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery additional properties cannot override chart-managed checks.security.bypass.identity-headers",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery additional properties cannot override chart-managed checks.security.bypass.csi-read",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery additional properties cannot override chart-managed studio.execution.enabled",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery additional properties cannot override chart-managed studio.execution.dispatcher.enabled",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery additional properties cannot override chart-managed studio.execution.evidence-retention",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery additional properties cannot override chart-managed studio.execution.callback.service-token",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery additional properties cannot override chart-managed studio.execution.sse.heartbeat",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery additional properties cannot override chart-managed studio.execution.sse.lifetime",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery additional properties cannot override chart-managed studio.runner.base-url",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery additional properties cannot override chart-managed studio.runner.service-identity-token",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery additional properties cannot override chart-managed studio.storage.provider",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery additional properties cannot override chart-managed studio.storage.bucket",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery additional properties cannot override chart-managed studio.storage.region",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery additional properties cannot override chart-managed studio.storage.credentials-directory",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery additional properties cannot override chart-managed spring.profiles.active",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery additional properties cannot override chart-managed spring.config.import",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery nested and relaxed property spellings cannot bypass the chart-managed guards",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery all profile activation mechanisms are reserved across flat and nested properties",
+      "AC-18 \u2014 envFrom names and lossless Spring configuration delivery environment and secret selectors cannot activate development profiles indirectly",
+      "production integration provider wiring ships production-safe Vertex translation and an enabled UI_TEST source by default",
+      "production integration provider wiring passes a test-scoped Vault path template the backend accepts, with the provider off",
+      "production integration provider wiring renders one Sonic endpoint/bucket into writer and readers with file credentials",
+      "production integration provider wiring fails rendering an incomplete Sonic selection instead of falling back",
+      "production integration provider wiring can reuse one pre-provisioned local claim and rejects an unbound local store",
+      "production integration provider wiring mounts Vault and Vertex credentials only when their real providers are selected",
+      "production integration provider wiring values-uat.yaml selects Vertex Gemini Flash and environment-owned routing configuration",
+      "production integration provider wiring values-prod.yaml selects Vertex Gemini Flash and environment-owned routing configuration",
+      "production integration provider wiring values-uat.yaml rejects disabled translation",
+      "production integration provider wiring values-prod.yaml rejects disabled translation",
+      "production integration provider wiring fails a Vertex selection that provides neither direct routing values nor a ConfigMap",
+      "production integration provider wiring values-uat.yaml cannot disable UI_TEST to bypass the application readiness guard",
+      "production integration provider wiring values-prod.yaml cannot disable UI_TEST to bypass the application readiness guard",
+      "production integration provider wiring values-uat.yaml cannot relabel a deployed Spring profile as local to weaken provider guards",
+      "production integration provider wiring values-prod.yaml cannot relabel a deployed Spring profile as local to weaken provider guards",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.provider",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.endpoint",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.project",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.location",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.model",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.credentials.mode",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects flat studio.gateway.credentials.service-account-key-file",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects flat STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.provider",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.endpoint",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.project",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.location",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.model",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.credentials.mode",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects nested studio.gateway.credentials.service-account-key-file",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects nested STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.provider",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.endpoint",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.project",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.location",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.model",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.credentials.mode",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed studio.gateway.credentials.service-account-key-file",
+      "gateway chart-owned facts in mounted Spring configuration backend rejects relaxed STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+      "gateway chart-owned facts in mounted Spring configuration backend keeps legacy compile spelling studio.gateway.provider reserved",
+      "gateway chart-owned facts in mounted Spring configuration backend keeps legacy compile spelling studio.gateway.endpoint reserved",
+      "gateway chart-owned facts in mounted Spring configuration backend keeps legacy compile spelling studio.gateway.project reserved",
+      "gateway chart-owned facts in mounted Spring configuration backend keeps legacy compile spelling studio.gateway.location reserved",
+      "gateway chart-owned facts in mounted Spring configuration backend keeps legacy compile spelling studio.gateway.model reserved",
+      "gateway chart-owned facts in mounted Spring configuration backend keeps legacy compile spelling studio.gateway.credentials.mode reserved",
+      "gateway chart-owned facts in mounted Spring configuration backend keeps legacy compile spelling studio.gateway.credentials.service-account-key-file reserved",
+      "gateway chart-owned facts in mounted Spring configuration backend keeps gateway tuning and custom properties available",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.provider",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.endpoint",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.project",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.location",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.model",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.credentials.mode",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects flat studio.gateway.credentials.service-account-key-file",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects flat STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.provider",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.endpoint",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.project",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.location",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.model",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.credentials.mode",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects nested studio.gateway.credentials.service-account-key-file",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects nested STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.provider",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.endpoint",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.project",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.location",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.model",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.credentials.mode",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed studio.gateway.credentials.service-account-key-file",
+      "gateway chart-owned facts in mounted Spring configuration worker rejects relaxed STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+      "gateway chart-owned facts in mounted Spring configuration worker keeps legacy compile spelling studio.gateway.provider reserved",
+      "gateway chart-owned facts in mounted Spring configuration worker keeps legacy compile spelling studio.gateway.endpoint reserved",
+      "gateway chart-owned facts in mounted Spring configuration worker keeps legacy compile spelling studio.gateway.project reserved",
+      "gateway chart-owned facts in mounted Spring configuration worker keeps legacy compile spelling studio.gateway.location reserved",
+      "gateway chart-owned facts in mounted Spring configuration worker keeps legacy compile spelling studio.gateway.model reserved",
+      "gateway chart-owned facts in mounted Spring configuration worker keeps legacy compile spelling studio.gateway.credentials.mode reserved",
+      "gateway chart-owned facts in mounted Spring configuration worker keeps legacy compile spelling studio.gateway.credentials.service-account-key-file reserved",
+      "gateway chart-owned facts in mounted Spring configuration worker keeps gateway tuning and custom properties available",
+      "gateway chart-owned facts in mounted Spring configuration mutation: removing only studio.gateway.provider defeats its refusal",
+      "gateway chart-owned facts in mounted Spring configuration mutation: removing only studio.gateway.endpoint defeats its refusal",
+      "gateway chart-owned facts in mounted Spring configuration mutation: removing only studio.gateway.project defeats its refusal",
+      "gateway chart-owned facts in mounted Spring configuration mutation: removing only studio.gateway.location defeats its refusal",
+      "gateway chart-owned facts in mounted Spring configuration mutation: removing only studio.gateway.model defeats its refusal",
+      "gateway chart-owned facts in mounted Spring configuration mutation: removing only studio.gateway.credentials.mode defeats its refusal",
+      "gateway chart-owned facts in mounted Spring configuration mutation: removing only studio.gateway.credentials.service-account-key-file defeats its refusal",
+      "gateway chart-owned facts in mounted Spring configuration mutation: removing only STUDIO_GATEWAY_CREDENTIALS_KEY_FILE defeats its refusal",
+      "gateway chart-owned facts in mounted Spring configuration values.yaml: valid application-default manifests stay byte-identical after adding the guards",
+      "gateway chart-owned facts in mounted Spring configuration values-dev.yaml: valid application-default manifests stay byte-identical after adding the guards",
+      "gateway chart-owned facts in mounted Spring configuration values-uat.yaml: valid application-default manifests stay byte-identical after adding the guards",
+      "gateway chart-owned facts in mounted Spring configuration values-prod.yaml: valid application-default manifests stay byte-identical after adding the guards",
+      "gateway chart-owned facts in mounted Spring configuration values.yaml: valid service-account-file manifests stay byte-identical after adding the guards",
+      "gateway chart-owned facts in mounted Spring configuration values-dev.yaml: valid service-account-file manifests stay byte-identical after adding the guards",
+      "gateway chart-owned facts in mounted Spring configuration values-uat.yaml: valid service-account-file manifests stay byte-identical after adding the guards",
+      "gateway chart-owned facts in mounted Spring configuration values-prod.yaml: valid service-account-file manifests stay byte-identical after adding the guards"
+    ]
+  },
+  "preservation": {
+    "originalTestBodyContiguousByteIdentical": true,
+    "allFinalTargetsExactReviewedCandidates": true,
+    "legacySevenTokensUnchanged": true,
+    "unmodifiedRelevantSourcePins": [
+      {
+        "path": "helm-chart/put-checks/templates/deployment.yaml",
+        "sha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977"
+      },
+      {
+        "path": "helm-chart/put-checks/templates/configmap.yaml",
+        "sha256": "6ea290fb3b98d582748cf0c9ac2000e8e30c32a099c6cbede8a89348f19fd260"
+      },
+      {
+        "path": "helm-chart/put-checks/values.yaml",
+        "sha256": "51c680d4ff1863c43d5138cc10e3a696ae78ba32cb4dbf72b9ab60c3bc9a1a80"
+      },
+      {
+        "path": "helm-chart/put-checks/values-dev.yaml",
+        "sha256": "cc241dc9394885234c426fa9bf73564d4b69ebdea65cce14c508318c8af78fb1"
+      },
+      {
+        "path": "helm-chart/put-checks/values-uat.yaml",
+        "sha256": "7cb2ef4aaa5a61f3c4599acdcfef4bb757e397e06a922c42cef46beb537cce33"
+      },
+      {
+        "path": "helm-chart/put-checks/values-prod.yaml",
+        "sha256": "9a330dc518420bc06ab8f63804efff04855ea9a49081dad1502332c0dcda60f9"
+      },
+      {
+        "path": "studio-runner/test/deployment/envfrom-keys.test.ts",
+        "sha256": "87b82dbb8186fbf08885e36794785e477419b9fbc7c28408d1a6a923a237c840"
+      },
+      {
+        "path": "studio-runner/test/deployment/helm.ts",
+        "sha256": "0a3a32b68b4276bc7da20a1c37d08026d8f9696d1030b479cf93228be13aa3b0"
+      },
+      {
+        "path": "backend/src/main/resources/application.yml",
+        "sha256": "271fac527d075f996173e6cf1ef52d409d4416d3d6a46114fc541097b3a25f75"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/gateway/StudioGatewayProperties.java",
+        "sha256": "44b1a118ce320d1e1a2e132409025e1070cd70846baf1e1fd142bb3a44daf0b4"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/gateway/StudioGatewaySelectionProperties.java",
+        "sha256": "7e2828989313dfaadd3eeb383e2935c5a41c2830d6f960158ce032a578752b3b"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/gateway/StudioGatewayConfig.java",
+        "sha256": "dbbd1f7b5f5883ab0f831e1eb78bff2511757c97b9df04b2a081813e6e88c2dc"
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/config/MountedSpringConfigurationTest.java",
+        "sha256": "b880c0c0d71e6450d1fdd3d5f2453e6289c8bdc5a459b2dafb45e12987737e38"
+      }
+    ],
+    "sourceDifferenceFromPostRecovery": [
+      {
+        "path": "studio-runner/test/deployment/integrations.test.ts",
+        "before": "6358d5d008ea3545df78719d5c2e66bc16f5cdf564e17af8056bd9d3e57d302b",
+        "after": "38c101be9a0d466d12ac7fc6c08b4614b4e918e189feabce7059ac6ca7d29907"
+      }
+    ],
+    "collectorScopeExcludesHelm": true,
+    "helmHelperSeparatelyPinned": true,
+    "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210"
+  },
+  "executionSequenceDisclosure": "Older Aria gateway009-review and current Quinn review were read before application; current Aria 990b104e assessment was located via Quinn manifest and read directly after green, before type/lint. Current Aria was already summarized and bound in the pre-execution Quinn review. No new finding or candidate change resulted. Direct current-Aria read was later than requested.",
+  "collectorDisclosure": "Established collector internally uses read-only git ls-files/rev-parse for manifests; no direct git operation or git mutation was performed.",
+  "unrunGates": [
+    "Complete vitest.deployment.config.ts tier without file filters, with actual Helm/Docker/verified approved existing local image prerequisites; no Docker/image query/build/pull/run in this lane.",
+    "Retained independent copied-chart recursion/normalization falsification obligations from future-verification.md; no new matrix/framework authored.",
+    "Final affected suites and independent QA/root review.",
+    "Backend runtime binding/full backend check and executed fresh JaCoCo remain separate root gates; none run here.",
+    "All existing external/live/human/security requirements and 21 external inputs remain owed; no provider/credential/deployed behavior proved."
+  ],
+  "releaseCredit": false,
+  "storyDoneClaimed": false,
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN"
+}

@@ -1,0 +1,49 @@
+{
+  "scope": "INDEPENDENT_WIRE_CANDIDATE23_SOURCE_REVIEW",
+  "disposition": "REVISE_BEFORE_ACTUAL_ADOPTION_AND_AFFECTED_PROOF",
+  "blockingFindingCount": 1,
+  "findings": [
+    {
+      "id": "W23-01",
+      "severity": "HIGH",
+      "title": "Non-array operator string becomes falsely complete after loop union",
+      "path": "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+      "lines": [
+        1151,
+        1154,
+        1163,
+        1700,
+        1701,
+        1703
+      ],
+      "problem": "copiedCanaryEntries wraps non-array string as [string]; runBenchmark unions it into an array before withTextCapture can mark the original category invalid.",
+      "violatedRequirement": "Design21 WD20-01/WD20-02: invalid operator configuration must remain unavailable without losing required known hits.",
+      "requiredCorrection": "Carry original invalid-container status through the final immutable per-run union; preserve valid/required hits and optional undefined semantics.",
+      "requiredRegression": "Actual runBenchmark self-test-host loop with non-array string operator configuration: unavailable/null total/non-PASS for required scope, actual fixture-password hit retained and raw values redacted.",
+      "existingTestGap": "invalid-operator currently supplies an array containing numeric42, which remains invalid and does not cover normalization of a string container.",
+      "status": "OPEN"
+    }
+  ],
+  "acceptedControls": [
+    "Private actual-client identity/isolated observer and override-preserving fallback",
+    "Complete transient consumed-text scan before original size/parse/status refusal",
+    "Closed errors/codes and full successful capture before revision validation",
+    "Accounting before hard-stop latch and awaited recovery/cleanup",
+    "Collector stage at-most-once, sticky known hits/unavailability and safe labels",
+    "All-attempt completeness/config gate and explicitly local/null-global report",
+    "Mandatory actual fixture-password inclusion and self-mode-only host seam",
+    "Original harness assertions/real-fixture remainder preserved",
+    "Corpus semantic validator and stop rule unchanged"
+  ],
+  "sourceForecastOnly": {
+    "newWireCases": 29,
+    "retainedHarnessCases": 31,
+    "affectedScoringCases": 31,
+    "actualOutcomesMeasured": false
+  },
+  "actualCodeAdoptionAuthority": false,
+  "runtimeAuthority": false,
+  "storyQaVerdict": false,
+  "codeUnderReviewParsedImportedExecuted": false,
+  "privateBusinessBodiesRead": false
+}

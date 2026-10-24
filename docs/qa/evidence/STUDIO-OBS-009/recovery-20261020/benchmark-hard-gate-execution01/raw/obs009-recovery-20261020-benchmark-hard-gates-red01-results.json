@@ -1,0 +1,42 @@
+{
+  "command": [
+    "pnpm",
+    "--dir=/private/tmp/obs009-benchmark-hard-gates-20261020-rg01/before-repo/studio-runner",
+    "--config.package-manager-strict=false",
+    "exec",
+    "/private/tmp/obs009-benchmark-hard-gates-20261020-rg01/before-repo/studio-runner/node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "test/evaluation/benchmarkScoring.test.ts",
+    "--coverage.enabled=false",
+    "--minWorkers=1",
+    "--maxWorkers=1",
+    "--no-file-parallelism",
+    "--testTimeout=5000",
+    "--hookTimeout=5000",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-benchmark-hard-gates-red01-vitest.json"
+  ],
+  "cwd": "studio-runner",
+  "started": "2026-10-20T22:57:48.469178+00:00",
+  "elapsedSeconds": 1.72,
+  "exit": 1,
+  "sourceStable": true,
+  "distStable": true,
+  "logSha256": "b83238fc4a5798f662186847b93b546cc57d7880a999bb655612315661e81b4c",
+  "testInputStable": true,
+  "testInputDigestBefore": "c3c3c9aa6d79a993438d0500c598a5372b34f5134de8a554d991e117f2d6805c",
+  "testInputDigestAfter": "c3c3c9aa6d79a993438d0500c598a5372b34f5134de8a554d991e117f2d6805c",
+  "vitest": {
+    "success": false,
+    "numPassedTests": 20,
+    "numFailedTests": 2,
+    "numPendingTests": 0,
+    "numTotalTests": 22,
+    "numPassedTestSuites": 4,
+    "numFailedTestSuites": 2
+  },
+  "vitestReportSha256": "e1260c69f7c607f236bf73d3f5b4cf32edfa9405b7ab6c71f6e0d952ef579a40"
+}

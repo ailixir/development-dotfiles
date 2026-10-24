@@ -1,0 +1,163 @@
+{
+  "kind": "ACTUAL_BOUNDED_LINT_FIX_PROOF49_COMPLETE",
+  "allFourReviewedCommandsPassed": true,
+  "stageReferences": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-execution/harness01-receipt.json",
+      "sha256": "8ee781ee702e784d4bfd21121770590d565247d8557bbf6f100042c9f035191b",
+      "bytes": 7963
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-execution/scoring01-receipt.json",
+      "sha256": "b5ec1c43c8ea6ca5faf85047ffe2c1b3102ca3aca3a13cea77c05fd3d192149a",
+      "bytes": 7902
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-execution/types01-receipt.json",
+      "sha256": "2b5c5ab015c785d3d522989050006d8f9453ba900fbcc067431d8193f0978a05",
+      "bytes": 6431
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-execution/lint01-receipt.json",
+      "sha256": "a15e792bfbe53572b11f3bdd2f3e88af04b1a12332819ad03d5a9cd7f89d1434",
+      "bytes": 6711
+    }
+  ],
+  "rootReleaseReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-bound/root-release49.json",
+    "sha256": "fc395101d612d2f7f5c9ac154facfb134c477506954a9736a6312d16d0f14357",
+    "bytes": 8438
+  },
+  "commandReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-preparation/commands.json",
+    "sha256": "b8b32c8481e7011ceed581f1cc8d5d5f6281e292dca66b55e788595b6c2f8780",
+    "bytes": 17574
+  },
+  "catalogueReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-bound/corrected-source-identity-catalogue.json",
+    "sha256": "cb08d64c9c64aa34e741b8516095127af5f9e729b99c59f432424898d56d8592",
+    "bytes": 56302
+  },
+  "corpus48Reference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-io-execution06/lint-successor48/corpus48-root-receipt.json",
+    "sha256": "706b889be3bf5a659e7ecf790ab0dc4401e6b088069799ccd70c3895bbeeda98",
+    "bytes": 9962
+  },
+  "actual47Reference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-actual-adoption47/manifest.json",
+    "sha256": "6e6da75fa2f6cbfa6fb120df4dda53f15b2a4f3eea541da6ef832ac80a5c8595",
+    "bytes": 8737
+  },
+  "originalWrapperRawExits": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "harnessSelectedPassed": 61,
+  "harnessIntentionalFiltered": 15,
+  "scoringSelectedPassed": 31,
+  "scoringFiltered": 0,
+  "selectedCaseInstances": 92,
+  "physicalTestFileInvocations": 2,
+  "distinctAdditionalCoverageClaim": false,
+  "typesRawExit": 0,
+  "lintRawExit": 0,
+  "sourceDigest": "df860ccc1c6479e62320328b65f5e5bcaa1c431f863c543b7c07005b5654f8d2",
+  "distDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+  "sourceRows": 1814,
+  "distRows": 238,
+  "fullRows": 13995,
+  "inputRows": 13757,
+  "allFourCommandsSourceDistManifestFivePinsRuntimeExact": true,
+  "onlyOwnPerTestTypedExistingCacheEntryDelta": true,
+  "typesAndLintEntireCacheExact": true,
+  "combinedOther189CacheRowsExact": true,
+  "noCacheRestoreResetSourceFixCorpusMutationOrAdditionalCheck": true,
+  "metadataCalls": [
+    {
+      "kind": "original_source_capture",
+      "outputReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-bound/initial-source.json",
+        "sha256": "819b7d41a108297a9f87b810a37504122f1d868418041079c6628a13a170a664",
+        "bytes": 360050
+      },
+      "rawExit": 0
+    },
+    {
+      "kind": "original_source_capture",
+      "outputReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-execution/harness01-guard-before-source.json",
+        "sha256": "fa95355b1fc28acdb95cbd52c674dc91d2c46b12b26936c07f1eeb3bc3507a93",
+        "bytes": 360050
+      },
+      "rawExit": 0
+    },
+    {
+      "kind": "original_source_capture",
+      "outputReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-execution/harness01-guard-after-source.json",
+        "sha256": "f17e32775d4bf9abf0c7727a81b17bb6f9e5099dff046310efae935ecf87eef5",
+        "bytes": 360050
+      },
+      "rawExit": 0
+    },
+    {
+      "kind": "original_source_capture",
+      "outputReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-execution/scoring01-guard-before-source.json",
+        "sha256": "4ea39cfceda3b45c6a555a019ea768cae189c56b738d04d6feed3eb2e807b401",
+        "bytes": 360050
+      },
+      "rawExit": 0
+    },
+    {
+      "kind": "original_source_capture",
+      "outputReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-execution/scoring01-guard-after-source.json",
+        "sha256": "e021c7ad2d453cacf06b56a40ad9d6d2eaa44f5682536ef19bec6b7499df8740",
+        "bytes": 360050
+      },
+      "rawExit": 0
+    },
+    {
+      "kind": "original_source_capture",
+      "outputReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-execution/types01-guard-before-source.json",
+        "sha256": "290776dbdd49042b77a781650483e1cb79cf7f2a3bfb19e2c13b214d9b6d9676",
+        "bytes": 360050
+      },
+      "rawExit": 0
+    },
+    {
+      "kind": "original_source_capture",
+      "outputReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-execution/types01-guard-after-source.json",
+        "sha256": "2568a942e04a001d6d9fa81e412d508265b80aa3f51346eb4851e84dd11e9100",
+        "bytes": 360050
+      },
+      "rawExit": 0
+    },
+    {
+      "kind": "original_source_capture",
+      "outputReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-execution/lint01-guard-before-source.json",
+        "sha256": "b6105fb0c2afa854ee5b31c7b027d2cb5294ff75d126d787d195318867954dd4",
+        "bytes": 360050
+      },
+      "rawExit": 0
+    },
+    {
+      "kind": "original_source_capture",
+      "outputReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-wire-lint-proof49-execution/lint01-guard-after-source.json",
+        "sha256": "aecde2e9b6c0d0abd5244c5b3e1445b9642bc8d3cbb4bbd311a553e8f22bad88",
+        "bytes": 360050
+      },
+      "rawExit": 0
+    }
+  ],
+  "noIndependentApprovalLifecycleOrExternalGateClaim": true,
+  "nextOperationGo": false,
+  "heavyAndActualInputReadWindowReleased": true
+}
