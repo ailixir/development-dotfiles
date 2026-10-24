@@ -11,13 +11,10 @@ import { MOCK_SCHEDULE_POLICY } from '@/services/mocks/studio/schedulePreview';
 import { mockExecutions } from '@/services/mocks/studio/fixtures';
 import { studioSchedulesApi } from '@/services/api/studioSchedulesApi';
 import type { ScheduleEnable, ScheduleOccurrence } from '@/types/studio/studioScheduling';
-import { useState } from 'react';
-import { Table, TableBody } from '@mui/material';
-import TestRow from '@/components/studio/tests/TestRow';
 import type { ExecutionSnapshot, TestDto } from '@/types/studio/studioTypes';
 import { StudioScheduleSummary } from './StudioScheduleSummary';
 import { StudioScheduleDialog } from './StudioScheduleDialog';
-import { uiTestRunPath } from '@/components/studio/uiTestPaths';
+import { uiTestPath, uiTestRunPath } from '@/components/studio/uiTestPaths';
 import { scheduleError } from './schedulePresentation';
 
 const BASE = '*/api/v1/studio';
@@ -25,7 +22,7 @@ const write = { cronExpression: '0 */5 * * * *', timeZone: 'UTC', executionPrinc
 const create = () => studioSchedulesApi.create(readyDraft.id, write);
 const user = () => userEvent.setup({ delay: null });
 const uiTestRunHref = (executionId: string) => uiTestRunPath(readyDraft.id, executionId);
-const renderDialog = (dirty = false, runHref = uiTestRunHref) => render(<MemoryRouter initialEntries={['/checks/studio/tests']}><StudioScheduleDialog test={readyDraft} dirty={dirty} runHref={runHref} onClose={() => undefined} /></MemoryRouter>);
+const renderDialog = (dirty = false, runHref = uiTestRunHref) => render(<MemoryRouter initialEntries={[uiTestPath(readyDraft.id)]}><StudioScheduleDialog test={readyDraft} dirty={dirty} runHref={runHref} onClose={() => undefined} /></MemoryRouter>);
 const loaded = async () => {
   await screen.findByLabelText('Cron expression');
   await waitFor(() => expect(screen.queryByText('Calculating next runs…')).not.toBeInTheDocument());
@@ -48,21 +45,6 @@ describe('STUDIO-OBS-012B COPY-002/COPY-003: schedule refusal copy uses learn vo
 });
 
 describe('Studio schedule operator flows', { timeout: 15000 }, () => {
-  it('opens from the test row menu and returns focus to the row action after closing', async () => {
-    function RowFlow() {
-      const [target, setTarget] = useState<TestDto | null>(null);
-      return <><Table><TableBody><TestRow test={readyDraft} now={Date.now()} onDelete={() => undefined} onSchedule={setTarget} /></TableBody></Table>
-        <StudioScheduleDialog test={target} runHref={uiTestRunHref} onClose={() => setTarget(null)} /></>;
-    }
-    render(<MemoryRouter initialEntries={['/checks/studio/tests']}><RowFlow /></MemoryRouter>);
-    const actions = screen.getByRole('button', { name: `Actions for ${readyDraft.name}` });
-    await user().click(actions);
-    await user().click(screen.getByRole('menuitem', { name: 'Manage schedule' }));
-    await loaded();
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-    await user().click(screen.getByRole('button', { name: 'Close' }));
-    await waitFor(() => expect(actions).toHaveFocus());
-  });
   it('shows five due slots, creates Paused and explicitly resumes the exact confirmed revision by keyboard', async () => {
     const mutations: ScheduleEnable[] = [];
     studioMockServer.use(http.patch(`${BASE}/tests/:id/schedule/enabled`, async ({ request }) => {

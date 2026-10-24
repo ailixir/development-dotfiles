@@ -1,5 +1,6 @@
 import EmptyState from '@/components/shared/States/EmptyState';
 import ErrorState from '@/components/shared/States/ErrorState';
+import { useUiTestAvailability } from '@/hooks/useUiTestAvailability';
 import { checksApi } from '@/services/api/checksApi';
 import { addNotification } from '@/store/slices/uiSlice';
 import {
@@ -58,12 +59,54 @@ import {
 } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '@store/index';
 import { deleteCheck, executeCheck, fetchChecks, pauseCheck, resumeCheck } from '@store/slices/checksSlice';
+import { fetchCSIs } from '@store/slices/csiSlice';
 import { selectSources } from '@store/slices/sourcesSlice';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useSearchParams } from 'react-router-dom';
 // Visual skeleton: scope is now shown globally in ScopeBar; this page gets a left FiltersRail
 import ScheduleDialog from '@components/scheduling/ScheduleDialog';
+import {
+  UI_TEST_TYPE,
+  buildCatalogRows,
+  checkRowIds,
+  filterCatalogRows,
+  isUiCatalogRow
+} from './catalogRows';
 import FiltersRail from './FiltersRail';
+import UiTestCatalogRow from './UiTestCatalogRow';
+import { UiTestCapNotice, UiTestEmptyState, UiTestLoadFailureNotice } from './UiTestCatalogNotices';
+import { useUiTestCatalog } from './useUiTestCatalog';
+
+const PREFS_KEY = 'checks:catalog:prefs';
+
+/** Status filter values only UI tests have: one per readiness state other than READY (spec 9.3). */
+const READINESS_STATUS_VALUES: readonly string[] = ['UNLEARNED', 'LEARNING', 'NEEDS_RELEARN'];
+
+interface StoredCatalogPrefs {
+  rowsPerPage?: number;
+  searchQuery?: string;
+  statusFilter?: string;
+  typeFilter?: string;
+}
+
+/** Reads the stored table preferences once, before the first render, so no request goes out with defaults. */
+function readStoredPrefs(): StoredCatalogPrefs {
+  try {
+    const raw = localStorage.getItem(PREFS_KEY);
+    if (!raw) return {};
+    const prefs = JSON.parse(raw);
+    if (!prefs || typeof prefs !== 'object') return {};
+    return {
+      rowsPerPage: prefs.rowsPerPage ? prefs.rowsPerPage : undefined,
+      searchQuery: typeof prefs.searchQuery === 'string' ? prefs.searchQuery : undefined,
+      statusFilter: typeof prefs.statusFilter === 'string' ? prefs.statusFilter : undefined,
+      typeFilter: typeof prefs.typeFilter === 'string' ? prefs.typeFilter : undefined
+    };
+  } catch {
+    /* Storage is optional; retain the in-memory state when persistence is unavailable. */
+    return {};
+  }
+}
 
 const AllChecksPage: React.FC = () => {
   const theme = useTheme();
@@ -81,11 +124,21 @@ const AllChecksPage: React.FC = () => {
   const searchContext = useAppSelector(state => state.dashboard.searchContext);
   
   // Local state
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('');
-  const [typeFilter, setTypeFilter] = useState<string>('');
+  const [storedPrefs] = useState(readStoredPrefs);
+  const [searchParams] = useSearchParams();
+  const urlType = searchParams.get('type');
+  const availability = useUiTestAvailability();
+  const uiTestsOn = availability === 'on';
+  const [searchQuery, setSearchQuery] = useState(storedPrefs.searchQuery ?? '');
+  const [statusFilter, setStatusFilter] = useState<string>(storedPrefs.statusFilter ?? '');
+  // The raw Type value. ?type=UI_TEST beats the stored one. A UI_TEST that availability does not (yet) allow is held here,
+  // and only the effective value below is applied or written (DC-18).
+  const [typeFilter, setTypeFilter] = useState<string>(
+    urlType === UI_TEST_TYPE ? UI_TEST_TYPE : storedPrefs.typeFilter ?? ''
+  );
+  const handledUrlType = useRef(urlType);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(25);
+  const [rowsPerPage, setRowsPerPage] = useState(storedPrefs.rowsPerPage ?? 25);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedCheck, setSelectedCheck] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -96,13 +149,19 @@ const AllChecksPage: React.FC = () => {
     message: '',
     severity: 'success'
   });
-  const [persisted, setPersisted] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [bulkBusy, setBulkBusy] = useState(false);
 
   useEffect(() => {
     dispatch(fetchChecks({ page: 1, limit: 100 }));
   }, [dispatch]);
+
+  // A later ?type=UI_TEST (for example the Dashboard action while this page is open) is applied like the first one.
+  useEffect(() => {
+    if (handledUrlType.current === urlType) return;
+    handledUrlType.current = urlType;
+    if (urlType === UI_TEST_TYPE) setTypeFilter(UI_TEST_TYPE);
+  }, [urlType]);
 
   // Return focus to trigger after closing schedule dialog
   useEffect(() => {
@@ -114,30 +173,36 @@ const AllChecksPage: React.FC = () => {
 
   // Note: toast handled via notifications when creating a check
 
-  // Persist table preferences (e.g., rowsPerPage)
-  useEffect(() => {
-    if (!persisted) {
-      try {
-        const raw = localStorage.getItem('checks:catalog:prefs');
-        if (raw) {
-          const prefs = JSON.parse(raw);
-          if (prefs?.rowsPerPage) setRowsPerPage(prefs.rowsPerPage);
-          if (prefs?.searchQuery !== undefined) setSearchQuery(prefs.searchQuery);
-          if (prefs?.statusFilter !== undefined) setStatusFilter(prefs.statusFilter);
-          if (prefs?.typeFilter !== undefined) setTypeFilter(prefs.typeFilter);
-        }
-      } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
-      setPersisted(true);
-    }
-  }, [persisted]);
+  // Effective filter values. A UI test only type or status is applied when UI tests are on; otherwise it reads as
+  // All Types / All Status (and is never written), whether it came from the URL or from the stored preferences.
+  const effectiveType = uiTestsOn ? typeFilter : typeFilter === UI_TEST_TYPE ? '' : typeFilter;
+  const effectiveStatus = uiTestsOn || !READINESS_STATUS_VALUES.includes(statusFilter) ? statusFilter : '';
 
+  // Persist table preferences. Nothing is written while availability is unknown, so a held UI_TEST is not lost or leaked.
   useEffect(() => {
+    if (availability === 'pending') return;
     try {
-      localStorage.setItem('checks:catalog:prefs', JSON.stringify({ rowsPerPage, searchQuery, statusFilter, typeFilter }));
+      localStorage.setItem(
+        PREFS_KEY,
+        JSON.stringify({ rowsPerPage, searchQuery, statusFilter: effectiveStatus, typeFilter: effectiveType })
+      );
     } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
-  }, [rowsPerPage, searchQuery, statusFilter, typeFilter]);
+  }, [availability, rowsPerPage, searchQuery, effectiveStatus, effectiveType]);
 
-  // Filter and search logic
+  // UI tests: one Studio list request, only when availability is 'on'; the server applies system, environment and search.
+  const uiTestCatalog = useUiTestCatalog({
+    csiId: searchContext.csiId,
+    environment: searchContext.environment,
+    q: searchQuery
+  });
+  const csiList = useAppSelector((state) => state.csi.data);
+  const csiLoadState = useAppSelector((state) => state.csi.loading);
+  useEffect(() => {
+    // UI test rows show the CSI name from the store; the store is filled here only if nothing has asked for it yet.
+    if (uiTestsOn && csiLoadState === 'idle') dispatch(fetchCSIs());
+  }, [dispatch, uiTestsOn, csiLoadState]);
+
+  // Filter and search logic (check rows only: scope, tags and search)
   const filteredChecks = useMemo(() => {
     let result = checks || [];
     
@@ -178,34 +243,49 @@ const AllChecksPage: React.FC = () => {
       );
     }
     
-    // Apply status filter
-    if (statusFilter) {
-      result = result.filter(check => check.status === statusFilter);
-    }
-    
-    // Apply type filter
-    if (typeFilter) {
-      result = result.filter(check => check.type === typeFilter);
-    }
-    
     return result;
-  }, [checks, searchContext.csiId, searchContext.environment, searchContext.tags, searchContext.tagMode, selectedCSI, selectedTags, filterMode, searchQuery, statusFilter, typeFilter]);
+  }, [checks, searchContext.csiId, searchContext.environment, searchContext.tags, searchContext.tagMode, selectedTags, filterMode, searchQuery]);
+
+  // The merged catalog: check rows and UI test rows in one list, deduplicated (the UI test wins) and ordered.
+  const tagFilterActive = (searchContext.tags?.length ?? 0) > 0 || (selectedTags?.length ?? 0) > 0;
+  const filteredRows = useMemo(() => {
+    const csiNames = new Map(csiList.map((csi) => [csi.id, csi.name]));
+    const rows = buildCatalogRows({
+      checks: filteredChecks,
+      tests: uiTestCatalog.tests,
+      csiNameOf: (csiId) => csiNames.get(csiId)
+    });
+    return filterCatalogRows(rows, { statusFilter: effectiveStatus, typeFilter: effectiveType, tagFilterActive });
+  }, [filteredChecks, uiTestCatalog.tests, csiList, effectiveStatus, effectiveType, tagFilterActive]);
+
+  // The UI test empty state: the Type filter is UI Test and the server has no UI test for the scope (a search that
+  // matches nothing is a plain "no match", not "no UI tests yet").
+  const showUiTestEmptyState =
+    effectiveType === UI_TEST_TYPE &&
+    !uiTestCatalog.loading &&
+    !uiTestCatalog.error &&
+    uiTestCatalog.tests.length === 0 &&
+    !searchQuery.trim();
 
   // Pagination
-  const paginatedChecks = useMemo(() => {
+  const paginatedRows = useMemo(() => {
     const startIndex = page * rowsPerPage;
-    return filteredChecks.slice(startIndex, startIndex + rowsPerPage);
-  }, [filteredChecks, page, rowsPerPage]);
+    return filteredRows.slice(startIndex, startIndex + rowsPerPage);
+  }, [filteredRows, page, rowsPerPage]);
 
-  const allVisibleSelected = paginatedChecks.length > 0 && paginatedChecks.every((c) => selectedIds.includes(c.id));
-  const someVisibleSelected = paginatedChecks.some((c) => selectedIds.includes(c.id));
+  // Selection and bulk actions take check ids only; a UI test id never reaches them (FR-17).
+  const visibleCheckIds = checkRowIds(paginatedRows);
+  const allVisibleSelected = visibleCheckIds.length > 0 && visibleCheckIds.every((id) => selectedIds.includes(id));
+  const someVisibleSelected = visibleCheckIds.some((id) => selectedIds.includes(id));
+  const uiTestIds = new Set(uiTestCatalog.tests.map((test) => test.id));
+  const bulkIds = selectedIds.filter((id) => !uiTestIds.has(id));
 
   const toggleSelectAllVisible = (checked: boolean) => {
     if (checked) {
-      const ids = Array.from(new Set([...selectedIds, ...paginatedChecks.map((c) => c.id)]));
+      const ids = Array.from(new Set([...selectedIds, ...visibleCheckIds]));
       setSelectedIds(ids);
     } else {
-      const visibleIds = new Set(paginatedChecks.map((c) => c.id));
+      const visibleIds = new Set(visibleCheckIds);
       setSelectedIds(selectedIds.filter((id) => !visibleIds.has(id)));
     }
   };
@@ -217,11 +297,11 @@ const AllChecksPage: React.FC = () => {
   const resetSelection = () => setSelectedIds([]);
 
   const handleBulkExecute = async () => {
-    if (selectedIds.length === 0) return;
+    if (bulkIds.length === 0) return;
     try {
       setBulkBusy(true);
-      await checksApi.executeMultipleChecks(selectedIds);
-      setSnackbar({ open: true, message: `Executed ${selectedIds.length} checks`, severity: 'success' });
+      await checksApi.executeMultipleChecks(bulkIds);
+      setSnackbar({ open: true, message: `Executed ${bulkIds.length} checks`, severity: 'success' });
       resetSelection();
       dispatch(fetchChecks({ page: 1, limit: 100 }));
     } catch {
@@ -232,10 +312,10 @@ const AllChecksPage: React.FC = () => {
   };
 
   const handleBulkDelete = async () => {
-    if (selectedIds.length === 0) return;
+    if (bulkIds.length === 0) return;
     try {
       setBulkBusy(true);
-      const res = await checksApi.deleteMultipleChecks(selectedIds);
+      const res = await checksApi.deleteMultipleChecks(bulkIds);
       setSnackbar({ open: true, message: `Deleted ${res.succeeded.length} checks${res.failed.length ? `, failed ${res.failed.length}` : ''}` as any, severity: res.failed.length ? 'error' : 'success' });
       resetSelection();
       dispatch(fetchChecks({ page: 1, limit: 100 }));
@@ -247,11 +327,11 @@ const AllChecksPage: React.FC = () => {
   };
 
   const handleBulkPause = async () => {
-    if (selectedIds.length === 0) return;
+    if (bulkIds.length === 0) return;
     try {
       setBulkBusy(true);
-      await Promise.all(selectedIds.map((id) => dispatch(pauseCheck(id)).unwrap().catch(() => null)));
-      setSnackbar({ open: true, message: `Paused ${selectedIds.length} checks`, severity: 'success' });
+      await Promise.all(bulkIds.map((id) => dispatch(pauseCheck(id)).unwrap().catch(() => null)));
+      setSnackbar({ open: true, message: `Paused ${bulkIds.length} checks`, severity: 'success' });
       resetSelection();
     } catch {
       setSnackbar({ open: true, message: 'Bulk pause encountered errors', severity: 'error' });
@@ -261,11 +341,11 @@ const AllChecksPage: React.FC = () => {
   };
 
   const handleBulkResume = async () => {
-    if (selectedIds.length === 0) return;
+    if (bulkIds.length === 0) return;
     try {
       setBulkBusy(true);
-      await Promise.all(selectedIds.map((id) => dispatch(resumeCheck(id)).unwrap().catch(() => null)));
-      setSnackbar({ open: true, message: `Resumed ${selectedIds.length} checks`, severity: 'success' });
+      await Promise.all(bulkIds.map((id) => dispatch(resumeCheck(id)).unwrap().catch(() => null)));
+      setSnackbar({ open: true, message: `Resumed ${bulkIds.length} checks`, severity: 'success' });
       resetSelection();
     } catch {
       setSnackbar({ open: true, message: 'Bulk resume encountered errors', severity: 'error' });
@@ -402,7 +482,7 @@ const AllChecksPage: React.FC = () => {
               <FormControl fullWidth>
                 <InputLabel>Status</InputLabel>
                 <Select
-                  value={statusFilter}
+                  value={effectiveStatus}
                   onChange={(e) => setStatusFilter(e.target.value)}
                   label="Status"
                 >
@@ -411,6 +491,9 @@ const AllChecksPage: React.FC = () => {
                   <MenuItem value="FAILING">Failing</MenuItem>
                   <MenuItem value="WARNING">Warning</MenuItem>
                   <MenuItem value="PENDING">Pending</MenuItem>
+                  {uiTestsOn && <MenuItem value="UNLEARNED">Not learned</MenuItem>}
+                  {uiTestsOn && <MenuItem value="LEARNING">Learning</MenuItem>}
+                  {uiTestsOn && <MenuItem value="NEEDS_RELEARN">Needs re-learn</MenuItem>}
                 </Select>
               </FormControl>
             </Grid>
@@ -418,7 +501,7 @@ const AllChecksPage: React.FC = () => {
               <FormControl fullWidth>
                 <InputLabel>Type</InputLabel>
                 <Select
-                  value={typeFilter}
+                  value={effectiveType}
                   onChange={(e) => setTypeFilter(e.target.value)}
                   label="Type"
                 >
@@ -429,7 +512,7 @@ const AllChecksPage: React.FC = () => {
                   <MenuItem value="GRAFANA">Grafana</MenuItem>
                   <MenuItem value="ITRS">ITRS</MenuItem>
                   <MenuItem value="APPDYNAMICS">AppDynamics</MenuItem>
-                  <MenuItem value="UI_TEST">UI Test</MenuItem>
+                  {uiTestsOn && <MenuItem value={UI_TEST_TYPE}>UI Test</MenuItem>}
                 </Select>
               </FormControl>
             </Grid>
@@ -453,10 +536,10 @@ const AllChecksPage: React.FC = () => {
       </Card>
 
       {/* Bulk actions toolbar */}
-      {selectedIds.length > 0 && (
+      {bulkIds.length > 0 && (
         <Paper elevation={0} sx={{ mb: 2, border: `1px solid ${theme.palette.divider}` }}>
           <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="subtitle2">{selectedIds.length} selected</Typography>
+            <Typography variant="subtitle2">{bulkIds.length} selected</Typography>
             <Stack direction="row" spacing={1}>
               <Button size="small" variant="outlined" onClick={handleBulkExecute} disabled={bulkBusy}>Execute</Button>
               <Button size="small" variant="outlined" onClick={handleBulkPause} disabled={bulkBusy}>Pause</Button>
@@ -475,7 +558,7 @@ const AllChecksPage: React.FC = () => {
         <Grid item xs={12} md={9} lg={9}>
           {/* Results Summary */}
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Showing {paginatedChecks.length} of {filteredChecks.length} checks
+            Showing {paginatedRows.length} of {filteredRows.length} checks
             {searchContext.csiId && ` (CSI: ${searchContext.csiId})`}
             {searchContext.environment && ` (Env: ${searchContext.environment})`}
             {searchContext.tags.length > 0 && ` (${searchContext.tags.length} global tag filters)`}
@@ -483,9 +566,13 @@ const AllChecksPage: React.FC = () => {
             {selectedTags.length > 0 && ` (${selectedTags.length} local tag filters)`}
           </Typography>
 
+          {/* UI test list notices: the check rows stay when the Studio list fails or is cut */}
+          {uiTestCatalog.error && <UiTestLoadFailureNotice onRetry={uiTestCatalog.retry} />}
+          <UiTestCapNotice totalElements={uiTestCatalog.totalElements} />
+
           {/* Checks Table */}
           <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}` }}>
-        {loading === 'loading' && <LinearProgress />}
+        {(loading === 'loading' || uiTestCatalog.loading) && <LinearProgress />}
         
         <TableContainer>
           <Table size="small">
@@ -496,6 +583,7 @@ const AllChecksPage: React.FC = () => {
                       indeterminate={!allVisibleSelected && someVisibleSelected}
                       checked={allVisibleSelected}
                       onChange={(e) => toggleSelectAllVisible(e.target.checked)}
+                      disabled={visibleCheckIds.length === 0}
                       inputProps={{ 'aria-label': 'select all visible checks' }}
                     />
                   </TableCell>
@@ -507,94 +595,104 @@ const AllChecksPage: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {loading === 'loading' ? null : paginatedChecks.length === 0 && (
+              {loading === 'loading' || uiTestCatalog.loading ? null : paginatedRows.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
-                    <EmptyState title="No checks match the current filters" description="Try clearing filters or create a new check." actionLabel="Create Check" onAction={() => navigate('/checks/create')} />
+                    {showUiTestEmptyState ? (
+                      <UiTestEmptyState />
+                    ) : (
+                      <EmptyState title="No checks match the current filters" description="Try clearing filters or create a new check." actionLabel="Create Check" onAction={() => navigate('/checks/create')} />
+                    )}
                   </TableCell>
                 </TableRow>
               )}
-              {paginatedChecks.map((check) => (
-                <TableRow key={check.id} hover>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={selectedIds.includes(check.id)}
-                      onChange={() => toggleRow(check.id)}
-                      inputProps={{ 'aria-label': `select ${check.name}` }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Stack>
-                      <Typography
-                        component={RouterLink}
-                        to={`/checks/details/${check.id}`}
-                        variant="subtitle2"
-                        fontWeight={600}
-                        sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
-                      >
-                        {check.name}
-                      </Typography>
-                      {check.description && (
-                        <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
-                          {check.description}
+              {paginatedRows.map((row) => {
+                if (isUiCatalogRow(row)) {
+                  return <UiTestCatalogRow key={`ui-test-${row.test.id}`} row={row} onDeleted={() => uiTestCatalog.retry()} />;
+                }
+                const check = row.check;
+                return (
+                  <TableRow key={`check-${check.id}`} hover>
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        checked={selectedIds.includes(check.id)}
+                        onChange={() => toggleRow(check.id)}
+                        inputProps={{ 'aria-label': `select ${check.name}` }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Stack>
+                        <Typography
+                          component={RouterLink}
+                          to={`/checks/details/${check.id}`}
+                          variant="subtitle2"
+                          fontWeight={600}
+                          sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                        >
+                          {check.name}
                         </Typography>
-                      )}
-                    </Stack>
-                  </TableCell>
-                  <TableCell>
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      {getTypeIcon(check.type)}
-                      <Typography variant="body2">{check.type}</Typography>
-                    </Stack>
-                  </TableCell>
-                  <TableCell>
-                    <Stack direction="row" alignItems="center" spacing={0.5}>
-                      {getStatusChip(check.status)}
-                      {!isSourceEnabled(check.type) && (
-                        <Chip label="Source disabled" size="small" variant="outlined" color="default" />
-                      )}
-                    </Stack>
-                  </TableCell>
-                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                    <Typography variant="body2">
-                      {check.lastExecution 
-                        ? new Date(check.lastExecution).toLocaleString()
-                        : 'Never'
-                      }
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Stack direction="row" spacing={1}>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleExecuteCheck(check.id)}
-                        title={isSourceEnabled(check.type) ? 'Execute Now' : 'Source disabled'}
-                        disabled={executingChecks.includes(check.id) || !isSourceEnabled(check.type)}
-                      >
-                        {executingChecks.includes(check.id) ? (
-                          <CircularProgress size={16} />
-                        ) : (
-                          <PlayArrow />
+                        {check.description && (
+                          <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                            {check.description}
+                          </Typography>
                         )}
-                      </IconButton>
-                      {/* Stop/Start schedule icon hidden per request */}
-                      <IconButton
-                        size="small"
-                        onClick={(e) => handleMenuClick(e, check.id)}
-                      >
-                        <MoreVert />
-                      </IconButton>
-                    </Stack>
-                  </TableCell>
-                </TableRow>
-              ))}
+                      </Stack>
+                    </TableCell>
+                    <TableCell>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        {getTypeIcon(check.type)}
+                        <Typography variant="body2">{check.type}</Typography>
+                      </Stack>
+                    </TableCell>
+                    <TableCell>
+                      <Stack direction="row" alignItems="center" spacing={0.5}>
+                        {getStatusChip(check.status)}
+                        {!isSourceEnabled(check.type) && (
+                          <Chip label="Source disabled" size="small" variant="outlined" color="default" />
+                        )}
+                      </Stack>
+                    </TableCell>
+                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                      <Typography variant="body2">
+                        {check.lastExecution 
+                          ? new Date(check.lastExecution).toLocaleString()
+                          : 'Never'
+                        }
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Stack direction="row" spacing={1}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleExecuteCheck(check.id)}
+                          title={isSourceEnabled(check.type) ? 'Execute Now' : 'Source disabled'}
+                          disabled={executingChecks.includes(check.id) || !isSourceEnabled(check.type)}
+                        >
+                          {executingChecks.includes(check.id) ? (
+                            <CircularProgress size={16} />
+                          ) : (
+                            <PlayArrow />
+                          )}
+                        </IconButton>
+                        {/* Stop/Start schedule icon hidden per request */}
+                        <IconButton
+                          size="small"
+                          onClick={(e) => handleMenuClick(e, check.id)}
+                        >
+                          <MoreVert />
+                        </IconButton>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>
 
             <TablePagination
               component="div"
-              count={filteredChecks.length}
+              count={filteredRows.length}
               page={page}
               onPageChange={(_, newPage) => setPage(newPage)}
               rowsPerPage={rowsPerPage}

@@ -1,4 +1,4 @@
-import type { TestLastRunFilter, TestReadiness } from '@/types/studio/studioTypes';
+import type { TestReadiness } from '@/types/studio/studioTypes';
 import { LEARNED_READY_LABEL } from '@/components/studio/run/runEnablement';
 
 /**
@@ -54,13 +54,6 @@ export function readinessFor(status: string): ReadinessPresentation {
 
 /** The environments a Studio test can target; the Create dialog and the list filter share them. */
 export const STUDIO_TEST_ENVIRONMENTS = ['Development', 'Staging', 'UAT', 'Production'] as const;
-
-export const LAST_RUN_FILTER_LABELS: Readonly<Record<TestLastRunFilter, string>> = {
-  PASSED: 'Passed',
-  FAILED: 'Failed',
-  ERROR: 'Error',
-  NEVER: 'Never run',
-};
 
 /** Maximum test name length, matching the backend column. */
 export const TEST_NAME_MAX_LENGTH = 255;

@@ -51,7 +51,10 @@ function makeStore(availability: Availability) {
   return store;
 }
 
-const Location: React.FC = () => <div data-testid="location">{useLocation().pathname}</div>;
+const Location: React.FC = () => {
+  const { pathname, search } = useLocation();
+  return <div data-testid="location">{pathname + search}</div>;
+};
 
 function renderWith(availability: Availability, ui: React.ReactElement) {
   const store = makeStore(availability);
@@ -72,10 +75,10 @@ afterEach(cleanup);
 describe('command palette Studio entry', () => {
   const palette = () => <CommandPalette open onClose={() => undefined} />;
 
-  it("opens /checks/studio/tests when availability is 'on'", async () => {
+  it("opens /checks/all?type=UI_TEST when availability is 'on'", async () => {
     renderWith('on', palette());
     await userEvent.click(screen.getByText('Studio'));
-    expect(screen.getByTestId('location')).toHaveTextContent('/checks/studio/tests');
+    expect(screen.getByTestId('location')).toHaveTextContent('/checks/all?type=UI_TEST');
   });
 
   it.each<Availability>(['pending', 'off'])("is absent when availability is '%s'", (availability) => {
@@ -98,10 +101,10 @@ describe('command palette Studio entry', () => {
 describe('dashboard Open Checks Studio quick action', () => {
   const name = /open checks studio/i;
 
-  it("opens /checks/studio/tests when availability is 'on'", async () => {
+  it("opens /checks/all?type=UI_TEST when availability is 'on'", async () => {
     renderWith('on', <DashboardPage />);
     await userEvent.click(screen.getByRole('button', { name }));
-    expect(screen.getByTestId('location')).toHaveTextContent('/checks/studio/tests');
+    expect(screen.getByTestId('location')).toHaveTextContent('/checks/all?type=UI_TEST');
   });
 
   it.each<Availability>(['pending', 'off'])("is absent when availability is '%s'", (availability) => {

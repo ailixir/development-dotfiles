@@ -30,6 +30,11 @@ const demoCsis: CSI[] = DEMO_CSIS.map((id) => ({
 
 /** Exact GET routes supplement each scenario; everything else retains the proxy's 502 refusal. */
 export const previewBootstrapHandlers = [
+  // All Checks asks for the check list and replaces the page with an error state when that fails. The
+  // harness has no checks data, so the answer is an empty page; UI tests come from the Studio list.
+  http.get('*/api/v1/checks', () =>
+    HttpResponse.json({ data: [], page: 0, size: 100, totalElements: 0, totalPages: 0 }),
+  ),
   http.get('*/api/v1/checks/sources', () => HttpResponse.json(sources)),
   http.get('*/api/v1/features', () => HttpResponse.json(features)),
   http.get('*/api/v1/csi', ({ request }) => {

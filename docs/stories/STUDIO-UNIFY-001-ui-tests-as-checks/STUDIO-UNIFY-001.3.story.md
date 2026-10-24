@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Story ID | STUDIO-UNIFY-001.3 |
-| Status | **Ready** |
+| Status | **Done** |
 | Epic | STUDIO-UNIFY-001-ui-tests-as-checks — UI tests as checks (Flow 1, frontend-only), increment 3 of 4 |
 | Depends on | STUDIO-UNIFY-001.2 |
 | Dependency notes | Needs story .2 Done. This story reuses what .1 and .2 deliver: `uiTestPaths.ts` (1.2), `useUiTestAvailability` (1.3), the `runHref` prop on `StudioScheduleDialog` (1.14), the Dashboard and palette entries (1.24), the shared status mapping `uiTestStatus.ts` (2.2) and the route test (1.21, 2.9). The plan's phase-3 subtasks depend on 1.2, 1.3, 1.14, 1.24, 2.2 and 2.10. Story .4 follows. |
@@ -64,7 +64,7 @@ AC text is copied from [requirements.json](spec/requirements.json). Where the sp
 - **AC-22** *[FR-23; spec §9.6]* Given no UI tests exist and Type = UI Test, when All Checks renders, then 'No UI tests yet' and 'Create UI test' are shown, and 'Create UI test' opens create?type=UI_TEST.
 - **AC-23 (increment 3 part: All Checks)** *[FR-24; DC-12, DC-18; spec §9.1, §9.4, §10]* Given the STUDIO feature is off, or the UI_TEST source is disabled, then no GET /studio/tests is sent, no UI test rows render, and the All Checks Type filter has no 'UI Test' option. all?type=UI_TEST, or stored preferences holding UI_TEST, show All Types and leave no UI_TEST in the stored preferences. Given sources and features have not been fetched yet ('pending'), then no GET /studio/tests is sent and a UI_TEST type from the URL or stored preferences is neither applied nor written. When sources then arrive with UI_TEST disabled, that type is dropped and never written. Given an empty sources list with the STUDIO feature on, UI tests behave as enabled. *(The card, editor and entry clauses were delivered in STUDIO-UNIFY-001.1 and the detail-route clause in .2.)*
 - **AC-26 (increment 3 part)** *[FR-27; D7; DC-22; spec §11 row 3]* Given the end of increment 3, then studio/tests lands on module home too; the Tests page, the sidebar Studio group, useStudioTests, TestRow, TestRowMenu, StudioListLayout, useUrlListState and LAST_RUN_FILTER_LABELS are gone. There is never a redirect to a ui-tests route.
-- **AC-27 (increment 3 part)** *[FR-28; CON-04; spec §12.5]* Given the Studio WCAG audit, when it runs at the end of increment 3, then it passes. After increment 3, surface 1 is gone. Any baseline move is regenerated, with its reason recorded in that increment ('surfaces deleted'). If a change breaks the audit, the regression is fixed instead (accessibility-scope rule). No surface is added for the new pages, and the ChecksLayout a11y test passes with its entry path updated in increment 3.
+- ~~**AC-27 (increment 3 part)**~~ **Removed by user decision 2026-10-23 ("We dont need WCAG, ignore/remove all accessibility tasks").** *[FR-28; CON-04; spec §12.5]* Given the Studio WCAG audit, when it runs at the end of increment 3, then it passes. After increment 3, surface 1 is gone. Any baseline move is regenerated, with its reason recorded in that increment ('surfaces deleted'). If a change breaks the audit, the regression is fixed instead (accessibility-scope rule). No surface is added for the new pages, and the ChecksLayout a11y test passes with its entry path updated in increment 3.
 
 ### Traceability: AC to plan subtasks
 
@@ -145,8 +145,8 @@ This story drops WCAG **surface 1** (`StudioTestsPage`) and its pin from `studio
 - Supporting: @ux-design-expert on request, for layout or interaction questions only (no accessibility review, ADR-SC-006); @devops only for a later, separately authorised push or PR. @dev does not push.
 
 **Quality Gate Tasks**
-- [ ] Pre-Commit (@dev): run the configured CodeRabbit review before marking the story complete. The CLI is WSL-based; if it is unavailable, record that it was not run, apply the configured graceful degradation, and do an independent manual diff review. Never claim a run that did not happen.
-- [ ] Independent review (@qa): implementation evidence, request counts (zero Studio requests unless `'on'`; one per settled change; superseded requests cancelled), bulk behaviour, the link walk, route scan S3, and the WCAG guard record.
+- [x] Pre-Commit (@dev) — CodeRabbit NOT RUN (no CLI/WSL on this host); graceful degradation: independent Lean review is the manual diff review. Original text: run the configured CodeRabbit review before marking the story complete. The CLI is WSL-based; if it is unavailable, record that it was not run, apply the configured graceful degradation, and do an independent manual diff review. Never claim a run that did not happen.
+- [x] Independent review (@qa): implementation evidence, request counts (zero Studio requests unless `'on'`; one per settled change; superseded requests cancelled), bulk behaviour, the link walk, route scan S3, and the WCAG guard record. — PASS, see QA Results (WCAG items removed by user decision).
 - [ ] Pre-PR (@devops): only if a PR is later authorised. No PR is implied here.
 
 **Self-Healing Configuration** (`.claude/rules/coderabbit-integration.md`)
@@ -171,7 +171,7 @@ This story drops WCAG **surface 1** (`StudioTestsPage`) and its pin from `studio
 
 The 20 tasks below map 1:1 to plan subtasks 3.1–3.20 (`plan/implementation.yaml`, phase-3). Run them **in the listed order**: several touch `AllChecksPage.tsx`, each for a distinct concern after the one before it. Run every command from `frontend/`. Use **pnpm only**. Re-read the cited lines before editing: they were verified on 2026-10-23 and may have drifted (ASM-06, R11). The "Plan notes" under each task are copied from the plan and are part of the task. Tick a box only when its verification command passes.
 
-- [ ] **3.1** Build the pure catalog-row union (kind, dedupe with UI test winning, createdAt/id order, status, filters, tag hiding, CSI fallback)
+- [x] **3.1** Build the pure catalog-row union (kind, dedupe with UI test winning, createdAt/id order, status, filters, tag hiding, CSI fallback)
   - Service: frontend. Covers: FR-14, FR-16, FR-18, AC-15, AC-16, AC-18, DC-07, DC-08, DC-16.
   - Files: `frontend/src/pages/AllChecksPage/catalogRows.ts`, `frontend/src/pages/AllChecksPage/catalogRows.test.ts`
   - Depends on: 2.2
@@ -179,7 +179,7 @@ The 20 tasks below map 1:1 to plan subtasks 3.1–3.20 (`plan/implementation.yam
   - Plan notes:
     kind is derived from the type (the Flow 2 seam). Order is createdAt descending, then id. An active tag filter hides uiTest rows.
 
-- [ ] **3.2** Add the UI test catalog hook (availability-gated GET /studio/tests with server filters, debounce, cancellation, error, retry, total)
+- [x] **3.2** Add the UI test catalog hook (availability-gated GET /studio/tests with server filters, debounce, cancellation, error, retry, total)
   - Service: frontend. Covers: FR-15, FR-20, FR-21, NFR-01, NFR-07, AC-15, AC-20, AC-21, AC-23.
   - Files: `frontend/src/pages/AllChecksPage/useUiTestCatalog.ts`, `frontend/src/pages/AllChecksPage/useUiTestCatalog.test.tsx`
   - Depends on: 1.3
@@ -189,7 +189,7 @@ The 20 tasks below map 1:1 to plan subtasks 3.1–3.20 (`plan/implementation.yam
     superseded request is aborted. Nothing is sent while 'pending' or 'off'. The hook returns
     {tests, totalElements, loading, error, retry}.
 
-- [ ] **3.3** Add the UI test catalog row (cells per §9.2, disabled checkbox, Execute and row menu with Schedule and Delete)
+- [x] **3.3** Add the UI test catalog row (cells per §9.2, disabled checkbox, Execute and row menu with Schedule and Delete)
   - Service: frontend. Covers: FR-13, FR-14, FR-17, FR-19, NFR-05, AC-14, AC-15, AC-17, AC-19.
   - Files: `frontend/src/pages/AllChecksPage/UiTestCatalogRow.tsx`
   - Depends on: 3.1, 1.2, 1.14
@@ -199,7 +199,7 @@ The 20 tasks below map 1:1 to plan subtasks 3.1–3.20 (`plan/implementation.yam
     - The menu offers Open, Edit in Studio, Schedule (runHref = uiTestRunPath) and Delete
       (DeleteTestDialog, then refresh).
 
-- [ ] **3.4** Wire the merged rows into AllChecksPage (data, rendering, bulk and select-all restricted to check ids)
+- [x] **3.4** Wire the merged rows into AllChecksPage (data, rendering, bulk and select-all restricted to check ids)
   - Service: frontend. Covers: FR-14, FR-17, AC-15, AC-17.
   - Files: `frontend/src/pages/AllChecksPage/AllChecksPage.tsx`
   - Depends on: 3.1, 3.2, 3.3
@@ -207,7 +207,7 @@ The 20 tasks below map 1:1 to plan subtasks 3.1–3.20 (`plan/implementation.yam
   - Plan notes:
     Filters (L138-191) and paging (L194-198) run over CatalogRow. Select-all (L200-209) and toggleRow take only check ids. L104 is unchanged.
 
-- [ ] **3.5** Extend AllChecksPage filters (readiness values, UI Test type option, ?type preselect, derived switch-off, prefs persistence)
+- [x] **3.5** Extend AllChecksPage filters (readiness values, UI Test type option, ?type preselect, derived switch-off, prefs persistence)
   - Service: frontend. Covers: FR-16, FR-18, FR-22, FR-24, AC-04, AC-16, AC-18, AC-23.
   - Files: `frontend/src/pages/AllChecksPage/AllChecksPage.tsx`
   - Depends on: 3.4
@@ -219,13 +219,13 @@ The 20 tasks below map 1:1 to plan subtasks 3.1–3.20 (`plan/implementation.yam
     - Effective type = 'on' ? raw : (raw === 'UI_TEST' ? '' : raw).
     - The prefs save (L132-138) is skipped while 'pending' and writes the effective value otherwise.
 
-- [ ] **3.6** Add the cap notice, the failure-with-Retry notice and the 'No UI tests yet' empty state
+- [x] **3.6** Add the cap notice, the failure-with-Retry notice and the 'No UI tests yet' empty state
   - Service: frontend. Covers: FR-20, FR-21, FR-23, NFR-06, AC-20, AC-21, AC-22.
   - Files: `frontend/src/pages/AllChecksPage/UiTestCatalogNotices.tsx`, `frontend/src/pages/AllChecksPage/AllChecksPage.tsx`
   - Depends on: 3.5
   - Verify (from `frontend/`): `pnpm run type-check && pnpm exec eslint src/pages/AllChecksPage`
 
-- [ ] **3.7** Retarget the editor's 'Open Tests' (no-test state) to /checks/all?type=UI_TEST
+- [x] **3.7** Retarget the editor's 'Open Tests' (no-test state) to /checks/all?type=UI_TEST
   - Service: frontend. Covers: FR-07, AC-08.
   - Files: `frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx`, `frontend/src/pages/ChecksStudioPage/pageFraming.test.tsx`
   - Depends on: 3.5
@@ -236,13 +236,13 @@ The 20 tasks below map 1:1 to plan subtasks 3.1–3.20 (`plan/implementation.yam
   - Plan notes:
     L1194.
 
-- [ ] **3.8** Retarget the Dashboard quick action and command palette entry to /checks/all?type=UI_TEST (still gated)
+- [x] **3.8** Retarget the Dashboard quick action and command palette entry to /checks/all?type=UI_TEST (still gated)
   - Service: frontend. Covers: FR-08, FR-24, AC-09, AC-23, DC-23.
   - Files: `frontend/src/components/home/CommandPalette.tsx`, `frontend/src/pages/DashboardPage/DashboardPage.tsx`, `frontend/src/components/home/entryPoints.test.tsx`
   - Depends on: 3.5, 1.24
   - Verify (from `frontend/`): `pnpm exec vitest run src/components/home/entryPoints.test.tsx`
 
-- [ ] **3.9** Add All Checks page tests (mixed rows, params, order, cancel, chips and filters, bulk, tags, actions, cap, failure, empty, switch-off incl. late sources, preselect)
+- [x] **3.9** Add All Checks page tests (mixed rows, params, order, cancel, chips and filters, bulk, tags, actions, cap, failure, empty, switch-off incl. late sources, preselect)
   - Service: frontend. Covers: AC-04, AC-14, AC-15, AC-16, AC-17, AC-18, AC-19, AC-20, AC-21, AC-22, AC-23.
   - Files: `frontend/src/pages/AllChecksPage/AllChecksPage.test.tsx`
   - Depends on: 3.6
@@ -251,7 +251,7 @@ The 20 tasks below map 1:1 to plan subtasks 3.1–3.20 (`plan/implementation.yam
     Serve GET /checks inline, since no MSW handler exists for it. The cases include sources resolving
     disabled after the first render: zero Studio requests, and no UI_TEST written.
 
-- [ ] **3.10** Remove studio/tests from both trees and extend the route test
+- [x] **3.10** Remove studio/tests from both trees and extend the route test
   - Service: frontend. Covers: FR-27, CON-09, AC-26.
   - Files: `frontend/src/App.tsx`, `frontend/src/App.routes.test.tsx`
   - Depends on: 3.7, 3.8, 2.10
@@ -259,7 +259,7 @@ The 20 tasks below map 1:1 to plan subtasks 3.1–3.20 (`plan/implementation.yam
   - Plan notes:
     Remove L111 and L140 and the lazy StudioTestsPage import (L23). studio/tests then lands on module home.
 
-- [ ] **3.11** Drop WCAG surface 1 (StudioTestsPage) and its pin, regenerate the baseline and record 'surfaces deleted'
+- [-] **3.11** (REMOVED, user decision 2026-10-23: no WCAG work) Drop WCAG surface 1 (StudioTestsPage) and its pin, regenerate the baseline and record 'surfaces deleted'
   - Service: frontend. Covers: FR-28, CON-04, AC-27.
   - Files: `frontend/src/test/a11y/studioWcagAudit.test.tsx`, `docs/qa/accessibility/axe-results.json`, `docs/qa/accessibility/studio-wcag-audit.md`
   - Depends on: 3.10
@@ -272,7 +272,7 @@ The 20 tasks below map 1:1 to plan subtasks 3.1–3.20 (`plan/implementation.yam
     L14, L103, L145) and add a dated entry: "surfaces deleted (StudioTestsPage, increment 3); no surface
     added".
 
-- [ ] **3.12** Remove the TestRow-based case and the Tests-page entries from the schedule dialog test
+- [x] **3.12** Remove the TestRow-based case and the Tests-page entries from the schedule dialog test
   - Service: frontend. Covers: FR-27, CRIT-17.
   - Files: `frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx`
   - Depends on: 3.10
@@ -280,13 +280,13 @@ The 20 tasks below map 1:1 to plan subtasks 3.1–3.20 (`plan/implementation.yam
   - Plan notes:
     Remove L17 and L53-56; the entries at L27 and L233 move off /studio/tests.
 
-- [ ] **3.13** Delete the Studio Tests page, its barrel and its test
+- [x] **3.13** Delete the Studio Tests page, its barrel and its test
   - Service: frontend. Covers: FR-27, AC-26.
   - Files: `frontend/src/pages/StudioTestsPage/StudioTestsPage.tsx`, `frontend/src/pages/StudioTestsPage/index.ts`, `frontend/src/pages/StudioTestsPage/StudioTestsPage.test.tsx`
   - Depends on: 3.10, 3.11
   - Verify (from `frontend/`): `pnpm run type-check && ! grep -rn "StudioTestsPage" src`
 
-- [ ] **3.14** Delete the Tests-page-only helpers useStudioTests, TestRow and TestRowMenu
+- [x] **3.14** Delete the Tests-page-only helpers useStudioTests, TestRow and TestRowMenu
   - Service: frontend. Covers: FR-27, AC-26.
   - Files: `frontend/src/components/studio/tests/useStudioTests.ts`, `frontend/src/components/studio/tests/TestRow.tsx`, `frontend/src/components/studio/tests/TestRowMenu.tsx`
   - Depends on: 3.12, 3.13
@@ -294,7 +294,7 @@ The 20 tasks below map 1:1 to plan subtasks 3.1–3.20 (`plan/implementation.yam
   - Plan notes:
     DeleteTestDialog, newTestRequest, uiTestStatus and testListPresentation (READINESS, readinessFor, STUDIO_TEST_ENVIRONMENTS, TEST_NAME_MAX_LENGTH) stay.
 
-- [ ] **3.15** Delete StudioListLayout (with SortableHeaderCell) and its test, keeping studioListSx
+- [x] **3.15** Delete StudioListLayout (with SortableHeaderCell) and its test, keeping studioListSx
   - Service: frontend. Covers: FR-27, DC-10, AC-26.
   - Files: `frontend/src/components/studio/list/StudioListLayout.tsx`, `frontend/src/components/studio/list/StudioListLayout.test.tsx`
   - Depends on: 3.13
@@ -302,7 +302,7 @@ The 20 tasks below map 1:1 to plan subtasks 3.1–3.20 (`plan/implementation.yam
   - Plan notes:
     studioListSx.ts stays, because RunRow imports hideBelowMd.
 
-- [ ] **3.16** Delete the list-URL hook and LAST_RUN_FILTER_LABELS that only the deleted Tests page used (G4)
+- [x] **3.16** Delete the list-URL hook and LAST_RUN_FILTER_LABELS that only the deleted Tests page used (G4)
   - Service: frontend. Covers: FR-27, AC-26.
   - Files: `frontend/src/hooks/useUrlListState.ts`, `frontend/src/hooks/useUrlListState.test.tsx`, `frontend/src/components/studio/tests/testListPresentation.ts`
   - Depends on: 3.14, 3.15, 3.2
@@ -310,7 +310,7 @@ The 20 tasks below map 1:1 to plan subtasks 3.1–3.20 (`plan/implementation.yam
   - Plan notes:
     The All Checks debounce (3.2) must not import this hook. It uses its own 300 ms constant.
 
-- [ ] **3.17** Remove the sidebar Studio group, its page-id mapping and ChecksLayout's tests clause
+- [x] **3.17** Remove the sidebar Studio group, its page-id mapping and ChecksLayout's tests clause
   - Service: frontend. Covers: FR-27, NFR-08, AC-26.
   - Files: `frontend/src/utils/navigation/navigationSetup.ts`, `frontend/src/utils/navigation/navigationSetup.test.ts`, `frontend/src/components/layout/ChecksLayout/ChecksLayout.tsx`
   - Depends on: 3.10
@@ -318,7 +318,7 @@ The 20 tasks below map 1:1 to plan subtasks 3.1–3.20 (`plan/implementation.yam
   - Plan notes:
     navigationSetup L19-33 and L74 (the studioVisible predicate goes as well, if nothing else uses it); ChecksLayout L86.
 
-- [ ] **3.18** Drop LayoutProvider's studio mapping and update the ChecksLayout a11y test's entry path
+- [x] **3.18** Drop LayoutProvider's studio mapping and update the ChecksLayout a11y test's entry path
   - Service: frontend. Covers: AC-26, AC-27.
   - Files: `frontend/src/components/layout/LayoutProvider/LayoutProvider.tsx`, `frontend/src/components/layout/ChecksLayout/ChecksLayout.a11y.test.tsx`
   - Depends on: 3.17
@@ -327,7 +327,7 @@ The 20 tasks below map 1:1 to plan subtasks 3.1–3.20 (`plan/implementation.yam
     LayoutProvider L70; ChecksLayout.a11y L45 becomes /checks/all (entry path only). If the a11y file
     fails at file level because @put/core-components does not resolve (G5), record that as pre-existing.
 
-- [ ] **3.19** Move the MSW harness E2E to All Checks and give the E2E proxy an empty GET /checks answer
+- [x] **3.19** Move the MSW harness E2E to All Checks and give the E2E proxy an empty GET /checks answer
   - Service: frontend. Covers: NFR-09, CON-10.
   - Files: `frontend/e2e/harness.spec.ts`, `frontend/e2e/previewBootstrapHandlers.ts`
   - Depends on: 3.10, 3.6
@@ -338,7 +338,7 @@ The 20 tasks below map 1:1 to plan subtasks 3.1–3.20 (`plan/implementation.yam
     page on a checks failure (K2). The L106-110 first-name check holds: 25 demo tests, createdAt order
     equals updatedAt order, all on one page.
 
-- [ ] **3.20** Run the phase-3 gate (type-check, lint, WCAG guard, touched suites, full removed-route scan)
+- [x] **3.20** Run the phase-3 gate (type-check, lint, WCAG guard, touched suites, full removed-route scan)
   - Service: infra. Covers: FR-27, FR-28, NFR-09, AC-09, AC-26, AC-27.
   - Files: `docs/qa/accessibility/axe-results.json`
   - Depends on: 3.9, 3.11, 3.14, 3.15, 3.16, 3.17, 3.18, 3.19
@@ -514,6 +514,9 @@ CON-01 frontend-only. CON-03 one path, no redirects, aliases or fallbacks. CON-0
 |---|---|---|---|
 | 2026-10-23 | 0.1.0 | Draft created from the approved spec (Spec Pipeline critique round 4: APPROVED, 4.38), requirements.json and plan revision 4, phase-3. ClickUp sync not performed (F1). | River (@sm) |
 | 2026-10-23 | 0.1.1 | Validated GO (9/10) — Status: Draft → Ready. Tasks match plan revision 4 phase-3 1:1; F3 (AC-14 All Checks half, FR-13) placement confirmed. Starts only after story .2 is Done. | Pax (@po) |
+| 2026-10-23 | 0.2.0 | Status: Ready → InProgress (story .2 Done). Executed as Lean work item STUDIO-UNIFY-001.3. AC-27 and task 3.11 removed; WCAG parts of 3.20 dropped (user decision "We dont need WCAG, ignore/remove all accessibility tasks"). | Claude Code (@dev role) |
+| 2026-10-23 | 0.3.0 | Status: InProgress → InReview. Tasks 3.1–3.20 done (3.11 removed); File List and Dev Agent Record filled; handed to the independent Lean review. | Claude Code (@dev role) |
+| 2026-10-23 | 1.0.0 | Independent Lean review PASS (15/15 criteria, 4 non-blocking findings); Lean acceptance recorded. Status: InReview → Done. | aiox-qa verdict, recorded by Claude Code coordinator |
 
 ## PO Validation (2026-10-23)
 
@@ -539,20 +542,34 @@ CON-01 frontend-only. CON-03 one path, no redirects, aliases or fallbacks. CON-0
 
 ### Agent Model Used
 
-_Populated by @dev during implementation._
+Coordinator and Lean builder: Claude Code main session (Opus 5.5, session 651237b1-faeb-45bb-9d2b-d4fa4eb9a3e7). Contributors: aiox-dev subagents on Sonnet 5.5, effort high, in parallel waves with one writer per file set: catalog union + row (3.1, 3.3); catalog hook + notices component (3.2, 3.6a); editor/Dashboard/palette retargets + schedule dialog test (3.7, 3.8, 3.12); single AllChecksPage writer (3.4, 3.5, 3.6b); routes (3.10); sidebar + layout (3.17, 3.18); deletions (3.13-3.16); All Checks tests (3.9); harness E2E (3.19). Run under AIOX Lean Delivery (work item STUDIO-UNIFY-001.3).
 
 ### Debug Log References
 
-_Populated by @dev during implementation._
+~/.aiox-lean/put-checks-ui-studio/STUDIO-UNIFY-001.3/ (binding, contract, logs); ~/.aiox-lean/put-checks-ui-studio/WAVES.md; PREPLAN-STUDIO-UNIFY-001.2-3.md.
 
 ### Completion Notes
 
-_Populated by @dev during implementation._
+- User decision "We dont need WCAG, ignore/remove all accessibility tasks": AC-27 and task 3.11 removed; WCAG parts of 3.20 dropped; `docs/qa/accessibility/` untouched. Task 3.18 kept as a route change (layout test entry path `/checks/all`; mobile-nav click now targets "Reports", since the Studio group and its "Tests" child are gone); no assertion added.
+- All Checks: stored prefs read before first render (so the first Studio request carries the stored search and a stored UI_TEST is not overwritten); readiness status options and the UI Test type option shown only when availability is 'on'; bulk uses check ids only (`bulkIds` guard); `fetchCSIs` dispatched only when availability is 'on' and the CSI store is idle; "No UI tests yet" only when Type is UI Test, no tests, and no search text.
+- Catalog order: `createdAt` descending, missing last, id ascending tie-break (spec leaves tie-break open). Search text is applied to UI tests by the server `q` only (DC-07).
+- "Open Tests" (both editor buttons), Dashboard quick action and palette entry go to `/checks/all?type=UI_TEST` (still gated on 'on'). ChecksStudioPage's `TEST_NOT_AVAILABLE_MESSAGE` re-export removed (tests import from the shared module).
+- Harness E2E moved to `/checks/all`; the E2E proxy serves an empty `GET /checks` (in `previewBootstrapHandlers.ts`, imported by `mswProxy.ts`). `/api/v1/studio/tests` API paths remain in E2E files by design.
+- `readinessFor` in `testListPresentation.ts` now has no users (kept, as the plan says).
+- CodeRabbit not run (unavailable on host). Pre-existing out-of-scope failure `realStudioStartup.test.ts` excluded from the bound check.
 
 ### File List
 
-_Empty until implementation. @dev lists only files this story creates, modifies or deletes._
+Created: `frontend/src/pages/AllChecksPage/catalogRows.ts`, `catalogRows.test.ts`, `UiTestCatalogRow.tsx`, `useUiTestCatalog.ts`, `useUiTestCatalog.test.tsx`, `UiTestCatalogNotices.tsx`, `UiTestCatalogNotices.test.tsx`, `AllChecksPage.test.tsx`.
+
+Modified: `frontend/src/pages/AllChecksPage/AllChecksPage.tsx`; `frontend/src/App.tsx`, `App.routes.test.tsx`; `frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx`, `pageFraming.test.tsx`, `pageLoadById.test.tsx`; `frontend/src/components/home/CommandPalette.tsx`, `entryPoints.test.tsx`; `frontend/src/pages/DashboardPage/DashboardPage.tsx`; `frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx`; `frontend/src/components/studio/tests/testListPresentation.ts`; `frontend/src/components/layout/ChecksLayout/ChecksLayout.tsx`, `ChecksLayout.a11y.test.tsx`; `frontend/src/components/layout/LayoutProvider/LayoutProvider.tsx`; `frontend/src/utils/navigation/navigationSetup.ts`, `navigationSetup.test.ts`; `frontend/e2e/harness.spec.ts`, `previewBootstrapHandlers.ts`; this story file.
+
+Deleted: `frontend/src/pages/StudioTestsPage/` (`StudioTestsPage.tsx`, `StudioTestsPage.test.tsx`, `index.ts`); `frontend/src/components/studio/tests/useStudioTests.ts`, `TestRow.tsx`, `TestRowMenu.tsx`; `frontend/src/components/studio/list/StudioListLayout.tsx`, `StudioListLayout.test.tsx`; `frontend/src/hooks/useUrlListState.ts`, `useUrlListState.test.tsx`.
 
 ## QA Results
 
-_Populated by @qa._
+**Verdict: PASS** (independent AIOX Lean review, 2026-10-23). Reviewer: aiox-qa subagent (Sonnet 5.5, effort high; execution 651237b1:a26f67e7665867aa8), fresh context, read-only, independent of all authors. Candidate `d17f7b536bdb17696ac6c66d1dfc43b63be8326fc030fe1552fbcbe9d161b9d8`; Lean acceptance recorded (engineering acceptance only). Payload: `~/.aiox-lean/put-checks-ui-studio/STUDIO-UNIFY-001.3/review-1.json`.
+
+- All 15 criteria PASS: AC-04, AC-08, AC-09, AC-14, AC-15, AC-16, AC-17, AC-18, AC-19, AC-20, AC-21, AC-22, AC-23, AC-26, DOD (AC-27 removed by user decision).
+- Bound checks on the same candidate: type-check; lint 0 errors; Vitest `src/pages` 402/402, `src/components` 751/751 (pre-existing `realStudioStartup.test.ts` excluded), hooks + navigation + routes 46/46; route scan S3 exit 0; Playwright msw `harness.spec.ts` 5/5. Reviewer re-ran 151 narrow tests and S3.
+- Non-blocking findings: (1) stray missing space `path="reports"element=` in `App.tsx` L121 (federated tree); (2) during the 300 ms search debounce UI test rows briefly reflect the previous server answer (consistent with DC-07); (3) cap and failure notices show regardless of the Type/tag filter (spec §9.6 states no condition); (4) doc comments still name the deleted "Tests page" (`studioTypes.ts` L578, `executionStatus.ts` L4). Items 1 and 4 are picked up by story .4's leftover sweep.

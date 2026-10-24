@@ -15,7 +15,8 @@ import { uiTestEditorPath } from '@/components/studio/uiTestPaths';
 import { store } from '@/store';
 import { fetchSources } from '@/store/slices/sourcesSlice';
 import { fetchFeatures } from '@/store/slices/featuresSlice';
-import ChecksStudioPage, { TEST_NOT_AVAILABLE_MESSAGE } from './ChecksStudioPage';
+import ChecksStudioPage from './ChecksStudioPage';
+import { TEST_NOT_AVAILABLE_MESSAGE } from '@/components/studio/StudioUnavailable';
 
 /**
  * STUDIO-UNIFY-001.1, task 1.11 (AC-06, AC-07): the editor is always the test the URL names.

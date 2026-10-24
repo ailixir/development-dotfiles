@@ -225,10 +225,6 @@ export interface ChecksStudioPageProps {
   readonly guidedOptions?: UseGuidedSessionOptions;
 }
 
-// The unreadable-test message now lives with the shared unavailable state; kept exported here for
-// the page tests that import it from the editor.
-export { TEST_NOT_AVAILABLE_MESSAGE };
-
 /**
  * A list answer that still carries the test the editor has open. The list is a page of tests; the
  * selected one is read by id and may not be on it, and a reload must never drop it.
@@ -1324,12 +1320,12 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                 ) : testUnavailable ? (
                   <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1}>
                     <Typography variant="body2" data-testid="studio-test-unavailable">{TEST_NOT_AVAILABLE_MESSAGE}</Typography>
-                    <Button size="small" variant="contained" onClick={() => navigate('/checks/studio/tests')}>Open Tests</Button>
+                    <Button size="small" variant="contained" onClick={() => navigate('/checks/all?type=UI_TEST')}>Open Tests</Button>
                   </Stack>
                 ) : (
                   <Stack direction="row" alignItems="center" justifyContent="space-between">
                     <Typography variant="body2">No test selected.</Typography>
-                    <Button size="small" variant="contained" onClick={() => navigate('/checks/studio/tests')}>Open Tests</Button>
+                    <Button size="small" variant="contained" onClick={() => navigate('/checks/all?type=UI_TEST')}>Open Tests</Button>
                   </Stack>
                 )}
               </Box>

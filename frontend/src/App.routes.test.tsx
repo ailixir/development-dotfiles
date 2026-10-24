@@ -18,7 +18,7 @@ import featuresSlice, { fetchFeatures } from '@/store/slices/featuresSlice';
  * through the catch-all (no redirect to a ui-tests route). Story .2 adds the detail routes: the shell is
  * the layout route of `ui-tests/:id` behind the STUDIO gate, with the Overview as its index child and
  * the Runs tab at `runs` and `runs/:executionId`; the module-level studio runs paths are gone and
- * land on module home. The removed-path list grows in story .3.
+ * land on module home. Story .3 removes the module-level tests list the same way.
  */
 
 vi.mock('@components/layout/ChecksLayout', () => ({
@@ -59,7 +59,6 @@ vi.mock('@pages/UiTestDetailsPage', () => ({
     return <div data-testid="page-detail-runs">{`runs:${executionId ?? 'none'}`}</div>;
   },
 }));
-vi.mock('@pages/StudioTestsPage', () => sentinel('studio-tests'));
 vi.mock('@pages/ActivityPage', () => sentinel('activity'));
 vi.mock('@pages/SchedulesPage', () => sentinel('schedules'));
 vi.mock('@pages/SplunkPrototypePage', () => sentinel('splunk'));
@@ -89,6 +88,7 @@ const ID = 'a0000000-0000-0000-0000-00000000abcd';
 const EXEC = 'b0000000-0000-0000-0000-00000000ef01';
 // Built from segments: the removed paths are not written as route literals anywhere in src.
 const REMOVED_RUNS = ['studio', 'runs'].join('/');
+const REMOVED_TESTS = ['studio', 'tests'].join('/');
 
 describe.each([
   ['federated tree (/checks/*)', '/checks'],
@@ -115,11 +115,6 @@ describe.each([
     renderApp(`${base}/studio/${ID}`);
     expect(await screen.findByTestId('page-home')).toBeInTheDocument();
     expect(screen.queryByTestId('page-editor')).toBeNull();
-  });
-
-  it('the Tests page still exists at this boundary', async () => {
-    renderApp(`${base}/studio/tests`);
-    expect(await screen.findByTestId('page-studio-tests')).toBeInTheDocument();
   });
 
   it('ui-tests/{id} renders the detail shell with the Overview as the index child', async () => {
@@ -162,6 +157,7 @@ describe.each([
   it.each([
     ['the module-level runs list', REMOVED_RUNS],
     ['the module-level run details', `${REMOVED_RUNS}/${EXEC}`],
+    ['the module-level tests list', REMOVED_TESTS],
   ])('%s is gone: it lands on module home, with no redirect to a ui-tests route', async (_label, tail) => {
     renderApp(`${base}/${tail}`);
     expect(await screen.findByTestId('page-home')).toBeInTheDocument();

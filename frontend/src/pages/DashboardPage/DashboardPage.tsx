@@ -753,7 +753,7 @@ const DashboardPage: React.FC = () => {
                         fullWidth
                         variant="contained"
                         startIcon={<Science />}
-                        onClick={() => navigate('/checks/studio/tests')}
+                        onClick={() => navigate('/checks/all?type=UI_TEST')}
                         sx={{
                           background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                           py: 1.5

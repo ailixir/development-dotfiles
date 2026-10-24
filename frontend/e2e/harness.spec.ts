@@ -54,7 +54,7 @@ test('zero service workers: none registered, none controlling, no worker script 
   page,
   context,
 }) => {
-  await page.goto('/checks/studio/tests');
+  await page.goto('/checks/all');
   await expect.poll(async () => (await recorded(page.request, '/api/v1/studio/tests')).length).toBeGreaterThan(0);
 
   const registrations = await page.evaluate(async () => {
@@ -91,7 +91,7 @@ test('the page reaches its data through apiClient and the proxy answers it from 
   page,
   request,
 }) => {
-  await page.goto('/checks/studio/tests');
+  await page.goto('/checks/all');
   await expect
     .poll(async () => (await recorded(request, '/api/v1/studio/tests')).filter((item) => item.handled).length)
     .toBeGreaterThan(0);
@@ -139,7 +139,7 @@ test('a WebM range request answers 206 with the fixture bytes, directly and thro
   ]);
 
   // A real <video> in Chromium loads it, which issues the browser's own range requests.
-  await page.goto('/checks/studio/tests');
+  await page.goto('/checks/all');
   const duration = await page.evaluate(
     (src) =>
       new Promise<number>((resolveDuration, reject) => {

@@ -10,7 +10,7 @@ interface CommandPaletteProps {
   onClose: () => void;
 }
 
-const STUDIO_PATH = '/checks/studio/tests';
+const STUDIO_PATH = '/checks/all?type=UI_TEST';
 
 const NAV_ITEMS = [
   { title: 'Home', path: '/checks' },

@@ -23,7 +23,8 @@ import uiSlice from '@/store/slices/uiSlice';
 import dashboardSlice from '@/store/slices/dashboardSlice';
 import sourcesSlice, { fetchSources } from '@/store/slices/sourcesSlice';
 import featuresSlice, { fetchFeatures } from '@/store/slices/featuresSlice';
-import ChecksStudioPage, { TEST_NOT_AVAILABLE_MESSAGE } from './ChecksStudioPage';
+import ChecksStudioPage from './ChecksStudioPage';
+import { TEST_NOT_AVAILABLE_MESSAGE } from '@/components/studio/StudioUnavailable';
 
 /**
  * STUDIO-UNIFY-001.1, task 1.15 (AC-08, AC-09, AC-01 UAT, AC-23 editor gate): how the editor is
@@ -294,7 +295,7 @@ describe('AC-08: the breadcrumb, the read-only CSI and the leave guard', () => {
     expect(dirty.defaultPrevented).toBe(true);
   }, TEST_TIMEOUT_MS);
 
-  it('"Open Tests" (shown when the route test cannot be read) goes to /checks/studio/tests', async () => {
+  it('"Open Tests" (shown when the route test cannot be read) goes to /checks/all?type=UI_TEST', async () => {
     serve();
     const view = renderStudioAt('c0000000-0000-0000-0000-00000000ffff', <ChecksStudioPage />, {
       wrapper: providerFor(settledStore()),
@@ -302,7 +303,8 @@ describe('AC-08: the breadcrumb, the read-only CSI and the leave guard', () => {
 
     expect(await screen.findByText(TEST_NOT_AVAILABLE_MESSAGE, {}, WAIT)).toBeInTheDocument();
     await user().click(screen.getByRole('button', { name: 'Open Tests' }));
-    expect(view.getLocation().pathname).toBe('/checks/studio/tests');
+    expect(view.getLocation().pathname).toBe('/checks/all');
+    expect(view.getLocation().search).toBe('?type=UI_TEST');
   }, TEST_TIMEOUT_MS);
 });
 

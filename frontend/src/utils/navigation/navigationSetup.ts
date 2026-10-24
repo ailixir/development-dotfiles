@@ -4,33 +4,15 @@ import { store } from '@/store';
 // Register the checks module navigation
 export const registerChecksNavigation = () => {
   const state = store.getState();
-  const sources = state.sources?.data ?? [];
   const features = state.features?.features ?? [];
 
-  const isSourceOn = (type: string) =>
-    sources.length === 0 || sources.find((s) => s.type === type)?.enabled !== false;
   const isFeatureOn = (key: string) =>
     features.length === 0 || features.find((f) => f.key === key)?.enabled !== false;
 
-  const studioVisible = isSourceOn('UI_TEST') && isFeatureOn('STUDIO');
   const reportsVisible = isFeatureOn('REPORTS');
 
   const navigation = [
     { id: 'home', label: 'Home', path: '/checks', icon: 'home', description: 'Attention, CSIs, and upcoming' },
-    ...(studioVisible
-      ? [
-          {
-            id: 'studio',
-            label: 'Studio',
-            path: '/checks/studio/tests',
-            icon: 'science',
-            description: 'UI testing studio',
-            children: [
-              { id: 'studio-tests', label: 'Tests', path: '/checks/studio/tests', icon: 'science' },
-            ],
-          },
-        ]
-      : []),
     {
       id: 'checks',
       label: 'Checks',
@@ -69,8 +51,6 @@ export const getCurrentPageId = (pathname: string): string => {
   if (pathname.startsWith('/checks/ui-tests')) return 'checks';
   if (pathname.startsWith('/checks/create') || pathname.startsWith('/checks/prototype')) return 'checks';
   // templates removed
-  // Studio sub-nav
-  if (pathname.startsWith('/checks/studio/tests')) return 'studio-tests';
   // Reports parent should highlight when in reports area
   if (pathname.startsWith('/checks/reports/new')) return 'reports';
   if (pathname.startsWith('/checks/reports/') && pathname.endsWith('/edit')) return 'reports';

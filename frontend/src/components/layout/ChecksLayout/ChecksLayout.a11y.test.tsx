@@ -42,7 +42,7 @@ describe('ChecksLayout accessibility', () => {
     render(
       <Provider store={store}>
         <ThemeProvider theme={theme}>
-          <MemoryRouter initialEntries={['/checks/studio/tests']}>
+          <MemoryRouter initialEntries={['/checks/all']}>
             <LayoutProvider><ChecksLayout><div>Test list content</div></ChecksLayout></LayoutProvider>
           </MemoryRouter>
         </ThemeProvider>
@@ -56,7 +56,7 @@ describe('ChecksLayout accessibility', () => {
     expect(screen.queryByRole('button', { name: 'Close navigation' })).toBeNull();
     fireEvent.click(menu);
     expect(screen.getByRole('button', { name: 'Close navigation' })).toBeInTheDocument();
-    fireEvent.click(screen.getByText('Tests', { exact: true }));
+    fireEvent.click(screen.getByText('Reports', { exact: true }));
     await waitFor(() => expect(screen.queryByRole('button', { name: 'Close navigation' })).toBeNull());
     expect(screen.getByRole('button', { name: 'Navigation' })).toHaveAttribute('aria-expanded', 'false');
     expect(screen.getByRole('main')).toHaveTextContent('Test list content');
