@@ -4,19 +4,23 @@ import { Box, Button, Grid, MenuItem, Table, TableBody, TableCell, TableContaine
 import { Add, Science } from '@mui/icons-material';
 import { SortableHeaderCell, StudioListLayout } from '@/components/studio/list/StudioListLayout';
 import { hideBelowMd } from '@/components/studio/list/studioListSx';
-import CreateTestDialog from '@/components/studio/tests/CreateTestDialog';
 import DeleteTestDialog from '@/components/studio/tests/DeleteTestDialog';
 import TestRow from '@/components/studio/tests/TestRow';
 import { StudioScheduleDialog } from '@/components/studio/scheduling/StudioScheduleDialog';
+import { runDetailsPath } from '@/components/studio/runs/runLinks';
 import { useStudioTests } from '@/components/studio/tests/useStudioTests';
 import {
   LAST_RUN_FILTER_LABELS,
   STUDIO_TEST_ENVIRONMENTS,
-  testHref,
 } from '@/components/studio/tests/testListPresentation';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { fetchCSIs } from '@/store/slices/csiSlice';
 import { TEST_LAST_RUN_FILTERS, type TestDto, type TestLastRunFilter } from '@/types/studio/studioTypes';
+
+/** Where the Create Test actions go: Create Check, with the UI Test type preselected. */
+const CREATE_UI_TEST_PATH = '/checks/create?type=UI_TEST';
+/** The Runs page run a schedule dialog link opens. */
+const runHref = (executionId: string): string => runDetailsPath('/checks/studio/runs', executionId);
 
 /** Columns: Test · System · Environment · Readiness · Last run · Updated · actions. */
 const COLUMN_SX = [undefined, hideBelowMd, hideBelowMd, undefined, undefined, hideBelowMd, undefined] as const;
@@ -26,7 +30,6 @@ const StudioTestsPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const registeredCsis = useAppSelector((state) => state.csi.data);
   const list = useStudioTests();
-  const [createOpen, setCreateOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<TestDto | null>(null);
   const [scheduleTarget, setScheduleTarget] = useState<TestDto | null>(null);
 
@@ -39,7 +42,7 @@ const StudioTestsPage: React.FC = () => {
   // One "now" per render, so every row's relative time agrees.
   const now = Date.now();
 
-  const openCreate = () => setCreateOpen(true);
+  const openCreate = () => navigate(CREATE_UI_TEST_PATH);
 
   const environmentFilter = (
     <Tooltip
@@ -170,16 +173,7 @@ const StudioTestsPage: React.FC = () => {
           list.reload();
         }}
       />
-      <StudioScheduleDialog test={scheduleTarget} onClose={() => setScheduleTarget(null)} />
-
-      <CreateTestDialog
-        open={createOpen}
-        onClose={() => setCreateOpen(false)}
-        onCreated={(created) => {
-          setCreateOpen(false);
-          navigate(testHref(created.id));
-        }}
-      />
+      <StudioScheduleDialog test={scheduleTarget} runHref={runHref} onClose={() => setScheduleTarget(null)} />
     </Box>
   );
 };

@@ -41,7 +41,6 @@ interface ReviewStepProps {
     daysOfMonth?: number[];
   };
   csiEntities: Array<{ id: string; name: string }> | null;
-  availableUITests: Array<{ id: string; name: string }>;
   editId?: string;
   onEditStep: (step: number) => void;
 }
@@ -182,30 +181,6 @@ const AppDynamicsConfigReview: React.FC<{ formData: any }> = ({ formData }) => (
   </Grid>
 );
 
-const UiTestConfigReview: React.FC<{
-  formData: any;
-  availableUITests: Array<{ id: string; name: string }>;
-}> = ({ formData, availableUITests }) => {
-  const selectedTest = availableUITests.find(
-    (t) => t.id === (formData as any).uiTestId,
-  );
-  const vars = (formData as any).uiVariables || {};
-  const varCount = Object.keys(vars).length;
-
-  return (
-    <Grid container spacing={1}>
-      <ConfigRow
-        label="Studio Test"
-        value={selectedTest?.name || (formData as any).uiTestId || 'Not selected'}
-      />
-      <ConfigRow label="Variables" value={varCount > 0 ? `${varCount} variable(s)` : 'None'} />
-      {formData.timeout && (
-        <ConfigRow label="Timeout override" value={`${formData.timeout}s`} />
-      )}
-    </Grid>
-  );
-};
-
 // ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
@@ -214,7 +189,6 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
   formData,
   schedule,
   csiEntities,
-  availableUITests,
   onEditStep,
 }) => {
   const theme = useTheme();
@@ -255,13 +229,6 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
         return <ItrsConfigReview formData={formData} />;
       case 'APPDYNAMICS':
         return <AppDynamicsConfigReview formData={formData} />;
-      case 'UI_TEST':
-        return (
-          <UiTestConfigReview
-            formData={formData}
-            availableUITests={availableUITests}
-          />
-        );
       default:
         return (
           <Typography variant="body2" color="text.secondary">

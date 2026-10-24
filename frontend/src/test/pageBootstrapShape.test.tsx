@@ -1,10 +1,12 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom';
 import { http, HttpResponse } from 'msw';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
+import { readyDraft } from '@/services/mocks/studio/readinessFixtures';
+import { renderStudioAt } from '@/test/renderStudioAt';
 import { store } from '@/store';
 import { fetchSources } from '@/store/slices/sourcesSlice';
 import { fetchFeatures } from '@/store/slices/featuresSlice';
@@ -59,16 +61,19 @@ async function bootstrapWith(sources: () => Response, features: () => Response) 
   return Promise.all([store.dispatch(fetchSources()), store.dispatch(fetchFeatures())]);
 }
 
+const StoreProvider = ({ children }: { children?: ReactNode }) => <Provider store={store}>{children}</Provider>;
+
+/** Mounts both consumers where the app mounts the editor: on a test id's editor route. */
 function renderConsumers() {
-  return render(
-    <Provider store={store}>
-      <MemoryRouter>
-        <CheckTypeSelector selectedType="" onSelect={() => {}} />
-        <FeatureGate featureKey="STUDIO">
-          <ChecksStudioPage />
-        </FeatureGate>
-      </MemoryRouter>
-    </Provider>,
+  return renderStudioAt(
+    readyDraft.id,
+    <>
+      <CheckTypeSelector selectedType="" onSelect={() => {}} />
+      <FeatureGate featureKey="STUDIO">
+        <ChecksStudioPage />
+      </FeatureGate>
+    </>,
+    { wrapper: StoreProvider },
   );
 }
 

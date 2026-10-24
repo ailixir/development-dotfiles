@@ -24,6 +24,7 @@ import {
 import type { SvgIconComponent } from '@mui/icons-material';
 import { useAppSelector } from '@/store/index';
 import { selectSources } from '@/store/slices/sourcesSlice';
+import { useUiTestAvailability } from '@/hooks/useUiTestAvailability';
 
 interface CheckType {
   value: string;
@@ -96,7 +97,7 @@ export const checkTypeCategories: CheckTypeCategory[] = [
     types: [
       {
         value: 'UI_TEST',
-        label: 'Checks Studio',
+        label: 'UI Test (Checks Studio)',
         description:
           'No-code browser automation with plain English commands — the flagship testing experience',
         icon: SmartDisplay,
@@ -109,13 +110,25 @@ export const checkTypeCategories: CheckTypeCategory[] = [
 interface CheckTypeSelectorProps {
   selectedType: string;
   onSelect: (value: string) => void;
+  /** Types the card list shows dimmed and refuses to select (the edit page passes UI_TEST). */
+  disabledTypes?: readonly string[];
 }
 
-const CheckTypeSelector: React.FC<CheckTypeSelectorProps> = ({ selectedType, onSelect }) => {
+const NO_DISABLED_TYPES: readonly string[] = [];
+
+const CheckTypeSelector: React.FC<CheckTypeSelectorProps> = ({
+  selectedType,
+  onSelect,
+  disabledTypes = NO_DISABLED_TYPES,
+}) => {
   const theme = useTheme();
   const sources = useAppSelector(selectSources);
+  const uiTestAvailability = useUiTestAvailability();
 
   const isEnabled = (typeValue: string): boolean => {
+    if (disabledTypes.includes(typeValue)) return false;
+    // UI Test is selectable only once both the UI_TEST source and the STUDIO feature are known to be on (DC-18).
+    if (typeValue === 'UI_TEST') return uiTestAvailability === 'on';
     // Fail-open: if sources array is empty, treat all as enabled
     if (sources.length === 0) return true;
     const source = sources.find((s) => s.type === typeValue);
@@ -215,7 +228,9 @@ const CheckTypeSelector: React.FC<CheckTypeSelectorProps> = ({ selectedType, onS
                         {type.description}
                       </Typography>
 
-                      {!enabled && (
+                      {!enabled
+                        && !disabledTypes.includes(type.value)
+                        && !(type.value === 'UI_TEST' && uiTestAvailability === 'pending') && (
                         <Chip
                           label="Coming Soon"
                           size="small"

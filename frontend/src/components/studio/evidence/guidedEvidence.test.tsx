@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -152,5 +152,46 @@ describe('AC-7 / D-10: named per-step and per-action seek, from server stamps on
     const button = screen.getByRole('button', { name: 'Seek to step 1' });
     expect(getComputedStyle(button.parentElement!).flexDirection).toBe('column');
     expect(getComputedStyle(button).width).toBe('100%');
+  });
+});
+
+describe('round 067 D2: a persistent marker of the last seek', () => {
+  it('the used step button is filled with a caption; an action seek replaces it; there is one marker', async () => {
+    render(<GuidedSeekControls result={recordingResult()} onSeek={() => undefined} />);
+    expect(screen.queryByTestId('guided-seek-marker')).toBeNull();
+    const group = screen.getByTestId('guided-seek-step-2');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Seek to step 2' }));
+    expect(within(group).getByTestId('guided-seek-marker')).toHaveTextContent('Jumped to step 2.');
+    expect(screen.getByRole('button', { name: 'Seek to step 2' })).toHaveAttribute('data-seek-active', 'true');
+    expect(screen.getByRole('button', { name: 'Seek to step 2' })).toHaveClass('MuiButton-contained');
+    expect(screen.getByRole('button', { name: 'Seek to step 1' })).not.toHaveAttribute('data-seek-active');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Seek to action: Click control' }));
+    expect(within(group).getByTestId('guided-seek-marker')).toHaveTextContent('Jumped to step 2, action: Click control.');
+    expect(screen.getAllByTestId('guided-seek-marker')).toHaveLength(1);
+    expect(screen.getByRole('button', { name: 'Seek to step 2' })).not.toHaveAttribute('data-seek-active');
+    expect(screen.getByRole('button', { name: 'Seek to action: Click control' })).toHaveAttribute('data-seek-active', 'true');
+    // The names are unchanged and "Seek to step 2" stays unique.
+    expect(screen.getAllByRole('button', { name: 'Seek to step 2' })).toHaveLength(1);
+    expect(within(group).getByRole('button', { name: 'Seek to action: Click control' })).toBeInTheDocument();
+  });
+
+  it('a new key (a new recording) starts with no marker, and the marker never touches the video', async () => {
+    const onSeek = vi.fn();
+    const result = recordingResult();
+    const { rerender } = render(<GuidedSeekControls key="a" result={result} onSeek={onSeek} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Seek to step 1' }));
+    expect(onSeek).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('guided-seek-marker')).toBeInTheDocument();
+    rerender(<GuidedSeekControls key="b" result={result} onSeek={onSeek} />);
+    expect(screen.queryByTestId('guided-seek-marker')).toBeNull();
+    expect(onSeek).toHaveBeenCalledTimes(1);
+  });
+
+  it('a disabled button sets no marker', async () => {
+    render(<GuidedSeekControls result={recordingResult()} recording={{ durationMs: 1000 }} onSeek={() => undefined} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Seek to step 2' }), { pointerEventsCheck: 0 });
+    expect(screen.queryByTestId('guided-seek-marker')).toBeNull();
   });
 });

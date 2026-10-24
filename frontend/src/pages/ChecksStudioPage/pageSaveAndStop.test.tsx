@@ -1,8 +1,8 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom';
 import { http, HttpResponse } from 'msw';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
@@ -22,6 +22,7 @@ import {
   type TestUpdateRequest,
 } from '@/types/studio/studioTypes';
 import { CANCELLED_LABEL, STOPPING_LABEL } from '@/components/studio/run';
+import { renderStudioAt } from '@/test/renderStudioAt';
 import { store } from '@/store';
 import { fetchSources } from '@/store/slices/sourcesSlice';
 import { fetchFeatures } from '@/store/slices/featuresSlice';
@@ -97,14 +98,11 @@ function acceptSaves(state: { current: TestDto; detail?: TestDetailDto }) {
   return bodies;
 }
 
+const StoreProvider = ({ children }: { children?: ReactNode }) => <Provider store={store}>{children}</Provider>;
+
+/** Mounts the editor on readyDraft's id, the one test this file's list fixture serves. */
 function renderPage() {
-  return render(
-    <Provider store={store}>
-      <MemoryRouter>
-        <ChecksStudioPage />
-      </MemoryRouter>
-    </Provider>,
-  );
+  return renderStudioAt(readyDraft.id, <ChecksStudioPage />, { wrapper: StoreProvider });
 }
 
 beforeAll(() => {
@@ -173,6 +171,24 @@ describe('Save', () => {
     expect(body.csiId).toBe(readyDraft.csiId);
     expect(JSON.stringify(body)).not.toContain('CSI-00000');
     expect(body.configuration.browser).toBe('chromium');
+  }, TEST_TIMEOUT_MS);
+
+  it('round 067 D4/D5: the Saved chip does not animate its colour, and the toast sits bottom-right', async () => {
+    const state = serveDraft(readyDraft);
+    acceptSaves(state);
+    renderPage();
+    await screen.findByRole('button', { name: 'Run Test' }, WAIT);
+
+    await userEvent.type(
+      screen.getByPlaceholderText('Add new test step...'),
+      'Click "Continue"{Control>}{Enter}{/Control}',
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    const toast = await screen.findByText('Test saved', {}, WAIT);
+
+    expect(toast.closest('.MuiSnackbar-root')).toHaveClass('MuiSnackbar-anchorOriginBottomRight');
+    await waitFor(() => expect(screen.getByTestId('studio-save-state')).toHaveTextContent('Saved'));
+    expect(getComputedStyle(screen.getByTestId('studio-save-state')).transition).toBe('none');
   }, TEST_TIMEOUT_MS);
 
   it('a second Save sends the revisions the first one returned', async () => {

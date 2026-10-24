@@ -2,13 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { Alert, Box, Button, Checkbox, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle,
   FormControlLabel, Link, MenuItem, Stack, Table, TableBody, TableCell, TableHead, TablePagination, TableRow,
   TextField, Typography } from '@mui/material';
-import { Link as RouterLink, useLocation } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import studioApi from '@/services/api/studioApi';
 import { studioSchedulesApi } from '@/services/api/studioSchedulesApi';
 import type { TestDraftHeader } from '@/types/studio/studioTypes';
 import type { ScheduleCapabilities, ScheduleOccurrencePage, SchedulePreview, StudioSchedule } from '@/types/studio/studioScheduling';
 import { notifyScheduleChanged, occurrenceLabel, offsetLabel, scheduleError, scheduleLabel } from './schedulePresentation';
-import { runDetailsPath } from '@/components/studio/runs/runLinks';
 
 const PRESETS = [
   ['0 */5 * * * *', 'Every 5 minutes'], ['0 */15 * * * *', 'Every 15 minutes'],
@@ -19,13 +18,12 @@ const EMPTY_HISTORY: ScheduleOccurrencePage = { data: [], page: 0, size: 10, tot
 export interface StudioScheduleDialogProps {
   test: TestDraftHeader | null;
   dirty?: boolean;
+  /** Where a run's details open; supplied by the host so the dialog never inspects the pathname. */
+  runHref: (executionId: string) => string;
   onClose: () => void;
 }
 
-function ScheduleContent({ test: initialTest, dirty = false, onClose, onBusyChange }: StudioScheduleDialogProps & { test: TestDraftHeader; onBusyChange: (busy: boolean) => void }) {
-  const location = useLocation();
-  const studioIndex = location.pathname.indexOf('/studio');
-  const runsPath = `${studioIndex >= 0 ? location.pathname.slice(0, studioIndex) : '/checks'}/studio/runs`;
+function ScheduleContent({ test: initialTest, dirty = false, runHref, onClose, onBusyChange }: StudioScheduleDialogProps & { test: TestDraftHeader; onBusyChange: (busy: boolean) => void }) {
   const [test, setTest] = useState<TestDraftHeader>(initialTest);
   const [schedule, setSchedule] = useState<StudioSchedule | null>(null);
   const [capabilities, setCapabilities] = useState<ScheduleCapabilities | null>(null);
@@ -176,7 +174,7 @@ function ScheduleContent({ test: initialTest, dirty = false, onClose, onBusyChan
           {configChanged && <Alert severity="info">Save scheduling changes before resuming.</Alert>}
           {!!uncertainty.length && <Box>
             <Typography variant="body2">We cannot tell whether these browsers ran. Investigate their effects before approving future scheduled runs.</Typography>
-            {uncertainty.map(id => <Box key={id}><Link component={RouterLink} to={runDetailsPath(runsPath, id)}>Inspect run {id}</Link></Box>)}
+            {uncertainty.map(id => <Box key={id}><Link component={RouterLink} to={runHref(id)}>Inspect run {id}</Link></Box>)}
             <FormControlLabel control={<Checkbox checked={acknowledged} onChange={event => setAcknowledged(event.target.checked)} disabled={!canManage || busy} />}
               label="I investigated these uncertain runs and acknowledge their possible effects. Resume permits future slots only." />
           </Box>}
@@ -211,7 +209,7 @@ function ScheduleContent({ test: initialTest, dirty = false, onClose, onBusyChan
             <Typography variant="caption">{row.scheduledAt}</Typography>
             {row.activatedBy && <Typography variant="caption" component="div">Activated by {row.activatedBy} at {row.activatedAt}</Typography>}</TableCell>
           <TableCell>{occurrenceLabel(row, capabilities)}</TableCell><TableCell>{row.executionId
-            ? <Link component={RouterLink} to={runDetailsPath(runsPath, row.executionId)}>View run</Link>
+            ? <Link component={RouterLink} to={runHref(row.executionId)}>View run</Link>
             : <Typography variant="caption">No browser run accepted</Typography>}</TableCell>
         </TableRow>)}</TableBody></Table></Box>}
         <TablePagination component="div" count={history.totalElements} page={historyPage} rowsPerPage={10} rowsPerPageOptions={[10]}

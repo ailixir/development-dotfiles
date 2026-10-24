@@ -65,9 +65,9 @@ export const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
     // Update current page based on route
     const getCurrentPageFromPath = (path: string): string => {
       if (path === '/checks' || path === '/') return 'dashboard';
-      if (path.startsWith('/checks/all')) return 'all-checks';
+      if (path.startsWith('/checks/all') || path.startsWith('/checks/ui-tests')) return 'all-checks';
       if (path.startsWith('/checks/create') || path.startsWith('/checks/prototype')) return 'create-check';
-      if (path.startsWith('/checks/studio')) return 'checks-studio';
+      if (path.startsWith('/checks/studio/tests') || path.startsWith('/checks/studio/runs')) return 'checks-studio';
       if (path.startsWith('/checks/reports')) return 'reports';
       return 'dashboard';
     };

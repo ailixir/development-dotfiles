@@ -1,8 +1,8 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom';
 import { http, HttpResponse } from 'msw';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
@@ -15,6 +15,7 @@ import {
   type TestDto,
   type TestUpdateRequest,
 } from '@/types/studio/studioTypes';
+import { renderStudioAt } from '@/test/renderStudioAt';
 import { store } from '@/store';
 import { fetchSources } from '@/store/slices/sourcesSlice';
 import { fetchFeatures } from '@/store/slices/featuresSlice';
@@ -61,14 +62,11 @@ function serveDraft(initial: TestDto) {
   return { state, bodies };
 }
 
+const StoreProvider = ({ children }: { children?: ReactNode }) => <Provider store={store}>{children}</Provider>;
+
+/** Mounts the editor on readyDraft's id, the one test every serveDraft list serves. */
 function renderPage() {
-  return render(
-    <Provider store={store}>
-      <MemoryRouter>
-        <ChecksStudioPage />
-      </MemoryRouter>
-    </Provider>,
-  );
+  return renderStudioAt(readyDraft.id, <ChecksStudioPage />, { wrapper: StoreProvider });
 }
 
 const withTimeout = (timeoutSeconds: number): TestDto => ({
@@ -125,7 +123,7 @@ describe('step timeout is always the default', () => {
   }, TEST_TIMEOUT_MS);
 
   it('a new test is created with, and saved with, 30 seconds', async () => {
-    // The Tests page creates a draft with `defaultConfiguration()`; this is that payload's value.
+    // Create Check, the only create path, creates a draft with `defaultConfiguration()`; this is that payload's value.
     expect(DEFAULT_STEP_TIMEOUT_SECONDS).toBe(30);
     expect(defaultConfiguration().timeoutSeconds).toBe(30);
 

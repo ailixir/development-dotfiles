@@ -82,7 +82,6 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
     if (p === '/' || p === '/checks') return true; // Home (standalone and host base)
     if (p === '/checks/all') return true; // Checks catalog
     if (p === '/checks/reports') return true; // Reports catalog
-    if (p === '/checks/studio') return true; // Studio landing
     if (p.startsWith('/checks/studio/tests')) return true; // Studio Tests
     if (p.startsWith('/checks/studio/runs')) return true; // Studio Runs
     return false;

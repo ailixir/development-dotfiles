@@ -20,17 +20,6 @@ export function runDetailsPath(listPath: string, executionId: string, search = '
   return `${listPath}/${encodeURIComponent(executionId)}${search}`;
 }
 
-/** The Studio editor for a test, a sibling of the Runs page. */
-export function studioTestPath(listPath: string, testId: string): string {
-  const studioBase = listPath.slice(0, listPath.length - '/runs'.length);
-  return `${studioBase}/${encodeURIComponent(testId)}`;
-}
-
-/** The Tests list, a sibling of the Runs page (`/checks/studio/tests`). */
-export function studioTestsPath(listPath: string): string {
-  return `${listPath.slice(0, listPath.length - '/runs'.length)}/tests`;
-}
-
 /** Copies text to the clipboard. Resolves `false` when the browser refuses or has no clipboard. */
 export async function copyText(text: string): Promise<boolean> {
   try {

@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { mockExecutions } from '@/services/mocks/studio/fixtures';
 import { RunRow } from '@/components/studio/runs/RunRow';
 import { RunDetailsDrawer } from '@/components/studio/runs/RunDetailsDrawer';
+import { uiTestEditorPath } from '@/components/studio/uiTestPaths';
 import type { ExecutionSnapshot } from '@/types/studio/studioTypes';
 import { occurrenceLabel } from './schedulePresentation';
 import type { ScheduleOccurrence } from '@/types/studio/studioScheduling';
@@ -25,9 +26,9 @@ describe('Scheduling evidence presentation', () => {
   });
   it('run details retain the actual activation actor and accepted revision', () => {
     render(<MemoryRouter><RunDetailsDrawer executionId={scheduled.executionId} pageRuns={[scheduled]} onClose={() => undefined}
-      onNavigateRun={() => undefined} onCopyLink={() => undefined} testHref={id => `/studio/${id}`} /></MemoryRouter>);
+      onNavigateRun={() => undefined} onCopyLink={() => undefined} testHref={id => uiTestEditorPath(id)} /></MemoryRouter>);
     expect(screen.getByTestId('run-schedule-provenance')).toHaveTextContent('original.operator@citi.com');
-    expect(screen.getByTestId('run-schedule-provenance')).toHaveTextContent(`Confirmed revision: ${scheduled.revisionId}`);
+    expect(screen.getByTestId('run-schedule-provenance')).toHaveTextContent(`Learned revision: ${scheduled.revisionId}`);
     expect(screen.getByTestId('run-schedule-provenance')).toHaveTextContent('activation-old');
   });
   it('expired deferred work is awaiting settlement, including while capability is off', () => {

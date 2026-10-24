@@ -7,8 +7,8 @@ import { delay, http, HttpResponse } from 'msw';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
 import { readyDraft } from '@/services/mocks/studio/readinessFixtures';
-import type { TestDto, TestReadiness, TestRequest } from '@/types/studio/studioTypes';
-import { CREATE_ERRORS, DELETE_ERRORS } from '@/components/studio/tests/testErrors';
+import type { TestDto, TestReadiness } from '@/types/studio/studioTypes';
+import { DELETE_ERRORS } from '@/components/studio/tests/testErrors';
 import { store } from '@/store';
 import StudioTestsPage from './StudioTestsPage';
 
@@ -29,7 +29,6 @@ type ListResponder = (params: URLSearchParams) => { data: TestDto[]; totalElemen
 
 let user: ReturnType<typeof userEvent.setup>;
 let listRequests: URLSearchParams[];
-let createCalls: TestRequest[];
 let deleteCalls: string[];
 
 function makeTest(id: string, overrides: Partial<TestDto> = {}): TestDto {
@@ -81,7 +80,6 @@ beforeAll(() => studioMockServer.listen({ onUnhandledRequest: 'error' }));
 beforeEach(() => {
   user = userEvent.setup({ delay: null });
   listRequests = [];
-  createCalls = [];
   deleteCalls = [];
   store.dispatch({ type: 'dashboard/setSearchContext', payload: { csiId: null } });
 });
@@ -225,7 +223,7 @@ describe('Tests page — rows', { timeout: 15_000 }, () => {
     renderPage();
 
     const link = await screen.findByRole('link', { name: 'Test one' }, WAIT);
-    expect(link).toHaveAttribute('href', '/checks/studio/one');
+    expect(link).toHaveAttribute('href', '/checks/ui-tests/one/studio');
     const row = screen.getByTestId('test-row-one');
     expect(within(row).getByText('Pays an invoice · 3 steps')).toBeInTheDocument();
     expect(await within(row).findByText('Payments', {}, WAIT)).toBeInTheDocument();
@@ -270,7 +268,7 @@ describe('Tests page — rows', { timeout: 15_000 }, () => {
     await user.click(await screen.findByRole('button', { name: 'Actions for Test one' }, WAIT));
     expect(screen.queryByRole('menuitem', { name: /Run/ })).toBeNull();
     await user.click(screen.getByRole('menuitem', { name: 'Open' }));
-    expect(screen.getByTestId('location')).toHaveTextContent('/checks/studio/one');
+    expect(screen.getByTestId('location')).toHaveTextContent('/checks/ui-tests/one/studio');
   });
 });
 
@@ -353,89 +351,17 @@ describe('Tests page — delete', { timeout: 15_000 }, () => {
 });
 
 describe('Tests page — create', { timeout: 15_000 }, () => {
-  function serveCreate(status: number, body: object = {}) {
-    studioMockServer.use(http.post(`${STUDIO_BASE}/tests`, async ({ request }) => {
-      const payload = await request.json() as TestRequest;
-      createCalls.push(payload);
-      if (status === 201) return HttpResponse.json({ ...readyDraft, ...payload, id: 'created-id' }, { status });
-      return HttpResponse.json(body, { status });
-    }));
-  }
-
-  async function fillAndSubmit(name = 'Checkout journey') {
-    await user.click(await screen.findByRole('button', { name: 'Create Test' }, WAIT));
-    const dialog = screen.getByRole('dialog');
-    await user.click(within(dialog).getByRole('textbox', { name: /name/i }));
-    await user.paste(name);
-    await user.click(within(dialog).getByRole('combobox', { name: /System \(CSI\)/i }));
-    await user.click(await screen.findByRole('option', { name: '178672: Payments' }, WAIT));
-    await user.click(within(dialog).getByRole('button', { name: 'Create' }));
-    return dialog;
-  }
-
-  it('limits the name to 255 characters with a counter', async () => {
-    serve();
-    renderPage();
-    await user.click(await screen.findByRole('button', { name: 'Create Test' }, WAIT));
-    const name = within(screen.getByRole('dialog')).getByRole('textbox', { name: /name/i });
-
-    expect(name).toHaveAttribute('maxLength', '255');
-    expect(screen.getByText('0/255')).toBeInTheDocument();
-    await user.click(name);
-    await user.paste('Login');
-    expect(screen.getByText('5/255')).toBeInTheDocument();
-  });
-
-  it('does not show the system field in error on open, only after the user leaves it empty', async () => {
-    store.dispatch({ type: 'dashboard/setSearchContext', payload: { csiId: '60406' } });
-    serve();
+  it.each<[string, TestDto[]]>([
+    ['header', [makeTest('one')]],
+    ['empty state', []],
+  ])('sends the %s Create Test action to Create Check with the UI Test type', async (_where, data) => {
+    serve(() => ({ data }));
     renderPage();
 
     await user.click(await screen.findByRole('button', { name: 'Create Test' }, WAIT));
-    const helper = screen.getByText('Choose the system this test belongs to.');
-    expect(helper).not.toHaveClass('Mui-error');
 
-    await user.click(within(screen.getByRole('dialog')).getByRole('combobox', { name: /System \(CSI\)/i }));
-    await screen.findByRole('option', { name: '178672: Payments' }, WAIT);
-    await user.keyboard('{Escape}');
-    await waitFor(() => expect(screen.getByText('Choose the system this test belongs to.')).toHaveClass('Mui-error'));
-  });
-
-  it('requires a registered system instead of sending a stale default, then opens the new test', async () => {
-    store.dispatch({ type: 'dashboard/setSearchContext', payload: { csiId: '60406' } });
-    serve();
-    serveCreate(201);
-    renderPage();
-
-    await user.click(await screen.findByRole('button', { name: 'Create Test' }, WAIT));
-    await user.click(screen.getByRole('textbox', { name: /name/i }));
-    await user.paste('Checkout journey');
-    expect(screen.getByRole('button', { name: 'Create' })).toBeDisabled();
-    expect(screen.getByText('Choose the system this test belongs to.')).toBeInTheDocument();
-
-    await user.click(within(screen.getByRole('dialog')).getByRole('combobox', { name: /System \(CSI\)/i }));
-    await user.click(await screen.findByRole('option', { name: '178672: Payments' }, WAIT));
-    await user.click(screen.getByRole('button', { name: 'Create' }));
-
-    await waitFor(() => expect(createCalls).toHaveLength(1), WAIT);
-    expect(createCalls[0]).toMatchObject({ name: 'Checkout journey', csiId: '178672', steps: [] });
-    await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/checks/studio/created-id'), WAIT);
-  });
-
-  it.each<[string, number, object, string]>([
-    ['400 with detail', 400, { error: 'BAD_REQUEST', message: 'Name must not be blank' }, 'Name must not be blank'],
-    ['400 without detail', 400, {}, CREATE_ERRORS.validation],
-    ['403', 403, { message: 'denied' }, CREATE_ERRORS.forbidden],
-    ['409', 409, { message: 'conflict' }, CREATE_ERRORS.conflict],
-    ['500', 500, { message: 'boom' }, CREATE_ERRORS.generic],
-  ])('explains a %s refusal', async (_case, status, body, message) => {
-    serve();
-    serveCreate(status, body);
-    renderPage();
-
-    const dialog = await fillAndSubmit();
-
-    expect(await within(dialog).findByText(message, {}, WAIT)).toBeInTheDocument();
-    expect(screen.getByTestId('location')).toHaveTextContent('/checks/studio/tests');
+    expect(screen.getByTestId('location')).toHaveTextContent('/checks/create');
+    expect(search().get('type')).toBe('UI_TEST');
+    expect(screen.queryByRole('dialog')).toBeNull();
   });
 });

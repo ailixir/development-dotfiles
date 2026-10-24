@@ -6,7 +6,8 @@ import { hideBelowMd } from '@/components/studio/list/studioListSx';
 import type { TestDto } from '@/types/studio/studioTypes';
 import { formatAbsoluteTime, formatRelativeTime } from '@/utils/time';
 import TestRowMenu from './TestRowMenu';
-import { readinessFor, testHref } from './testListPresentation';
+import { readinessFor } from './testListPresentation';
+import { uiTestEditorPath } from '@/components/studio/uiTestPaths';
 import { StudioScheduleSummary } from '@/components/studio/scheduling/StudioScheduleSummary';
 
 export interface TestRowProps {
@@ -29,7 +30,7 @@ function stepsLabel(count: number): string {
 }
 
 const TestRow: React.FC<TestRowProps> = ({ test, csiName, now, actionsDisabled = false, onDelete, onSchedule }) => {
-  const href = testHref(test.id);
+  const href = uiTestEditorPath(test.id);
   const readiness = readinessFor(test.readiness);
   const outcome = test.lastRunStatus;
 

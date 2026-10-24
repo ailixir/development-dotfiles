@@ -12,6 +12,7 @@ import {
 import type { TestDto } from '@/types/studio/studioTypes';
 import { mockTests } from '@/services/mocks/studio/fixtures';
 import { DEV_TRANSPORT_SCENARIO } from '@/services/mocks/studio/executionScenarios';
+import { uiTestEditorPath } from '@/components/studio/uiTestPaths';
 
 /**
  * Story 10.11b — **AC-7**, **AC-8** and the surface half of **AC-13**, asserted against the real
@@ -140,6 +141,8 @@ async function loadApp(baseUrl: string) {
   const { MemoryRouter, Route, Routes, useNavigate } = await import('react-router-dom');
   const { store } = await import('@/store');
   const { default: ChecksStudioPage } = await import('./ChecksStudioPage');
+  // The editor's route pattern comes from the shared helper; its module is read after the reset like the rest.
+  const { STUDIO_EDITOR_ROUTE } = await import('@/test/renderStudioAt');
   const transport = await import('@/services/api/studioTransportWiring');
 
   /**
@@ -167,11 +170,7 @@ async function loadApp(baseUrl: string) {
             Routes,
             null,
             React.createElement(Route, {
-              path: '/studio/tests/:id',
-              element: React.createElement(ChecksStudioPage) as ReactElement,
-            }),
-            React.createElement(Route, {
-              path: '/studio',
+              path: STUDIO_EDITOR_ROUTE,
               element: React.createElement(ChecksStudioPage) as ReactElement,
             }),
           ),
@@ -221,7 +220,7 @@ describe('AC-7: all progress reaches the screen through one transport abstractio
     });
 
     try {
-      renderAt(`/studio/tests/${draftA.id}`);
+      renderAt(uiTestEditorPath(draftA.id));
       await runTheTest(rtl);
 
       await until(() => started === 1, 'the substituted transport to be started');
@@ -250,7 +249,7 @@ describe('AC-8: the 700 ms polling loop is gone as the primary path', () => {
   it('SCN-DEV-TRANSPORT: a full healthy run produces progress on the surface and zero GET /executions/{id} requests', async () => {
     const { rtl, renderAt, transport } = await loadApp(api().baseUrl);
     try {
-      renderAt(`/studio/tests/${draftA.id}`);
+      renderAt(uiTestEditorPath(draftA.id));
       await runTheTest(rtl);
 
       await until(() => connections.length === 1, 'the stream connection', 15000);
@@ -309,7 +308,7 @@ describe('AC-13: no subscription accumulates', () => {
     const { rtl, renderAt } = await loadApp(api().baseUrl);
     try {
       for (let cycle = 0; cycle < 3; cycle += 1) {
-        const view = renderAt(`/studio/tests/${draftA.id}`);
+        const view = renderAt(uiTestEditorPath(draftA.id));
         // eslint-disable-next-line no-await-in-loop
         await runTheTest(rtl);
         // eslint-disable-next-line no-await-in-loop
@@ -340,7 +339,7 @@ describe('AC-13: no subscription accumulates', () => {
   it('SCN-TERMINAL-EVIDENCE-SETTLED: a scenario switch performed while a stream is open leaves no connection behind', async () => {
     const { rtl, renderAt, nav } = await loadApp(api().baseUrl);
     try {
-      const view = renderAt(`/studio/tests/${draftA.id}`);
+      const view = renderAt(uiTestEditorPath(draftA.id));
       await runTheTest(rtl);
       await until(() => connections.length === 1, 'the stream connection', 15000);
       await rtl.act(async () => {
@@ -359,7 +358,7 @@ describe('AC-13: no subscription accumulates', () => {
       // unmount cleanup cannot be what closes the connection.
       const before = api().streamsClosed;
       await rtl.act(async () => {
-        nav.go?.(`/studio/tests/${draftB.id}`);
+        nav.go?.(uiTestEditorPath(draftB.id));
         await new Promise((resolve) => setTimeout(resolve, 60));
       });
 
@@ -390,7 +389,7 @@ describe('SCEN-1 (@qa gate): the route effect is a change detector, not a differ
     listedDrafts = [draftA];
     const { rtl, renderAt } = await loadApp(api().baseUrl);
     try {
-      renderAt(`/studio/tests/${draftB.id}`);
+      renderAt(uiTestEditorPath(draftB.id));
 
       // The route names draftB, but the list does not carry it, so the page settles on draftA.
       await rtl.screen.findByRole('heading', { level: 1, name: draftA.name }, { timeout: 10000 });

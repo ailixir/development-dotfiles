@@ -197,12 +197,6 @@ export interface GuidedCompletionProps {
   readonly draftStepIds: readonly string[];
   readonly onGoToStep: (stepId: string) => void;
   readonly onOpenVariables: () => void;
-  /**
-   * KL-015-Q4 (conditional): the draft step number N the authored-literal hint names, or `null`/absent
-   * for no hint. The page decides when it applies (`authoredLiteralHintStep`; @dev records the trigger
-   * at T2); this component only renders it, under a failure (W5 UX-03).
-   */
-  readonly authoredLiteralHintStep?: number | null;
 }
 
 function Lines({ lines }: { readonly lines: readonly string[] }) {
@@ -224,7 +218,6 @@ export function GuidedCompletion({
   draftStepIds,
   onGoToStep,
   onOpenVariables,
-  authoredLiteralHintStep = null,
 }: GuidedCompletionProps) {
   if (input.kind === 'replay') {
     if (input.snapshot.status !== 'PASSED') return null;
@@ -251,11 +244,6 @@ export function GuidedCompletion({
     );
   }
 
-  const hint =
-    authoredLiteralHintStep != null && (view.kind === 'failed' || view.kind === 'failedUnnamed')
-      ? guidedCopy('authoredLiteralTargetNotFound', { N: authoredLiteralHintStep })
-      : null;
-
   return (
     <Alert
       severity={SEVERITY[view.kind]}
@@ -280,11 +268,6 @@ export function GuidedCompletion({
               sx={{ fontFamily: 'monospace', mt: 0.5, overflowWrap: 'anywhere' }}
             >
               {view.code}
-            </Typography>
-          )}
-          {hint !== null && (
-            <Typography variant="body2" data-testid="guided-authored-literal-hint" sx={{ mt: 0.5 }}>
-              {hint}
             </Typography>
           )}
         </>

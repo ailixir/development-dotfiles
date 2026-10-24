@@ -1,10 +1,10 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom';
 import { http, HttpResponse } from 'msw';
-import type { ExecutionSnapshot, TestDto } from '@/types/studio/studioTypes';
+import type { ExecutionSnapshot, TestDto, TestUpdateRequest } from '@/types/studio/studioTypes';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
 import { fixtureDetail, fixtureStepId } from '@/services/mocks/studio/authoringState';
@@ -26,11 +26,12 @@ import {
 } from '@/services/api/studioTransportWiring';
 import { resetGuidedSessionRuntime } from '@/components/studio/guided/useGuidedSession';
 import { availableQuickStartTemplates } from '@/components/studio/templates';
+import { renderStudioAt } from '@/test/renderStudioAt';
 import { store } from '@/store';
 import { fetchSources } from '@/store/slices/sourcesSlice';
 import { fetchFeatures } from '@/store/slices/featuresSlice';
 import { clearGuidedSession, setExecuting } from '@/store/slices/studioSlice';
-import ChecksStudioPage from './ChecksStudioPage';
+import ChecksStudioPage, { RELOAD_TEST_LABEL, SAVE_CONFLICT_TITLE } from './ChecksStudioPage';
 
 /**
  * STUDIO-OBS-008 AC-9 — the replay half and the editor wiring, on the real page (lane L5b).
@@ -151,14 +152,11 @@ function serveReplay(frames: readonly ExecutionSnapshot[]) {
   );
 }
 
-function renderPage() {
-  return render(
-    <Provider store={store}>
-      <MemoryRouter>
-        <ChecksStudioPage guidedOptions={GUIDED_OPTIONS} />
-      </MemoryRouter>
-    </Provider>,
-  );
+const StoreProvider = ({ children }: { children?: ReactNode }) => <Provider store={store}>{children}</Provider>;
+
+/** Mounts the editor on the id of the draft the test just served. */
+function renderPage(id: string) {
+  return renderStudioAt(id, <ChecksStudioPage guidedOptions={GUIDED_OPTIONS} />, { wrapper: StoreProvider });
 }
 
 async function runButton(): Promise<HTMLElement> {
@@ -250,7 +248,7 @@ describe('AC-9: later replay (AC-2, AC-3)', () => {
   it('later replay: a READY test replays through one execute, starts no guided session, and says "Completed — saved steps replayed."', async () => {
     serveDraft(readyDraft);
     serveReplay(DEV_TRANSPORT_SCENARIO);
-    renderPage();
+    renderPage(readyDraft.id);
     expect(await screen.findByTestId('guided-readiness-chip', {}, WAIT)).toHaveTextContent('Learned · ready to repeat');
     await user().click(await runButton());
 
@@ -270,7 +268,7 @@ describe('W5-1: an unreadable stored session never blocks a replay (ruling w5-un
     storePointer(readyDraft, 'guided-session-probe');
     serveDraft(readyDraft);
     serveReplay(frames);
-    renderPage();
+    renderPage(readyDraft.id);
     // The stored session was read and refused, so the page is in the `unreadable` state.
     await waitFor(() => expect(guidedRequestCount('read')).toBeGreaterThan(0), WAIT);
   }
@@ -324,7 +322,7 @@ describe('AC-9 / T0 ruling A1.6 on the page: the replay names its cause', () => 
     async (scenario, stepNumber, sentence) => {
       serveDraft(readyDraft);
       serveReplay(REPLAY_FAILURE_SCENARIOS[scenario]);
-      renderPage();
+      renderPage(readyDraft.id);
       await user().click(await runButton());
 
       const notice = await screen.findByTestId('login-required-notice', {}, WAIT);
@@ -348,7 +346,7 @@ describe('AC-9 / T0 ruling A1.6 on the page: the replay names its cause', () => 
   it('replay drift → Learn again from step N: the drift sentence, a seek on the existing replay path, and exactly that guided start (base, step, fresh key)', async () => {
     serveDraft(readyDraft);
     serveReplay(REPLAY_FAILURE_SCENARIOS.targetDrift);
-    renderPage();
+    renderPage(readyDraft.id);
     await user().click(await runButton());
 
     expect(await screen.findByTestId('replay-drift', {}, WAIT)).toHaveTextContent('Step 2 no longer matches the page…');
@@ -391,7 +389,7 @@ describe('AC-9: references and capability (AC-5 editor wiring)', () => {
   it('reference insert for <var> and <secret>: tokens land at the caret, and an inserted secret is declared by its Vault name (D-8)', async () => {
     seedSecretNames(readyDraft.id, ['API_TOKEN']);
     serveDraft(readyDraft);
-    renderPage();
+    renderPage(readyDraft.id);
     await runButton();
     await capabilityLoaded();
     const u = user();
@@ -430,7 +428,7 @@ describe('AC-9: references and capability (AC-5 editor wiring)', () => {
     // refuses such a set at start (IncrementalAuthoringIdentity.java:83-90), so nothing is inserted.
     seedSecretNames(readyDraft.id, ['USER_ID']);
     serveDraft(readyDraft);
-    renderPage();
+    renderPage(readyDraft.id);
     await runButton();
     await capabilityLoaded();
     const u = user();
@@ -465,7 +463,7 @@ describe('AC-9: references and capability (AC-5 editor wiring)', () => {
 
   it('D-8: a secret row with no chosen secret is not written, and a template secret is written under its Vault name', async () => {
     serveDraft(readyDraft);
-    renderPage();
+    renderPage(readyDraft.id);
     await runButton();
     await capabilityLoaded();
     const u = user();
@@ -501,7 +499,7 @@ describe('AC-9: references and capability (AC-5 editor wiring)', () => {
   it('capability off: secrets are unavailable, said in text; no secret template, no secret in the insert menu', async () => {
     setVaultSecrets(false);
     serveDraft(readyDraft);
-    renderPage();
+    renderPage(readyDraft.id);
     await runButton();
     await capabilityLoaded();
     const u = user();
@@ -525,7 +523,7 @@ describe('AC-9: references and capability (AC-5 editor wiring)', () => {
   it('capability on: no unavailability sentence, the secret template is offered, and the insert menu offers "New secret…"', async () => {
     setVaultSecrets(true);
     serveDraft(readyDraft);
-    renderPage();
+    renderPage(readyDraft.id);
     await runButton();
     await capabilityLoaded();
     const u = user();
@@ -550,7 +548,7 @@ describe('AC-9 / AC-8 a: narrow layout', () => {
     window.dispatchEvent(new Event('resize'));
     setGuidedScenario(loginRequired(false), unlearnedDraft.id);
     serveDraft(unlearnedDraft);
-    renderPage();
+    renderPage(unlearnedDraft.id);
     const run = await runButton();
     await user().click(run);
     const notice = await screen.findByTestId('login-required-notice', {}, WAIT);
@@ -585,5 +583,122 @@ describe('AC-9 / AC-8 a: narrow layout', () => {
     expect(screen.getByRole('button', { name: 'Run Test' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Insert reference' })).toBeInTheDocument();
     expect(screen.getByRole('textbox', { name: 'Step 1' })).toBeInTheDocument();
+  }, TEST_TIMEOUT_MS);
+});
+
+
+describe('C-OBS008-4: manual Variables-save ambiguity preflight', () => {
+  const collisionCopy = 'A variable name conflicts with a secret reference. Rename it or select the matching secret.';
+
+  it('refuses a distinct plain-name/secret-ID collision without consuming any draft, then correction sends one whole-draft PUT', async () => {
+    seedSecretNames(readyDraft.id, ['LOGIN_PW', 'USER_ID']);
+    serveDraft(readyDraft);
+    renderPage(readyDraft.id);
+    await runButton(); await capabilityLoaded();
+    const u = user();
+    const step = screen.getByRole('textbox', { name: 'Step 1' });
+    const pending = screen.getByRole('textbox', { name: 'Add a test step' });
+    fireEvent.change(step, { target: { value: 'Click the edited public step' } });
+    fireEvent.change(pending, { target: { value: 'Check the pending public step' } });
+    await u.click(screen.getByRole('combobox', { name: 'Environment' }));
+    await u.click(await screen.findByRole('option', { name: 'Development' }, WAIT));
+    await u.click(screen.getByRole('button', { name: 'Variables' }));
+    const dialog = await screen.findByRole('dialog', {}, WAIT);
+    const alias = within(dialog).getByRole('textbox', { name: 'Variable 2 name' });
+    await u.clear(alias); await u.type(alias, 'LOGIN');
+    await u.click(within(dialog).getByRole('combobox', { name: 'Select secret' }));
+    await u.click(await screen.findByRole('option', { name: 'USER_ID' }, WAIT));
+    const value = within(dialog).getByRole('textbox', { name: 'Variable 1 value' });
+    await u.clear(value); await u.type(value, '  public typed value  ');
+    await u.click(within(dialog).getByRole('button', { name: 'Save' }));
+    expect(await screen.findByTestId('variables-save-issue', {}, WAIT)).toHaveTextContent(collisionCopy);
+    expect(requests('PUT', SAVES)).toHaveLength(0);
+    expect(requests('POST', STARTS)).toHaveLength(0);
+    expect(step).toHaveValue('Click the edited public step');
+    expect(pending).toHaveValue('Check the pending public step');
+    expect(screen.queryByRole('textbox', { name: 'Step 5', hidden: true })).toBeNull();
+    expect(value).toHaveValue('  public typed value  ');
+    expect(alias).toHaveValue('LOGIN');
+    expect(within(dialog).getByRole('combobox', { name: 'Select secret' })).toHaveTextContent('USER_ID');
+    const name = within(dialog).getByRole('textbox', { name: 'Variable 1 name' });
+    await u.clear(name); await u.type(name, 'USER_ALIAS');
+    expect(screen.queryByTestId('variables-save-issue')).toBeNull();
+    await u.click(within(dialog).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(requests('PUT', SAVES)[0]?.body).toBeTruthy(), WAIT);
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull(), WAIT);
+    expect(requests('PUT', SAVES)).toHaveLength(1);
+    const body = requests('PUT', SAVES)[0].body as TestUpdateRequest;
+    expect(body.variables).toEqual([{ name: 'USER_ALIAS', kind: 'plain', value: '  public typed value  ' }, { name: 'LOGIN', kind: 'secretRef', secretId: 'USER_ID' }]);
+    expect(body.steps[0]).toEqual({ id: fixtureStepId(0), text: 'Click the edited public step' });
+    expect(body.steps.map((row) => row.text)).toEqual(['Click the edited public step', ...readyDraft.steps.slice(1), 'Check the pending public step']);
+    expect(body).toMatchObject({ environment: 'Development', sourceRevision: readyDraft.sourceRevision, configurationRevision: readyDraft.configurationRevision, csiId: readyDraft.csiId });
+  }, TEST_TIMEOUT_MS);
+
+  it('refuses a secret alias naming another secretId and accepts two aliases after selecting the matching secret', async () => {
+    const draft: TestDto = { ...readyDraft, variables: [{ name: 'TOKEN', kind: 'secretRef', secretId: 'OTHER' }, { name: 'LOGIN', kind: 'secretRef', secretId: 'OTHER' }] };
+    seedSecretNames(draft.id, ['OTHER', 'TOKEN']); serveDraft(draft); renderPage(draft.id);
+    await runButton(); await capabilityLoaded(); const u = user();
+    await u.click(screen.getByRole('button', { name: 'Variables' }));
+    const dialog = await screen.findByRole('dialog', {}, WAIT);
+    await u.click(within(dialog).getAllByRole('combobox', { name: 'Select secret' })[1]);
+    await u.click(await screen.findByRole('option', { name: 'TOKEN' }, WAIT));
+    await u.click(within(dialog).getByRole('button', { name: 'Save' }));
+    expect(await screen.findByTestId('variables-save-issue', {}, WAIT)).toHaveTextContent(collisionCopy);
+    expect(requests('PUT', SAVES)).toHaveLength(0);
+    await u.click(within(dialog).getAllByRole('combobox', { name: 'Select secret' })[0]);
+    await u.click(await screen.findByRole('option', { name: 'TOKEN' }, WAIT));
+    expect(screen.queryByTestId('variables-save-issue')).toBeNull();
+    await u.click(within(dialog).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(requests('PUT', SAVES)[0]?.body).toBeTruthy(), WAIT);
+    expect(requests('PUT', SAVES)).toHaveLength(1);
+    expect((requests('PUT', SAVES)[0].body as TestUpdateRequest).variables).toEqual([{ name: 'TOKEN', kind: 'secretRef', secretId: 'TOKEN' }, { name: 'LOGIN', kind: 'secretRef', secretId: 'TOKEN' }]);
+  }, TEST_TIMEOUT_MS);
+
+  it('blocks duplicate-after-trim in dialog and toolbar Save, clearing the generic issue when corrected', async () => {
+    serveDraft(readyDraft); renderPage(readyDraft.id); await runButton(); await capabilityLoaded(); const u = user();
+    await u.click(screen.getByRole('button', { name: 'Variables' }));
+    let dialog = await screen.findByRole('dialog', {}, WAIT);
+    const name = within(dialog).getByRole('textbox', { name: 'Variable 2 name' });
+    await u.clear(name); await u.type(name, ' USER_ID ');
+    await u.click(within(dialog).getByRole('button', { name: 'Save' }));
+    expect(await screen.findByTestId('variables-save-issue', {}, WAIT)).toHaveTextContent('Variable names must be unique. Rename or remove the duplicate.');
+    expect(requests('PUT', SAVES)).toHaveLength(0);
+    expect(name).toHaveValue(' USER_ID ');
+    await u.click(within(dialog).getByRole('button', { name: 'Close' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull(), WAIT);
+    await u.click(screen.getByRole('button', { name: 'Save' }));
+    dialog = await screen.findByRole('dialog', {}, WAIT);
+    expect(within(dialog).getByTestId('variables-save-issue')).toHaveTextContent('Variable names must be unique.');
+    expect(requests('PUT', SAVES)).toHaveLength(0);
+    const corrected = within(dialog).getByRole('textbox', { name: 'Variable 2 name' });
+    await u.clear(corrected); await u.type(corrected, 'LOGIN_PW');
+    expect(screen.queryByTestId('variables-save-issue')).toBeNull();
+    await u.click(within(dialog).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(requests('PUT', SAVES)[0]?.body).toBeTruthy(), WAIT);
+    expect(requests('PUT', SAVES)).toHaveLength(1);
+    expect((requests('PUT', SAVES)[0].body as TestUpdateRequest).variables).toEqual(readyDraft.variables);
+  }, TEST_TIMEOUT_MS);
+
+  it('preserves capability-off secret declarations and original409 conflict/reload behavior for valid saves', async () => {
+    setVaultSecrets(false); serveDraft(readyDraft); let current = readyDraft;
+    studioMockServer.use(
+      http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fixtureDetail(current))),
+      http.put(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json({ error: 'STALE_REVISION', message: 'Reload the newer draft' }, { status: 409 })),
+    );
+    renderPage(readyDraft.id); await runButton(); await capabilityLoaded(); const u = user();
+    await u.click(screen.getByRole('button', { name: 'Variables' }));
+    const dialog = await screen.findByRole('dialog', {}, WAIT);
+    await u.click(within(dialog).getByRole('button', { name: 'Save' }));
+    const conflict = await screen.findByTestId('save-conflict', {}, WAIT);
+    expect(conflict).toHaveTextContent(SAVE_CONFLICT_TITLE);
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull(), WAIT);
+    await waitFor(() => expect(requests('PUT', SAVES)[0]?.body).toBeTruthy(), WAIT);
+    expect((requests('PUT', SAVES)[0].body as TestUpdateRequest).variables).toEqual(readyDraft.variables);
+    current = { ...readyDraft, steps: [...readyDraft.steps, 'Wait for the newer public draft'], sourceRevision: readyDraft.sourceRevision + 1 };
+    await u.click(within(conflict).getByRole('button', { name: RELOAD_TEST_LABEL }));
+    expect(await screen.findByDisplayValue('Wait for the newer public draft', {}, WAIT)).toBeInTheDocument();
+    expect(screen.queryByTestId('save-conflict')).toBeNull();
+    expect(requests('PUT', SAVES)).toHaveLength(1);
+    expect(requests('POST', STARTS)).toHaveLength(0);
   }, TEST_TIMEOUT_MS);
 });

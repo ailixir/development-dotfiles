@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { useState } from 'react';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { setupServer } from 'msw/node';
 import { http, HttpResponse } from 'msw';
@@ -84,7 +84,9 @@ async function openCreateDialog() {
   const listbox = await screen.findByRole('listbox');
   await within(listbox).findByText('EXISTING_PW');
   await user.click(within(listbox).getByText('+ Create new secret…'));
-  return screen.findByRole('dialog');
+  const dialog = await screen.findByRole('dialog');
+  await within(dialog).findByLabelText('Name');
+  return dialog;
 }
 
 /** Pastes each field (one input event each): the tests check the values, not per-character typing. */
@@ -94,7 +96,7 @@ async function fillField(field: HTMLElement, text: string) {
 }
 
 async function fillDialog(dialog: HTMLElement, fields: { name: string; value: string; origins: string }) {
-  await fillField(within(dialog).getByLabelText('Name'), fields.name);
+  await fillField(await within(dialog).findByLabelText('Name'), fields.name);
   await fillField(within(dialog).getByLabelText('Value'), fields.value);
   await fillField(within(dialog).getByLabelText('Allowed origins'), fields.origins);
 }
@@ -123,7 +125,10 @@ describe('SecretInput', () => {
     render(<SecretInput label="Select secret" testId={TEST_ID} value={null} onChange={onChange} />);
 
     const dialog = await openCreateDialog();
-    expect(observed).toEqual([{ method: 'GET', path: `/api/v1/studio/tests/${TEST_ID}/secrets` }]);
+    expect(observed).toEqual([
+      { method: 'GET', path: `/api/v1/studio/tests/${TEST_ID}/secrets` },
+      { method: 'GET', path: `/api/v1/studio/tests/${TEST_ID}/secrets` },
+    ]);
     expect(within(dialog).queryByLabelText('Label')).toBeNull();
     expect(within(dialog).queryByLabelText('Scope')).toBeNull();
 
@@ -155,7 +160,7 @@ describe('SecretInput', () => {
     expect(within(listbox).getByText('LOGIN_PW')).toBeInTheDocument();
     await user.click(within(listbox).getByText('+ Create new secret…'));
     const reopened = await screen.findByRole('dialog');
-    expect(within(reopened).getByLabelText('Value')).toHaveValue('');
+    expect(await within(reopened).findByLabelText('Value')).toHaveValue('');
     // Two full dialog round-trips (open, fill, create, close, reopen) are inherent to what this
     // asserts; already delay-free and paste-filled (VAL-002), it still timed out once at 5s under
     // full-suite load (VAL-032).
@@ -466,6 +471,7 @@ describe('secretsHandlers (MSW mirror): never echoes the value and matches the c
     const listbox = await screen.findByRole('listbox');
     await user.click(within(listbox).getByText('+ Create new secret…'));
     const dialog = await screen.findByRole('dialog');
+    await user.click(await within(dialog).findByRole('button', { name: 'Continue' }));
     await fillDialog(dialog, { name: 'LOGIN_PW', value: MIRROR_CANARY, origins: 'https://login.app.example' });
     await user.click(within(dialog).getByRole('button', { name: 'Create' }));
 
@@ -477,6 +483,178 @@ describe('secretsHandlers (MSW mirror): never echoes the value and matches the c
 });
 
 describe('CreateSecretDialog (shared with the reference picker)', () => {
+  it('round 067 D10: the disclaimer tells authors to use a functional ID or service account, after the first sentence', async () => {
+    server.use(...secretsHandlers);
+    render(<CreateSecretDialog open testId={TEST_ID} onClose={vi.fn()} onCreated={vi.fn()} />);
+    const dialog = screen.getByRole('dialog');
+    await within(dialog).findByText('Before adding your first secret');
+    const text = within(dialog).getByText(/Only add secrets you are authorised/).textContent ?? '';
+    const sentence = "Use a functional ID or service account for sign-in, never a real person's login.";
+    expect(text).toContain(sentence);
+    expect(text.indexOf('Only add secrets you are authorised to use for this test')).toBe(0);
+    expect(text.indexOf(sentence)).toBeGreaterThan(text.indexOf('for this test.'));
+    const copy = fs.readFileSync(
+      path.resolve(__dirname, '../../../../docs/qa/evidence/STUDIO-OBS-009/ux-fix-067/copy.md'),
+      'utf8',
+    );
+    expect(copy).toContain(sentence);
+  });
+
+  it('shows the disclaimer before the first secret, then skips it after a successful create for that test', async () => {
+    server.use(...secretsHandlers);
+    const onCreated = vi.fn();
+    const { rerender } = render(
+      <CreateSecretDialog open testId={TEST_ID} onClose={vi.fn()} onCreated={onCreated} />,
+    );
+    const dialog = screen.getByRole('dialog');
+    expect(await within(dialog).findByText('Before adding your first secret')).toBeVisible();
+    expect(within(dialog).getByText(/Only add secrets you are authorised to use for this test/)).toBeVisible();
+    expect(within(dialog).getByText(/may appear in the recording/)).toBeVisible();
+    expect(within(dialog).queryByRole('textbox')).toBeNull();
+    expect(within(dialog).queryByLabelText('Value')).toBeNull();
+    expect(within(dialog).queryByRole('button', { name: 'Create' })).toBeNull();
+    expect(observed.filter((entry) => entry.method === 'POST')).toEqual([]);
+
+    await user.click(within(dialog).getByRole('button', { name: 'Continue' }));
+    expect(within(dialog).getAllByRole('textbox')).toHaveLength(2); // Secret identifier and origins only.
+    expect(within(dialog).getByRole('button', { name: 'Create' })).toBeDisabled();
+    await fillDialog(dialog, { name: 'LOGIN_PW', value: 'typed-value', origins: 'https://login.app.example' });
+    await user.click(within(dialog).getByRole('button', { name: 'Create' }));
+    await waitFor(() => expect(onCreated).toHaveBeenCalledTimes(1));
+
+    rerender(<CreateSecretDialog open={false} testId={TEST_ID} onClose={vi.fn()} onCreated={onCreated} />);
+    rerender(<CreateSecretDialog open testId={TEST_ID} onClose={vi.fn()} onCreated={onCreated} />);
+    expect(await screen.findByLabelText('Name')).toHaveValue('');
+    expect(screen.queryByText('Before adding your first secret')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Continue' })).toBeNull();
+    expect(screen.getByLabelText('Value')).toHaveValue('');
+  });
+
+  it.each(['disclaimer', 'form'])('cancels from the %s without creating or remembering a first-secret acknowledgement', async (cancelFrom) => {
+    server.use(...secretsHandlers);
+    const onCreated = vi.fn();
+    function Host() {
+      const [open, setOpen] = useState(true);
+      return <>
+        <button onClick={() => setOpen(true)}>Add secret</button>
+        <CreateSecretDialog open={open} testId={TEST_ID} onClose={() => setOpen(false)} onCreated={onCreated} />
+      </>;
+    }
+    render(<Host />);
+    const dialog = screen.getByRole('dialog');
+    await within(dialog).findByText('Before adding your first secret');
+    if (cancelFrom === 'form') {
+      await user.click(within(dialog).getByRole('button', { name: 'Continue' }));
+      await fillDialog(dialog, { name: 'LOGIN_PW', value: 'discarded-value', origins: 'https://login.app.example' });
+    }
+    await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Add secret' }));
+    expect(await screen.findByText('Before adding your first secret')).toBeVisible();
+    expect(observed.filter((entry) => entry.method === 'POST')).toEqual([]);
+    expect(onCreated).not.toHaveBeenCalled();
+    expect(window.localStorage.length).toBe(0);
+    expect(window.sessionStorage.length).toBe(0);
+  });
+
+  it('checks a different test independently and discards the previous test\'s form values', async () => {
+    server.use(...secretsHandlers);
+    seedSecretNames(TEST_ID, ['EXISTING_PW']);
+    const otherTestId = '22222222-2222-4222-8222-222222222222';
+    const onCreated = vi.fn();
+    const { rerender } = render(<CreateSecretDialog open testId={TEST_ID} onClose={vi.fn()} onCreated={onCreated} />);
+    await fillDialog(screen.getByRole('dialog'), {
+      name: 'DRAFT_PW', value: 'discarded-value', origins: 'https://login.app.example',
+    });
+
+    rerender(<CreateSecretDialog open testId={otherTestId} onClose={vi.fn()} onCreated={onCreated} />);
+    expect(await screen.findByText('Before adding your first secret')).toBeVisible();
+    expect(screen.queryByLabelText('Value')).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    expect(screen.getByLabelText('Name')).toHaveValue('');
+    expect(screen.getByLabelText('Value')).toHaveValue('');
+    expect(screen.getByLabelText('Allowed origins')).toHaveValue('');
+    expect(observed.filter((entry) => entry.method === 'GET').map((entry) => entry.path)).toEqual([
+      `/api/v1/studio/tests/${TEST_ID}/secrets`, `/api/v1/studio/tests/${otherTestId}/secrets`,
+    ]);
+    expect(onCreated).not.toHaveBeenCalled();
+  });
+
+  it('offers Retry on a failed list check and waits for a successful check before showing the disclaimer', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    server.use(http.get(SECRETS_ROUTE, () =>
+      HttpResponse.json({ error: 'VAULT_UNAVAILABLE', message: 'refused' }, { status: 503 }),
+    ));
+    render(<CreateSecretDialog open testId={TEST_ID} onClose={vi.fn()} onCreated={vi.fn()} />);
+    expect(await screen.findByText('Vault is temporarily unavailable. Try again.')).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'Continue' })).toBeNull();
+    expect(screen.queryByLabelText('Value')).toBeNull();
+    expect(observed).toHaveLength(1);
+
+    server.use(...secretsHandlers);
+    await user.click(screen.getByRole('button', { name: 'Retry' }));
+    expect(await screen.findByText('Before adding your first secret')).toBeVisible();
+    expect(observed).toHaveLength(2);
+    expect(observed.every((entry) => entry.method === 'GET')).toBe(true);
+  });
+
+  it('ignores a late empty-list answer from the previous test', async () => {
+    let releaseFirst: () => void = () => undefined;
+    const firstGate = new Promise<void>((resolve) => { releaseFirst = resolve; });
+    const listSecrets = vi.spyOn(secretsApi, 'listSecrets').mockImplementation(async (id) => {
+      if (id === TEST_ID) {
+        await firstGate;
+        return { data: [] };
+      }
+      return { data: [{ name: 'EXISTING_PW' }] };
+    });
+    const onCreated = vi.fn();
+    const { rerender } = render(<CreateSecretDialog open testId={TEST_ID} onClose={vi.fn()} onCreated={onCreated} />);
+    expect(screen.getByText('Checking secrets for this test…')).toBeVisible();
+    rerender(<CreateSecretDialog open testId="22222222-2222-4222-8222-222222222222" onClose={vi.fn()} onCreated={onCreated} />);
+    expect(await screen.findByLabelText('Name')).toBeVisible();
+    await act(async () => {
+      releaseFirst();
+      await listSecrets.mock.results[0].value;
+    });
+    expect(screen.queryByText('Before adding your first secret')).toBeNull();
+    expect(screen.getByLabelText('Name')).toHaveValue('');
+  });
+
+  it.each(['cancel and reopen', 'switch tests'])('does not select a delayed create result after %s', async (leaveBy) => {
+    let releaseCreate: () => void = () => undefined;
+    const createGate = new Promise<void>((resolve) => { releaseCreate = resolve; });
+    const createSecret = vi.spyOn(secretsApi, 'createSecret').mockImplementation(async () => {
+      await createGate;
+      return { name: 'OLD_TEST_PW', version: '1', allowedOrigins: ['https://login.app.example'] };
+    });
+    const onCreated = vi.fn();
+    const onClose = vi.fn();
+    const { rerender } = render(<CreateSecretDialog open testId={TEST_ID} onClose={onClose} onCreated={onCreated} />);
+    const dialog = screen.getByRole('dialog');
+    await fillDialog(dialog, { name: 'OLD_TEST_PW', value: 'typed-value', origins: 'https://login.app.example' });
+    await user.click(within(dialog).getByRole('button', { name: 'Create' }));
+    expect(createSecret).toHaveBeenCalledTimes(1);
+
+    if (leaveBy === 'cancel and reopen') {
+      await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+      rerender(<CreateSecretDialog open={false} testId={TEST_ID} onClose={onClose} onCreated={onCreated} />);
+      rerender(<CreateSecretDialog open testId={TEST_ID} onClose={onClose} onCreated={onCreated} />);
+    } else {
+      rerender(<CreateSecretDialog open testId="22222222-2222-4222-8222-222222222222" onClose={onClose} onCreated={onCreated} />);
+    }
+    expect(await screen.findByLabelText('Name')).toHaveValue('');
+    onClose.mockClear();
+    await act(async () => {
+      releaseCreate();
+      await createSecret.mock.results[0].value;
+    });
+    expect(onCreated).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByLabelText('Name')).toHaveValue('');
+    expect(screen.getByLabelText('Value')).toHaveValue('');
+  });
+
   it('passes on only {name, version, allowedOrigins}, even if a create answer carried more', async () => {
     server.use(
       http.post(SECRETS_ROUTE, () =>
@@ -506,7 +684,8 @@ describe('CreateSecretDialog (shared with the reference picker)', () => {
     const onCreated = vi.fn();
     render(<CreateSecretDialog open testId={TEST_ID} onClose={vi.fn()} onCreated={onCreated} />);
     const dialog = screen.getByRole('dialog');
-    const value = within(dialog).getByLabelText('Value');
+    await user.click(await within(dialog).findByRole('button', { name: 'Continue' }));
+    const value = await within(dialog).findByLabelText('Value');
     expect(value).toHaveAttribute('maxlength', String(VALUE_BOUND));
 
     // A 4097th character does not get in.

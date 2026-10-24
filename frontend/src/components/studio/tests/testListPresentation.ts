@@ -64,6 +64,3 @@ export const LAST_RUN_FILTER_LABELS: Readonly<Record<TestLastRunFilter, string>>
 
 /** Maximum test name length, matching the backend column. */
 export const TEST_NAME_MAX_LENGTH = 255;
-
-/** The editor route for a test; a real link so middle-click and new-tab work. */
-export const testHref = (id: string): string => `/checks/studio/${id}`;

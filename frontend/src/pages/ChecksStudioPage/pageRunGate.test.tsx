@@ -1,8 +1,8 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom';
 import { http, HttpResponse } from 'msw';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,6 +11,7 @@ import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
 import { fixtureDetail } from '@/services/mocks/studio/authoringState';
 import { readyDraft, unlearnedDraft } from '@/services/mocks/studio/readinessFixtures';
+import { renderStudioAt } from '@/test/renderStudioAt';
 import { store } from '@/store';
 import { fetchSources } from '@/store/slices/sourcesSlice';
 import { fetchFeatures } from '@/store/slices/featuresSlice';
@@ -123,14 +124,11 @@ afterAll(() => {
   studioMockServer.close();
 });
 
-function renderPage() {
-  return render(
-    <Provider store={store}>
-      <MemoryRouter>
-        <ChecksStudioPage />
-      </MemoryRouter>
-    </Provider>,
-  );
+const StoreProvider = ({ children }: { children?: ReactNode }) => <Provider store={store}>{children}</Provider>;
+
+/** Mounts the editor on the id the list fixture serves first. */
+function renderPage(id: string) {
+  return renderStudioAt(id, <ChecksStudioPage />, { wrapper: StoreProvider });
 }
 
 function serveList(draft: typeof readyDraft) {
@@ -153,7 +151,7 @@ function serveList(draft: typeof readyDraft) {
 describe('AC-2: the page’s own Run control is governed by the server and not by the editor', () => {
   it('a READY draft produces exactly one POST /execute from the page, with no step grammar check', async () => {
     serveList(readyDraft);
-    renderPage();
+    renderPage(readyDraft.id);
 
     const control = await screen.findByRole('button', { name: 'Run Test' }, pageWait);
     await waitFor(() => expect(control).not.toBeDisabled(), pageWait);
@@ -183,7 +181,7 @@ describe('AC-2: the page’s own Run control is governed by the server and not b
 
   it('STUDIO-OBS-008: an unlearned draft offers Run (it learns), with no Code tab and no review controls', async () => {
     serveList(unlearnedDraft);
-    renderPage();
+    renderPage(unlearnedDraft.id);
 
     const control = await screen.findByRole('button', { name: 'Run Test' }, pageWait);
     // The STUDIO-OBS-012B interim sentence is gone: Run learns an unlearned draft (AC-2).
@@ -201,7 +199,7 @@ describe('AC-2: the page’s own Run control is governed by the server and not b
 
   it('STUDIO-OBS-012B: a draft with no steps shows the never-learned empty state verbatim', async () => {
     serveList({ ...unlearnedDraft, steps: [] });
-    renderPage();
+    renderPage(unlearnedDraft.id);
 
     const empty = await screen.findByTestId('never-learned-empty-state', {}, pageWait);
     expect(empty.textContent).toBe(
@@ -214,7 +212,7 @@ describe('AC-2: the page’s own Run control is governed by the server and not b
 describe('the simple Save and Run workflow', () => {
   it('marks edits unsaved, keeps Run available because Run saves first, and protects navigation until the user decides', async () => {
     serveList(readyDraft);
-    renderPage();
+    renderPage(readyDraft.id);
 
     const run = await screen.findByRole('button', { name: 'Run Test' }, pageWait);
     await waitFor(() => expect(run).not.toBeDisabled(), pageWait);
@@ -270,7 +268,7 @@ describe('the draft the page sends carries a timeout the contract would accept',
       }),
     );
 
-    renderPage();
+    renderPage(readyDraft.id);
     await screen.findByRole('button', { name: 'Run Test' }, pageWait);
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
@@ -290,7 +288,7 @@ describe('VAL-042: the first Run press on a freshly opened saved test acts', () 
   it('READY: one press, with nothing touched first, starts exactly one execute and no save', async () => {
     serveList(readyDraft);
     const user = userEvent.setup({ delay: null });
-    renderPage();
+    renderPage(readyDraft.id);
 
     const control = await screen.findByRole('button', { name: 'Run Test' }, pageWait);
     await waitFor(() => expect(control).not.toBeDisabled(), pageWait);
@@ -316,7 +314,7 @@ describe('Story 10.48 AC-10b: on the page, a caller who may not run sees why bef
         }),
       ),
     );
-    renderPage();
+    renderPage(readyDraft.id);
 
     const reason = await screen.findByTestId('run-not-permitted', undefined, pageWait);
     const control = screen.getByRole('button', { name: 'Run Test' });

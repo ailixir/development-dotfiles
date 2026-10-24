@@ -59,6 +59,7 @@ export const COPY_SOURCE_FILES = {
   readinessService: 'backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java',
   guidedHook: 'frontend/src/components/studio/guided/useGuidedSession.ts',
   w5Ruling: 'docs/qa/evidence/STUDIO-OBS-008/execution-20261017/rulings/w5-unreadable-and-alias.md',
+  uxFix067: 'docs/qa/evidence/STUDIO-OBS-009/ux-fix-067/copy.md',
 } as const;
 
 export type CopySourceFile = (typeof COPY_SOURCE_FILES)[keyof typeof COPY_SOURCE_FILES];
@@ -343,18 +344,6 @@ export const GUIDED_COPY = {
     basis: 'verbatim',
     source: { file: S.uxPlan, quote: 'For a checkbox or switch, say “check” or “uncheck” explicitly.' },
   },
-  authoredLiteralTargetNotFound: {
-    template:
-      'This may be because of step {N}: Studio cannot see page text that matches a value written in a step. If so, try rewording step {N}, for example by checking for a longer or different piece of visible text.',
-    basis: 'delegated',
-    source: { file: S.story, quote: '@ux-design-expert writes the wording under the AC-3 conventions' },
-    note: 'Conditional KL-015-Q4 copy key (named for STUDIO-OBS-009 AUTHORED-ECHO-01 f to remove). The trigger is the page\'s, not this module\'s. W5 UX-03: hedged so it stays true on Q9 §5 R2 (a model, CSI, cap or window BUDGET_EXCEEDED: \'true there but may be irrelevant\'); \'a step\' covers R1 (cross-step). N = draft position of failedStepIdOf (Q9 §3 condition 3).',
-    facts: {
-      file: S.story,
-      quote:
-        'the narrative explains that Studio cannot see page text that matches a value written in the step, and suggests rewording (for example, assert a longer or different visible text)',
-    },
-  },
 
   // -------------------------------------------------------------------------------------------
   // Replay drift (AC-3, ruling A1). Worded here; rendered by the replay narratives (L5b).
@@ -378,6 +367,13 @@ export const GUIDED_COPY = {
     template: 'Steps changed — next Run learns from step {k}',
     basis: 'verbatim',
     source: { file: S.story, quote: 'Steps changed — next Run learns from step k' },
+  },
+  changedSinceThisRun: {
+    template: 'Changed since this run',
+    basis: 'delegated',
+    source: { file: S.uxFix067, quote: '@ux-design-expert writes the copy for the round-067 Studio UX fixes' },
+    note: 'Round 067 D3: chip on the step the server names as first changed since the published revision.',
+    facts: { file: S.uxFix067, quote: "The step is the server's firstChangedStepId for the revision this run published" },
   },
   needsRelearnNoBoundary: {
     template: 'Steps changed',
@@ -534,6 +530,28 @@ export const GUIDED_COPY = {
     template: 'Seek to action: {<safe label>}',
     basis: 'verbatim',
     source: { file: S.story, quote: 'Seek to action: <safe label>' },
+  },
+
+  seekMarkerStep: {
+    template: 'Jumped to step {N}.',
+    basis: 'delegated',
+    source: { file: S.uxFix067, quote: '@ux-design-expert writes the copy for the round-067 Studio UX fixes' },
+    note: 'Round 067 D2: caption under the used seek control.',
+    facts: { file: S.uxFix067, quote: 'The last seek on this recording went to the start stamp of the step' },
+  },
+  seekMarkerAction: {
+    template: 'Jumped to step {N}, action: {<safe label>}.',
+    basis: 'delegated',
+    source: { file: S.uxFix067, quote: '@ux-design-expert writes the copy for the round-067 Studio UX fixes' },
+    note: 'Round 067 D2: caption under the used action seek control.',
+    facts: { file: S.uxFix067, quote: 'The last seek went to the stamp of that action' },
+  },
+  runInProgressEvidence: {
+    template: 'The recording will appear here when this run ends.',
+    basis: 'delegated',
+    source: { file: S.uxFix067, quote: '@ux-design-expert writes the copy for the round-067 Studio UX fixes' },
+    note: 'Round 067 D7: evidence card text while a Run is live and has no result yet.',
+    facts: { file: S.uxFix067, quote: 'A live Run has no result yet, so it has no recording on screen' },
   },
 
   // -------------------------------------------------------------------------------------------

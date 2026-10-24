@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Alert, Box, TextField, MenuItem, Stack, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import React, { useEffect, useRef, useState } from 'react';
+import { Alert, Box, TextField, MenuItem, Stack, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
 import secretsApi, { type StudioSecret } from '@/services/api/secretsApi';
 import {
   SECRETS_NEED_SAVED_TEST,
@@ -55,21 +55,60 @@ interface CreateSecretDialogProps {
  * "Create Secret": name, value (a password field) and allowed origins. The value lives in this
  * dialog's state only until the create call settles, then it is cleared whatever the answer.
  */
-export const CreateSecretDialog: React.FC<CreateSecretDialogProps> = ({ open, testId, onClose, onCreated }) => {
+export const CreateSecretDialog: React.FC<CreateSecretDialogProps> = (props) =>
+  props.open ? <CreateSecretSession key={props.testId} {...props} /> : null;
+
+type SecretCreationStage = 'checking' | 'disclaimer' | 'form' | 'failed';
+
+/** Each opening checks this test afresh; continuing is not a stored authorisation or approval. */
+const CreateSecretSession: React.FC<CreateSecretDialogProps> = ({ open, testId, onClose, onCreated }) => {
+  const sessionActive = useRef(true);
+  const [stage, setStage] = useState<SecretCreationStage>(testId === null ? 'form' : 'checking');
+  const [checkAttempt, setCheckAttempt] = useState(0);
+  const [checkError, setCheckError] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
   const [newValue, setNewValue] = useState('');
   const [newOrigins, setNewOrigins] = useState('');
   const [createError, setCreateError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
+  useEffect(() => {
+    sessionActive.current = true;
+    return () => {
+      sessionActive.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (testId === null) return undefined;
+    let active = true;
+    setStage('checking');
+    setCheckError(null);
+    secretsApi.listSecrets(testId).then(
+      (response) => {
+        if (active) setStage(response.data.length === 0 ? 'disclaimer' : 'form');
+      },
+      (failure: unknown) => {
+        if (active) {
+          setCheckError(secretFailureText(failure, 'Could not load secrets'));
+          setStage('failed');
+        }
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, [testId, checkAttempt]);
+
   const origins = parseAllowedOrigins(newOrigins);
   const nameInvalid = newName.length > 0 && !isReferenceName(newName);
   const valueValid = newValue.length > 0 && newValue.length <= MAX_VALUE_LENGTH;
   const originsValid =
     origins.length > 0 && origins.length <= MAX_ORIGINS && origins.every((origin) => origin.length <= MAX_ORIGIN_LENGTH);
-  const canCreate = testId !== null && isReferenceName(newName) && valueValid && originsValid && !creating;
+  const canCreate = stage === 'form' && testId !== null && isReferenceName(newName) && valueValid && originsValid && !creating;
 
   const closeCreate = () => {
+    sessionActive.current = false;
     setNewName('');
     setNewValue('');
     setNewOrigins('');
@@ -82,22 +121,34 @@ export const CreateSecretDialog: React.FC<CreateSecretDialogProps> = ({ open, te
     setCreating(true);
     try {
       const created = await secretsApi.createSecret(testId, { name: newName, value: newValue, allowedOrigins: origins });
+      if (!sessionActive.current) return;
       setNewValue('');
       onCreated(projectCreated(created));
       closeCreate();
     } catch (failure: unknown) {
+      if (!sessionActive.current) return;
       setNewValue('');
       setCreateError(secretFailureText(failure, 'Could not create the secret'));
     } finally {
-      setCreating(false);
+      if (sessionActive.current) setCreating(false);
     }
   };
 
   return (
     <Dialog open={open} onClose={closeCreate} maxWidth="sm" fullWidth>
-      <DialogTitle>Create Secret</DialogTitle>
+      <DialogTitle>{stage === 'disclaimer' ? 'Before adding your first secret' : 'Create Secret'}</DialogTitle>
       <DialogContent>
-        <Stack spacing={2} sx={{ pt: 1 }}>
+        {stage === 'checking' && <DialogContentText>Checking secrets for this test…</DialogContentText>}
+        {stage === 'failed' && <Alert severity="error">{checkError}</Alert>}
+        {stage === 'disclaimer' && (
+          <DialogContentText>
+            Only add secrets you are authorised to use for this test. Use a functional ID or service account for
+            sign-in, never a real person&apos;s login. During execution, Checks Studio can use them
+            on the allowed origins you specify. If the application displays a secret as plain text, it may appear
+            in the recording. Check the allowed origins before continuing.
+          </DialogContentText>
+        )}
+        {stage === 'form' && <Stack spacing={2} sx={{ pt: 1 }}>
           {createError && <Alert severity="error">{createError}</Alert>}
           <TextField
             label="Name"
@@ -131,11 +182,13 @@ export const CreateSecretDialog: React.FC<CreateSecretDialogProps> = ({ open, te
             helperText="One per line, or comma-separated. The secret is filled only on these origins."
             fullWidth
           />
-        </Stack>
+        </Stack>}
       </DialogContent>
       <DialogActions>
         <Button onClick={closeCreate}>Cancel</Button>
-        <Button variant="contained" onClick={handleCreate} disabled={!canCreate}>Create</Button>
+        {stage === 'failed' && <Button onClick={() => setCheckAttempt((attempt) => attempt + 1)}>Retry</Button>}
+        {stage === 'disclaimer' && <Button variant="contained" onClick={() => setStage('form')}>Continue</Button>}
+        {stage === 'form' && <Button variant="contained" onClick={handleCreate} disabled={!canCreate}>Create</Button>}
       </DialogActions>
     </Dialog>
   );
@@ -203,6 +256,7 @@ const SecretInput: React.FC<SecretInputProps> = ({
           onChange(val ? { id: val } : null);
         }}
         SelectProps={{ displayEmpty: true }}
+        InputLabelProps={{ shrink: true }}
         error={!disabled && loadError !== null}
         helperText={disabled ? disabledHint : loadError ?? undefined}
       >

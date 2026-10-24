@@ -420,3 +420,22 @@ describe('Studio v1 gaps: a recording the API has no store for', () => {
     expect(urlsIn(container).filter((url) => VIDEO_ROUTE.test(url))).toEqual([]);
   });
 });
+
+describe('round 067 D7: a live Run with no result yet', () => {
+  it('snapshot null with runInProgress shows the pending-run line and no empty state or player', () => {
+    render(<VideoEvidencePanel snapshot={null} runInProgress />);
+    expect(screen.getByTestId('video-evidence-pending-run')).toHaveTextContent(
+      'The recording will appear here when this run ends.',
+    );
+    expect(screen.queryByTestId('video-evidence-empty')).toBeNull();
+    expect(screen.queryByTestId('video-evidence-player')).toBeNull();
+  });
+
+  it('without the prop the empty state keeps its text', () => {
+    render(<VideoEvidencePanel snapshot={null} />);
+    expect(screen.getByTestId('video-evidence-empty')).toHaveTextContent(
+      'No run is on screen yet, so there is no recording to show.',
+    );
+    expect(screen.queryByTestId('video-evidence-pending-run')).toBeNull();
+  });
+});

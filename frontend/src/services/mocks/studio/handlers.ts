@@ -112,6 +112,8 @@ let created: TestDto[] = [];
 /** Soft-deleted test ids: hidden from every read; their runs resolve `testName: null`. */
 const deletedTestIds = new Set<string>();
 let acceptedExecutions: ExecutionSnapshot[] = [];
+/** Accepted replay snapshots progress on at most three GETs, never on list reads or timers. */
+const acceptedExecutionReads = new Map<string, number>();
 /** Principal-scoped idempotency, mirrored from the ledger the server keeps. */
 const idempotency = new Map<string, string>();
 
@@ -124,6 +126,7 @@ export function resetStudioMocks(): void {
   created = [];
   deletedTestIds.clear();
   acceptedExecutions = [];
+  acceptedExecutionReads.clear();
   idempotency.clear();
   MOCK_EXECUTE_DENIED_CSIS.clear();
 }
@@ -161,7 +164,7 @@ const isBlank = (value: unknown): boolean =>
  * `POST /tests/{id}/validate-variables` (`validateTestVariables`, kept by STUDIO-OBS-012A AC-2,
  * cleanup inventory CLN-12). Mirrors the document's description: `<var NAME>` and `<secret ID>`
  * references in the steps are matched against the declared variables (a `secretRef` by its
- * `secretId`, falling back to its name); only a supplied value's presence is read and no value is
+ * `secretId` only); only a supplied value's presence is read and no value is
  * echoed. Nothing is written.
  */
 function validateVariableReferences(
@@ -174,7 +177,7 @@ function validateVariableReferences(
   const secretIds: string[] = [];
   for (const variable of test.variables) {
     if (variable.kind === 'secretRef') {
-      const id = variable.secretId ?? variable.name;
+      const id = variable.secretId;
       if (id && !secretIds.includes(id)) secretIds.push(id);
     } else if (variable.name) {
       plainValues.set(variable.name, variable.value);
@@ -227,6 +230,49 @@ const allExecutions = (): ExecutionSnapshot[] => [
   ...Object.values(replayFailureExecutions),
   ...demoExecutions,
 ];
+
+/**
+ * Bounded MSW-only replay: first read PENDING, second RUNNING, third PASSED. This models UI
+ * progression, not a browser execution or validated artifact; no recording is manufactured.
+ * Terminal snapshots (including cancellation) are immutable on subsequent reads.
+ */
+function readAcceptedReplay(execution: ExecutionSnapshot): ExecutionSnapshot {
+  if (isTerminalExecutionStatus(execution.status) || !acceptedExecutions.includes(execution)) return execution;
+  const reads = acceptedExecutionReads.get(execution.executionId) ?? 0;
+  acceptedExecutionReads.set(execution.executionId, reads + 1);
+  if (reads === 0) return execution;
+  const complete = execution.status === 'RUNNING';
+  const durationMs = execution.stepResults.length * 250;
+  const startedAt = execution.startedAt ?? execution.acceptedAt;
+  const endedAt = new Date(Date.parse(startedAt) + durationMs).toISOString();
+  const next: ExecutionSnapshot = {
+    ...execution,
+    status: complete ? 'PASSED' : 'RUNNING',
+    startedAt,
+    endedAt: complete ? endedAt : null,
+    durationMs: complete ? durationMs : null,
+    stepResults: execution.stepResults.map((step, index) => ({
+      ...step,
+      status: complete ? 'PASS' : index === 0 ? 'RUNNING' : 'PENDING',
+      offsetMs: complete || index === 0 ? index * 250 : null,
+      durationMs: complete ? 250 : null,
+      message: 'Synthetic MSW replay; no browser action was executed.',
+    })),
+    logs: [...execution.logs, {
+      at: complete ? endedAt : startedAt,
+      level: 'INFO',
+      message: complete
+        ? 'Synthetic MSW replay completed; no browser ran and no recording exists.'
+        : 'Synthetic MSW replay started; no browser is running.',
+    }],
+    video: complete ? { status: 'UNAVAILABLE', error: null, expiresAt: null, partial: false } : execution.video,
+    videoPath: null,
+    revision: execution.revision + 1,
+    streamComplete: complete,
+  };
+  acceptedExecutions = [next, ...acceptedExecutions.filter((candidate) => candidate.executionId !== next.executionId)];
+  return next;
+}
 
 /** The server's batch name lookup: the live test's name, or `null` once it is deleted. */
 function withTestNames(executions: ExecutionSnapshot[]): ExecutionSnapshot[] {
@@ -357,6 +403,25 @@ export const studioHandlers = [
   ...createGuidedHandlers({
     getTest: id => allTests().find(test => test.id === id) ?? readinessDraft(id),
     stepsOf: stepRefsOf,
+    publish: ({ testId, sourceRevision, configurationRevision, receipt }) => {
+      const current = allTests().find(test => test.id === testId) ?? readinessDraft(testId);
+      if (
+        !current || String(current.sourceRevision) !== sourceRevision ||
+        String(current.configurationRevision) !== configurationRevision
+      ) return false;
+      const published: TestDto = {
+        ...current,
+        readiness: 'READY',
+        firstChangedStepId: null,
+        confirmedRevisionId: receipt.revisionId,
+        confirmedRevisionArtifactHash: receipt.artifactHash,
+        // The mirror holds the synthetic receipt, not a validated artifact for this draft.
+        confirmedRevisionArtifact: null,
+        updatedAt: receipt.publishedAt,
+      };
+      created = [published, ...created.filter(test => test.id !== testId)];
+      return true;
+    },
   }),
   ...createCapabilityHandlers({ getTest: id => allTests().find(test => test.id === id) ?? readinessDraft(id) }),
   ...secretsHandlers,
@@ -468,6 +533,7 @@ export const studioHandlers = [
     if (key) {
       idempotency.set(key, executionId);
     }
+    const acceptedAt = new Date().toISOString();
     const pendingExecution: ExecutionSnapshot = {
         executionId,
         triggerSource: 'MANUAL',
@@ -476,7 +542,7 @@ export const studioHandlers = [
         revisionId: test.confirmedRevisionId,
         status: 'PENDING',
         errorCode: null,
-        acceptedAt: new Date().toISOString(),
+        acceptedAt,
         startedAt: null,
         endedAt: null,
         durationMs: null,
@@ -488,7 +554,7 @@ export const studioHandlers = [
           durationMs: null,
           message: null,
         })),
-        logs: [],
+        logs: [{ at: acceptedAt, level: 'INFO', message: 'Synthetic MSW replay accepted; no browser will run.' }],
         logsTruncated: false,
         video: { status: 'PROCESSING', error: null, expiresAt: null, partial: false },
         videoPath: null,
@@ -563,7 +629,7 @@ export const studioHandlers = [
         { status: 404 },
       );
     }
-    return HttpResponse.json(withTestNames([execution])[0]);
+    return HttpResponse.json(withTestNames([readAcceptedReplay(execution)])[0]);
   }),
 
   http.get(`${BASE}/executions/:id/video`, ({ params, request }) =>

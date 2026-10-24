@@ -7,6 +7,7 @@ import {
   NO_RUN_EVIDENCE_MESSAGE,
   PARTIAL_RECORDING_QUALIFIER,
   PLAYBACK_FAILED_MESSAGE,
+  RUN_IN_PROGRESS_EVIDENCE_MESSAGE,
   stoppedRunRecordingStatement,
   videoEvidenceNarrative,
 } from './videoEvidenceNarratives';
@@ -66,10 +67,13 @@ export type VideoEvidencePanelProps =
       /** Null before any run is on screen. */
       readonly snapshot: ExecutionSnapshot | null;
       readonly guided?: undefined;
+      /** Round 067 D7: a Run is live, so a null snapshot means "not yet", not "no run". */
+      readonly runInProgress?: boolean;
     }
   | {
       readonly guided: GuidedVideoEvidence;
       readonly snapshot?: undefined;
+      readonly runInProgress?: undefined;
     };
 
 /** What the panel renders, whichever recording it is. */
@@ -124,6 +128,16 @@ export const VideoEvidencePanel = forwardRef<HTMLVideoElement, VideoEvidencePane
     useEffect(() => {
       setPlaybackFailed(false);
     }, [playbackUrl]);
+
+    if (source === null && props.runInProgress === true) {
+      return (
+        <Box data-testid="video-evidence-pending-run">
+          <Typography variant="body2" color="text.secondary">
+            {RUN_IN_PROGRESS_EVIDENCE_MESSAGE}
+          </Typography>
+        </Box>
+      );
+    }
 
     if (source === null) {
       return (

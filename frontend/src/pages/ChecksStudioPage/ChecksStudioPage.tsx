@@ -115,8 +115,7 @@ import {
 } from '@/components/studio/references';
 import { isGuidedTerminalState } from '@/types/studio/studioGuidedTypes';
 import { saveErrorMessage } from './saveErrorMessage';
-import { authoredLiteralHintStep } from './authoredLiteralHint';
-import { declareInsertedSecret, type EditableVariable } from './secretDeclaration';
+import { declareInsertedSecret, toContractVariables, variableDeclarationIssue, type EditableVariable, type VariableDeclarationIssue } from './secretDeclaration';
 import { StudioScheduleDialog } from '@/components/studio/scheduling/StudioScheduleDialog';
 import { StudioScheduleSummary } from '@/components/studio/scheduling/StudioScheduleSummary';
 
@@ -129,24 +128,6 @@ function toEditableVariables(variables: StudioVariable[] | null | undefined): Ed
     value: variable.kind === 'plain' ? variable.value ?? '' : undefined,
     secretId: variable.kind === 'secretRef' ? variable.secretId ?? undefined : undefined,
   }));
-}
-
-/**
- * The contract's typed variables. A `secretRef` carries its reference only.
- *
- * Ruling D-8: a `secretRef` always carries the Vault name it points at, and no write sends
- * `secretId` as null, empty or the alias. A secret row the author has not pointed at a secret yet
- * stays visible in the Variables dialog, incomplete, and is not sent until a secret is chosen.
- */
-function toContractVariables(rows: EditableVariable[]): StudioVariable[] {
-  return rows
-    .filter((row) => row.name.trim() !== '')
-    .filter((row) => row.type !== 'secret' || (row.secretId ?? '').trim() !== '')
-    .map((row) =>
-      row.type === 'secret'
-        ? { name: row.name.trim(), kind: 'secretRef', secretId: (row.secretId ?? '').trim() }
-        : { name: row.name.trim(), kind: 'plain', value: row.value ?? '' },
-    );
 }
 
 /** Optional opposite-kind fields are serialized as null by Java and omitted by some clients. */
@@ -175,6 +156,12 @@ export const SAVE_REFUSED_TITLE = 'The server refused the save';
 export const RELOAD_TEST_LABEL = 'Reload test';
 
 type SaveOutcome = 'saved' | 'conflict' | 'error';
+
+const VARIABLE_DECLARATION_MESSAGES: Record<VariableDeclarationIssue, string> = {
+  invalidSecretId: 'Select a valid secret reference.',
+  duplicateName: 'Variable names must be unique. Rename or remove the duplicate.',
+  secretNameCollision: 'A variable name conflicts with a secret reference. Rename it or select the matching secret.',
+};
 
 const StudioUnavailable: React.FC = () => (
   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', textAlign: 'center', p: 4 }}>
@@ -338,6 +325,11 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
   const [stopError, setStopError] = useState<string | null>(null);
   // Removed legacy interval-based simulator in favor of API polling
   const [variablesList, setVariablesList] = useState<EditableVariable[]>([]);
+  const [variablesSaveAttempted, setVariablesSaveAttempted] = useState(false);
+  const variablesSaveIssue = useMemo(
+    () => variablesSaveAttempted ? variableDeclarationIssue(toContractVariables(variablesList)) : null,
+    [variablesList, variablesSaveAttempted],
+  );
   /** The secret ID whose insert was refused because a variable of that name exists (W5-2). */
   const [referenceRefusal, setReferenceRefusal] = useState<string | null>(null);
   const [environment, setEnvironment] = useState('');
@@ -551,6 +543,8 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
    */
   const subscriptionRef = useRef<ExecutionSubscription | null>(null);
   const currentExecutionIdRef = useRef<string | null>(null);
+  /** Round 067 D6: the execution whose terminal outcome has already caused one re-read of the test. */
+  const runOutcomeReadRef = useRef<string | null>(null);
   const [transportStatus, setTransportStatus] = useState<TransportStatus | null>(null);
   const [accessDenied, setAccessDenied] = useState<number | null>(null);
   const closeSubscription = useCallback(() => {
@@ -605,6 +599,23 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
         if (isTerminalExecutionStatus(exec.status)) {
           dispatch(setExecuting(false));
           setIsStopping(false);
+          // Round 067 D6: the server records `lastRunStatus` when the run ends; read the test once so
+          // the "Previous run" chip is not stale. A GET, never a run.
+          const testId = latestSelectionRef.current;
+          if (
+            testId &&
+            exec.video.status !== 'PROCESSING' &&
+            currentExecutionIdRef.current === exec.executionId &&
+            runOutcomeReadRef.current !== exec.executionId
+          ) {
+            runOutcomeReadRef.current = exec.executionId;
+            studioApi.getTest(testId).then(
+              (fresh) => {
+                if (latestSelectionRef.current === testId) replaceScenario(fresh);
+              },
+              () => undefined,
+            );
+          }
         }
       },
       onStatus: (status) => setTransportStatus(status),
@@ -619,7 +630,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
         setIsStopping(false);
       },
     });
-  }, [closeSubscription, dispatch, guidedSessionId, guided.startRefusal]);
+  }, [closeSubscription, dispatch, guidedSessionId, guided.startRefusal, replaceScenario]);
 
   /*
    * Story 10.11a, AC-3(a): the client-side Python regeneration that used to run here on every
@@ -731,6 +742,13 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
   const saveDraft = useCallback(async (): Promise<SaveOutcome> => {
     const test = draft;
     if (!test) return 'error';
+    const variables = toContractVariables(variablesList);
+    if (variableDeclarationIssue(variables) !== null) {
+      setVariablesSaveAttempted(true);
+      setVariablesOpen(true);
+      return 'error';
+    }
+    setVariablesSaveAttempted(false);
     // VAL-036: a step still sitting in the add field is added before the draft is saved.
     const steps = newStep.trim() ? [...testSteps, newAuthoringStep(newStep)] : testSteps;
     if (steps !== testSteps) {
@@ -747,7 +765,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
       environment,
       steps,
       ...(test.globalContext ? { globalContext: test.globalContext } : {}),
-      variables: toContractVariables(variablesList),
+      variables,
       configuration: {
         ...defaultConfiguration(),
         ...test.configuration,
@@ -1056,6 +1074,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                 variant={isDirty ? 'filled' : 'outlined'}
                 label={isDirty ? 'Unsaved changes' : 'Saved'}
                 data-testid="studio-save-state"
+                sx={{ transition: 'none' }}
               />
             </Stack>
           </Box>
@@ -1151,13 +1170,15 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                     <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1} flexWrap="wrap">
                       <Typography variant="subtitle2" sx={{ fontWeight: 600, minWidth: 0, overflowWrap: 'anywhere' }}>{selectedScenarioData.name}</Typography>
                       <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
-                        <Chip
-                          label={selectedScenarioData.lastRunStatus ? `Previous run: ${executionStatusLabel(selectedScenarioData.lastRunStatus)}` : 'No run history'}
-                          size="small"
-                          color={selectedScenarioData.lastRunStatus ? executionStatusTone(selectedScenarioData.lastRunStatus) : 'default'}
-                          data-testid="test-last-run-status"
-                          sx={{ fontSize: 11 }}
-                        />
+                        {(selectedScenarioData.lastRunStatus || !selectedScenarioData.confirmedRevisionId) && (
+                          <Chip
+                            label={selectedScenarioData.lastRunStatus ? `Previous run: ${executionStatusLabel(selectedScenarioData.lastRunStatus)}` : 'No run history'}
+                            size="small"
+                            color={selectedScenarioData.lastRunStatus ? executionStatusTone(selectedScenarioData.lastRunStatus) : 'default'}
+                            data-testid="test-last-run-status"
+                            sx={{ fontSize: 11 }}
+                          />
+                        )}
                       </Stack>
                     </Stack>
                     {selectedScenarioData.description && (
@@ -1182,6 +1203,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                     fullWidth
                     size="small"
                     label="Environment"
+                    InputLabelProps={{ shrink: true }}
                     value={environment}
                     disabled={editorLocked || !selectedScenarioData}
                     onChange={(event) => setEnvironment(event.target.value)}
@@ -1580,9 +1602,8 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                             draftStepIds={draftStepIds}
                             onGoToStep={requestStepFocus}
                             onOpenVariables={openVariables}
-                            authoredLiteralHintStep={authoredLiteralHintStep(guided.result, testSteps)}
                           />
-                          <PlanExplanation result={guided.result} />
+                          <PlanExplanation result={guided.result} test={draft} />
                         </>
                       )}
                       <Paper variant="outlined" sx={{ p: 2, minWidth: 0 }}>
@@ -1593,13 +1614,14 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                               guided={{ sessionId: guided.result.sessionId, result: guided.result }}
                             />
                             <GuidedSeekControls
+                              key={guided.result.sessionId}
                               result={guided.result}
                               onSeek={handleSeekStep}
                               recording={{ durationMs: recordingDurationMs }}
                             />
                           </Stack>
                         ) : (
-                          <VideoEvidencePanel ref={videoRef} snapshot={null} />
+                          <VideoEvidencePanel ref={videoRef} snapshot={null} runInProgress={guidedActive} />
                         )}
                       </Paper>
                     </Stack>
@@ -1656,7 +1678,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                         </Box>
                       )}
                       <Paper variant="outlined" sx={{ p: 2 }}>
-                        <VideoEvidencePanel ref={videoRef} snapshot={snapshot} />
+                        <VideoEvidencePanel ref={videoRef} snapshot={snapshot} runInProgress={isRunning} />
                       </Paper>
                     </>
                   )}
@@ -1673,7 +1695,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                         <Typography component="span" sx={{ color: log.type === 'error' ? 'error.light' : 'white', fontFamily: 'inherit', fontSize: 'inherit' }}>{log.message}</Typography>
                       </Box>
                     ))}
-                    {executionLogs.length === 0 && <Box sx={{ color: 'grey.400' }}>No logs yet. Run the test to see live output.</Box>}
+                    {executionLogs.length === 0 && <Box sx={{ color: 'grey.400' }}>No logs are available.</Box>}
                   </Paper>
                 </Box>
               </Box>
@@ -1696,6 +1718,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
         open={saveSnack.open}
         autoHideDuration={2500}
         onClose={() => setSaveSnack((s) => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         message={saveSnack.message}
       />
 
@@ -1711,6 +1734,11 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }} data-testid="variables-secrets-availability">
               {secretsNotice}
             </Typography>
+          )}
+          {variablesSaveIssue !== null && (
+            <Alert severity="error" sx={{ mb: 1 }} data-testid="variables-save-issue">
+              {VARIABLE_DECLARATION_MESSAGES[variablesSaveIssue]}
+            </Alert>
           )}
           <Paper variant="outlined" sx={{ p: 1, overflowX: 'auto' }}>
             <Table size="small" sx={{ minWidth: 720 }}>

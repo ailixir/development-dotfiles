@@ -62,6 +62,7 @@ import { useNavigate } from 'react-router-dom';
 import { parseTag } from '@utils/tagUtils';
 import type { CSI } from '@/types/csi/csiTypes';
 import UpcomingExecutions from '@components/scheduling/UpcomingExecutions';
+import { useUiTestAvailability } from '@/hooks/useUiTestAvailability';
 
 // Mock real-time data for demonstration
 const mockRealTimeData = {
@@ -80,6 +81,7 @@ const DashboardPage: React.FC = () => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const uiTestAvailability = useUiTestAvailability();
   
   const { data: checks, loading, error } = useAppSelector(state => state.checks);
   const { selectedCSI, tags: { selected: selectedTags }, data: csiData } = useAppSelector(state => state.csi);
@@ -746,18 +748,20 @@ const DashboardPage: React.FC = () => {
                   </Typography>
                   
                   <Stack spacing={2}>
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      startIcon={<Science />}
-                    onClick={() => navigate('/checks/studio')}
-                      sx={{
-                        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                        py: 1.5
-                      }}
-                    >
-                      Open Checks Studio
-                    </Button>
+                    {uiTestAvailability === 'on' && (
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        startIcon={<Science />}
+                        onClick={() => navigate('/checks/studio/tests')}
+                        sx={{
+                          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                          py: 1.5
+                        }}
+                      >
+                        Open Checks Studio
+                      </Button>
+                    )}
                     
                     <Button
                       fullWidth

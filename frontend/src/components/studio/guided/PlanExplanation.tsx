@@ -1,4 +1,5 @@
 import { Box, Chip, Divider, Paper, Stack, Typography } from '@mui/material';
+import type { TestDetailDto } from '@/types/studio/studioTypes';
 import type {
   GuidedArgumentSlot,
   GuidedResult,
@@ -6,6 +7,7 @@ import type {
   PublicExplanationStep,
 } from '@/types/studio/studioGuidedTypes';
 import { READY_CHIP_LABEL, guidedCopy, type GuidedCopyKey } from './guidedNarratives';
+import { readinessChipLabel } from './ReadinessChip';
 
 /**
  * "Steps as learned" (STUDIO-OBS-008 AC-6; architect P3): a read-only account of what this session
@@ -16,8 +18,9 @@ import { READY_CHIP_LABEL, guidedCopy, type GuidedCopyKey } from './guidedNarrat
  *    step was learned in this run, reused from a previous revision, or re-learned after drift. A
  *    step the retained facts do not prove carries no claim and no actions.
  *  - **IDs, never values.** `referenceIds` and reference-flow `bindingId`s are declared IDs; they are
- *    shown as text in code style and never interpreted as markup. No step text is rendered here: the
- *    progress text is the authored sentence, and P2 forbids using it as a value source.
+ *    shown as text in code style and never interpreted as markup. Server-generated UUID ids are left
+ *    out (round 067 amendment to P3). The authored sentence is shown only as a caption under the step
+ *    (round 067 D1a), never as a value source (P2).
  *  - **Reference flows** read "<binding> from step 2 → Fill field in step 4", numbered by the
  *    explanation's own steps. A flow whose producer or consumer step it does not number is left out,
  *    never linked by guess.
@@ -71,6 +74,73 @@ export function explanationFacts(
   };
 }
 
+/** The server's own view of the test, read from `GET`/`PUT /tests/{id}` (never the unsaved editor). */
+export type PlanTest = Pick<
+  TestDetailDto,
+  'sourceRevision' | 'steps' | 'readiness' | 'readinessReason' | 'firstChangedStepId' | 'confirmedRevisionId'
+>;
+
+type PlanResult = Pick<GuidedResult, 'explanation' | 'publication' | 'currentReadiness'>;
+
+/** Round 067 D3: the test's readiness speaks for "now" only when it describes the revision this run published. */
+function testDescribesThisRun(result: PlanResult, test: PlanTest | null | undefined): test is PlanTest {
+  return (
+    test !== null &&
+    test !== undefined &&
+    result.publication.status === 'PUBLISHED' &&
+    result.publication.receipt.revisionId === test.confirmedRevisionId &&
+    (test.readiness === 'READY' || test.readiness === 'NEEDS_RELEARN')
+  );
+}
+
+/** Round 067 D3: the current-readiness line, from the fresh test read where it applies. */
+export function currentReadinessLine(result: PlanResult, test?: PlanTest | null): string {
+  if (testDescribesThisRun(result, test)) {
+    const label = readinessChipLabel(
+      test,
+      test.steps.map((step) => step.id),
+    );
+    if (label !== null) return label;
+  }
+  return explanationFacts(result).current;
+}
+
+/** Round 067 D3: the stable ID of the step changed since this run, or null. */
+export function changedStepIdOf(result: PlanResult, test?: PlanTest | null): string | null {
+  if (!testDescribesThisRun(result, test)) return null;
+  if (test.readiness !== 'NEEDS_RELEARN' || test.readinessReason === 'BASE_IDENTITY_INCOMPLETE') return null;
+  return test.firstChangedStepId;
+}
+
+/**
+ * Round 067 D1a: the authored sentence per step, only where it provably equals what the run used.
+ * Same `sourceRevision`: all steps. Otherwise, for the revision this run published and a
+ * NEEDS_RELEARN draft: the steps before `firstChangedStepId`, which are unchanged by definition.
+ */
+export function planStepTexts(result: PlanResult, test?: PlanTest | null): ReadonlyMap<string, string> {
+  const texts = new Map<string, string>();
+  if (test === null || test === undefined) return texts;
+  let eligible: PlanTest['steps'] = [];
+  if (String(test.sourceRevision) === result.explanation.sourceRevision) {
+    eligible = test.steps;
+  } else if (
+    result.publication.status === 'PUBLISHED' &&
+    result.publication.receipt.revisionId === test.confirmedRevisionId &&
+    test.readiness === 'NEEDS_RELEARN' &&
+    test.firstChangedStepId !== null
+  ) {
+    const boundary = test.steps.findIndex((step) => step.id === test.firstChangedStepId);
+    if (boundary >= 0) eligible = test.steps.slice(0, boundary);
+  }
+  for (const step of eligible) {
+    if (step.text.trim() !== '') texts.set(step.id, step.text);
+  }
+  return texts;
+}
+
+/** Round 067 D1b (architect P3 amendment): server-generated input UUIDs are not shown. */
+const UUID_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const ID_SX = {
   fontFamily: 'monospace',
   px: 0.5,
@@ -80,12 +150,16 @@ const ID_SX = {
 } as const;
 
 export interface PlanExplanationProps {
-  readonly result: Pick<GuidedResult, 'explanation' | 'publication' | 'currentReadiness'>;
+  readonly result: PlanResult;
+  /** The page's server draft. Absent: the plan reads from the result alone. */
+  readonly test?: PlanTest | null;
 }
 
-export function PlanExplanation({ result }: PlanExplanationProps) {
+export function PlanExplanation({ result, test = null }: PlanExplanationProps) {
   const { explanation } = result;
-  const facts = explanationFacts(result);
+  const facts = { ...explanationFacts(result), current: currentReadinessLine(result, test) };
+  const stepTexts = planStepTexts(result, test);
+  const changedStepId = changedStepIdOf(result, test);
   const flows = referenceFlowLines(explanation);
   const steps = [...explanation.steps].sort((a, b) => a.number - b.number);
 
@@ -119,7 +193,21 @@ export function PlanExplanation({ result }: PlanExplanationProps) {
                     {claims.map((claim) => (
                       <Chip key={claim} size="small" variant="outlined" label={claim} />
                     ))}
+                    {changedStepId === step.stepId && (
+                      <Chip
+                        size="small"
+                        variant="outlined"
+                        color="warning"
+                        label={guidedCopy('changedSinceThisRun')}
+                        data-testid="plan-step-changed"
+                      />
+                    )}
                   </Stack>
+                  {stepTexts.has(step.stepId) && (
+                    <Typography variant="body2" data-testid="plan-step-text" sx={{ overflowWrap: 'anywhere' }}>
+                      {stepTexts.get(step.stepId)}
+                    </Typography>
+                  )}
                   {step.actions.length > 0 && (
                     <Stack component="ul" spacing={0.5} sx={{ pl: 2, m: 0 }}>
                       {step.actions.map((action) => (
@@ -132,7 +220,7 @@ export function PlanExplanation({ result }: PlanExplanationProps) {
                           <Typography variant="body2" component="span">
                             {action.safeLabel}
                           </Typography>
-                          {action.referenceIds.map((id) => (
+                          {action.referenceIds.filter((id) => !UUID_ID.test(id)).map((id) => (
                             <Box key={id} component="code" data-testid="plan-reference-id" sx={{ ...ID_SX, ml: 1 }}>
                               {id}
                             </Box>

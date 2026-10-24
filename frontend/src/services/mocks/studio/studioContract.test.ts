@@ -29,6 +29,7 @@ import {
 import { EXECUTION_FIXTURE_MATRIX, executionCorpus, replayFailureExecutions } from './executionFixtures';
 import {
   NO_RUN_EVIDENCE_MESSAGE,
+  RUN_IN_PROGRESS_EVIDENCE_MESSAGE,
   PARTIAL_RECORDING_QUALIFIER,
   PLAYBACK_FAILED_MESSAGE,
   VIDEO_EVIDENCE_NARRATIVES,
@@ -1218,7 +1219,7 @@ describe('story 10.16a: every VideoStatus renders a distinct, named state (AC-1)
       const narrative = videoEvidenceNarrative(status);
       return [narrative.title, narrative.statement];
     });
-    for (const extra of [PLAYBACK_FAILED_MESSAGE, PARTIAL_RECORDING_QUALIFIER, NO_RUN_EVIDENCE_MESSAGE]) {
+    for (const extra of [PLAYBACK_FAILED_MESSAGE, PARTIAL_RECORDING_QUALIFIER, NO_RUN_EVIDENCE_MESSAGE, RUN_IN_PROGRESS_EVIDENCE_MESSAGE]) {
       expect(wordings).not.toContain(extra);
     }
   });

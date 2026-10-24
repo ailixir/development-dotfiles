@@ -85,14 +85,13 @@ function failedWith(code: string): GuidedResult {
 
 const noop = () => undefined;
 
-function renderCompletion(result: GuidedResult, extra: Partial<{ firstLearnStepId: string; hintStep: number }> = {}) {
+function renderCompletion(result: GuidedResult, extra: Partial<{ firstLearnStepId: string }> = {}) {
   return render(
     <GuidedCompletion
       input={{ kind: 'guided', result, firstLearnStepId: extra.firstLearnStepId ?? null }}
       draftStepIds={DRAFT}
       onGoToStep={noop}
       onOpenVariables={noop}
-      authoredLiteralHintStep={extra.hintStep}
     />,
   );
 }
@@ -426,21 +425,6 @@ describe('GuidedCompletion: success comes from the learned receipt (AC-3, AC-6)'
     expect(completion).not.toHaveTextContent(STRUCK_SECRET_FILL_COPY);
     expect(completion).toHaveTextContent(GUIDED_COPY.failedUnnamed.template);
     expect(screen.getByTestId('guided-completion-code')).toHaveTextContent('INVALID_CONTRACT');
-  });
-
-  it('KL-015-Q4: the authored-literal hint shows only when the page gives it a step, under a failure, and names that step (W5 UX-03)', () => {
-    const { unmount } = renderCompletion(failedWith('TARGET_MISMATCH'), { hintStep: 2 });
-    const hint = screen.getByTestId('guided-authored-literal-hint');
-    expect(hint).toHaveTextContent(guidedCopy('authoredLiteralTargetNotFound', { N: 2 }));
-    expect(hint).toHaveTextContent('step 2');
-    // Hedged: "This may be because of step 2 … If so, try rewording step 2".
-    expect(hint.textContent).toMatch(/^This may be because of step 2: /u);
-    unmount();
-    renderCompletion(failedWith('TARGET_MISMATCH'));
-    expect(screen.queryByTestId('guided-authored-literal-hint')).toBeNull();
-    const ok = publishedResult();
-    renderCompletion(ok, { hintStep: 2 });
-    expect(screen.queryByTestId('guided-authored-literal-hint')).toBeNull();
   });
 
   it('FAILED with no failure and no errorCode says the server gave no reason, with no code line (W5 UX-12)', () => {

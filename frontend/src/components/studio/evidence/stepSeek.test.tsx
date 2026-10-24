@@ -221,3 +221,19 @@ describe('STUDIO-OBS-008 AC-7 (L5b-F1): the replay per-step seek is named "Seek 
     );
   });
 });
+
+describe('round 067 D2: the replay step seek leaves a marker', () => {
+  it('clicking a step control shows "Jumped to step N." under it and calls onSeekStep once', async () => {
+    const onSeek = vi.fn();
+    render(<SeekHarness snapshot={TERMINAL_EVIDENCE_SETTLED} onSeek={onSeek} />);
+    const step = TERMINAL_EVIDENCE_SETTLED.stepResults.find(
+      (candidate) => candidate.offsetMs !== null && screen.queryByTestId(`step-seek-${candidate.stepIndex}`) !== null,
+    )!;
+    expect(screen.queryByTestId(`step-seek-marker-${step.stepIndex}`)).toBeNull();
+    await userEvent.click(stepSeekControl(step.stepIndex));
+    expect(screen.getByTestId(`step-seek-marker-${step.stepIndex}`)).toHaveTextContent(`Jumped to step ${step.stepIndex + 1}.`);
+    expect(stepSeekControl(step.stepIndex)).toHaveAttribute('data-seek-active', 'true');
+    expect(onSeek).toHaveBeenCalledTimes(1);
+    expect(onSeek).toHaveBeenCalledWith(step.offsetMs);
+  });
+});

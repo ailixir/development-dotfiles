@@ -150,27 +150,37 @@ export function seekControlLabel(step: Pick<StepResult, 'stepIndex' | 'offsetMs'
  * tab order, and named as not attempted rather than silently inert. Its handler also refuses on its
  * own, so the disabled attribute is not the only thing standing between a skipped step and a seek.
  */
-const StepSeekControl: React.FC<{ step: StepResult; onSeekStep: (offsetMs: number) => void }> = ({
-  step,
-  onSeekStep,
-}) => {
+const StepSeekControl: React.FC<{
+  step: StepResult;
+  onSeekStep: (offsetMs: number) => void;
+  /** Round 067 D2: this step's control was the last one used on this run. */
+  active: boolean;
+  onUsed: () => void;
+}> = ({ step, onSeekStep, active, onUsed }) => {
   const eligibility = seekEligibility(step);
   return (
     <Box>
       <Button
         size="small"
-        variant="text"
+        variant={active ? 'outlined' : 'text'}
         disabled={!eligibility.seekable}
         aria-label={seekControlLabel(step)}
         data-testid={`step-seek-${step.stepIndex}`}
+        data-seek-active={active ? 'true' : undefined}
         onClick={() => {
           if (eligibility.seekable) {
+            onUsed();
             onSeekStep(eligibility.offsetMs);
           }
         }}
       >
         {seekStepLabel(step.stepIndex)}
       </Button>
+      {active && (
+        <Typography variant="caption" color="text.secondary" display="block" data-testid={`step-seek-marker-${step.stepIndex}`}>
+          {guidedCopy('seekMarkerStep', { N: step.stepIndex + 1 })}
+        </Typography>
+      )}
     </Box>
   );
 };
@@ -325,6 +335,8 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
   showLogs = true,
   replayContext,
 }) => {
+  // Round 067 D2: the step seek control last used, keyed by execution so a new run starts with none.
+  const [lastSeek, setLastSeek] = React.useState<{ executionId: string; stepIndex: number } | null>(null);
   if (!snapshot) {
     return (
       <Box data-testid="execution-progress-empty">
@@ -434,7 +446,12 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
               </Typography>
               <StepTimings step={step} />
               {onSeekStep && failureSeekOffset(snapshot, step) === null && (
-                <StepSeekControl step={step} onSeekStep={onSeekStep} />
+                <StepSeekControl
+                  step={step}
+                  onSeekStep={onSeekStep}
+                  active={lastSeek?.executionId === snapshot.executionId && lastSeek.stepIndex === step.stepIndex}
+                  onUsed={() => setLastSeek({ executionId: snapshot.executionId, stepIndex: step.stepIndex })}
+                />
               )}
               {step.message && (
                 <Typography variant="caption" data-testid={`step-message-${step.stepIndex}`}>

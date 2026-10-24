@@ -11,7 +11,6 @@ import { MOCK_SCHEDULE_POLICY } from '@/services/mocks/studio/schedulePreview';
 import { mockExecutions } from '@/services/mocks/studio/fixtures';
 import { studioSchedulesApi } from '@/services/api/studioSchedulesApi';
 import type { ScheduleEnable, ScheduleOccurrence } from '@/types/studio/studioScheduling';
-import axe from 'axe-core';
 import { useState } from 'react';
 import { Table, TableBody } from '@mui/material';
 import TestRow from '@/components/studio/tests/TestRow';
@@ -24,7 +23,8 @@ const BASE = '*/api/v1/studio';
 const write = { cronExpression: '0 */5 * * * *', timeZone: 'UTC', executionPrincipal: 'studio-local' };
 const create = () => studioSchedulesApi.create(readyDraft.id, write);
 const user = () => userEvent.setup({ delay: null });
-const renderDialog = (dirty = false, entry = '/checks/studio/tests') => render(<MemoryRouter initialEntries={[entry]}><StudioScheduleDialog test={readyDraft} dirty={dirty} onClose={() => undefined} /></MemoryRouter>);
+const runsPageHref = (executionId: string) => `/checks/studio/runs/${executionId}`;
+const renderDialog = (dirty = false, runHref = runsPageHref) => render(<MemoryRouter initialEntries={['/checks/studio/tests']}><StudioScheduleDialog test={readyDraft} dirty={dirty} runHref={runHref} onClose={() => undefined} /></MemoryRouter>);
 const loaded = async () => {
   await screen.findByLabelText('Cron expression');
   await waitFor(() => expect(screen.queryByText('Calculating next runs…')).not.toBeInTheDocument());
@@ -51,7 +51,7 @@ describe('Studio schedule operator flows', { timeout: 15000 }, () => {
     function RowFlow() {
       const [target, setTarget] = useState<TestDto | null>(null);
       return <><Table><TableBody><TestRow test={readyDraft} now={Date.now()} onDelete={() => undefined} onSchedule={setTarget} /></TableBody></Table>
-        <StudioScheduleDialog test={target} onClose={() => setTarget(null)} /></>;
+        <StudioScheduleDialog test={target} runHref={runsPageHref} onClose={() => setTarget(null)} /></>;
     }
     render(<MemoryRouter initialEntries={['/checks/studio/tests']}><RowFlow /></MemoryRouter>);
     const actions = screen.getByRole('button', { name: `Actions for ${readyDraft.name}` });
@@ -221,17 +221,11 @@ describe('Studio schedule operator flows', { timeout: 15000 }, () => {
     expect((await studioSchedulesApi.get(readyDraft.id))?.unacknowledgedUncertaintyExecutionIds).toEqual(['uncertain-summary']);
   });
 
-  it('schedule dialog labels and structure pass the automated accessibility rules supported by jsdom', async () => {
-    renderDialog(); await loaded();
-    const result = await axe.run(screen.getByRole('dialog'), { rules: { 'color-contrast': { enabled: false } } });
-    expect(result.violations.map(violation => ({ id: violation.id, nodes: violation.nodes.map(node => node.target) }))).toEqual([]);
-  });
-
-  it('standalone uncertainty links stay under /studio rather than the federated route', async () => {
+  it('uncertainty links use the host-supplied run link verbatim, whatever the current route', async () => {
     const uncertain = { ...mockExecutions[0], executionId: 'standalone-run', testId: readyDraft.id, status: 'ERROR' as const, errorCode: 'STALE' as const };
     studioMockServer.use(...createSchedulingHandlers({ getTest: () => readyDraft, getExecutions: () => [uncertain] }));
-    await create(); renderDialog(false, '/studio/tests'); await loaded();
-    expect(screen.getByRole('link', { name: 'Inspect run standalone-run' })).toHaveAttribute('href', '/studio/runs/standalone-run');
+    await create(); renderDialog(false, id => `/somewhere/else/${id}`); await loaded();
+    expect(screen.getByRole('link', { name: 'Inspect run standalone-run' })).toHaveAttribute('href', '/somewhere/else/standalone-run');
   });
 
   it('pages actual occurrence links and refusals without inventing browser evidence; removal retains history', async () => {

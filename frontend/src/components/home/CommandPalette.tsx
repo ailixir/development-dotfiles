@@ -3,17 +3,20 @@ import { Box, Dialog, List, ListItemButton, ListItemText, Paper, TextField } fro
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { searchAll } from '@/store/slices/dashboardSlice';
+import { useUiTestAvailability } from '@/hooks/useUiTestAvailability';
 
 interface CommandPaletteProps {
   open: boolean;
   onClose: () => void;
 }
 
+const STUDIO_PATH = '/checks/studio/tests';
+
 const NAV_ITEMS = [
   { title: 'Home', path: '/checks' },
   { title: 'All Checks', path: '/checks/all' },
   { title: 'Reports', path: '/checks/reports' },
-  { title: 'Studio', path: '/checks/studio' },
+  { title: 'Studio', path: STUDIO_PATH },
   { title: 'Splunk prototype', path: '/checks/prototype/splunk' },
 ];
 
@@ -23,6 +26,8 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
   const { data, loading } = useAppSelector((s) => s.dashboard.search);
   const results = Array.isArray(data) ? data : [];
   const [q, setQ] = useState('');
+  // The Studio entry is shown only when UI tests are available (DC-18, DC-23).
+  const uiTestAvailability = useUiTestAvailability();
 
   useEffect(() => {
     if (!open) return;
@@ -34,8 +39,10 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
 
   const staticMatches = useMemo(() => {
     const term = q.toLowerCase();
-    return NAV_ITEMS.filter((i) => i.title.toLowerCase().includes(term));
-  }, [q]);
+    return NAV_ITEMS.filter(
+      (i) => (i.path !== STUDIO_PATH || uiTestAvailability === 'on') && i.title.toLowerCase().includes(term),
+    );
+  }, [q, uiTestAvailability]);
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">

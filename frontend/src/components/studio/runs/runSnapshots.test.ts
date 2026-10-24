@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { passedExecution } from '@/services/mocks/studio/executionFixtures';
 import type { ExecutionSnapshot } from '@/types/studio/studioTypes';
 import { applyRunSnapshot, mergeRunsByRevision, newerSnapshot } from './runSnapshots';
-import { runDetailsPath, runsListPath, studioTestPath } from './runLinks';
+import { runDetailsPath, runsListPath } from './runLinks';
 import { runDurationText, runQueueWaitMs, runTestLabel } from './runPresentation';
 
 const snap = (id: string, revision: number, overrides: Partial<ExecutionSnapshot> = {}): ExecutionSnapshot => ({
@@ -45,12 +45,10 @@ describe('run snapshot merging (story 10.46, AC-2/AC-3)', () => {
 });
 
 describe('run links', () => {
-  it('derives list, run and test paths in host and standalone mounts', () => {
+  it('derives list and run paths in host and standalone mounts', () => {
     expect(runsListPath('/checks/studio/runs/abc')).toBe('/checks/studio/runs');
     expect(runsListPath('/studio/runs')).toBe('/studio/runs');
     expect(runDetailsPath('/checks/studio/runs', 'x y', '?q=a')).toBe('/checks/studio/runs/x%20y?q=a');
-    expect(studioTestPath('/checks/studio/runs', 't1')).toBe('/checks/studio/t1');
-    expect(studioTestPath('/studio/runs', 't1')).toBe('/studio/t1');
   });
 });
 

@@ -104,7 +104,8 @@ function renderPage(entry = LIST) {
         <Routes>
           <Route path="/checks/studio/runs" element={<StudioRunsPage />} />
           <Route path="/checks/studio/runs/:executionId" element={<StudioRunsPage />} />
-          <Route path="/checks/studio/:id" element={<div data-testid="studio-editor" />} />
+          <Route path="/checks/ui-tests/:id/studio" element={<div data-testid="studio-editor" />} />
+          <Route path="/checks/create" element={<div data-testid="create-check" />} />
         </Routes>
         <LocationProbe />
       </MemoryRouter>
@@ -226,7 +227,9 @@ describe('Runs page — server list and URL state', () => {
     await userEvent.click(screen.getAllByRole('button', { name: 'Clear Filters' })[0]);
     await waitFor(() => expect(screen.getAllByRole('button', { name: 'Create Test' })).toHaveLength(2), WAIT);
     await userEvent.click(screen.getAllByRole('button', { name: 'Create Test' })[1]);
-    expect(await screen.findByRole('dialog', {}, WAIT)).toBeInTheDocument();
+    expect(await screen.findByTestId('create-check', {}, WAIT)).toBeInTheDocument();
+    expect(location()).toBe('/checks/create?type=UI_TEST');
+    expect(screen.queryByRole('dialog')).toBeNull();
   });
 });
 
@@ -271,7 +274,7 @@ describe('Runs page — rows', () => {
     const row = await screen.findByTestId(`run-${available.executionId}`, {}, WAIT);
     await userEvent.click(within(row).getByRole('button', { name: 'More actions for Checkout journey' }));
     await userEvent.click(screen.getByRole('menuitem', { name: 'Open test' }));
-    expect(location()).toBe(`/checks/studio/${available.testId}`);
+    expect(location()).toBe(`/checks/ui-tests/${available.testId}/studio`);
   });
 });
 

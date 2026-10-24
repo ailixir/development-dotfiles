@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { declareInsertedSecret, type EditableVariable, type SecretDeclaration } from './secretDeclaration';
+import { declareInsertedSecret, toContractVariables, variableDeclarationIssue, type EditableVariable, type SecretDeclaration } from './secretDeclaration';
 
 /**
  * Tech gate L5b F-L5b-4 (L5b-F2), corrected by W5-2 (unfreeze unit U1, ruling
@@ -87,5 +87,53 @@ describe('declareInsertedSecret', () => {
 
   it('a name that differs only by surrounding spaces still counts as taken, as the page trims names before it saves', () => {
     expect(declareInsertedSecret([plain('  USER_ID ')], 'USER_ID').ok).toBe(false);
+  });
+});
+
+
+describe('manual Variables-save declarations', () => {
+  it('normalizes exactly the submitted D-8 list without changing values, references or editing rows', () => {
+    const rows = [plain('  USER ID! ', '  public value  '), secret(' LOGIN ', ' TOKEN '),
+      plain('   ', 'omitted'), secret('TOKEN'), secret('INCOMPLETE', '   ')];
+    const before = structuredClone(rows);
+    expect(toContractVariables(rows)).toEqual([
+      { name: 'USER ID!', kind: 'plain', value: '  public value  ' },
+      { name: 'LOGIN', kind: 'secretRef', secretId: 'TOKEN' },
+    ]);
+    expect(variableDeclarationIssue(toContractVariables(rows))).toBeNull();
+    expect(rows).toEqual(before);
+    expect(toContractVariables([plain('EMPTY', undefined)])).toEqual([{ name: 'EMPTY', kind: 'plain', value: 'v' }]);
+  });
+
+  it.each(['.', '..', 'with space', 'bad/name', 'x'.repeat(65), '', null, undefined])(
+    'rejects an invalid submitted secretId (%s) without treating plain aliases as reference tokens', (secretId) => {
+      expect(variableDeclarationIssue([{ name: 'LOGIN', kind: 'secretRef', secretId }])).toBe('invalidSecretId');
+    },
+  );
+
+  it.each(['A', 'with-dash', 'with.dot', 'under_score', 'abc123', 'x'.repeat(64)])(
+    'accepts the existing reference grammar (%s)', (secretId) => {
+      expect(variableDeclarationIssue([{ name: 'opaque alias !', kind: 'secretRef', secretId }])).toBeNull();
+    },
+  );
+
+  it('blocks duplicate names after normalization and preserves exact-case opaque aliases', () => {
+    expect(variableDeclarationIssue(toContractVariables([plain(' NAME '), secret('NAME', 'TOKEN')]))).toBe('duplicateName');
+    expect(variableDeclarationIssue(toContractVariables([plain('name'), plain('NAME'), plain('has spaces !')]))).toBeNull();
+    expect(variableDeclarationIssue(toContractVariables([plain('TOKEN'), secret('LOGIN', 'token')]))).toBeNull();
+  });
+
+  it('refuses both reachable secret-ID/name collisions without inventing the unreachable fourth branch', () => {
+    expect(variableDeclarationIssue(toContractVariables([plain('USER_ID'), secret('LOGIN', 'USER_ID')]))).toBe('secretNameCollision');
+    expect(variableDeclarationIssue(toContractVariables([secret('TOKEN', 'OTHER'), secret('LOGIN', 'TOKEN')]))).toBe('secretNameCollision');
+  });
+
+  it('allows self-match and unique aliases for one secretId with no automatic renaming or deduplication', () => {
+    const rows = [secret('TOKEN', 'TOKEN'), secret('LOGIN', 'TOKEN'), secret('OTHER_ALIAS', 'TOKEN')];
+    const normalized = toContractVariables(rows);
+    expect(variableDeclarationIssue(normalized)).toBeNull();
+    expect(normalized).toHaveLength(3);
+    expect(normalized.map((variable) => variable.name)).toEqual(['TOKEN', 'LOGIN', 'OTHER_ALIAS']);
+    expect(normalized.every((variable) => !('value' in variable))).toBe(true);
   });
 });

@@ -1,8 +1,8 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom';
 import { http, HttpResponse } from 'msw';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10,7 +10,7 @@ import type { ExecutionSnapshot } from '@/types/studio/studioTypes';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
 import { fixtureDetail } from '@/services/mocks/studio/authoringState';
-import { readyDraft } from '@/services/mocks/studio/readinessFixtures';
+import { readyDraft, unlearnedDraft } from '@/services/mocks/studio/readinessFixtures';
 import {
   TERMINAL_EVIDENCE_PROCESSING,
   TERMINAL_EVIDENCE_SETTLED,
@@ -22,6 +22,7 @@ import {
 } from '@/services/api/studioTransportWiring';
 import { VIDEO_EVIDENCE_NARRATIVES } from '@/components/studio/evidence';
 import { executionStatusLabel } from '@/components/studio/run';
+import { renderStudioAt } from '@/test/renderStudioAt';
 import { store } from '@/store';
 import { fetchSources } from '@/store/slices/sourcesSlice';
 import { fetchFeatures } from '@/store/slices/featuresSlice';
@@ -45,6 +46,13 @@ const bootstrapHandlers = [
   http.get(`${API_BASE}/checks/sources`, () => HttpResponse.json({ sources: [] })),
   http.get(`${API_BASE}/features`, () => HttpResponse.json({ sources: [], features: [] })),
 ];
+
+const StoreProvider = ({ children }: { children?: ReactNode }) => <Provider store={store}>{children}</Provider>;
+
+/** Mounts the editor on readyDraft's id, the one test serveDraft lists. */
+function renderPage() {
+  return renderStudioAt(readyDraft.id, <ChecksStudioPage />, { wrapper: StoreProvider });
+}
 
 function serveDraft() {
   studioMockServer.use(
@@ -102,13 +110,7 @@ afterAll(() => studioMockServer.close());
 async function runWithFrames(frames: readonly ExecutionSnapshot[]) {
   setExecutionTransportSeam({ primary: createScriptedTransport(frames, 0), fallback: null });
   serveDraft();
-  render(
-    <Provider store={store}>
-      <MemoryRouter>
-        <ChecksStudioPage />
-      </MemoryRouter>
-    </Provider>,
-  );
+  renderPage();
   const control = await screen.findByRole('button', { name: 'Run Test' });
   await waitFor(() => expect(control).not.toBeDisabled());
   await user.click(control);
@@ -117,13 +119,7 @@ async function runWithFrames(frames: readonly ExecutionSnapshot[]) {
 describe('AC-21: the page has exactly one playback path', () => {
   it('before any run, the page mounts no <video> at all', async () => {
     serveDraft();
-    render(
-      <Provider store={store}>
-        <MemoryRouter>
-          <ChecksStudioPage />
-        </MemoryRouter>
-      </Provider>,
-    );
+    renderPage();
     await screen.findByRole('button', { name: 'Run Test' });
     expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Proof', 'Logs']);
     expect(screen.getByRole('tab', { name: 'Proof' })).toHaveAttribute('aria-selected', 'true');
@@ -217,4 +213,66 @@ describe('AC-21: the page has exactly one playback path', () => {
     expect(source).not.toMatch(/\bIndex\s*\*\s*\d/u);
     expect(source).not.toMatch(/<video\b/u);
   });
+});
+
+describe('round 067 D6: the "Previous run" chip follows the run', () => {
+  it('a terminal run with settled evidence causes exactly one test re-read, and the chip shows the server status', async () => {
+    let executed = false;
+    let readsAfterRun = 0;
+    setExecutionTransportSeam({ primary: createScriptedTransport([TERMINAL_EVIDENCE_SETTLED], 0), fallback: null });
+    serveDraft();
+    studioMockServer.use(
+      http.post(`${STUDIO_BASE}/tests/:id/execute`, () => {
+        executed = true;
+        return HttpResponse.json(
+          { executionId: TERMINAL_EVIDENCE_SETTLED.executionId, status: 'PENDING' },
+          { status: 202 },
+        );
+      }),
+      http.get(`${STUDIO_BASE}/tests/:id`, () => {
+        if (executed) readsAfterRun += 1;
+        return HttpResponse.json({ ...fixtureDetail(readyDraft), lastRunStatus: executed ? 'PASSED' : null });
+      }),
+    );
+    renderPage();
+    const control = await screen.findByRole('button', { name: 'Run Test' });
+    await waitFor(() => expect(control).not.toBeDisabled());
+    expect(screen.queryByTestId('test-last-run-status')).toBeNull();
+    await user.click(control);
+    await waitFor(() => expect(screen.getByTestId('test-last-run-status')).toHaveTextContent('Previous run: Passed'));
+    await screen.findByTestId('video-evidence-player');
+    expect(readsAfterRun).toBe(1);
+  }, 15000);
+
+  it('a learned test with no run status shows no chip', async () => {
+    serveDraft();
+    renderPage();
+    await screen.findByRole('button', { name: 'Run Test' });
+    expect(readyDraft.lastRunStatus).toBeNull();
+    expect(screen.queryByTestId('test-last-run-status')).toBeNull();
+  }, 15000);
+
+  it('an UNLEARNED draft with no run status says "No run history"', async () => {
+    studioMockServer.use(
+      ...bootstrapHandlers,
+      http.get(`${STUDIO_BASE}/tests`, () =>
+        HttpResponse.json({ data: [unlearnedDraft], page: 0, size: 20, totalElements: 1, totalPages: 1 }),
+      ),
+      http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fixtureDetail(unlearnedDraft))),
+    );
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('test-last-run-status')).toHaveTextContent('No run history'));
+  }, 15000);
+});
+
+describe('round 067 D7: the evidence card during a live run', () => {
+  it('a replay Run that has no snapshot yet says the recording appears when the run ends', async () => {
+    // A transport that never delivers a frame keeps the run in flight with no snapshot.
+    setExecutionTransportSeam({ primary: createScriptedTransport([], 0), fallback: null });
+    await runWithFrames([]);
+    await waitFor(() => expect(screen.getByTestId('video-evidence-pending-run')).toHaveTextContent(
+      'The recording will appear here when this run ends.',
+    ));
+    expect(screen.queryByTestId('video-evidence-empty')).toBeNull();
+  }, 15000);
 });

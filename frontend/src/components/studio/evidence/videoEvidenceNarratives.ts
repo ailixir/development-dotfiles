@@ -1,4 +1,5 @@
 import type { ExecutionErrorCode, VideoStatus } from '@/types/studio/studioTypes';
+import { guidedCopy } from '@/components/studio/guided/guidedNarratives';
 
 /**
  * What the run's evidence state means, per `VideoStatus` (story 10.16a, AC-1, AC-2).
@@ -120,6 +121,12 @@ export const PLAYBACK_FAILED_MESSAGE = 'The recording could not be played here.'
 
 /** Rendered before any run is on screen. It is not one of the five states and does not pose as one. */
 export const NO_RUN_EVIDENCE_MESSAGE = 'No run is on screen yet, so there is no recording to show.';
+
+/**
+ * Round 067 D7: rendered while a Run is live and has no result on screen yet. Like
+ * {@link NO_RUN_EVIDENCE_MESSAGE}, it is not one of the five states and does not pose as one.
+ */
+export const RUN_IN_PROGRESS_EVIDENCE_MESSAGE = guidedCopy('runInProgressEvidence');
 
 /**
  * Total lookup. A sixth value throws rather than rendering a generic panel that would hide which

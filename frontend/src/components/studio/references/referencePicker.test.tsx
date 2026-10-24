@@ -367,6 +367,20 @@ describe('ReferencePicker: secrets follow the capability', () => {
     expect(within(menu).getByRole('menuitem', { name: 'New secret…' })).toBeVisible();
   });
 
+  it('shows the first-secret disclaimer from Insert reference and cancels without inserting or storing anything', async () => {
+    const onInsert = renderPicker();
+    const menu = await openPicker();
+    await user.click(within(menu).getByRole('menuitem', { name: 'New secret…' }));
+    const dialog = screen.getByRole('dialog');
+    expect(await within(dialog).findByText('Before adding your first secret')).toBeVisible();
+    expect(within(dialog).queryByLabelText('Name')).toBeNull();
+    expect(within(dialog).queryByLabelText('Value')).toBeNull();
+    await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(onInsert).not.toHaveBeenCalled();
+    expect(requestsTo('/secrets').every((entry) => entry.method === 'GET')).toBe(true);
+  });
+
   it.each([
     ['VAULT_UNAVAILABLE', 'Vault is temporarily unavailable. Try again.'],
     ['VAULT_NOT_CONFIGURED', 'Vault is not connected for this environment.'],
@@ -445,6 +459,9 @@ describe('ReferencePicker: "New secret…" never echoes the value', () => {
     await within(menu).findByText(/No secrets stored|<secret /);
     await user.click(within(menu).getByRole('menuitem', { name: 'New secret…' }));
     const dialog = await screen.findByRole('dialog');
+    await waitFor(() => expect(within(dialog).queryByText('Checking secrets for this test…')).toBeNull());
+    const continueButton = within(dialog).queryByRole('button', { name: 'Continue' });
+    if (continueButton) await user.click(continueButton);
     const value = within(dialog).getByLabelText('Value');
     expect(value).toHaveAttribute('type', 'password');
     expect(value).toHaveAttribute('autocomplete', 'new-password');
@@ -481,7 +498,7 @@ describe('ReferencePicker: "New secret…" never echoes the value', () => {
     const again = await openPicker();
     await user.click(within(again).getByRole('menuitem', { name: 'New secret…' }));
     const reopened = await screen.findByRole('dialog');
-    expect(within(reopened).getByLabelText('Value')).toHaveValue('');
+    expect(await within(reopened).findByLabelText('Value')).toHaveValue('');
     expect(within(reopened).getByLabelText('Name')).toHaveValue('');
     expect(within(reopened).getByLabelText('Allowed origins')).toHaveValue('');
     expectNoCanaryOnScreen();
@@ -590,7 +607,6 @@ describe('ruling A2: the struck secret-fill copy is absent from this lane', () =
       '../SecretInput.tsx',
       '../OnboardingCoach.tsx',
       '../templates/quickStartTemplates.ts',
-      '../../checks/wizard/configs/UiTestConfig.tsx',
       '../../../utils/config/studioCapabilities.ts',
       '../../../services/mocks/studio/secretsHandlers.ts',
     ];

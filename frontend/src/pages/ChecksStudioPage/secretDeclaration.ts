@@ -1,3 +1,6 @@
+import type { StudioVariable } from '@/types/studio/studioTypes';
+import { isReferenceName } from '@/components/studio/references/referenceTokens';
+
 /** One row of the Variables dialog. `secret` rows hold a reference id, never a secret value. */
 export type EditableVariable = {
   id: string;
@@ -51,4 +54,43 @@ export function declareInsertedSecret(rows: readonly EditableVariable[], secretI
     return { ok: true, rows: rows.map((row, index) => (index === incomplete ? { ...row, secretId } : row)) };
   }
   return { ok: true, rows: [...rows, { id: `ref_${secretId}`, name: secretId, type: 'secret', secretId }] };
+}
+
+/**
+ * The contract's typed variables. A `secretRef` carries its reference only.
+ *
+ * Ruling D-8: a `secretRef` always carries the Vault name it points at, and no write sends
+ * `secretId` as null, empty or the alias. A secret row the author has not pointed at a secret yet
+ * stays visible in the Variables dialog, incomplete, and is not sent until a secret is chosen.
+ */
+export function toContractVariables(rows: EditableVariable[]): StudioVariable[] {
+  return rows
+    .filter((row) => row.name.trim() !== '')
+    .filter((row) => row.type !== 'secret' || (row.secretId ?? '').trim() !== '')
+    .map((row) =>
+      row.type === 'secret'
+        ? { name: row.name.trim(), kind: 'secretRef', secretId: (row.secretId ?? '').trim() }
+        : { name: row.name.trim(), kind: 'plain', value: row.value ?? '' },
+    );
+}
+
+export type VariableDeclarationIssue = 'invalidSecretId' | 'duplicateName' | 'secretNameCollision';
+
+/** Checks the exact normalized declarations that Save will submit; editing-only rows stay omitted. */
+export function variableDeclarationIssue(variables: readonly StudioVariable[]): VariableDeclarationIssue | null {
+  const names = new Map<string, StudioVariable>();
+  const secretIds = new Set<string>();
+  for (const variable of variables) {
+    if (variable.kind === 'secretRef') {
+      if (typeof variable.secretId !== 'string' || !isReferenceName(variable.secretId)) return 'invalidSecretId';
+      secretIds.add(variable.secretId);
+    }
+    if (names.has(variable.name)) return 'duplicateName';
+    names.set(variable.name, variable);
+  }
+  for (const secretId of secretIds) {
+    const named = names.get(secretId);
+    if (named && (named.kind !== 'secretRef' || named.secretId !== secretId)) return 'secretNameCollision';
+  }
+  return null;
 }

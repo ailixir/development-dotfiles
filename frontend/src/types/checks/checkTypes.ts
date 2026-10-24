@@ -60,17 +60,6 @@ export interface CheckConfiguration {
   application?: string;
   healthRule?: string;
   tier?: string;
-
-  // UI Test Configuration
-  uiTest?: {
-    testId: string;
-    variables?: Record<string, { kind: 'plain' | 'secret' | 'number' | 'boolean'; value?: string | number; secretId?: string }>;
-    overrides?: {
-      browser?: 'chrome' | 'firefox' | 'safari' | 'edge';
-      viewport?: { width: number; height: number };
-      timeout?: number;
-    };
-  };
 }
 
 export interface ThresholdConfig {

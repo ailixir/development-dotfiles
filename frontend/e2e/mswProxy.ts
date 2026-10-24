@@ -28,6 +28,7 @@ import { getResponse, type RequestHandler } from 'msw';
 import { resetStudioMocks, studioHandlers } from '@services/mocks/studio/handlers';
 import { setGuidedScenario } from '@services/mocks/studio/guidedHandlers';
 import { learnWithQuestion, loginRequired } from '@services/mocks/studio/guidedFixtures';
+import { previewBootstrapHandlers } from './previewBootstrapHandlers';
 
 export interface RecordedRequest {
   seq: number;
@@ -137,7 +138,7 @@ export async function startMswProxy(options: { host: string; port: number }): Pr
       } catch {
         name = undefined;
       }
-      if (typeof name !== 'string' || !Object.hasOwn(scenarios, name)) {
+      if (typeof name !== 'string' || !Object.prototype.hasOwnProperty.call(scenarios, name)) {
         sendJson(response, 400, { error: 'UNKNOWN_SCENARIO', known: Object.keys(scenarios) });
         return;
       }
@@ -187,7 +188,10 @@ export async function startMswProxy(options: { host: string; port: number }): Pr
       requests.push(record);
 
       const mocked = url.pathname.startsWith(API_PREFIX)
-        ? await getResponse(scenarios[scenario].handlers, toFetchRequest(request, origin, body))
+        ? await getResponse(
+            [...scenarios[scenario].handlers, ...previewBootstrapHandlers],
+            toFetchRequest(request, origin, body),
+          )
         : undefined;
       if (mocked === undefined) {
         sendJson(response, 502, {

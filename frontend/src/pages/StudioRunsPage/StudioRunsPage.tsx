@@ -17,7 +17,6 @@ import {
   TextField,
 } from '@mui/material';
 import { Add, Movie } from '@mui/icons-material';
-import CreateTestDialog from '@/components/studio/tests/CreateTestDialog';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { fetchCSIs } from '@/store/slices/csiSlice';
@@ -36,10 +35,16 @@ import { useStudioRuns } from '@/components/studio/runs/useStudioRuns';
 import { useLiveRunsRefresh } from '@/components/studio/runs/useLiveRunsRefresh';
 import { RunRow } from '@/components/studio/runs/RunRow';
 import { RunDetailsDrawer } from '@/components/studio/runs/RunDetailsDrawer';
-import { copyText, runDetailsPath, runsListPath, studioTestPath } from '@/components/studio/runs/runLinks';
+import { copyText, runDetailsPath, runsListPath } from '@/components/studio/runs/runLinks';
+import { uiTestEditorPath } from '@/components/studio/uiTestPaths';
 import { isActiveRunStatus } from '@/components/studio/runs/runSnapshots';
 
 export const RUNS_PAGE_SIZE = 25;
+
+/** Where the Create Test actions go: Create Check, with the UI Test type preselected. */
+const CREATE_UI_TEST_PATH = '/checks/create?type=UI_TEST';
+/** The editor for a run's test. */
+const testHref = (testId: string): string => uiTestEditorPath(testId);
 
 type StatusFilterValue = ExecutionStatusFilter | '';
 const STATUS_VALUES: readonly StatusFilterValue[] = ['', ...EXECUTION_STATUS_FILTERS];
@@ -61,7 +66,6 @@ const StudioRunsPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const csiId = useAppSelector((state) => state.dashboard.searchContext.csiId);
   const registeredCsis = useAppSelector((state) => state.csi.data);
-  const [createOpen, setCreateOpen] = useState(false);
   const [notice, setNotice] = useState<{ message: string; severity: 'success' | 'error' } | null>(null);
 
   useEffect(() => { void dispatch(fetchCSIs()); }, [dispatch]);
@@ -108,7 +112,6 @@ const StudioRunsPage: React.FC = () => {
 
   const listPath = runsListPath(location.pathname);
   const runHref = (id: string) => runDetailsPath(listPath, id, location.search);
-  const testHref = useCallback((testId: string) => studioTestPath(listPath, testId), [listPath]);
 
   const openRun = (id: string) => navigate(runHref(id));
   const closeRun = () => navigate({ pathname: listPath, search: location.search });
@@ -142,7 +145,7 @@ const StudioRunsPage: React.FC = () => {
                 onClick={() => list.setFilter('status', list.filters.status === 'RUNNING' ? '' : 'RUNNING')}
               />
             )}
-            <Button variant="contained" startIcon={<Add />} onClick={() => setCreateOpen(true)} size="large">Create Test</Button>
+            <Button variant="contained" startIcon={<Add />} onClick={() => navigate(CREATE_UI_TEST_PATH)} size="large">Create Test</Button>
           </>
         }
         query={list.query}
@@ -169,7 +172,7 @@ const StudioRunsPage: React.FC = () => {
         onRefresh={() => { void reload(); }}
         emptyTitle={filterActive ? 'No matching runs' : 'No runs yet'}
         emptyMessage={filterActive ? 'No runs match your filters.' : 'Run a test from the Studio editor and its result appears here.'}
-        emptyAction={filterActive ? undefined : { label: 'Create Test', onClick: () => setCreateOpen(true) }}
+        emptyAction={filterActive ? undefined : { label: 'Create Test', onClick: () => navigate(CREATE_UI_TEST_PATH) }}
         hasActiveFilters={list.hasActiveFilters}
         onClearFilters={list.clearAll}
         count={totalElements}
@@ -233,15 +236,6 @@ const StudioRunsPage: React.FC = () => {
         onCopyLink={copyRunLink}
         testHref={testHref}
         onSnapshot={applySnapshot}
-      />
-
-      <CreateTestDialog
-        open={createOpen}
-        onClose={() => setCreateOpen(false)}
-        onCreated={(created) => {
-          setCreateOpen(false);
-          navigate(testHref(created.id));
-        }}
       />
 
       <Snackbar

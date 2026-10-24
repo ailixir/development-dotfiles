@@ -69,6 +69,15 @@ export interface GuidedMockEnvironment {
   getTest(id: string): TestDto | undefined;
   /** The draft's source steps by stable ID. Defaults to the fixture IDs `fixtureStepId(i)`. */
   stepsOf?(test: TestDto): GuidedStepRef[];
+  /** Commit this synthetic receipt only if the saved draft still matches its frozen revisions. */
+  publish?(publication: GuidedMockPublication): boolean;
+}
+
+export interface GuidedMockPublication {
+  readonly testId: string;
+  readonly sourceRevision: string;
+  readonly configurationRevision: string;
+  readonly receipt: PublicationReceipt;
 }
 
 const fixtureTests = (): TestDto[] => [...mockTests, ...readinessDrafts, ...demoTests];
@@ -776,6 +785,14 @@ export function createGuidedHandlers(environment: GuidedMockEnvironment): HttpHa
         ) {
           return { refusal: refuse('REVISION_CONFLICT', 409) };
         }
+        const current = readableTest(session.testId);
+        if (
+          !current ||
+          String(current.sourceRevision) !== session.request.sourceRevision ||
+          String(current.configurationRevision) !== session.request.configurationRevision
+        ) {
+          return { refusal: refuse('REVISION_CONFLICT', 409) };
+        }
         if (session.plan.finalize === 'CONFLICT') {
           session.forced = {
             step: { state: 'PUBLICATION_CONFLICT', activeIndex: null },
@@ -790,6 +807,14 @@ export function createGuidedHandlers(environment: GuidedMockEnvironment): HttpHa
           return { refusal: refuse('PUBLICATION_CONFLICT', 409) };
         }
         const receipt = receiptFor(session.sessionId, session.sequence, relearnedFromOf(session));
+        if (environment.publish && !environment.publish({
+          testId: session.testId,
+          sourceRevision: session.request.sourceRevision,
+          configurationRevision: session.request.configurationRevision,
+          receipt,
+        })) {
+          return { refusal: refuse('REVISION_CONFLICT', 409) };
+        }
         session.forced = {
           step: { state: 'SUCCEEDED', activeIndex: null },
           terminal: { publicationStatus: 'REFUSED', completed: session.steps.length, failedIndex: null },

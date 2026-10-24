@@ -1,8 +1,8 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom';
 import { http, HttpResponse } from 'msw';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
@@ -10,6 +10,7 @@ import { fixtureDetail, fixtureStepId } from '@/services/mocks/studio/authoringS
 import { availableQuickStartTemplates } from '@/components/studio/templates';
 import { setVaultSecrets } from '@/services/mocks/studio/capabilityHandlers';
 import { readyDraft } from '@/services/mocks/studio/readinessFixtures';
+import { renderStudioAt } from '@/test/renderStudioAt';
 import { store } from '@/store';
 import { fetchSources } from '@/store/slices/sourcesSlice';
 import { fetchFeatures } from '@/store/slices/featuresSlice';
@@ -84,14 +85,11 @@ afterAll(() => {
   studioMockServer.close();
 });
 
+const StoreProvider = ({ children }: { children?: ReactNode }) => <Provider store={store}>{children}</Provider>;
+
+/** Mounts the editor on readyDraft's id, the one test this file's list fixture serves. */
 function renderPage() {
-  return render(
-    <Provider store={store}>
-      <MemoryRouter>
-        <ChecksStudioPage />
-      </MemoryRouter>
-    </Provider>,
-  );
+  return renderStudioAt(readyDraft.id, <ChecksStudioPage />, { wrapper: StoreProvider });
 }
 
 function serveList(draft: typeof readyDraft) {

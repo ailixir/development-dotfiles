@@ -1,4 +1,5 @@
-import { Box, Button, Stack } from '@mui/material';
+import { useState } from 'react';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import type { GuidedResult } from '@/types/studio/studioGuidedTypes';
 import { guidedCopy } from '@/components/studio/guided/guidedNarratives';
 import { seekEligibility, UNKNOWN_RECORDING_EXTENT, type RecordingExtent } from './seekEligibility';
@@ -23,23 +24,43 @@ export interface GuidedSeekControlsProps {
   readonly recording?: RecordingExtent;
 }
 
+/** The control last used to seek: a step's own button (`actionKey: null`) or one of its actions. */
+interface LastSeek {
+  readonly stepNumber: number;
+  readonly actionKey: string | null;
+  readonly actionLabel: string | null;
+}
+
 export function GuidedSeekControls({ result, onSeek, recording = UNKNOWN_RECORDING_EXTENT }: GuidedSeekControlsProps) {
+  // Round 067 D2: a persistent marker of the last seek. The page mounts this per session, so a new
+  // recording starts with none. It never touches the <video>.
+  const [lastSeek, setLastSeek] = useState<LastSeek | null>(null);
   const targets = guidedSeekTargets(result);
   if (targets.length === 0) {
     return null;
   }
 
-  const seekButton = (key: string, label: string, offsetMs: number, testId: string) => {
+  const seekButton = (
+    key: string,
+    label: string,
+    offsetMs: number,
+    testId: string,
+    marker: LastSeek,
+  ) => {
     const eligibility = seekEligibility({ offsetMs }, recording);
+    const active =
+      lastSeek !== null && lastSeek.stepNumber === marker.stepNumber && lastSeek.actionKey === marker.actionKey;
     return (
       <Button
         key={key}
         size="small"
-        variant="outlined"
+        variant={active ? 'contained' : 'outlined'}
         disabled={!eligibility.seekable}
         data-testid={testId}
+        data-seek-active={active ? 'true' : undefined}
         onClick={() => {
           if (eligibility.seekable) {
+            setLastSeek(marker);
             onSeek(eligibility.offsetMs);
           }
         }}
@@ -66,6 +87,7 @@ export function GuidedSeekControls({ result, onSeek, recording = UNKNOWN_RECORDI
                 guidedCopy('seekToStep', { N: target.stepNumber }),
                 target.stepOffsetMs,
                 `guided-seek-step-button-${target.stepNumber}`,
+                { stepNumber: target.stepNumber, actionKey: null, actionLabel: null },
               )}
             {target.actions.map((action) =>
               seekButton(
@@ -73,9 +95,26 @@ export function GuidedSeekControls({ result, onSeek, recording = UNKNOWN_RECORDI
                 guidedCopy('seekToAction', { '<safe label>': action.safeLabel }),
                 action.offsetMs,
                 'guided-seek-action-button',
+                {
+                  stepNumber: target.stepNumber,
+                  actionKey: `${action.admissionId}:${action.ordinal}`,
+                  actionLabel: action.safeLabel,
+                },
               ),
             )}
           </Stack>
+          {lastSeek !== null && lastSeek.stepNumber === target.stepNumber && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              data-testid="guided-seek-marker"
+              sx={{ display: 'block', mt: 0.5, overflowWrap: 'anywhere' }}
+            >
+              {lastSeek.actionLabel === null
+                ? guidedCopy('seekMarkerStep', { N: lastSeek.stepNumber })
+                : guidedCopy('seekMarkerAction', { N: lastSeek.stepNumber, '<safe label>': lastSeek.actionLabel })}
+            </Typography>
+          )}
         </Box>
       ))}
     </Stack>

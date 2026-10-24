@@ -1,8 +1,11 @@
 import CheckTypeSelector from '@/components/checks/wizard/CheckTypeSelector';
-import { AppDynamicsConfig, GrafanaConfig, HttpConfig, ItrsConfig, SplunkConfig, TcpConfig, UiTestConfig } from '@/components/checks/wizard/configs';
+import { AppDynamicsConfig, GrafanaConfig, HttpConfig, ItrsConfig, SplunkConfig, TcpConfig } from '@/components/checks/wizard/configs';
 import ReviewStep from '@/components/checks/wizard/ReviewStep';
+import UiTestCreateForm, { type UiTestFormField } from '@/components/checks/wizard/UiTestCreateForm';
 import WizardHeader from '@/components/checks/wizard/WizardHeader';
 import ScheduleEditor from '@/components/reports/ScheduleEditor';
+import { uiTestEditorPath } from '@/components/studio/uiTestPaths';
+import { useUiTestAvailability } from '@/hooks/useUiTestAvailability';
 import { schedulesApi } from '@/services/api/schedulesApi';
 import { addNotification } from '@/store/slices/uiSlice';
 import { frequencyToCron, parseCron } from '@/utils/cronNextRun';
@@ -41,7 +44,7 @@ import { useAppDispatch, useAppSelector } from '@store/index';
 import { createCheck, fetchCheckById, updateCheck } from '@store/slices/checksSlice';
 import { fetchCSIs } from '@store/slices/csiSlice';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 const WIZARD_FREQUENCIES = new Set(['hourly', 'daily', 'weekly', 'monthly', 'custom']);
 
@@ -57,12 +60,17 @@ const environments = ['Development', 'Staging', 'Production', 'UAT'];
 
 const steps = ['Basic Information', 'Check Configuration', 'Scheduling', 'Review'];
 
+const DRAFT_KEY = 'checks:create:draft';
+const UI_TEST_TYPE = 'UI_TEST';
+
 const CreateCheckPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { data: csiEntities, loading: csiLoading } = useAppSelector(state => state.csi);
   const { data: checksData } = useAppSelector(state => state.checks);
   const { id: editId } = useParams<{ id?: string }>();
+  const [searchParams] = useSearchParams();
+  const availability = useUiTestAvailability();
 
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState({
@@ -77,70 +85,77 @@ const CreateCheckPage: React.FC = () => {
     frequency: '5m', enabled: true,
   });
 
+  // A UI_TEST type that came from ?type=UI_TEST or from the stored draft waits here (DC-18). It is applied once
+  // availability is 'on', and dropped once it is 'off'; while 'pending' it is neither applied, written nor dropped.
+  const [urlUiTest, setUrlUiTest] = useState(() => searchParams.get('type') === UI_TEST_TYPE);
+  const [draftUiTest, setDraftUiTest] = useState(false);
+  // The environment counts as chosen once the user changes the select or a stored UI Test draft is restored (spec §6).
+  const environmentChosenRef = useRef(false);
+  const draftClearedRef = useRef(false);
+  const uiTestHeld = !editId && (urlUiTest || draftUiTest);
+  // The UI Test one-form branch: only on the create route, and only while UI tests are available.
+  const isUiTest = !editId && availability === 'on' && formData.checkType === UI_TEST_TYPE;
+
   const [tagInput, setTagInput] = useState('');
   const saveTimeoutRef = useRef<number | null>(null);
   const [saveHint, setSaveHint] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [autosaveEnabled, setAutosaveEnabled] = useState(true);
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
-  const [availableUITests, setAvailableUITests] = useState<Array<{ id: string; name: string }>>([]);
   const [schedule, setSchedule] = useState<{ enabled: boolean; frequency: 'hourly'|'daily'|'weekly'|'monthly'|'custom'; time?: string; cron?: string; timezone?: string; daysOfWeek?: number[]; daysOfMonth?: number[] }>({ enabled: true, frequency: 'hourly', time: '09:00', cron: '', timezone: 'EST', daysOfWeek: [], daysOfMonth: [] });
 
   useEffect(() => { dispatch(fetchCSIs()); }, [dispatch]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        if (formData.checkType === 'UI_TEST') {
-          const studio = (await import('@/services/api/studioApi')).default;
-          const res = (await studio.listTests({})) as any;
-          const data = res?.data || res || [];
-          setAvailableUITests(data.map((t: any) => ({ id: t.id, name: t.name })));
-        }
-      } catch { /* Optional prefill data is unavailable; retain the current editable form. */ }
-    })();
-  }, [formData.checkType]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        if (formData.checkType === 'UI_TEST' && (formData as any).uiTestId) {
-          const studio = (await import('@/services/api/studioApi')).default;
-          const test = await studio.getTest((formData as any).uiTestId);
-          // `TestDetailDto.variables` are `StudioVariable`s: `kind` is `plain` or `secretRef`.
-          const vars = test.variables;
-          if (Array.isArray(vars) && vars.length > 0) {
-            setFormData((prev) => {
-              const existing = (prev as any).uiVariables || {};
-              const next = { ...existing } as Record<string, any>;
-              for (const v of vars) {
-                if (!v || !v.name) continue;
-                const key = v.name.toUpperCase();
-                if (next[key]) continue;
-                next[key] = v.kind === 'secretRef' ? { kind: 'secret', secretId: '' } : { kind: 'plain', value: '' };
-              }
-              return { ...prev, uiVariables: next } as any;
-            });
-          }
-        }
-      } catch { /* Optional prefill data is unavailable; retain the current editable form. */ }
-    })();
-  }, [(formData as any).uiTestId, formData.checkType]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (!formData.environment) setFormData((p) => ({ ...p, environment: 'Production' })); }, []);
 
   useEffect(() => {
     if (!autosaveEnabled) return;
+    // A held UI_TEST type is not written, and the stored draft that may carry it is left as it is, until availability is known.
+    if (availability === 'pending' && uiTestHeld) return;
     if (saveTimeoutRef.current) window.clearTimeout(saveTimeoutRef.current);
     setSaveHint('saving');
     saveTimeoutRef.current = window.setTimeout(() => {
-      try { localStorage.setItem('checks:create:draft', JSON.stringify(formData)); setSaveHint('saved'); setTimeout(() => setSaveHint('idle'), 1200); } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
+      if (draftClearedRef.current) return;
+      try { localStorage.setItem(DRAFT_KEY, JSON.stringify(formData)); setSaveHint('saved'); setTimeout(() => setSaveHint('idle'), 1200); } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
     }, 400);
     return () => { if (saveTimeoutRef.current) window.clearTimeout(saveTimeoutRef.current); };
-  }, [formData, autosaveEnabled]);
+  }, [formData, autosaveEnabled, availability, uiTestHeld]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { try { const raw = localStorage.getItem('checks:create:draft'); if (raw) { const d = JSON.parse(raw); if (d && typeof d === 'object') setFormData((p) => ({ ...p, ...d })); } } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ } }, []);
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const d = JSON.parse(raw);
+      if (!d || typeof d !== 'object') return;
+      if (d.checkType === UI_TEST_TYPE) {
+        // Restoring a UI Test draft marks its environment as chosen; the type itself is held until availability is known.
+        environmentChosenRef.current = true;
+        setDraftUiTest(true);
+        setFormData((p) => ({ ...p, ...d, checkType: '' }));
+      } else {
+        setFormData((p) => ({ ...p, ...d }));
+      }
+    } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
+  }, []);
+
+  // Resolves a held UI_TEST type against availability. ?type=UI_TEST and a stored UI Test draft both land on the card.
+  useEffect(() => {
+    if (availability === 'pending') return;
+    if (availability === 'on') {
+      if (!editId && (urlUiTest || draftUiTest)) setFormData((p) => ({ ...p, checkType: UI_TEST_TYPE }));
+    } else {
+      // 'off': the held type is dropped and never written, and a selected UI Test type is reset.
+      setFormData((p) => (p.checkType === UI_TEST_TYPE ? { ...p, checkType: '' } : p));
+    }
+    if (urlUiTest) setUrlUiTest(false);
+    if (draftUiTest) setDraftUiTest(false);
+  }, [availability, editId, urlUiTest, draftUiTest]);
+
+  // Entering UI Test sets Development, but only while no environment has been chosen.
+  useEffect(() => {
+    if (isUiTest && !environmentChosenRef.current) setFormData((p) => ({ ...p, environment: 'Development' }));
+  }, [isUiTest]);
 
   useEffect(() => {
     (async () => {
@@ -157,7 +172,6 @@ const CreateCheckPage: React.FC = () => {
           ...(check.type === 'GRAFANA' ? { grafanaDashboard: (check.configuration as any)?.dashboard || (check.configuration as any)?.grafanaDashboard || '', grafanaPanel: (check.configuration as any)?.panel || (check.configuration as any)?.grafanaPanel || '', metric: (check.configuration as any)?.metric || '', threshold: (check.configuration as any)?.threshold || 0, thresholdOperator: (check.configuration as any)?.thresholdOperator || '<' } : {}),
           ...(check.type === 'ITRS' ? { itrsSampler: (check.configuration as any)?.sampler || (check.configuration as any)?.gateway || '', itrsExpectedStatus: (check.configuration as any)?.expectedStatus || 'OK' } : {}),
           ...(check.type === 'APPDYNAMICS' ? { appDynamicsApp: (check.configuration as any)?.application || '', healthRule: (check.configuration as any)?.healthRule || '' } : {}),
-          ...(check.type === 'UI_TEST' ? { uiTestId: (check.configuration as any)?.uiTest?.testId || '', uiVariables: (check.configuration as any)?.uiTest?.variables || {}, timeout: Math.round((((check.configuration as any)?.uiTest?.overrides || {})?.timeout || 30000) / 1000) } : {}),
           enabled: check.schedule?.enabled ?? true,
           ...(check.schedule && (check.schedule as any).cron ? { cron: (check.schedule as any).cron } : {}),
         }));
@@ -183,12 +197,21 @@ const CreateCheckPage: React.FC = () => {
   useEffect(() => { try { const raw = localStorage.getItem('checks:create:draft'); if (!raw) return; const d = JSON.parse(raw); if (d && d.__fromTemplate && !snackbar.open) { setSnackbar({ open: true, message: `Prefilled from template: ${d.__fromTemplate}`, severity: 'success' }); delete d.__fromTemplate; localStorage.setItem('checks:create:draft', JSON.stringify(d)); } } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ } }, []);
 
   const handleFieldChange = (field: string, value: any) => {
+    if (field === 'environment') environmentChosenRef.current = true;
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleInputChange = (field: string) => (event: any) => {
     const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
+    if (field === 'environment') environmentChosenRef.current = true;
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleUiTestCreated = (testId: string) => {
+    // The stored draft goes first and autosave stops, so the unmounting form cannot write it back.
+    draftClearedRef.current = true;
+    try { localStorage.removeItem(DRAFT_KEY); } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
+    navigate(uiTestEditorPath(testId), { replace: true });
   };
 
   const handleAddTag = () => {
@@ -206,7 +229,6 @@ const CreateCheckPage: React.FC = () => {
       case 'GRAFANA': return { type: 'GRAFANA', dashboard: formData.grafanaDashboard, panel: formData.grafanaPanel, metric: formData.metric, threshold: formData.threshold, thresholdOperator: formData.thresholdOperator };
       case 'ITRS': return { type: 'ITRS', sampler: formData.itrsSampler, expectedStatus: formData.itrsExpectedStatus };
       case 'APPDYNAMICS': return { type: 'APPDYNAMICS', application: formData.appDynamicsApp, healthRule: formData.healthRule };
-      case 'UI_TEST': return { type: 'UI_TEST', uiTest: { testId: (formData as any).uiTestId || '', variables: (formData as any).uiVariables || {}, overrides: { ...(formData.timeout ? { timeout: formData.timeout * 1000 } : {}) } } };
       default: return {};
     }
   };
@@ -251,7 +273,7 @@ const CreateCheckPage: React.FC = () => {
         navigate(`/checks/details/${editId}`);
       } else {
         const created = await dispatch(createCheck(buildCheckPayload() as any)).unwrap();
-        try { localStorage.removeItem('checks:create:draft'); } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
+        try { localStorage.removeItem(DRAFT_KEY); } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
         try {
           await schedulesApi.create(buildSchedulePayload(created.id));
         } catch { /* Storage is optional; retain the in-memory state when persistence is unavailable. */ }
@@ -273,7 +295,6 @@ const CreateCheckPage: React.FC = () => {
       case 'GRAFANA': return Boolean(formData.grafanaDashboard && formData.grafanaPanel && formData.metric);
       case 'ITRS': return Boolean(formData.itrsSampler && formData.itrsExpectedStatus);
       case 'APPDYNAMICS': return Boolean(formData.appDynamicsApp && formData.healthRule);
-      case 'UI_TEST': return Boolean((formData as any).uiTestId && typeof (formData as any).uiTestId === 'string');
       default: return false;
     }
   }, [formData]);
@@ -293,21 +314,11 @@ const CreateCheckPage: React.FC = () => {
       case 'GRAFANA': return <GrafanaConfig {...props} />;
       case 'ITRS': return <ItrsConfig {...props} />;
       case 'APPDYNAMICS': return <AppDynamicsConfig {...props} />;
-      case 'UI_TEST': return (
-        <UiTestConfig {...props} availableTests={availableUITests} onValidateVariables={async () => {
-          try {
-            const studio = (await import('@/services/api/studioApi')).default;
-            const testId = (formData as any).uiTestId;
-            if (!testId) return;
-            const res = await studio.validateVariables(testId, (formData as any).uiVariables || {});
-            const ok = (res as any).isValid !== false;
-            setSnackbar({ open: true, message: ok ? 'Variables look good' : `Missing: ${(res as any).missing?.join(', ')}`, severity: ok ? 'success' : 'error' });
-          } catch { setSnackbar({ open: true, message: 'Validation failed', severity: 'error' }); }
-        }} />
-      );
       default: return <Alert severity="warning">Please select a check type in Step 1 to configure.</Alert>;
     }
   };
+
+  const uiTestDisabledTypes = editId ? [UI_TEST_TYPE] : undefined;
 
   const renderStep = (step: number) => {
     switch (step) {
@@ -315,7 +326,7 @@ const CreateCheckPage: React.FC = () => {
         return (
           <Box>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>What are you monitoring?</Typography>
-            <CheckTypeSelector selectedType={formData.checkType} onSelect={(value) => handleFieldChange('checkType', value)} />
+            <CheckTypeSelector selectedType={formData.checkType} onSelect={(value) => handleFieldChange('checkType', value)} disabledTypes={uiTestDisabledTypes} />
 
             <Fade in={Boolean(formData.checkType)} timeout={200}>
               <Box sx={{ mt: 3 }}>
@@ -404,7 +415,7 @@ const CreateCheckPage: React.FC = () => {
       case 3:
         return (
           <ReviewStep
-            formData={formData} schedule={schedule} csiEntities={csiEntities} availableUITests={availableUITests} editId={editId}
+            formData={formData} schedule={schedule} csiEntities={csiEntities} editId={editId}
             onEditStep={(s) => setActiveStep(s)}
           />
         );
@@ -429,6 +440,20 @@ const CreateCheckPage: React.FC = () => {
         Splunk Logs / Metrics UX prototype runs fully offline — no backend required.
       </Alert>
 
+      {isUiTest ? (
+        <Card>
+          <CardContent>
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>What are you monitoring?</Typography>
+            <CheckTypeSelector selectedType={formData.checkType} onSelect={(value) => handleFieldChange('checkType', value)} disabledTypes={uiTestDisabledTypes} />
+            <Divider sx={{ my: 2 }} />
+            <UiTestCreateForm
+              values={{ name: formData.name, description: formData.description, csiId: formData.csiId, environment: formData.environment }}
+              onChange={(field: UiTestFormField, value: string) => handleFieldChange(field, value)}
+              onCreated={handleUiTestCreated}
+            />
+          </CardContent>
+        </Card>
+      ) : (
       <Card>
         <CardContent>
           <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
@@ -483,6 +508,7 @@ const CreateCheckPage: React.FC = () => {
           </Box>
         </CardContent>
       </Card>
+      )}
 
       <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar((s) => ({ ...s, open: false }))}>
         <Alert severity={snackbar.severity} onClose={() => setSnackbar((s) => ({ ...s, open: false }))}>{snackbar.message}</Alert>

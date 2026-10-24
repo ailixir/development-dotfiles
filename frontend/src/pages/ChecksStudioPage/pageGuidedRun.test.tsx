@@ -1,8 +1,8 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { act, cleanup, render, screen, waitFor, within } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { act, cleanup, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
-import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import { http, HttpResponse } from 'msw';
 import type { TestDetailDto, TestDto } from '@/types/studio/studioTypes';
 import { studioMockServer } from '@/services/mocks/studio/server';
@@ -31,6 +31,8 @@ import {
 import { resetGuidedSessionRuntime } from '@/components/studio/guided/useGuidedSession';
 import { EXECUTION_ERROR_NARRATIVES } from '@/components/studio/run/executionErrorNarratives';
 import { guidedSessionStorageKey } from '@/types/studio/studioGuidedTypes';
+import { renderStudioAt, type StudioNavHandle } from '@/test/renderStudioAt';
+import { uiTestEditorPath } from '@/components/studio/uiTestPaths';
 import { store } from '@/store';
 import { fetchSources } from '@/store/slices/sourcesSlice';
 import { fetchFeatures } from '@/store/slices/featuresSlice';
@@ -133,8 +135,12 @@ afterAll(() => {
   studioMockServer.close();
 });
 
+/** The id of the draft `serveDraft` served last: the first (only) entry of that list, and the route id the editor mounts on. */
+let servedId: string = unlearnedDraft.id;
+
 /** Serves one draft as the list and as its single read (optionally with fields the read adds). */
 function serveDraft(draft: TestDto, detail: Partial<TestDetailDto> = {}) {
+  servedId = draft.id;
   studioMockServer.use(
     ...bootstrapHandlers,
     http.get(`${STUDIO_BASE}/tests`, () =>
@@ -144,14 +150,11 @@ function serveDraft(draft: TestDto, detail: Partial<TestDetailDto> = {}) {
   );
 }
 
-function renderPage() {
-  return render(
-    <Provider store={store}>
-      <MemoryRouter>
-        <ChecksStudioPage guidedOptions={GUIDED_OPTIONS} />
-      </MemoryRouter>
-    </Provider>,
-  );
+const StoreProvider = ({ children }: { children?: ReactNode }) => <Provider store={store}>{children}</Provider>;
+
+/** Mounts the editor on the id of the draft the test just served. */
+function renderPage(id: string = servedId) {
+  return renderStudioAt(id, <ChecksStudioPage guidedOptions={GUIDED_OPTIONS} />, { wrapper: StoreProvider });
 }
 
 /** The Run button, once the gate has read the test (its mode is known). */
@@ -675,9 +678,7 @@ describe('AC-9: terminal outcomes that are not a success (AC-3)', () => {
   }, TEST_TIMEOUT_MS);
 });
 
-describe('AC-9: KL-015-Q4 authored-literal hint, while AUTHORED-ECHO-01 has not landed (conditional obligation b–d)', () => {
-  // The literal step is draft step 2 in both describes (W5 UX-03: the hint names it).
-  const HINT = guidedCopy('authoredLiteralTargetNotFound', { N: 2 });
+describe('AC-9: terminal failures on a step with authored text', () => {
   /** A draft whose second step asserts an authored literal, known to the page and to the mirror alike. */
   const LITERAL_STEPS = [
     { id: fixtureStepId(0), text: 'Go to "https://shop.example.test/orders"' },
@@ -688,49 +689,38 @@ describe('AC-9: KL-015-Q4 authored-literal hint, while AUTHORED-ECHO-01 has not 
     serveDraft(unlearnedDraft, { steps: LITERAL_STEPS });
   }
 
-  it('KL-015-Q4: a target-not-found outcome on "Check the heading says Order confirmed" shows the authored-literal hint', async () => {
+  it('a target-not-found outcome shows the generic failure and the returned code', async () => {
     setGuidedScenario(endsIn('FAILED', { atStepIndex: 1, failureCode: 'TARGET_MISMATCH' }), unlearnedDraft.id);
     serveLiteralDraft();
     renderPage();
     await user().click(await runButton());
 
     const completion = await screen.findByTestId('guided-completion', {}, WAIT);
+    expect(completion).toHaveAttribute('data-kind', 'failedUnnamed');
     expect(within(completion).getByTestId('guided-completion-code')).toHaveTextContent('TARGET_MISMATCH');
-    expect(within(completion).getByTestId('guided-authored-literal-hint')).toHaveTextContent(HINT);
+    expect(completion.textContent).toBe(`${guidedCopy('failedUnnamed')}TARGET_MISMATCH`);
   }, TEST_TIMEOUT_MS);
 
-  it('KL-015-Q4 control: the same target-not-found outcome on a step without such a literal shows no hint', async () => {
-    setGuidedScenario(endsIn('FAILED', { atStepIndex: 1, failureCode: 'TARGET_MISMATCH' }), unlearnedDraft.id);
-    serveDraft(unlearnedDraft);
-    renderPage();
-    await user().click(await runButton());
-
-    const completion = await screen.findByTestId('guided-completion', {}, WAIT);
-    expect(within(completion).getByTestId('guided-completion-code')).toHaveTextContent('TARGET_MISMATCH');
-    expect(STEP_TEXTS[1]).toMatch(/^Click/u);
-    expect(screen.queryByTestId('guided-authored-literal-hint')).toBeNull();
-    expect(document.body.textContent).not.toContain(HINT);
-  }, TEST_TIMEOUT_MS);
-
-  it.each(['AMBIGUOUS_TARGET', 'ASSERTION_FAILED'] as const)(
-    'KL-015-Q4 control: the literal step ending %s (a different cause in the landed data) shows no hint',
-    async (failureCode) => {
+  it.each([
+    { failureCode: 'AMBIGUOUS_TARGET', kind: 'failedUnnamed', message: `${guidedCopy('failedUnnamed')}AMBIGUOUS_TARGET` },
+    { failureCode: 'ASSERTION_FAILED', kind: 'failed', message: guidedCopy('assertionFailed') },
+  ] as const)(
+    '$failureCode keeps its appropriate failure narrative',
+    async ({ failureCode, kind, message }) => {
       setGuidedScenario(endsIn('FAILED', { atStepIndex: 1, failureCode }), unlearnedDraft.id);
       serveLiteralDraft();
       renderPage();
       await user().click(await runButton());
 
-      await screen.findByTestId('guided-completion', {}, WAIT);
-      expect(screen.queryByTestId('guided-authored-literal-hint')).toBeNull();
-      expect(document.body.textContent).not.toContain(HINT);
+      const completion = await screen.findByTestId('guided-completion', {}, WAIT);
+      expect(completion).toHaveAttribute('data-kind', kind);
+      expect(completion.textContent).toBe(message);
     },
     TEST_TIMEOUT_MS,
   );
 });
 
-describe('AC-9: KL-015-Q4 on the backend shape (ruling Q9: FAILED BUDGET_EXCEEDED, no failure, no admitted action)', () => {
-  // The literal step is draft step 2 in both describes (W5 UX-03: the hint names it).
-  const HINT = guidedCopy('authoredLiteralTargetNotFound', { N: 2 });
+describe('AC-9: terminal failures before an action is admitted', () => {
   const BUDGET_SENTENCE = 'This run reached its learning budget, so Studio stopped it.';
   const LITERAL_STEPS = [
     { id: fixtureStepId(0), text: 'Go to "https://shop.example.test/orders"' },
@@ -771,29 +761,17 @@ describe('AC-9: KL-015-Q4 on the backend shape (ruling Q9: FAILED BUDGET_EXCEEDE
     );
   }
 
-  it('G1: a BUDGET_EXCEEDED stop on "Check the heading says Order confirmed" shows the budget sentence and the authored-literal hint', async () => {
+  it('a BUDGET_EXCEEDED stop shows the budget sentence and states that nothing restarts automatically', async () => {
     serveBackendShapedFailure('BUDGET_EXCEEDED', LITERAL_STEPS);
     renderPage();
     await user().click(await runButton());
 
     const completion = await screen.findByTestId('guided-completion', {}, WAIT);
     expect(completion).toHaveAttribute('data-kind', 'failed');
-    expect(completion).toHaveTextContent(BUDGET_SENTENCE);
-    expect(within(completion).getByTestId('guided-authored-literal-hint')).toHaveTextContent(HINT);
+    expect(completion.textContent).toBe(`${BUDGET_SENTENCE}${guidedCopy('nothingStartsOnItsOwn')}`);
   }, TEST_TIMEOUT_MS);
 
-  it('G2: the same BUDGET_EXCEEDED stop on a step without a literal shows the budget sentence and no hint', async () => {
-    serveBackendShapedFailure('BUDGET_EXCEEDED', [LITERAL_STEPS[0], { id: fixtureStepId(1), text: 'Click "Sign On"' }]);
-    renderPage();
-    await user().click(await runButton());
-
-    const completion = await screen.findByTestId('guided-completion', {}, WAIT);
-    expect(completion).toHaveTextContent(BUDGET_SENTENCE);
-    expect(screen.queryByTestId('guided-authored-literal-hint')).toBeNull();
-    expect(document.body.textContent).not.toContain(HINT);
-  }, TEST_TIMEOUT_MS);
-
-  it('G3: the literal step ending RUNTIME_INCOMPATIBLE (a cause that names nothing) shows the generic failure with its code and no hint', async () => {
+  it('RUNTIME_INCOMPATIBLE shows the generic failure and the returned code', async () => {
     serveBackendShapedFailure('RUNTIME_INCOMPATIBLE', LITERAL_STEPS);
     renderPage();
     await user().click(await runButton());
@@ -801,8 +779,7 @@ describe('AC-9: KL-015-Q4 on the backend shape (ruling Q9: FAILED BUDGET_EXCEEDE
     const completion = await screen.findByTestId('guided-completion', {}, WAIT);
     expect(completion).toHaveAttribute('data-kind', 'failedUnnamed');
     expect(within(completion).getByTestId('guided-completion-code')).toHaveTextContent('RUNTIME_INCOMPATIBLE');
-    expect(screen.queryByTestId('guided-authored-literal-hint')).toBeNull();
-    expect(document.body.textContent).not.toContain(HINT);
+    expect(completion.textContent).toBe(`${guidedCopy('failedUnnamed')}RUNTIME_INCOMPATIBLE`);
   }, TEST_TIMEOUT_MS);
 });
 
@@ -1028,26 +1005,16 @@ describe('AC-2 / ADR-SC-006: a stored session whose read is refused (tech gate L
       const pointerBefore = storedPointer(unlearnedDraft);
       expect(pointerBefore).not.toBeNull();
 
-      const nav: { go: ((to: string) => void) | null } = { go: null };
-      const NavHandle = () => {
-        nav.go = useNavigate();
-        return null;
-      };
-      render(
-        <Provider store={store}>
-          <MemoryRouter initialEntries={[`/studio/tests/${unlearnedDraft.id}`]}>
-            <NavHandle />
-            <Routes>
-              <Route path="/studio/tests/:id" element={<ChecksStudioPage guidedOptions={GUIDED_OPTIONS} />} />
-            </Routes>
-          </MemoryRouter>
-        </Provider>,
-      );
+      const nav: StudioNavHandle = { go: null };
+      renderStudioAt(unlearnedDraft.id, <ChecksStudioPage guidedOptions={GUIDED_OPTIONS} />, {
+        navHandle: nav,
+        wrapper: StoreProvider,
+      });
 
       // The check is in flight (it was sent after the refusal); the author switches tests before it answers.
       await waitFor(() => expect(checks).toBe(1), WAIT);
       await act(async () => {
-        nav.go?.(`/studio/tests/${needsRelearnDraft.id}`);
+        nav.go?.(uiTestEditorPath(needsRelearnDraft.id));
       });
       await waitFor(() => expect(screen.getByRole('textbox', { name: 'Step 2' })).toBeInTheDocument(), WAIT);
       await settle(800);
