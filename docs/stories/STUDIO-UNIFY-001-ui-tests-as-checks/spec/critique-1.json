@@ -1,0 +1,254 @@
+{
+  "storyId": "STUDIO-UNIFY-001-ui-tests-as-checks",
+  "critiquedAt": "2026-10-23T21:07:33Z",
+  "critiquedBy": "@qa",
+  "specVersion": 1,
+  "iteration": 1,
+  "verdict": "NEEDS_REVISION",
+  "verdictReason": "No HIGH issues and every dimension is at least 3, but there are 7 MEDIUM issues and the weighted average is 3.65 (band 3.0-3.9). The spec is well traced and most of its code claims hold: no FR, NFR or CON is missing, no endpoint needs a backend change, and ADR-SC-006, pnpm, single path and Flyway are respected. The MEDIUM issues are specification gaps that would force the Plan to guess: what the editor does when mounted without a route id (and the 10+ test files, including audit surfaces 3-7, that mount it that way); what 'the run gate first settles' means for the once-only autorun; a broken schedule-dialog link at the increment 1/2 boundary; an incorrect 'RunRow reused unchanged' claim; CSI names taken from a store that holds only the first 20 CSIs; unspecified Create Check wizard mechanics for the UI Test type; and a ?type=UI_TEST dead end when the switch is off.",
+  "scores": {
+    "accuracy": 4,
+    "completeness": 3,
+    "consistency": 3.5,
+    "feasibility": 3.5,
+    "alignment": 4.5,
+    "average": 3.65
+  },
+  "issues": [
+    {
+      "id": "CRIT-1",
+      "severity": "MEDIUM",
+      "category": "completeness",
+      "check": "comp-2",
+      "description": "Editor behaviour without a route id is unspecified, and the tests that depend on it are not listed. FR-06 and AC-06 say the editor 'never falls back', but ChecksStudioPage is mounted with no route id in the WCAG audit surfaces 3-7 (frontend/src/test/a11y/studioWcagAudit.test.tsx L25 and renderPage L202-208, bare <MemoryRouter> with no Route) and by about 10 other test files (pageEvidence, pageGuidedRun, pageRunGate, pageSaveAndStop, pageStepTimeout, pageAuthoringUx, pageIncrementalRecording, pageReplayAndReferences, studioRunTransport.node, replayFailure, pageBootstrapShape, and the execution fixture/scenario matrix tests). All of them rely on the list[0] fallback (ChecksStudioPage.tsx L495-499). Production also still mounts the editor without an id through the `studio` route until increment 4 (App.tsx L110 and L139; Dashboard and command palette). §12.5 says the audit only drops surfaces 1-2 and 'the remaining surfaces stay green', and §12.4 lists none of these files, while R1 and §12.2 only mention 'route-id mounting' in passing.",
+      "location": "spec.md#7.1, #12.2, #12.4, #12.5, #17 R1",
+      "suggestion": "State the no-id behaviour explicitly: for example 'the list[0] fallback applies only when the route has no id, and is deleted with the `studio` route in increment 4', or 'tests mount via a Route with :id'. Then list the affected test files in §12.4 as mount-wrapper updates, and in §12.5 say that wrapping surfaces 3-7 in a route with an id is a re-mount, not an audit extension (ADR-SC-006 allows it). Keep the per-increment accounting.",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-2",
+      "severity": "MEDIUM",
+      "category": "feasibility",
+      "check": "feas-2",
+      "description": "'When the run gate first settles' (DC-01, FR-13, §7.2) is not defined, and AC-29's permission row cannot be met as written. RunControl hosts its own useRunGate, which does an independent GET /tests/{id} (useRunGate.ts L296-323) and an independent capabilities read (L339-358). A pending or failed capabilities read is 'unknown' and 'never disables Run'. RunControl also needs hasSteps from the editor draft (ChecksStudioPage.tsx L1121). A naive reading (evaluate on the first render, when gate.test is still null) drops every autorun at mount. A reading that waits only for the test read fires a run for a user whose capabilities read has not returned yet. That contradicts AC-29 ('a user without run permission: no execute').",
+      "location": "spec.md#1.4 DC-01, #7.2 (rows 'Run not permitted', 'No steps'), requirements.json AC-29",
+      "suggestion": "Define the settle event: 'the gate's initial test read has completed (loading=false), the capabilities read has resolved or failed, and the editor draft is loaded'. Say that an 'unknown' permission proceeds and the server's 403 refusal is the visible outcome. Restrict AC-29's permission scenario to the case where permission is already 'denied' at settle. Leave the code location to the Plan, but pin the event.",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-3",
+      "severity": "MEDIUM",
+      "category": "consistency",
+      "check": "con-4",
+      "description": "The increment 1/2 boundary leaves a broken link although CON-08 and §14 promise none. StudioScheduleDialog derives its run-link base from location.pathname.indexOf('/studio') (StudioScheduleDialog.tsx L26-28). The editor opens the dialog (ChecksStudioPage.tsx L1144). After increment 1 the editor path is /checks/ui-tests/{id}/studio, so 'Inspect run' and 'View run' (dialog L179, L214) point to /checks/ui-tests/{id}/studio/runs, a route that does not exist and falls to the catch-all. The spec assigns the dialog fix to increment 2 (§14 row 2, FR-08).",
+      "location": "spec.md#14 (rows 1-2, closing paragraph), #8.2, FR-08",
+      "suggestion": "Move the dialog's runs-link change into increment 1. Pass the link target in explicitly (do not derive it from pathname). In increment 1 it targets the still-existing /checks/studio/runs/{id}. In increment 2 it switches to the ui-tests runs helper. Add this to the Increment 1 and 2 test lists.",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-4",
+      "severity": "MEDIUM",
+      "category": "accuracy",
+      "check": "acc-1",
+      "description": "'Rows use RunRow with the Test column hidden' (§8.4, FR-11, AC-12) and 'reused unchanged unless noted' (§3.3) are incorrect. RunRowProps (components/studio/runs/RunRow.tsx L11-23) has no prop to hide a column. The first cell is the test-name link built from runTestLabel (L42, L50-70), and the column headers live in the page (StudioRunsPage) that this story deletes. RunDetailsDrawer also has a required testHref prop that links to the test editor (RunDetailsDrawer.tsx L57, L297), which has no defined target inside a single-test Runs tab.",
+      "location": "spec.md#3.3, #8.4, FR-11, AC-12",
+      "suggestion": "Say that RunRow is adapted (ADAPT, new prop) with the primary cell showing the run time or id for single-test context. Say the Runs tab owns its table header. Define the drawer's testHref for this context (the detail page, or omit the link). Update §3.3's 'unchanged' list.",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-5",
+      "severity": "MEDIUM",
+      "category": "feasibility",
+      "check": "feas-2",
+      "description": "FR-14, §9.2 and NFR-01 resolve UI test CSI names from the CSI store with no extra request, but the store holds only the first page: fetchCSIs() calls csiApi.listCsis with default limit 20 and page 0 (csiApi.ts L14-16, csiSlice.ts L55-61). All Checks does not load CSIs itself; ScopeBar and FilterBar do, with the same default. A UI test whose CSI is not among the first 20 has no resolvable name, and the spec gives no fallback. The same store feeds Create Check's CSI select (CreateCheckPage.tsx L340), so AC-01's 'registered CSIs only' inherits the limit. The old Tests page had the same limit, but a cross-system All Checks view exposes it more widely. I did not verify how many CSIs the real environment has.",
+      "location": "spec.md#9.2, #6, FR-14, NFR-01, AC-15",
+      "suggestion": "Add a fallback to FR-14 and AC-15 (show the csiId when the name is unknown), and record the 20-CSI page as a known limitation or risk. If unacceptable, allow a documented larger-limit CSI load (frontend-only) and amend NFR-01.",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-6",
+      "severity": "MEDIUM",
+      "category": "completeness",
+      "check": "comp-1",
+      "description": "The Create Check wizard behaviour for the UI Test type is not specified. The page is a four-step stepper (CreateCheckPage.tsx L58: Basic Information, Check Configuration, Scheduling, Review) with Back/Next, Test Now and Create Check buttons. FR-01 and §6 say 'a single step' and 'Create and open Studio' without saying how the stepper, Scheduling and Review steps, Next/Back, tags and Test Now behave for UI_TEST. Environment default is also unresolved: the page sets 'Production' on mount (L130) and restores a stored draft that may hold another environment (L143). AC-01 says 'preset to Development'. The spec does not say whether selecting the UI Test card resets the environment, or whether a restored or user-chosen value wins.",
+      "location": "spec.md#6, FR-01, AC-01, AC-02",
+      "suggestion": "Add a short UI_TEST branch description: the stepper is hidden or reduced to the one form, which buttons exist, tags and schedule fields are absent, and environment is set to Development when the UI Test card is selected unless the user has already changed it (state the rule and its precedence over the Production mount default and the stored draft).",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-7",
+      "severity": "MEDIUM",
+      "category": "consistency",
+      "check": "con-4",
+      "description": "?type=UI_TEST with the availability switch off is a dead end. DC-09 sends the Dashboard quick action (DashboardPage.tsx ~L753) and the command palette 'Studio' entry (CommandPalette.tsx L16) to /checks/all?type=UI_TEST. Neither entry is gated by the switch today. DC-12 hides the 'UI Test' Type option when the switch is off, and DC-06 then saves the filter to checks:catalog:prefs (AllChecksPage.tsx L120-138). The result is an All Checks page filtered to a type that is not in the dropdown, matching nothing, and persisted to later visits. AC-23 and AC-09 do not cover this.",
+      "location": "spec.md#1.4 DC-06, DC-09, DC-12, #9.4, #10, AC-23",
+      "suggestion": "Add a rule: when the switch is off, the preselect and any stored 'UI_TEST' type filter are ignored (and not saved), or the two entry points are hidden when off. Add a scenario to AC-23.",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-8",
+      "severity": "LOW",
+      "category": "accuracy",
+      "check": "acc-1",
+      "description": "§11 says 'copyText and READINESS stay because they are still used'. The only consumer of copyText is StudioRunsPage (runLinks.ts L35; StudioRunsPage.tsx L39 and L117), which is deleted in increment 4. READINESS stays (readinessFor and studioContract.test.ts L16), but copyText becomes dead code unless the new Runs tab wires a copy-link action (RunDetailsDrawer takes a required onCopyLink, L53). The spec specifies no copy-link behaviour and has no FR for one.",
+      "location": "spec.md#11",
+      "suggestion": "Either delete copyText with runLinks.ts and correct the sentence, or state that the Runs tab keeps the drawer's copy-link action (traced to FR-11) and uses copyText.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-9",
+      "severity": "LOW",
+      "category": "consistency",
+      "check": "con-4",
+      "description": "NFR-04's metric ('no direct fetch in the new or changed modules') cannot pass: CreateCheckPage.tsx is a changed module and contains a pre-existing direct fetch('/api/v1/checks/test-connection') (L465).",
+      "location": "requirements.json NFR-04; spec.md#2.2",
+      "suggestion": "Scope the metric to new or changed lines, or note the existing call as out of scope for this story.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-10",
+      "severity": "LOW",
+      "category": "completeness",
+      "check": "comp-4",
+      "description": "D5 and §13 update CLAUDE.md L101-117 (three-panel text and nav tree), but AGENTS.md carries the same stale text (L106 'Three-Panel Interface', L117 'Checks Studio - UI testing'). It would be left inconsistent. D5 is an enumerated list, so the spec cannot silently add it.",
+      "location": "spec.md#13, FR-29, DC-11",
+      "suggestion": "Record AGENTS.md L106/L117 as an observation in §13 'Not changed', or ask the user whether D5 covers the AGENTS.md mirror.",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-11",
+      "severity": "LOW",
+      "category": "completeness",
+      "check": "comp-1",
+      "description": "UI test rows in the All Checks table are not mapped to the table's columns (Check Name, Type, Status, Last Execution, Actions; AllChecksPage.tsx ~L494-505). FR-14 names only the CSI name. It is unspecified what the Type cell shows, whether environment is shown, and how lastRunAt maps to 'Last Execution'.",
+      "location": "spec.md#9.2, FR-14, AC-15",
+      "suggestion": "Add a one-line column mapping for kind 'uiTest' (name, 'UI Test', §9.3 chip, lastRunAt, actions).",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-12",
+      "severity": "LOW",
+      "category": "completeness",
+      "check": "comp-2",
+      "description": "§12.4 omits test files affected by the removals: StudioListLayout.test.tsx (deleted if StudioListLayout is removed, which §11 leaves conditional), scheduleProvenance.test.tsx L28 (passes a studio testHref), and the ChecksStudioPage test family (see CRIT-1). There is also no test described for the CON-09 requirement that both App.tsx route trees carry the ui-tests routes.",
+      "location": "spec.md#12.2, #12.4, CON-09",
+      "suggestion": "Add those files to the Delete/Update lists, make the StudioListLayout decision explicit, and add a route test per tree (federated /checks and standalone).",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-13",
+      "severity": "LOW",
+      "category": "consistency",
+      "check": "con-1",
+      "description": "complexity.json (knowledge dimension) still names 'MUI v7, React Router v7', which the spec corrected in CON-05 to MUI 5.18.0 and React Router 6.30.1. The versions are right in the spec (verified in package.json and pnpm-lock.yaml); only the upstream artifact is stale, and the spec's header cites it as an input.",
+      "location": "complexity.json dimensions.knowledge.notes; spec.md#2.3 CON-05",
+      "suggestion": "Add a one-line note in the spec metadata or changelog that complexity.json's stack wording is superseded by CON-05. The score does not change.",
+      "autoFixable": true
+    }
+  ],
+  "summary": {
+    "highIssues": 0,
+    "mediumIssues": 7,
+    "lowIssues": 6,
+    "autoFixable": 3,
+    "checksEvaluated": 21,
+    "checksPassed": 13,
+    "dimensionChecks": {
+      "accuracy": {
+        "passed": ["acc-2", "acc-3", "acc-4"],
+        "failed": ["acc-1 (CRIT-4, CRIT-8)"]
+      },
+      "completeness": {
+        "passed": ["comp-3", "comp-5"],
+        "failed": ["comp-1 (CRIT-6, CRIT-11)", "comp-2 (CRIT-1, CRIT-12)", "comp-4 (CRIT-10)"]
+      },
+      "consistency": {
+        "passed": ["con-1", "con-2", "con-3"],
+        "failed": ["con-4 (CRIT-3, CRIT-7, CRIT-9)"]
+      },
+      "feasibility": {
+        "passed": ["feas-1", "feas-3", "feas-4"],
+        "failed": ["feas-2 (CRIT-2, CRIT-5)"]
+      },
+      "alignment": {
+        "passed": ["align-1", "align-2", "align-3", "align-4"],
+        "failed": []
+      }
+    }
+  },
+  "nextAction": "Return to @pm spec-write with this critique.json (iteration 2). Resolve CRIT-1 to CRIT-7; the LOW items can be folded in at the same time. Re-critique after the revision. No product code before an approved spec and a Ready story.",
+  "autoFixes": [
+    {
+      "issueId": "CRIT-9",
+      "location": "requirements.json NFR-04.metric",
+      "original": "lint and review find no direct fetch in the new or changed modules.",
+      "suggested": "lint and review find no direct fetch in new or changed lines (the existing call in CreateCheckPage.tsx is out of scope)."
+    },
+    {
+      "issueId": "CRIT-8",
+      "location": "spec.md#11",
+      "original": "`copyText` and `READINESS` stay because they are still used.",
+      "suggested": "`READINESS` stays (used by `readinessFor` and the contract test). `copyText` is removed with `runLinks.ts` unless the Runs tab keeps the drawer's copy-link action."
+    },
+    {
+      "issueId": "CRIT-13",
+      "location": "spec.md#Metadata",
+      "original": "(none)",
+      "suggested": "Note: complexity.json's 'MUI v7 / React Router v7' wording is superseded by CON-05 (MUI 5.18.0, React Router 6.30.1)."
+    }
+  ],
+  "evidence": {
+    "inputHashes": {
+      "spec.md": "2e7bfb7d6af889d69ad92ddaec8557dcbb035bdba7d2c5e6f17a2d65e3e3aa44",
+      "requirements.json": "08b6ae0158347214433dc81da61536a7ca4567306ff68862589a37e2195da17b",
+      "complexity.json": "b11f282b4436514904db6f8d342cd33ae121be2bfa1b4a03868909f40d9682dc",
+      "research.json": "2b43ee4f02431b91ef6ffa24b472f7f2abbd01d1fba00d9af7ffcefd081842bc"
+    },
+    "requirementCoverage": {
+      "functional": 29,
+      "nonFunctional": 9,
+      "constraints": 10,
+      "acceptanceCriteria": 29,
+      "note": "Every FR-01..FR-29, NFR-01..NFR-09 and CON-01..CON-10 appears in the spec and in the §19 traceability or §2 tables. No phantom requirement found; the design calls DC-01..DC-14 trace to recorded OQ/R/RF items or D1-D6."
+    },
+    "claimsVerifiedInCode": [
+      "ChecksStudioPage.tsx L482-522: load effect uses listTests() with no params, falls back to list[0] (L495-499), reads autorun at L494 and bumps runRequest at L507-510; autorun is never removed from the URL; only navigate calls are L1061 and L1194.",
+      "ChecksStudioPage.tsx L705-717: route-change detector ignores an id not in the loaded list (L712).",
+      "ChecksStudioPage.tsx L1212: editor environment options are Development, Staging, Production (no UAT). L1667: Run again shares the runRequest token.",
+      "RunControl.tsx L139, L181-187: held-token semantics (token served only while runnable and not running, re-checked each render). useRunGate.ts L480-513 and runEnablement.ts: READY replays, UNLEARNED learns, NEEDS_RELEARN re-learns, LEARNING is busy.",
+      "StudioController.java L51-64 (list params, default size 20), L155-171 (executions accept UUID testId; default sort acceptedAt,desc). StudioService.java L178 (size capped at 100), L303-320 (absent test gives StudioAccessDeniedException), L338 (CSI_IMMUTABLE), L679/L702 (TEST_DELETED). UITestDto.forList carries readiness, lastRunAt, lastRunStatus.",
+      "ExecutionStatus.java: PENDING, RUNNING, PASSED, FAILED, ERROR; studioTypes.ts lastRunStatus PASSED|FAILED|ERROR; TEST_READINESS_VALUES has four values. The §9.3 status mapping is consistent with these enums.",
+      "CheckService.java L115: GET /checks sorts createdAt descending. AllChecksPage.tsx L104 (limit 100), L120-138 (prefs), type options incl. UI_TEST, no acknowledge or assign anywhere, bulk handlers use selectedIds.",
+      "App.tsx: both trees carry studio, studio/tests, studio/runs, studio/runs/:executionId, studio/:id (L110-114, L139-143) and a catch-all (L123, L160).",
+      "navigationSetup.ts L15-34 and L73-75; ChecksLayout.tsx L85-87; LayoutProvider.tsx L70; navigationConfig.ts exists and is imported by nothing; CommandPalette.tsx L16 and DashboardPage.tsx quick action both target /checks/studio and are not gated.",
+      "CreateCheckPage.tsx L56 (four environments), L143 (draft restore), L254 (draft removal), L58 (four-step wizard). CreateTestDialog.tsx L82-91 payload matches FR-02. checkTypes.ts L65 holds the stale uiTest field.",
+      "studioWcagAudit.test.tsx L26-27 import StudioTestsPage and StudioRunsPage; surfaces 1-2 at L289-310; surfaces 3-7 render ChecksStudioPage in a bare MemoryRouter.",
+      "package.json and pnpm-lock.yaml: @mui/material 5.18.0, react-router-dom 6.30.1, msw 2.15.0; frontend/.npmrc node-linker=hoisted. SharedSchedulingIT L341 asserts zero UI_TEST checks; application.yml UI_TEST: false.",
+      "PRD.md L76, L78, L99, L111, L115, L121, L128, L158, L229 and studio-execution.md L20, L23, L229, L235 match the §13 descriptions; CLAUDE.md L101-117 matches (AGENTS.md mirrors it, see CRIT-10).",
+      "Increment 1-4 link audit: all existing in-app entry points to the editor and runs were located (testHref, runLinks, StudioScheduleDialog, Dashboard, CommandPalette, ChecksStudioPage L1061/L1194); only the schedule dialog's derived runs path breaks at the 1/2 boundary (CRIT-3)."
+    ],
+    "checksPerformed": [
+      "Read spec.md, requirements.json, complexity.json and research.json in full and applied all 21 checks of spec-critique.md across the five dimensions.",
+      "Independently sampled more than 10 claims against the working tree (list above), covering the five highest-risk areas: autorun consumed once (§7.2), load-by-route-id (§7.1), status mapping (§9.3), removals (§11) and WCAG guard handling (§12.5).",
+      "Checked every endpoint the screens need (list, read, create, delete, executions by testId, schedule, capabilities) exists today, so D1/CON-01 is met with no backend change.",
+      "Walked each increment boundary for broken links.",
+      "Checked project rules: ADR-SC-006 (no accessibility work added, the audit only shrinks), pnpm only, single path with no compat routes (the catch-all is existing behaviour), Flyway untouched.",
+      "Article IV: every spec statement traces to an FR/NFR/CON, a D1-D6 decision, a research finding or a recorded DC. No invented feature found."
+    ],
+    "notPerformed": [
+      "No test suite, type-check, lint, build or E2E was run; this is a read-only specification critique.",
+      "Not verified: list-endpoint cost at size=100 (readiness per row, unmeasured in research); that a malformed id answers 400 (inferred from the UUID parameter type, no handler or test read); MUI's rendering of an out-of-range select value; the real number of CSIs in the target environment (CRIT-5); the bundle-size and FCP targets (NFR-02).",
+      "The 10+ test files that mount ChecksStudioPage without a route id were identified by import and by sampling the audit and pageGuidedRun, not each opened.",
+      "The declared spec-quality-checklist.md was not looked for separately; the explicit 21 checks and verdict rules in spec-critique.md were used."
+    ],
+    "limits": [
+      "Fractional dimension scores (3.5, 4.5) are used where a dimension sits between two rubric levels; the average is the weighted mean (0.25, 0.25, 0.20, 0.15, 0.15) = 3.65."
+    ]
+  },
+  "selfCritique": {
+    "performed": true,
+    "framework": ".aiox-core/development/tasks/spec-critique.md",
+    "verdictRulesApplied": "No HIGH issues, so not BLOCKED. MEDIUM issues are present and the weighted average is 3.65 (3.0-3.9) with all dimensions >= 3, so NEEDS_REVISION.",
+    "scopeDistinction": "Local specification gate only. No implementation verdict. Accessibility items were deliberately not raised (ADR-SC-006)."
+  }
+}

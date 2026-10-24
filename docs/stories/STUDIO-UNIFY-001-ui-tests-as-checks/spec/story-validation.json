@@ -1,0 +1,153 @@
+{
+  "storyId": "STUDIO-UNIFY-001-ui-tests-as-checks",
+  "validatedBy": "@po (Pax)",
+  "date": "2026-10-23",
+  "mode": "yolo",
+  "task": ".aiox-core/development/tasks/validate-next-story.md",
+  "checklist": ".claude/rules/story-lifecycle.md (10-point); .aiox-core/product/checklists/po-master-checklist.md and change-checklist.md read, applied only where story-level (no course change triggered)",
+  "verdictSummary": "All four stories GO and Draft -> Ready. Ready does not authorize execution: plan revision 4 is still status pending / executionAuthorized false, and @dev starts 1.1 only after the user approves it (C-1).",
+  "sourceInventory": {
+    "spec": {"path": "spec/spec.md", "iteration": 6, "sha256": "93a67de406bba299f77f6d050e6f7aab8abe8a6039f23398cacb54ea1854d9d7"},
+    "requirements": {"path": "spec/requirements.json", "sha256": "ee4628416a38891a0988e5b0afe6274609d2a7f000d6fa298007da30213cebb5"},
+    "plan": {"path": "plan/implementation.yaml", "revision": 4, "status": "pending", "executionAuthorized": false, "subtasks": 78, "sha256": "f2c9b27401f59056ba2be1b6bea95cde3252b3303edf6f566a734ef35e33a0d7"},
+    "critique": {"path": "spec/critique-4.json", "round": 4, "verdict": "APPROVED", "average": 4.38, "sha256": "c7a1cf63a821a25a796514231a1b853f9c36048093ec60aa8e724ea6e9ffc4a2", "note": "spec/critique.json is byte-identical to critique-4.json"},
+    "research": {"path": "spec/research.json", "sha256": "2b43ee4f02431b91ef6ffa24b472f7f2abbd01d1fba00d9af7ffcefd081842bc"},
+    "complexity": {"path": "spec/complexity.json", "sha256": "05254a4a2ad96a823a4279076f1d38722d56139c37a8fed2ebfb1a56a63a3d46"},
+    "planPinsMatchCurrentFiles": true,
+    "repoHead": "b39359f78 (dirty working tree, preserved)"
+  },
+  "independentSpecGate": {
+    "path": "spec/critique-4.json",
+    "verdict": "APPROVED",
+    "score": 4.38,
+    "round": 4,
+    "lowIssuesOpen": ["CRIT-27 spec side only (spec Metadata, header Status line, §18 still name critique 2 / plan revision 2)"],
+    "crit26AppliedInPlan": "plan 1.15 notes carry the outer availability gate (verified)",
+    "matchingInputHashes": true
+  },
+  "methods": [
+    "Task-to-subtask comparison by script (js-yaml parse of plan/implementation.yaml vs each story's Tasks section): id set and order, description, service, files, dependencies, coverage, verification command and notes. 78/78 identical; no missing or extra task.",
+    "AC comparison by script against requirements.json acceptanceCriteria: unsplit ACs verbatim; split ACs carry only their increment's sentences plus traced interim wording.",
+    "Plan dependency scan: no subtask depends on a later phase; every service is frontend or infra; no file under backend/ or any migration; no subtask over 3 files.",
+    "Route-scan dry runs from frontend/ on 2026-10-23: S1 25 lines (18+7), S2 24 lines (0 imports), S3 50+21 lines, S4 40 files; all equal the plan's recorded dry runs.",
+    "Cited file:line spot-checks in the working tree (see each story's antiHallucinationFindings.verified).",
+    "isCodeIntelAvailable() returned false: step 8.1 skipped. EpicContextAccumulator needs completed stories in session state; none of this pipeline's stories are done, so accumulated context is empty and accumulated-context.md does not exist. Cross-story coherence was checked through each story's Cross-story handoff section."
+  ],
+  "flagRulings": [
+    {"flag": "1a", "story": "STUDIO-UNIFY-001.2", "storyFlag": "F3", "item": "AC-23 detail-route clause in increment 2", "ruling": "Correct placement", "trace": "FR-24 text ('shows the feature-unavailable state on ui-tests routes'; 'the detail routes show a loading state'); spec §8.1, §10, DC-18; plan 2.1, 2.5, 2.17 coverage AC-23. The detail routes first exist in increment 2.", "housekeeping": "Spec §14 row 2 and §19 FR-24 row omit increment 2 (@pm, non-blocking)."},
+    {"flag": "1b", "story": "STUDIO-UNIFY-001.3", "storyFlag": "F3", "item": "AC-14 / FR-13 All Checks half in increment 3", "ruling": "Correct placement", "trace": "FR-13 text ('on the detail page and on All Checks UI test rows'); §19 FR-13 increments 1, 2, 3; spec §9.5; AC-19 'behaves as AC-14'; plan 3.3, 3.9 coverage AC-14.", "housekeeping": "Spec §14 row 3 omits FR-13/AC-14 (@pm, non-blocking)."},
+    {"flag": "1c", "story": "STUDIO-UNIFY-001.4", "storyFlag": "F2", "item": "Leftover sweep as AC-26 in increment 4", "ruling": "Correct placement", "trace": "FR-27 'Increment 4: anything left over'; spec §11 row 4; §14 row 4 FR column 'FR-27 (leftovers)'; plan 4.1, 4.7 coverage AC-26; scan S4. Every AC clause maps to an S4 pattern.", "housekeeping": "Spec §14 row 4 AC column lists only AC-28 (@pm, non-blocking)."},
+    {"flag": "1d", "story": "STUDIO-UNIFY-001.1", "storyFlag": "F3", "item": "AC-08 leave-guard clause in increment 1", "ruling": "Correct placement", "trace": "Spec §14 row 1 FR column 'FR-07 (breadcrumb, CSI, leave guard)'; AC-08 own clause; plan 1.15 'keeps the leave guard'. Interim back/'Open Tests' targets trace to spec §7.3, §14.1 and plan 1.15 / linkWalkAtExit."},
+    {"flag": "1e", "story": "STUDIO-UNIFY-001.1", "storyFlag": "F4", "item": "AC-23 editor-gate clauses in increment 1 (related to 1a)", "ruling": "Correct placement", "trace": "FR-24 text; spec §7.1 'Availability gate'; DC-18; §14 row 1 'FR-24 (card, routes, entries)'; plan 1.15 (CRIT-26)."},
+    {"flag": "2", "story": "STUDIO-UNIFY-001.4", "storyFlag": "F3", "item": "Plan greps 4.3/4.4 cannot prove AC-28", "ruling": "The stated QA verification is adequate", "trace": "Quality Gate Tasks: @qa reads every D5 line against AC-28 and treats the greps as necessary, not sufficient. DoD: every D5 line has been read and matches AC-28, and PRD L121 is unchanged. The D5 table gives line, required change and pre-edit text (spot-checked: it matches the current files). 4.5 and 4.6 record the reviewer's result.", "shouldFix": "SF-1: record the per-line AC-28 result in the Dev Agent Record, review by content (line numbers move), and show PRD L121 unchanged with git diff."},
+    {"flag": "3", "story": "STUDIO-UNIFY-001.1", "storyFlag": "F7", "item": "Stale spec Metadata and plan pins (CRIT-27)", "ruling": "Does not block", "trace": "Plan qualityGate pins already match the current files (spec 93a67de4..., requirements ee462841..., critique-4 c7a1cf63...). Only the spec's Metadata, header Status line and §18 lag. No AC, task or verification depends on them. critique-4 classes CRIT-27 as LOW, 'only matters at the moment of approval'; @pm refreshes the spec lines at plan approval.", "shouldFix": "SF-1 (@sm): F7 overstates the issue; the plan pins were refreshed in revision 4."}
+  ],
+  "crossStoryChecks": {
+    "acCoverage": "All 30 ACs are assigned. AC-08, AC-09, AC-23, AC-26 and AC-27 are split by increment with no clause lost or duplicated, and AC-04 and AC-14 are split into two halves each.",
+    "d7Removals": "Each spec §11 row is removed in its own story, its references are repointed there, and each WCAG surface is dropped before its page files. The link-walk tables match §14.1.",
+    "dependencyOrder": "Strict order: .1 (none) -> .2 -> .3 -> .4. Plan subtasks depend only on earlier phases.",
+    "backend": "None. All 78 subtasks are service frontend or infra.",
+    "accessibility": "No accessibility AC or task. The WCAG audit gets only the planned changes: surfaces 3-7 re-mounted (1.10), surface 2 dropped (2.12), surface 1 dropped (3.11), the ChecksLayout.a11y entry path (3.18) and the consistency check (4.6). ADR-SC-006 applied; nothing was scored down for missing accessibility work.",
+    "pnpmVerification": "Stories .1-.3: every task verifies with pnpm from frontend/ (1.32 is manual with a pnpm fallback). Story .4: 4.1, 4.3 and 4.4 are grep-only and 4.5 is a manual review, by plan design (critique-4 planTaskRules: 75 command, 3 manual, pnpm only). The 4.7 pnpm gate depends on all of them. No npm or yarn anywhere."
+  },
+  "stories": [
+    {
+      "storyPath": "docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/STUDIO-UNIFY-001.1.story.md",
+      "planPhase": "phase-1 (1.1-1.33)",
+      "verdict": "GO",
+      "status": "Ready",
+      "implementationReadinessScore": 9,
+      "confidence": "High",
+      "readyTransitionApplied": true,
+      "changeLogVersion": "0.1.0 -> 0.1.1",
+      "draftSha256": "f409820d8d94e8770e62115302c82942ad0356f41538fc22d2b8e8597d86fb56",
+      "validatedSha256": "6ec092f820ecdeca7f39c2fc7a989da24fce5e3768fa11795230ce2740e1365d",
+      "tenPointChecklist": {"title": "PASS", "description": "PASS", "testableAC": "PASS (Given/When/Then)", "scopeInOut": "PASS", "dependencies": "PASS (none; plan approval gate stated)", "complexity": "PASS (S-M, 33 subtasks)", "businessValue": "PASS", "risks": "PASS (R1, R2, R7, R8, R10-R14)", "definitionOfDone": "PASS", "alignment": "PASS (spec §14 row 1, requirements, plan phase-1)"},
+      "taskChecks": {"1_template": "PASS", "1.1_executor": "PASS (@dev / @qa; constitution QA authority adaptation as in STUDIO-SCHED-001)", "2_fileStructure": "PASS", "3_frontend": "PASS", "4_acCoverage": "PASS (AC-to-subtask table matches plan coverage)", "5_testing": "PASS", "6_security": "PASS (NFR-03, NFR-04, centralized client)", "7_sequence": "PASS (re-mount 1.5-1.10 before fallback removal 1.11)", "8_coderabbit": "PASS", "8.1_codeIntel": "N/A (unavailable)", "9_antiHallucination": "PASS", "10_readiness": "PASS"},
+      "acShare": "14 ACs = spec §14 row 1 (AC-01-07, AC-08 inc 1, AC-09 inc 1, AC-23 inc 1, AC-26 inc 1, AC-27 inc 1, AC-29, AC-30).",
+      "antiHallucinationFindings": {"verified": ["ChecksStudioPage.tsx L166, L494, L495, L507, L694, L734, L1061, L1144, L1167, L1194, L1212, L1936-1940", "App.tsx L110-114, L123, L139-143, L160", "StudioScheduleDialog.tsx L11, L27-28", "CreateCheckPage.tsx L130, L465", "navigationSetup.ts L75", "LayoutProvider.tsx L70", "ChecksLayout.tsx L85", "DashboardPage.tsx L753", "CommandPalette.tsx L16", "testErrors.ts L30", "navigationConfig.ts L28 (no importer)", "referencePicker.test.tsx L610", "studioWcagAudit.test.tsx L203", "installed @mui/material 5.18.0, react-router-dom 6.30.1, msw 2.15.0; pnpm-lock.yaml only"], "unverified": []},
+      "criticalIssues": [],
+      "shouldFixIssues": [
+        {"id": "C-1", "description": "Ready does not authorize execution. Plan revision 4 is status pending / executionAuthorized false; @dev starts 1.1 only after the user approves it. If approval changes the plan (sha256 f2c9b274...), @sm re-syncs the affected tasks and @po re-validates.", "owner": "user / @dev", "blocksImplementation": true, "blocksReady": false},
+        {"id": "SF-1", "description": "Reword drafting flag F7: plan qualityGate pins were refreshed in revision 4; only spec-side lines lag.", "owner": "@sm", "blocksImplementation": false}
+      ],
+      "niceToHave": []
+    },
+    {
+      "storyPath": "docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/STUDIO-UNIFY-001.2.story.md",
+      "planPhase": "phase-2 (2.1-2.18)",
+      "verdict": "GO",
+      "status": "Ready",
+      "implementationReadinessScore": 9,
+      "confidence": "High",
+      "readyTransitionApplied": true,
+      "changeLogVersion": "0.1.0 -> 0.1.1",
+      "draftSha256": "bb97c0d14277bf709629bbcf984073625f3b6a140f4af0ba16125621e1c80cb9",
+      "validatedSha256": "aec2d1574468f82a946b1dc9d6d8cc1b0e7ecc3c876cd6faaf4f7d51e3892862",
+      "tenPointChecklist": {"title": "PASS", "description": "PASS (D3 quoted)", "testableAC": "PASS", "scopeInOut": "PASS", "dependencies": "PASS (.1)", "complexity": "PASS (M, 18 subtasks)", "businessValue": "PASS", "risks": "PASS (R3, R4, R8, R9, R11, R14)", "definitionOfDone": "PASS", "alignment": "PASS (spec §8, §14 row 2, plan phase-2)"},
+      "taskChecks": {"1_template": "PASS", "1.1_executor": "PASS", "2_fileStructure": "PASS", "3_frontend": "PASS", "4_acCoverage": "PASS", "5_testing": "PASS", "6_security": "PASS (test-read gate, expectedTestId, no /checks/{id} probe, secret shows reference only)", "7_sequence": "PASS (routes and links 2.9-2.11, then WCAG 2.12, then files 2.13)", "8_coderabbit": "PASS", "8.1_codeIntel": "N/A", "9_antiHallucination": "PASS", "10_readiness": "PASS"},
+      "acShare": "12 ACs = spec §14 row 2 (AC-08 back, AC-09 inc 2, AC-10-13, AC-14 detail, AC-24, AC-25, AC-26 inc 2, AC-27 inc 2) plus AC-23 detail-route clause (flag 1a). AC-16 correctly excluded (2.2 only builds the shared mapping).",
+      "antiHallucinationFindings": {"verified": ["App.tsx L112-113, L141-142", "navigationSetup.ts L30, L73", "ChecksLayout.tsx L87", "runLinks.ts L9 RUNS_SEGMENT; exports runsListPath, runDetailsPath, studioTestPath, studioTestsPath, copyText", "useStudioRuns.ts L13, L84, L89", "RunRow.tsx L11 props", "StudioTestsPage.tsx L173 dialog host", "studioWcagAudit.test.tsx L27, L97"], "unverified": []},
+      "criticalIssues": [],
+      "shouldFixIssues": [
+        {"id": "C-1", "description": "Inherits story .1 condition: no code before plan approval and story .1 Done.", "owner": "user / @dev", "blocksImplementation": true, "blocksReady": false}
+      ],
+      "niceToHave": [
+        {"id": "NTH-1", "description": "AC-25 first clause ('the editor's live subscription is closed') has no named case in the 2.17 list; @qa to confirm evidence (existing editor stream-closing coverage or a 2.17 assertion).", "owner": "@qa"}
+      ]
+    },
+    {
+      "storyPath": "docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/STUDIO-UNIFY-001.3.story.md",
+      "planPhase": "phase-3 (3.1-3.20)",
+      "verdict": "GO",
+      "status": "Ready",
+      "implementationReadinessScore": 9,
+      "confidence": "High",
+      "readyTransitionApplied": true,
+      "changeLogVersion": "0.1.0 -> 0.1.1",
+      "draftSha256": "0e041348f274ed7fc3873949a3115e36364d09a303d4582c6f307481606781c0",
+      "validatedSha256": "59d7dc0b61893ff662b9c09546a0bab8d184151f8189e1c23e646137a9e55e7e",
+      "tenPointChecklist": {"title": "PASS", "description": "PASS", "testableAC": "PASS", "scopeInOut": "PASS", "dependencies": "PASS (.2)", "complexity": "PASS (M, 20 subtasks)", "businessValue": "PASS", "risks": "PASS (R5, R6, R12, R13, R14, K2)", "definitionOfDone": "PASS", "alignment": "PASS (spec §9, §14 row 3, plan phase-3)"},
+      "taskChecks": {"1_template": "PASS", "1.1_executor": "PASS", "2_fileStructure": "PASS", "3_frontend": "PASS", "4_acCoverage": "PASS", "5_testing": "PASS (GET /checks served inline; E2E handler 3.19)", "6_security": "PASS (no bulk on UI test ids, run gate only entry, zero Studio requests unless 'on')", "7_sequence": "PASS (retargets 3.7-3.8 before route removal 3.10; WCAG 3.11 before 3.13)", "8_coderabbit": "PASS", "8.1_codeIntel": "N/A", "9_antiHallucination": "PASS", "10_readiness": "PASS"},
+      "acShare": "15 ACs = spec §14 row 3 (AC-04 all, AC-08 Open Tests, AC-09 inc 3, AC-15-23, AC-26 inc 3, AC-27 inc 3) plus AC-14 All Checks half (flag 1b).",
+      "antiHallucinationFindings": {"verified": ["StudioTestsPage.tsx L5 imports StudioListLayout", "AllChecksPage.tsx L104, L339, L432", "useUrlListState.ts L94 debounceMs = 300", "previewBootstrapHandlers.ts L33-35 (no GET /checks)", "ChecksLayout.tsx L86", "ChecksLayout.a11y.test.tsx L45", "studioWcagAudit.test.tsx L26, L96, L288"], "unverified": []},
+      "criticalIssues": [],
+      "shouldFixIssues": [
+        {"id": "C-1", "description": "Inherits story .1 condition: no code before plan approval and story .2 Done.", "owner": "user / @dev", "blocksImplementation": true, "blocksReady": false}
+      ],
+      "niceToHave": []
+    },
+    {
+      "storyPath": "docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/STUDIO-UNIFY-001.4.story.md",
+      "planPhase": "phase-4 (4.1-4.7)",
+      "verdict": "GO",
+      "status": "Ready",
+      "implementationReadinessScore": 8,
+      "confidence": "High for scan and gate; Medium for AC-28 (manual document review)",
+      "readyTransitionApplied": true,
+      "changeLogVersion": "0.1.0 -> 0.1.1",
+      "draftSha256": "74b1a7d711aea882776c74bc83d532a23b4d4ab3083cefcc823bd911e7e0251e",
+      "validatedSha256": "8114cfdf664d53b4b503fff5c338fd95e77e21da15e184cd39837f4c75da0a10",
+      "tenPointChecklist": {"title": "PASS", "description": "PASS (D5 quoted)", "testableAC": "PASS (AC-26 scan; AC-28 document review)", "scopeInOut": "PASS", "dependencies": "PASS (.3; 4.2 uses the 1.1 baseline)", "complexity": "PASS (S, 7 subtasks)", "businessValue": "PASS", "risks": "PASS (R11, R14)", "definitionOfDone": "PASS", "alignment": "PASS (spec §13, §14 row 4, plan phase-4)"},
+      "taskChecks": {"1_template": "PASS", "1.1_executor": "PASS", "2_fileStructure": "PASS", "3_frontend": "N/A (docs and verification only)", "4_acCoverage": "PASS", "5_testing": "PASS (manual review stated for AC-28)", "6_security": "N/A", "7_sequence": "PASS", "8_coderabbit": "PASS (Documentation focus)", "8.1_codeIntel": "N/A", "9_antiHallucination": "PASS", "10_readiness": "PASS"},
+      "acShare": "AC-28 (spec §14 row 4) plus AC-26 leftovers (flag 1c).",
+      "antiHallucinationFindings": {"verified": ["PRD.md L76, L78, L90, L99, L111, L115, L121, L128, L158, L229 match the 'Found at drafting' column", "CLAUDE.md L106 'Three-Panel Interface', L117 'Checks Studio - UI testing'", "AGENTS.md L106, L117 same", "docs/architecture/studio-execution.md L20, L23, L229, L235", "ARCH.md L36, L198 (M5), L391, L787-788"], "unverified": []},
+      "criticalIssues": [],
+      "shouldFixIssues": [
+        {"id": "C-1", "description": "Inherits story .1 condition: no code before plan approval and story .3 Done.", "owner": "user / @dev", "blocksImplementation": true, "blocksReady": false},
+        {"id": "SF-1", "description": "Record the per-line AC-28 result (line, required change, verdict) in the Dev Agent Record as for 4.5/4.6; review by content because line numbers move after edits; show PRD L121 unchanged via git diff -- ../PRD.md.", "owner": "@dev (checked by @qa)", "blocksImplementation": false}
+      ],
+      "niceToHave": [],
+      "observations": ["4.1, 4.3 and 4.4 verify with grep only and 4.5 is manual (plan design for infra/doc subtasks). pnpm runs in 4.2, 4.6 and the 4.7 gate. A literal pnpm step in every task would be a plan change for @architect."]
+    }
+  ],
+  "specHousekeeping": {
+    "owner": "@pm (spec) / @architect (plan phase descriptions)",
+    "blocks": false,
+    "items": [
+      "CRIT-27 spec side: Metadata 'critique.json (iteration 2, APPROVED)' and 'plan revision 2', header Status line naming critique 2, §18 'plan revision 2'.",
+      "§14 and §19 omit FR-24/AC-23 for increment 2, FR-13/AC-14 for increment 3 and AC-26 for increment 4; the plan's phase-2 and phase-3 descriptions omit FR-24 and FR-13 although subtask coverage includes them."
+    ]
+  },
+  "nextAction": "The user approves plan revision 4. Then @dev runs *develop STUDIO-UNIFY-001.1. Stories .2-.4 follow strictly after the previous story is Done."
+}

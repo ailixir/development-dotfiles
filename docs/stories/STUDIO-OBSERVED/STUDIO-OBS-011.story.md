@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Story ID | STUDIO-OBS-011 |
-| Status | **Ready** |
+| Status | **Done** |
 | Epic | Studio observed authoring |
 | Depends on | STUDIO-OBS-010 |
 | Dependency notes | User decision: "at the end of the wave". ADR-SC-005 allows a start once OBS-009 is Done, in parallel with OBS-010, provided nothing on OBS-010's dated "Live surface" list is removed — so T0 waits for that list. Thin by design: compile-path removal, v1/v2 retirement, migration re-baseline and the frontend compile UI moved to OBS-012A/012B. **Amended 2026-10-15 (user decision):** this story no longer waits for OBS-009 Done. It may start once two things hold: OBS-009's locally achievable ACs are implemented and validated, and OBS-010's dated "Live surface" list exists. See "Start-condition amendment" under PO Validation. |
@@ -128,24 +128,62 @@ Method is 10.51's: per-item re-grep at HEAD with the command recorded, count-and
 
 ## Tasks / Subtasks
 
-- [ ] **T0 — Baselines, rulings, Live surface (AC-1, AC-2, AC-7).** Read OBS-010's "Live surface" list; re-run the inventory at HEAD; collect the AC-2 rulings (CLN-10 @po/@devops; CLN-40 @qa); take the three baselines; timing run to name the sleep-polled ITs (AC-5); @architect confirms the fold targets (AC-4) and any wait-library choice.
-- [ ] **T1 — Leftovers (AC-2, AC-3).** Class A removals; class B sweep; class C per ruling; emitters per OBS-009 outcome; targeted tests; grep per item.
-  - [ ] F-1 (CLN-F1), before the T2 split. First migrate the positive admissions in `GuidedSessionIT`/`GuidedServiceTransportFaultIT` to planner-issued obligations, porting by name with counts. Then make the `GuidedSessionService` admission gate unconditional and remove the translation-absent arms, with the exact shape ruled by @architect at T0. Add the no-translation-state `409 RUNTIME_INCOMPATIBLE` negative test, and record the neutrality proof and the grep. Remove the orphaned bridge helpers and fold the duplicated bridge fixture (ruling §4.1 and F-3). If any of this is not done, carry it forward (AC-2 obligation F-1 a–g).
-  - [ ] CLN-F2: get the @architect + @data-engineer ruling on the historical V18 fixture adapter.
+- [x] **T0 — Baselines, rulings, Live surface (AC-1, AC-2, AC-7).** Read OBS-010's "Live surface" list; re-run the inventory at HEAD; collect the AC-2 rulings (CLN-10 @po/@devops; CLN-40 @qa); take the three baselines; timing run to name the sleep-polled ITs (AC-5); @architect confirms the fold targets (AC-4) and any wait-library choice.
+- [x] **T1 — Leftovers (AC-2, AC-3).** Class A removals; class B sweep; class C per ruling; emitters per OBS-009 outcome; targeted tests; grep per item.
+  - [x] F-1 (CLN-F1), before the T2 split. First migrate the positive admissions in `GuidedSessionIT`/`GuidedServiceTransportFaultIT` to planner-issued obligations, porting by name with counts. Then make the `GuidedSessionService` admission gate unconditional and remove the translation-absent arms, with the exact shape ruled by @architect at T0. Add the no-translation-state `409 RUNTIME_INCOMPATIBLE` negative test, and record the neutrality proof and the grep. Remove the orphaned bridge helpers and fold the duplicated bridge fixture (ruling §4.1 and F-3). If any of this is not done, carry it forward (AC-2 obligation F-1 a–g).
+  - [x] CLN-F2: get the @architect + @data-engineer ruling on the historical V18 fixture adapter.
     - If it is retired: port or retire the `InferenceMigrationIT` V18 cases by name, delete the adapter, and confirm the grep returns 0.
     - If it is kept: list it as a named AC-7 exception.
     - With no ruling: carry it forward (AC-1 candidate CLN-F2 a–d).
-  - [ ] C-OBS008-5 (from STUDIO-OBS-008; placed 2026-10-17): remove the `secretId ?? name` fallback in the validate-variables mirror (`handlers.ts:177`) and fix the `:164` comment. Add the undeclared-by-name test with its positive control. The authoring-mirror `secretId` check is optional. If this is not done, move it to "Carried forward" ("Carried items (inbound)" C-OBS008-5 a–f).
-- [ ] **T2 — Folds and splits (AC-4).** Dispatch-client fold; authorization fold; `claim()`/`checkCommand` split; runner TS reformat; regeneration check confirmed.
-  - [ ] R9-OBS-3: in the authorization fold, publication-grant minting and judging (folded authorization + `GuidedPlanPublisher`) use `DatabaseClock`; windows unchanged; skew-both-ways proof; carried forward with owner @architect if the fold is not done (AC-4 (b) obligation a–c).
-  - [ ] C-OBS008-1 (from STUDIO-OBS-008; placed 2026-10-17): fold the two result builders into one projection, so that `/guided-sessions/{id}/result` answers a non-terminal session with `202` and a v3 `result` on every path. Delete the fallback's non-terminal `view` shortcut. Add one HTTP test with publication disabled. Get the T0 ruling on terminal `publication.status` with publication disabled. If this is not done, move it to "Carried forward" ("Carried items (inbound)" C-OBS008-1 a–h).
-  - [ ] C-OBS008-3 (from STUDIO-OBS-008; placed 2026-10-17): keep only rendering data in `guidedNarratives.ts` at runtime, and move `basis`/`source`/`note`/`facts`/`COPY_SOURCE_FILES` to a test-only registry. Every `template` stays byte-identical. Reconcile the copy-table rows by name, and show by grep that the build output has no `COPY_SOURCE_FILES` path. If this is not done, move it to "Carried forward" ("Carried items (inbound)" C-OBS008-3 a–f).
-- [ ] **T3 — IT flake reduction (AC-5).** Condition-driven waits; before/after wall time; exact list.
-  - [ ] TEST-001 (015 gate; placed 2026-10-17): make `GuidedPublicationReplayIT` order-independent, including the two P7 tests, with no weaker assertions. Record full-class and single-test runs. Single-test reruns are still never credited as gate evidence (AC-5 cleanup item a–d).
-- [ ] **T4 — Docs and artefacts (AC-6).** Dated notes; historical header; `.ai/` decision archive-first; pins if touched.
-  - [ ] C-OBS008-2 (from STUDIO-OBS-008; placed 2026-10-17; optional per the ruling): correct the stale Javadoc on `StudioSecretsService.MAX_VALUE_LENGTH` so that it cites STUDIO-OBS-007 AC-12 (F-5). Comment only, with no behaviour change ("Carried items (inbound)" C-OBS008-2 a–d).
-  - [ ] CLN-50 and CLN-51 (inventory §5, added 2026-10-17): the doc corrections proposed there, after the AC-1 re-verification.
-- [ ] **T5 — Verification and record (AC-7).** Full affected suites; final symbol grep; reconciled counts; File List as changed; "Carried forward" table; submit to independent @qa; only QA can set Done.
+  - [x] C-OBS008-5 (from STUDIO-OBS-008; placed 2026-10-17): remove the `secretId ?? name` fallback in the validate-variables mirror (`handlers.ts:177`) and fix the `:164` comment. Add the undeclared-by-name test with its positive control. The authoring-mirror `secretId` check is optional. If this is not done, move it to "Carried forward" ("Carried items (inbound)" C-OBS008-5 a–f).
+- [x] **T2 — Folds and splits (AC-4).** Dispatch-client fold; authorization fold; `claim()`/`checkCommand` split; runner TS reformat; regeneration check confirmed.
+  - [x] R9-OBS-3: in the authorization fold, publication-grant minting and judging (folded authorization + `GuidedPlanPublisher`) use `DatabaseClock`; windows unchanged; skew-both-ways proof; carried forward with owner @architect if the fold is not done (AC-4 (b) obligation a–c).
+  - [x] C-OBS008-1 (from STUDIO-OBS-008; placed 2026-10-17): fold the two result builders into one projection, so that `/guided-sessions/{id}/result` answers a non-terminal session with `202` and a v3 `result` on every path. Delete the fallback's non-terminal `view` shortcut. Add one HTTP test with publication disabled. Get the T0 ruling on terminal `publication.status` with publication disabled. If this is not done, move it to "Carried forward" ("Carried items (inbound)" C-OBS008-1 a–h).
+  - [x] C-OBS008-3 (from STUDIO-OBS-008; placed 2026-10-17): keep only rendering data in `guidedNarratives.ts` at runtime, and move `basis`/`source`/`note`/`facts`/`COPY_SOURCE_FILES` to a test-only registry. Every `template` stays byte-identical. Reconcile the copy-table rows by name, and show by grep that the build output has no `COPY_SOURCE_FILES` path. If this is not done, move it to "Carried forward" ("Carried items (inbound)" C-OBS008-3 a–f).
+- [x] **T3 — IT flake reduction (AC-5).** Condition-driven waits; before/after wall time; exact list.
+  - [x] TEST-001 (015 gate; placed 2026-10-17): make `GuidedPublicationReplayIT` order-independent, including the two P7 tests, with no weaker assertions. Record full-class and single-test runs. Single-test reruns are still never credited as gate evidence (AC-5 cleanup item a–d).
+- [x] **T4 — Docs and artefacts (AC-6).** Dated notes; historical header; `.ai/` decision archive-first; pins if touched.
+  - [x] C-OBS008-2 (from STUDIO-OBS-008; placed 2026-10-17; optional per the ruling): correct the stale Javadoc on `StudioSecretsService.MAX_VALUE_LENGTH` so that it cites STUDIO-OBS-007 AC-12 (F-5). Comment only, with no behaviour change ("Carried items (inbound)" C-OBS008-2 a–d).
+  - [x] CLN-50 and CLN-51 (inventory §5, added 2026-10-17): the doc corrections proposed there, after the AC-1 re-verification.
+- [x] **T5 — Verification and record (AC-7).** Full affected suites; final symbol grep; reconciled counts; File List as changed; "Carried forward" table; submit to independent @qa; only QA can set Done.
+
+### Developer task disposition — 2026-10-21 UTC
+
+The checked T0–T5 rows are submitted to independent formal QA using the dated final Dev Agent Record below. A checked deferred subtask means its expressly permitted carry-forward disposition has been recorded, not that its implementation, ruling, migration or dedicated proof occurred. F-1/CLN-F1, CLN-F2, C-OBS008-2, C-OBS008-3 and optional C-OBS008-5(e) remain carried exactly as qualified below. The T2 split is resolved by RD-1 rather than credited as a new split. T5 is checked for developer verification/record and submission; it does not grant a QA verdict or Done.
+
+### Carried forward — lean execution decision (2026-10-19)
+
+On the user's request to shorten execution, the following nonblocking work is excluded from the remaining implementation path. These rows record deferral, not completion; existing behavior, assertions and test coverage remain protected. The [lean execution plan](../../../.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/lean-execution-plan-20261019.json) retains the required fresh backend `check --rerun-tasks` with JaCoCo before story credit and full affected T5 suites after integration. AC-5 and TEST-001 remain required; moving that programme to a separate story is only a proposal.
+
+| Item | Owner | Reason and retained limit |
+|---|---|---|
+| F-1 / CLN-F1 remaining legacy-branch removal, admission-test migration and related fixture cleanup | @dev + @architect | Explicitly non-release-blocking under AC-2 F-1(g). Defer the remaining obligation; no removal or migration is credited. Until completed, affected test citations prove post-admission behavior only, never admission authority. |
+| F-2 / CLN-F2 historical V18 fixture retirement and related case porting | @architect + @data-engineer | Explicitly non-release-blocking under AC-1 CLN-F2(d). Preserve the adapter and current migration coverage; no case is silently retired and no runtime compatibility is claimed. |
+| C-OBS008-2 `StudioSecretsService.MAX_VALUE_LENGTH` Javadoc correction | @dev | Optional per the inbound ruling; defer this comment-only correction. |
+| C-OBS008-3 remaining narrative citation metadata extraction | @dev | Carry-forward permitted by inbound C-OBS008-3(f). Defer remaining bundle cleanup and its dedicated extraction proof. Preserve rendered copy and existing copy-table coverage; no completed work is reverted and no extraction completion is claimed. |
+| C-OBS008-5(e) additional authoring-mirror `secretId` refusal | @dev | Explicitly optional under inbound C-OBS008-5(e). Defer this extra validation. The separate validate-variables fallback correction and its focused positive/negative test remain in scope. |
+
+**Review follow-up (2026-10-19).** The last two rows apply the inbound items' existing carry-forward provisions. During implementation, run checks for changed behavior and affected dependencies; defer repeated broad regression to the required final affected suites. Preserve the fresh T0 backend `check --rerun-tasks` and JaCoCo prerequisite before any story credit. Do not build tests or evidence packets for deferred implementations. AC-5/TEST-001 remain owed: moving that programme to a follow-up would require an explicit acceptance-criteria amendment.
+
+### Carried forward — final developer handoff (2026-10-21 UTC)
+
+This dated successor preserves the earlier lean-execution table and all inbound/PO text. These dispositions resolve bookkeeping only; deferred work receives no implementation credit.
+
+| Item | Owner | Final recorded disposition and retained limit |
+|---|---|---|
+| F-1 / CLN-F1, related fixture/admission migration and `recordEvidence` | @dev + @architect | Deferred under the nonblocking ruling; branches/fixtures are retained. Existing citations prove post-admission behavior, not admission authority. |
+| F-2 / CLN-F2 historical V18 adapter and case porting | @architect + @data-engineer | Carried under the approved lean disposition; no new ruling, retirement, port or runtime compatibility credit is claimed. |
+| C-OBS008-2 optional `MAX_VALUE_LENGTH` Javadoc | @dev | Deferred comment-only correction; existing constant and code remain protected. |
+| C-OBS008-3 remaining narrative citation extraction | @dev | Deferred remaining extraction and dedicated proof; rendered copy and existing copy-table coverage are preserved. |
+| C-OBS008-5(e) additional authoring-mirror refusal | @dev | Optional hardening deferred. The separate validate-variables fallback correction and its positive/negative controls are completed in the accepted frontend record. |
+| CLN-52–56 evaluation files | Existing evaluation owner / @dev | Retained under the 009 T4/use/corpus guard; no guarded harness deletion is credited. |
+| CLN-59/60 | Existing @dev/@architect owners | Optional hardening declined / existing diagnostic limits retained, as recorded in the accepted per-item inventory. |
+| CLN-10 legacy worker shim | @devops | Existing co-sign retained; removal awaits a recorded first production artifact plus 28 days. No production date or elapsed trigger is invented. |
+| CLN-11 / tracked `.ai` and functional accessibility | @po disposition / existing owners | KEEP tracked `.ai` and unrelated dirty governance. Functional flows remain in scope; existing WCAG audit is a regression guard, not a new accessibility target. |
+| NEG01–07 / 729 Live IDs | Existing source/runtime/external proof owners | Preserve original distinctions and limitations; source hashes or a generic green suite do not create new negative-test or external credit. |
+| P7 / TEST-001 / FOLD / C10 | Existing accepted proof owners | Qualified historical carries plus final ordinary fulfillment; no new final-byte mutation execution. M4/S3/B2/B3/ADJ1 and single-writer limitations remain in the final record. |
+| Shared File List attribution / document profile | @dev record; independent @qa adoption | 18 historical attributions remain unknown; the 103-entry declared shared boundary is not exclusive 011 authorship or an exhaustive document universe. |
+| Separate 009/010 model, provider, staging, security and human/pilot facts | Existing coordinator / external owners | Still unproved where recorded; no actual U13 acknowledgment, rollout, spend headroom or external approval is inferred. |
 
 ## Dev Notes
 
@@ -175,9 +213,9 @@ Primary: Refactor/cleanup. Secondary: Architecture (folds). Complexity: medium.
 
 ### Quality Gates
 
-- [ ] Applicable pre-commit checks and focused review recorded.
-- [ ] Independent SDC QA review with per-row requirement-to-evidence mapping and independent symbol grep.
-- [ ] Any eventual PR/push is handed to @devops with verified gates.
+- [x] Applicable pre-commit checks and focused review recorded.
+- [x] Independent SDC QA review with per-row requirement-to-evidence mapping and independent symbol grep.
+- [x] Any eventual PR/push is handed to @devops with verified gates.
 
 ### Self-Healing and Focus Areas
 
@@ -218,6 +256,16 @@ Docs and artefacts
 - `docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md`
 
 Not owned here: CLN-30/31 security paths (ED-02), `frontend/package.json` dependencies (CLN-13), JPA accessors (CLN-25), runner over-exports (CLN-42), everything on OBS-010's "Live surface" list, migrations (immutable after OBS-012A).
+
+### Runner source integration supplement — 2026-10-21 UTC
+
+The seven actual neutral RT paths are `studio-runner/src/guided/contracts.ts`, `diagnostics.ts`, `evidence.ts`, `json.ts`, `transport.ts` (the latter four share that guided directory), `studio-runner/src/run/guidedBrowser.ts` and `studio-runner/test/deferred.test.ts`. Exact application provenance is `docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application01/code-application.json`. The separate three-path bootstrap fixture/helper/unit repair is recorded with STUDIO-OBS-009. No guarded evaluation files, runtime/ownership/collector source, dependencies, generated files or private dist are part of this copyback.
+
+### Actual File List — final developer handoff, 2026-10-21 UTC
+
+The historical proposed list above is preserved. The actual conservative review boundary is the [103-entry record12 File List](../../qa/evidence/STUDIO-OBS-011/recovery-20261020/final-t5-record-preparation12/file-list-reviewer-record.json) (SHA256 `6146f74cf2f5a6ec50fef3832508cb76cd0d915c7eff663bad80fa9598d65369`): 95 shared 009/011 source paths (10 added, 4 removed, 81 modified) plus eight explicit outside-profile document rows. The 77 existing application records remain referenced; 73 source rows have direct application pointers and 18 historical source attributions remain unknown. This is neither exclusive 011 authorship nor a whole-document-universe claim.
+
+The [handoff14 actual File List supplement](../../qa/evidence/STUDIO-OBS-011/recovery-20261020/final-developer-record-handoff14/actual-file-list.json) preserves all 103 entries and binds this story's new application-after hash separately from record12's historical document pins. This documentation-only story revision is outside the protected 1814-source capture profile; it does not change source A1 or configured host dist E19. Original application records and historical document-after hashes remain labeled and immutable.
 
 ## PO Validation (2026-10-10) — single path (0.2.x)
 
@@ -543,9 +591,84 @@ Recorded by Pax (@po), append-only, on the lead's instruction of 2026-10-18. No 
 
 Not started. Draft preparation only; no implementation evidence yet.
 
+### T0 execution provenance — 2026-10-18 EDT (2026-10-19 UTC)
+
+Developer status update at `2026-10-19T02:12:34.023845+00:00`: **Ready → InProgress** reflects the current T0 baseline collection, failure investigation and off-tree draft preparation. The preceding “Not started” sentence records the earlier preparation checkpoint. This update records ongoing work; it claims no implementation completion, review readiness or QA verdict. Root explicitly authorized this status-only unit in `docs/qa/evidence/STUDIO-OBS-011/t0/resume2-root-state.json` after both baseline collections were terminal and their inputs were verified stable.
+
+The original B1 `obs011-t0-baseline-check01` finished with exit 1 (2775 total, 2751 passed, 15 failed, 9 skipped); its startup-failure cause and missing fresh coverage/report obligations remain unresolved. B7's five commands are terminal: Vitest, type-check, lint and build exited 0, while the unused-code check exited 2. Native diagnostic and implementation packages remain off-tree and unvalidated. This lifecycle bookkeeping does not authorize W1, production/main source writes or any diagnostic run, and does not clear B1 failures, coverage debt, story gates or external requirements. Evidence and exact status/header delta: `docs/qa/evidence/STUDIO-OBS-011/t0/status-progress/receipt.json`.
+
+
+### 2026-10-21 UTC — reviewed runner RT sources integrated
+
+Under root's exclusive quiet source window, exactly the seven RT after-buffers were integrated together with the separately validated three-path bootstrap fixture repair; hashes/modes and actual eight-existing/two-absent preimages are recorded in `docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application01/code-application.json`. The six production TypeScript candidates retain their accepted AST/token/comment qualification, including only the approved client-name JSDoc correction. The deferred file retains all15 genuine criteria and original suite paths; only the four previously approved pointer placeholders and their empty wrappers are retired, with historical comments preserved.
+
+The accepted fresh functional-base private source/emit/unit proof is retained in `runner-functional-base-execution01/` and `runner-functional-base-phase2-execution01/` under the same recovery directory. The later source-defined helper repair measured41 pure PASS and six original native PASS; its exact producer records and qualifications remain separate.
+
+Root adopted qualified unchanged301 (292 PASS +9 genuine skips) plus fresh Native02 six PASS as307 covered/298 PASS+9 SKIP across two invocations in `docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/native-six02-root-qualified-composition-adoption.json` (SHA256 `0ae96f8ae3e47a9a7590fedb4c14d7caa7eb0bfbe1b2e807c8263cfce73a30ab`). This is not one fresh passing307 command. Original raw307 and first native-six failures, historical failed-phase cleanup NOT_ESTABLISHED and the disclosed Native02 metadata writer failure/lost signal0 observations remain preserved.
+
+No private compiled output was copied. Matching actual configured build/output equivalence is still required before any backend/native work; final actual types/lint/full-unit coverage/contracts/pins/image/deployment and backend final pair/wholecheck remain owed. This dated source-application entry changes no lifecycle status, acceptance criterion, task checkbox, QA result or external fact and supplies no Done/release/pilot approval.
+
+### Final developer completion and submission — 2026-10-21 UTC
+
+Developer implementation/verification and the authorized record handoff are complete for independent formal review: **InProgress → InReview**, patch `0.2.18`. This dated successor supersedes the earlier checkpoint statements about gates still owed; it preserves those statements and every failed attempt as history. The QA Results section is unchanged. This is a developer submission, not a formal QA verdict, Done, release or external rollout approval. Root admission [handoff14](../../qa/evidence/STUDIO-OBS-011/recovery-20261020/final-developer-record14-root-admission.json) is SHA256 `a0dc02194baaaab028097ad55cd02da4fd11e6142f082c4de48454af62aa59d1`.
+
+**Accepted evidence for review.** The [whole execution QA](../../qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/manifest.json) (`21ed9150…`) and [root whole adoption](../../qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole06-root-execution-adoption.json) (`f5e657f0…`) accept the original whole6 component. The [independent diagnostic/candidate QA13](../../qa/evidence/STUDIO-OBS-011/recovery-20261020/final-whole-diagnostics-independent-qa13/manifest.json) (`9bfa99f7…`) is READY_FOR_DEVELOPER_RECORD_AND_FORMAL_QA_WITH_RECORDED_QUALIFICATIONS, with no new mandatory evidence finding. The [independent architect component13](../../qa/evidence/STUDIO-OBS-011/recovery-20261020/final-t5-architect-review13/manifest.json) (`97cabe7a…`) and [root adoption](../../qa/evidence/STUDIO-OBS-011/recovery-20261020/final-t5-architect13-root-adoption.json) (`995d4e73…`) record scoped PASS with zero mandatory architectural findings. The [record12 package](../../qa/evidence/STUDIO-OBS-011/recovery-20261020/final-t5-record-preparation12/manifest.json) (`546ab11f…`) preserves the shared File List, accepted component/carry references and requirement mapping. Its earlier pending-diagnostic wording remains historical; the [final three-run diagnostic disposition](../../qa/evidence/STUDIO-OBS-011/recovery-20261020/final-whole-diagnostics-independent-qa13/three-original-run-diagnostic-disposition.json) and candidate readiness13 are the dated successor. Independent formal AC1–7/T5 adoption remains QA-owned.
+
+**Final tuple, scope and counts.** Captured source remains `a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc` /1814 and matching configured host dist `e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1` /238; Replay `5d800923…`, client `072ce61b…`, immutable Linux image `sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753`. Linux image output is not asserted identical to host dist. The accepted inventory retains all 60 CLN IDs /22 scoped queries, 729 Live IDs (671 protected plus 58 annex), 51 contract-file anchors and 22 immutable migrations. The named count map retains 18 additions, seven relocations, no coverage drops and the nine exact historical skips; Live/NEG01–07 proof distinctions are not replaced by generic source or suite claims.
+
+Original consecutive class-only slots4/5 each passed 108 =46 default+62 incremental /35 variants, with zero failures/errors/skips and strict reader/corpus/retention/source checks. Original whole6 passed 2792 =2783 PASS+9 original SKIP, task totals2728/62/2 and 2768 distinct task/class/name/status keys with multiplicities retained. Required tasks, all three fresh XML/HTML/nonempty-exec partitions, original cohorts and coverage are accepted. The original JaCoCo report/verification merge only `test.exec` and `guidedIncrementalTest.exec`; `crossReplicaTest.exec` is freshly archived separately. Global LINE91.707566% and all four original scoped75% floors passed. All six original full calls remain charged, including the historical failures; there was no seventh call, retry, clock reset or source repair under final verification.
+
+The actual nine-class /ten task-class row /283-invocation timing comparison is **3865.201 →3911.173 seconds (+45.972)**: the matched-suite total increased. Whole collector elapsed **6468.83 →6407.02 seconds** is recorded separately, without a causal speedup claim or pair-time substitution. The original projection08 raw2/header-assertion history is retained; its successful XML/timing components and the separately accepted whole cohort completion are distinct evidence, not a rewritten projection result.
+
+Runner actual unit2717 =2692 PASS+25 original SKIP, with original configured coverage/types/lint/contracts/codegen/pins. FE1388 PASS /five gates is the accepted Node23 carry through its relevant-input/product bindings, not a fresh Node24 run. Private fixtures are qualified301+6 across TWO invocations,298 PASS+9 SKIP through matching actual source/build equivalence; no fresh307 command is claimed. Image/pins, G9, full deployment722 and D2 have their separate accepted component receipts. D2 proves its measured local Linux/core/drain/recording/cleanup oracles; it does not prove an internal rollout or external provider/pilot acceptance.
+
+**Historical proof and diagnostic qualifications.** P7 source-qualified singles64.27/45.34 seconds and reverse four PASS/108.15 seconds are carried; final ordinary pair/whole fulfillment does not relabel them as new single/order runs. FOLD's five intended kills/restored greens retain their exact-source/isomorphism qualifications, not new final-digest mutation credit. C10 remains carried-not-rerun with its original selected-source/ordinary-fulfillment limits: M4 survived34/34; S3 reds were constraint-mediated with rejection cause untraced; B2/B3 report-boundary and weak joined either-value limits remain; ADJ1 AUTHORIZATION_REVOKED with USAGE UNKNOWN_OUTCOME, single-writer and AND-null discipline are unchanged. The two declared 011 behavior exceptions remain DB-clock grant judging/minting and the publication-disabled v3 result projection; separate accepted 009 business fixes in the shared boundary do not become neutral 011 changes.
+
+All twelve approved diagnostic payloads ran once with genuine task/TEMP/owner/generation bindings, raw0 and errors{} across the three original Replay exposures (slots4/5/6,324 Replay rows). The closed disposition retains 222 parent records,219 child physical lines,249 generation logs, three named R10 baseline records and three observed grace/no-result/missing-child/null records, plus six pre-ready ends. There are **three observed GUIDED_START_FAILED lines /three plain pre-start refusals**, not zero. No new qualified R10 trigger, other REL recurrence candidate, deadline TIMEOUT code/action-timeout kind/>=15000 deadline candidate or paired D4 edge was classified. Those scoped facts do not establish historical cause: actual bootstrap UNKNOWN_OUTCOME pairing remains UNKNOWN_NOT_COMPUTED, earlier same-session stop chronology and startup-hang attribution remain NOT_COMPUTED. Replay-only roots prove no all-guided/ObservedCoRunIT zero. Missing versus explicit null,153 retained control-read rows,12 publish-overlap rows,0 observed kill-overlap rows, null incremental empty-read maxima, default observed read maxima48/42/24ms,512-row cap,16MiB terminal-writer precondition and reverse-child-reuse limits are preserved.
+
+**Task and handoff ownership.** T0–T5 are checked as implemented verification or expressly permitted resolved dispositions; the carried table states what remains unimplemented. `.ai`/dirty governance, functional-only accessibility, protected evaluation/optional work and CLN-10 production trigger remain qualified. The earlier Quality Gates checkboxes are preserved; actual validations/focused independent reviews are recorded here, while formal QA and any eventual PR/push remain reviewer/@devops work. No product/source/SDK/tree walk, tests/build/compiler/parser/native job, ledger/status-pointer change, Git/provider action or other story edit ran in this unit. Shared USD500/provider headroom remains UNKNOWN; separate 009/010 external/model/staging/security/human/pilot facts and actual U13 acknowledgment are not invented. Formal independent review may now consume this InReview revision; only authorized QA can set Done.
+
 ## QA Results
 
 Not reviewed. No quality verdict assigned.
+
+### Formal integrated review — 2026-10-21 UTC
+
+### Reviewed By: Quinn (@qa; independent SDC reviewer)
+
+### Reviewed Revision: story-content-sha256-v1:4a546acce5fcb68a9904f72e0cd979a669a481d705782656204b7d20b2ecefee
+
+**Verdict: PASS.** The earlier “Not reviewed” template is historical; this dated gate is authoritative. All original AC1–7/T5 criteria are met within the declared local scope; no new waiver or mandatory finding. Independent architect13 (`97cabe7a…`, root `995d4e73…`) and actual diagnostic/candidate QA13 (`9bfa99f7…`) are formally adopted with their recorded qualifications.
+
+**Requirement and test trace.** [AC1–7 evidence](../../qa/evidence/STUDIO-OBS-011/recovery-20261020/final-integrated-t5-qa15/ac-traceability.json) records each original criterion, given/when/then proof, exact accepted component references and all carried limits. Independent c26 per-item inventory/query evidence and unchanged A1 bindings fulfill the symbol/inventory method; no broad grep or completed proof was repeated. [Formal review](../../qa/evidence/STUDIO-OBS-011/recovery-20261020/final-integrated-t5-qa15/review.md) adopts source/Live/contracts, code health, TEST001, count reconciliation, exact timing and the current103-entry File List.
+
+**Quality assessment.** Coding standards/project structure/testing strategy and original ACs: PASS. Architecture/security/maintainability use accepted independent components; no refactoring was performed here. Backend whole2792=2783PASS+9 exact SKIP with2768distinct keys/multiplicities and all task/cohort/coverage controls is accepted. Runner2717, FE1388 Node23 carry, qualified private301+6 across two invocations, image/deployment722/G9/localD2 retain their original scope. Three actual Replay diagnostic exposures preserve324cases/222parents/219child lines, three exact named R10 baseline records, three observed start-failed lines/plain refusals and0new scoped trigger candidates. Unknown bootstrap/chronology/startup and reverse-reuse/Replay-only limitations are preserved; no all-guided or external zero is inferred.
+
+**Performance and documentation.** Matched9class/10row/283case time3865.201→3911.173s (+45.972, increase), with whole elapsed6468.83→6407.02s separately, meets the exact comparison/no-weaker-assertion requirement without claiming speedup. The103-entry shared File List and dated developer/carried record are accepted, with18historical attribution unknowns and document-profile qualifications retained. Existing permitted F1/F2/optional/evaluation/CLN10/.ai/Live/C10/FOLD/P7/external carries are not marked implemented or stronger than proved.
+
+**CodeRabbit fallback.** Actual nonloginPATH lookup resolved none of coderabbit/cr/wsl (raw1/output0, metadata `112885d5…`); the configured independent architect+QA fallback applies. No global installation claim or extra tool/native/network call is made.
+
+**Revision provenance.** Recipe [story-content-revision-v1.py](../../qa/evidence/STUDIO-OBS-011/recovery-20261020/final-integrated-t5-qa15/story-content-revision-v1.py), SHA256 `1fc0b7b7a8dbac78223afa0bbcbf527d0c84b38f4e4f1b83554556eb5ec7c8ed`, defines the gate revision. It retains all reviewed AC/developer/File List/carry text after LF normalization and normalizes only lifecycle Status/task checkbox markers while excluding QA Results/admin Change Log bodies. Both headings remain. Raw developer input is `0e4ad7f2220c9cecd0d24adad1515c61085e30dda4fad5015bd154e6989c41ff`; actual QA output/raw hash and before/after equality proof are stored separately in QA15 provenance. Future retained-body changes require new review; task completeness is checked separately by PO.
+
+**Files changed and next owner.** QA changes only this story's QA Results/Status/append-only QA Change Log, the actual gate and fresh QA15 evidence. Existing File List already names the story; QA-owned artifacts are bound by this gate/evidence. @dev must record factual post-gate completion/NArouting for the three unchanged Quality Gates checkbox markers before PO close; their reviewable text/body must stay unchanged for current provenance. No commit, PR, push, administrative close or other story transition is performed here.
+
+### Gate Status
+
+Gate: PASS → docs/qa/gates/STUDIO-OBS-011-final-sweep-inventory-re-run-leftover-removal-and-code-health-refactors.yml
+
+### Lifecycle Transition
+
+QA applied **InReview → Done**, patch **0.2.19**, on 2026-10-21; waiver inactive. This is the original scoped011 gate, not deployment/provider/human approval for009/010.
+
+### Review Date: 2026-10-21 — QA metadata format successor
+
+Reviewed By: Quinn (@qa; independent SDC reviewer)
+Reviewed Revision: story-content-sha256-v1:4a546acce5fcb68a9904f72e0cd979a669a481d705782656204b7d20b2ecefee
+Waiver Active: false
+
+This entry supplies parser-compatible provenance for the unchanged QA15 acceptance decision. It preserves Done, all original criteria, evidence, qualifications and the single QA15 lifecycle transition. All18 task markers were already checked by root16. Only administrative formatting is updated; no new acceptance review, waiver, lifecycle transition, execution or publication is performed. The original QA15 text and gate snapshot remain dated history.
+
+Gate: PASS → docs/qa/gates/STUDIO-OBS-011-final-sweep-inventory-re-run-leftover-removal-and-code-health-refactors.yml
 
 ## Change Log
 
@@ -570,3 +693,9 @@ Not reviewed. No quality verdict assigned.
 | 2026-10-18 | 0.2.14 | Inventory additions **CLN-52…CLN-56**, append-only, on the lead's placement of 2026-10-18. Source: STUDIO-OBS-009 lane EP finding F1, `docs/qa/evidence/STUDIO-OBS-009/execution-20261018/ep/receipt.md:101` (`d49aad3c…`). The rows are in a new §6 of `STUDIO-OBS-011-cleanup-inventory.md` (sha256 before `ab2b4c9b3b85235bd3aa1857190829c29ffa8874f11d5ea0efad27a0ce549de2`). Classes: CLN-52 `browser-oracle.test.mjs` and CLN-53 `example-manifest.json` are A. CLN-54 `oracle.mjs`, CLN-55 `report.mjs` and CLN-56 `fixture-server.mjs` are C, because @po's grep found live importers: `evaluation/cli.mjs:7-8` and the EP C04 fidelity test. The guard: no deletion while STUDIO-OBS-009 T4 may still use the AC-7 harness, unless its owner confirms. A dated bullet was added under "Inventory additions". RUN-ORPHAN-01 and SEC-AUDIT-PREREADY-01 were **not** placed here [AUTO-DECISION]: they are runner behaviour changes, recorded as STUDIO-OBS-009 carried residues (009 0.3.24). No task, File List, AC text or meaning changed. Status (**Ready**) is unchanged. Story sha256 before this row: `18014f338597c4ddfab0e0ec39582228b1813017775d82cafbf7f1b76917f50f` (0.2.13) | @po (Pax) |
 | 2026-10-18 | 0.2.15 | **T0 ratification (PO)**, append-only, in a new section "T0 ratification (PO) — 2026-10-18", on the lead's instruction. Package: Aria `docs/qa/evidence/STUDIO-OBS-011/t0-prep-20261018/` (`t0-proposal.md` `dc9c1376…`, `lanes.json` `a800e2e9…`, `w-brief.md` `57fe80a7…`); record `po-ratification.md` in the same folder. Root decisions recorded: RD-1 the `claim()`/`checkCommand` split closed and lane 11-GT dropped; RD-2 hand reformat with an AST-equality check, no Prettier; RD-3 RUN-ORPHAN-01 and SEC-AUDIT-PREREADY-01 stay in 009 (11-RO/11-RO-BE not opened); RD-4 an `execute-011` collector copy. @po verdicts P-1…P-12: AC-3 resolved by 009 (re-opens on an A17 override); AC-1 deltas ratified (bind after the start-digest re-take); 008 MNT-003 not placed here; `.ai/` kept tracked; CLN-10 carried, owner @devops; CLN-20 present (the 2026-10-10 drift note 1 withdrawn); the non-existent `IncrementalRelearnIT`/`SecretLoginFixtureIT` references replaced by the R-5 list; new candidates numbered CLN-57…60 under "Inventory additions"; R-T0-7, R-EP (with the §6 guard) and R-08-3 ratified; R-T0-3 (b) noted. Dated notes appended to AC-3 and AC-4. No task checkbox, File List text or lane start changed. The cleanup inventory, STUDIO-OBS-008 and all source files are not edited. Status (**Ready**) is unchanged. Story sha256 before this pass: `ef0eec7f9e28d94d37f38712acaacebcbc8f17f5877cdda018db2aca80dea262` (0.2.14) | @po (Pax) |
 | 2026-10-18 | 0.2.16 | Start conditions recorded, append-only, in a new section, "PO note — start conditions satisfied (2026-10-18)", on the lead's instruction. **(a) Satisfied:** the 009 @qa local-validation record (`bca21f53…`) reads `trigger: MET` under the user's C8 waiver. It is bound to source `061fc41f…`, dist `698a9365…` and helm `46070907…`. **(b) Satisfied:** the dated 010 Live surface list `live-surface-20261018/live-surface-list.json` (`e5c58fa5…`) has @architect CROSS-CHECKED-WITH-NOTES, **@pm ACCEPTED-WITH-NOTES** and the @po removal confirmation (`finalize-record.md` `c4e635a8…`). Noted: the owed full `check` plus JaCoCo at the T0 fresh baseline (B1) before any lane claims credit; @pm's notes; D5 for root to confirm. Also noted: plan v2 (`lanes.v2.json` `5d00751f…`, `w-brief.v2.md` `946d6189…`, `t0-record-draft.md` `56162d71…`, a draft that root signs), which @po has not ratified. Root confirms the condition and signs T0 (S-2); no lane started. AC text and meaning and Status (**Ready**) are unchanged. Receipt `docs/qa/evidence/STUDIO-OBS-009/execution-20261018/po-carry/receipt-6.md`. Story sha256 before this pass: `413fcaa4d825f51906965baa841966c0fa0c79dbac55778eef5b1a5c47753931` (0.2.15) | @po (Pax) |
+| 2026-10-18 | 0.2.17 | Developer lifecycle bookkeeping: **Ready → InProgress** for actual T0 execution after terminal B1/B7 receipts and stable end/input captures. Added dated Dev Agent Record provenance; existing first line, ACs, tasks and QA Results preserved. B1 failures/coverage debt, B7 unused-code failure and all implementation/final gates remain open. Root authorized only this status unit; no W1/source application, diagnostic run, completion or QA verdict. Receipt `docs/qa/evidence/STUDIO-OBS-011/t0/status-progress/receipt.json`. | @dev (Dex) |
+| 2026-10-21 | 0.2.18 | Development complete — Status: InProgress → InReview. Added dated final Dev Agent Record, actual shared103-entry File List/story-after-hash supplement, carried dispositions and developer task submission; preserved AC/PO/QA Results and failed history. Formal independent QA remains pending; no Done, runtime or external acceptance. | @dev (Dex) |
+| 2026-10-21 | 0.2.19 | QA Gate PASS — Status: InReview → Done | @qa (Quinn) |
+| 2026-10-21 | 0.2.20 | Post-gate developer checklist bookkeeping after independent QA PASS: applicable checks and focused configured fallback reviews recorded; independent per-row review and symbol reconciliation accepted. Eventual PR/push routing remains @devops-only with verified gates; conditional N/A because no remote operation was requested or performed. Only three Quality Gates markers resolved; QA-owned Done, QA Results and reviewed canonical content preserved. | @dev (Dex) |
+| 2026-10-21 | 0.2.21 | QA provenance metadata formatting compatibility only; Done and the original QA15 acceptance decision preserved. No second lifecycle transition or implementation review. | @qa (Quinn) |
+| 2026-10-21 | 0.2.22 | Administrative closure after accepted independent QA PASS; verified current deterministic reviewed revision, all18 checked tasks and the actual103-entry shared File List with its original qualifications. Epic-index011 completion recorded; QA-owned Done, QA Results and reviewed content preserved. No lifecycle transition, new waiver or remote operation. [closure-key: STUDIO-OBS-011:digest:story-content-sha256-v1:4a546acce5fcb68a9904f72e0cd979a669a481d705782656204b7d20b2ecefee] | @po (Pax) |

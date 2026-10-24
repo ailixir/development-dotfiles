@@ -1,0 +1,236 @@
+{
+  "storyId": "STUDIO-UNIFY-001-ui-tests-as-checks",
+  "critiquedAt": "2026-10-23T23:55:00Z",
+  "critiquedBy": "@qa",
+  "specVersion": 5,
+  "iteration": 3,
+  "scope": "Focused round: requirements.json changelog entries 3-5 (D7, G1-G10, DC-22..24, K2-K4), the spec sections they changed, and plan/implementation.yaml revision 2 (78 subtasks).",
+  "verdict": "NEEDS_REVISION",
+  "verdictReason": "The spec patch holds against the code and complies with D7: every key claim I checked is true (DC-22, DC-24, PC-15, PC-16, K2-K4, the settle bound of about 90.6 s), no old route, page or fallback survives the increment that replaces it, no redirect is added, and for all four increments the plan's subtasks cover the spec's removal and test lists with no extra item. No HIGH issue was found, and the spec has only LOW text issues. There are 2 MEDIUM issues, both in the plan's gate commands, which cannot pass as written: the phase-2 scan `! grep -rn \"/studio/runs\" src e2e` matches the directory name in every `@/components/studio/runs/...` import, and the phase-1 gate scan will fail on a stale `/checks/studio/:id` comment in ChecksStudioPage.tsx that no subtask owns. By the verdict rules any MEDIUM means NEEDS_REVISION. The fix is narrow and belongs to @architect (the plan), not @pm; the spec LOW items can ride along. Weighted average 4.13, all dimensions >= 3.",
+  "scores": {
+    "accuracy": 4.5,
+    "completeness": 4,
+    "consistency": 4,
+    "feasibility": 3.5,
+    "alignment": 4.5,
+    "average": 4.13
+  },
+  "issues": [
+    {
+      "id": "CRIT-19",
+      "severity": "MEDIUM",
+      "category": "feasibility",
+      "check": "feas-2",
+      "description": "Plan subtask 2.18 (phase-2 gate) runs `! grep -rn \"/studio/runs\" src e2e`. The substring `/studio/runs` also appears in the directory name of `components/studio/runs/`, so every import `@/components/studio/runs/RunRow`, `.../RunDetailsDrawer`, `.../useStudioRuns` and `.../runLinks` matches. Today that is StudioScheduleDialog.tsx L11, scheduleProvenance.test.tsx L6-7 and StudioRunsPage.tsx L35-40. After phase 2 the new UiTestRunsTab (2.8) imports the same modules and scheduleProvenance.test.tsx keeps its imports, so the gate can never pass. The note under 2.18 ('covers UI routes only; API paths are /api/v1/studio/executions') overlooks the directory match. The phase-2 gate is the check that confirms Runs-route links are gone, so its failure blocks the phase.",
+      "location": "plan/implementation.yaml subtask 2.18 (verification.command and notes); the same pattern should not be reused in 4.1/4.7",
+      "suggestion": "Match quoted route strings only, so imports are excluded: `! grep -rnE \"['\\\"`](/checks)?/studio/runs\" src e2e` (a quote or backtick immediately before the path). Keep the existing e2e coverage. Add 'import paths are excluded by design' to the note.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-20",
+      "severity": "MEDIUM",
+      "category": "consistency",
+      "check": "con-4",
+      "description": "Plan gate 1.33 greps for `checks/studio` followed by a quote, `)`, `/:id` or `/${`. ChecksStudioPage.tsx L694 is a comment that cites `/checks/studio/:id`, `App.tsx:114`, which matches. The 1.33 note says such comments are covered and 3.20 says they are 'updated here', but no subtask before 1.33 lists ChecksStudioPage.tsx for that comment (1.11 mentions only the L734 comment; 1.15 mentions none), and 1.33 and 3.20 list only axe-results.json and studio-wcag-audit.md. Gate 1.33 therefore fails on its first run, and fixing it needs an unplanned edit to a file not in the subtask's `files`, against the 3-files-listed rule.",
+      "location": "plan/implementation.yaml subtasks 1.11 or 1.15 (files/notes), 1.33 and 3.20 (notes)",
+      "suggestion": "Add the L694 comment fix to 1.11 (it already edits ChecksStudioPage.tsx and L734) and say so in its notes. Reword the 1.33 and 3.20 notes so the gate only verifies. Check whether any other comment (for example in StudioListLayout or RunRow) matches the 1.33/3.20/4.1 patterns and assign it likewise.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-21",
+      "severity": "LOW",
+      "category": "accuracy",
+      "check": "acc-1",
+      "description": "Small factual and staleness items in the patched spec. (a) §12.4 says the bare-mount sweep is '11 sites in 10 files', but the list under it sums to 12 (pageEvidence x3 plus nine single sites), and the code agrees: 12 bare `<ChecksStudioPage` mounts in 10 files, with the audit's five call sites going through one renderPage helper. (b) K2 text says the E2E proxy 'answers only `*/api/v1/checks/sources`'; previewBootstrapHandlers.ts L33-35 serves sources, features and csi, and the point (no GET /checks) is still right. (c) §18 still says 'the plan must re-sequence for D7 ... blocked subtasks 4.9 and 4.14-4.18', and Metadata 'Next' says the architect re-sequences the plan; both are now done.",
+      "location": "spec.md#12.4 (re-mount list), #12.4 increment 3 (K2), #18, Metadata",
+      "suggestion": "Say '12 sites in 10 files'; say 'serves sources, features and csi but not GET /checks'; replace §18's last two sentences and the 'Next' line with the current state (plan revision 2 done; next is the plan's approval and @sm).",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-22",
+      "severity": "LOW",
+      "category": "consistency",
+      "check": "con-2",
+      "description": "The plan header is stale against the spec. qualityGate cites specIteration 3 and the sha256 of spec.md 76b98b63... and requirements.json b6313889..., while the current files are iteration 5 with hashes 65fc8b04... and bb6c7269... (they changed with the fourth and fifth patches). `remainingConflicts` K1-K4 are listed as open although the spec now resolves all four (DC-24, K2-K4 in §12.4), and `qualityGate.round: 2 / average: 4.20` will need to follow this round.",
+      "location": "plan/implementation.yaml qualityGate, specGapsStatus, remainingConflicts",
+      "suggestion": "Refresh the hashes and iteration after the next approved critique, and mark K1-K4 resolved (spec entries 4 and 5) with their spec references.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-23",
+      "severity": "LOW",
+      "category": "completeness",
+      "check": "comp-2",
+      "description": "Three small spec-to-plan coverage gaps in increment 1. (a) §12.4 lists the `pageStepTimeout.test.tsx` L128 comment ('The Tests page creates a draft') as an update; no subtask mentions it (1.6 touches the file but its notes do not). (b) §12.2 and §12.4 (K4) say the Create Check test covers inline errors for 400 with and without detail, 403, 409 and 500 moved from the Tests page test, plus the 255-character name counter and the required-system case; subtask 1.30 lists only 'Inline error on 400 and 403' and omits the name-length and CSI-required cases that AC-01 depends on. (c) 1.17 and 1.19 rewrite the old dialog cases, but 1.30 is the only place that picks them up, so the omissions mean lost coverage.",
+      "location": "plan/implementation.yaml subtasks 1.6, 1.30; spec.md#12.2, #12.4",
+      "suggestion": "Add the L128 comment to the 1.6 notes. List in 1.30: 400 (with and without detail), 403, 409, 500, name over 255 rejected, CSI required.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-24",
+      "severity": "LOW",
+      "category": "consistency",
+      "check": "con-4",
+      "description": "Spec §12.5 (increment 1) says 'Expected baseline change: none' with the reason 'mount changed to a route id', and AC-27 repeats only that reason. Increment 1 also changes the editor's DOM (breadcrumb, read-only CSI chip, UAT option), which can move surfaces 3-7. The plan already handles this correctly (1.33 allows a regenerated baseline recorded as 'editor framing (increment 1), no surface added'), so the spec is the one that under-states it. axe-results.json holds every finding, not only failing ones (studioWcagAudit.test.tsx L243-275), so small DOM changes do show up in the diff.",
+      "location": "spec.md#12.5 (row 1), AC-27; plan 1.10, 1.33",
+      "suggestion": "In §12.5 and AC-27 name both causes for increment 1 ('mount changed to a route id' and/or 'editor framing'), keep 'no surface added', and keep ADR-SC-006's rule: fix a critical or serious regression, otherwise regenerate and record.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-25",
+      "severity": "LOW",
+      "category": "alignment",
+      "check": "align-2",
+      "description": "Two leftovers that D7's 'just update the references' would normally cover, both test-only. (a) pageGuidedRun.test.tsx L1012-1024 and studioRunTransport.node.test.tsx L170-175 and its renderAt calls keep test-local route patterns shaped like the old product route (`/studio/tests/:id`). §12.4 and plan 1.8/1.9 keep them on purpose; no scan (which look for `/checks/studio`) catches them. (b) DC-18 says ui-tests routes show a loading state while availability is 'pending'; the plan builds that for the detail page (2.5) but leaves the editor's own gate (ChecksStudioPage L1936-1940, still source/feature selectors) unchanged, so the editor does not show 'pending'.",
+      "location": "spec.md#12.4 increment 1, DC-18; plan 1.8, 1.9, 2.1",
+      "suggestion": "(a) Accept and note them as test-local route shapes, or point them at `ui-tests/:id/studio` through renderStudioAt in 1.8/1.9. (b) Either move the editor's gate onto useUiTestAvailability in 1.15 or narrow DC-18's pending wording to the detail page.",
+      "autoFixable": false
+    }
+  ],
+  "changelogVerification": [
+    {
+      "claim": "DC-22 / PC-15 link inventory",
+      "status": "HOLDS",
+      "evidence": "Re-ran the grep for `checks/studio` in src and e2e. Hits match PC-15 line for line: Dashboard L753, CommandPalette L16, navigationConfig.ts L28, ChecksLayout L85-87, navigationSetup L25/L29/L30/L73-75, LayoutProvider L70, editor L1061/L1194, testHref L69, runLinks, harness.spec L57/L94/L142, studio-authoring-real-backend L128, ChecksLayout.a11y L45, StudioScheduleDialog.test L27/L56/L145/L233/L234/L252, scheduleProvenance.test L20-21/L28, runSnapshots.test L49-53. studioTestsPath has no consumer (runLinks.ts L30 only). useUrlListState is used by useStudioTests and StudioRunsPage (StudioListLayout mentions it only in a comment). LAST_RUN_FILTER_LABELS is used by StudioTestsPage L13/L90. StudioTestsPage.tsx L5 imports StudioListLayout, so deleting it in increment 3 is right."
+    },
+    {
+      "claim": "DC-24 / PC-16 create dialog",
+      "status": "HOLDS",
+      "evidence": "CreateTestDialog is imported only by StudioTestsPage L7 and StudioRunsPage L20. 'Create Test' entry points: StudioTestsPage L42 (openCreate), L75 (header), L106 (empty state); StudioRunsPage L64, L145, L172. testErrors.ts createErrorMessage (L30) is called only by CreateTestDialog L97; CREATE_ERRORS is imported by StudioTestsPage.test L11; DeleteTestDialog uses deleteErrorMessage/statusOf from the same file. No test file imports the dialog directly; the create cases live in StudioTestsPage.test.tsx 'Tests page - create' (L355-439, including the 400/400/403/409/500 table at L426-430) and StudioRunsPage.test.tsx L219-228. The payload at CreateTestDialog.tsx L80-92 matches FR-02."
+    },
+    {
+      "claim": "Bare-mount re-mounts, including WCAG surfaces 3-7",
+      "status": "HOLDS, count off by one",
+      "evidence": "Bare `<ChecksStudioPage />` mounts: pageStepTimeout L68, pageAuthoringUx L91, pageGuidedRun L151, pageSaveAndStop L104, pageIncrementalRecording L142, pageRunGate L130, pageEvidence L108/L123/L227, pageReplayAndReferences L158, pageBootstrapShape L68 (with CheckTypeSelector), and the audit's renderPage (L203-208, five calls at L314-372). That is 12 sites in 10 files, not 11 (CRIT-21). pageGuidedRun L1015 and studioRunTransport.node L170-175 already use ids. No test uses `?autorun` through the page. replayFailure.test.tsx does not mount the page (G6)."
+    },
+    {
+      "claim": "K2 handler and AllChecks error state",
+      "status": "HOLDS",
+      "evidence": "previewBootstrapHandlers.ts L33-35 serves checks/sources, features and csi only. AllChecksPage.tsx L338-341 returns ErrorState when the checks load fails. harness.spec.ts L57/L94/L142 go to /checks/studio/tests; L106-110 expects the first listed test name on screen. The mock has 25 demo tests with createdAt = updatedAt + 7 days (demoFixtures.ts L258-259), so All Checks' createdAt order equals updatedAt order and one 25-row page shows them. fetchTags would hit unmocked /tags (502), which only fails the tags thunk."
+    },
+    {
+      "claim": "K3 referencePicker scan entry; K4 dialog test cases",
+      "status": "HOLDS",
+      "evidence": "referencePicker.test.tsx L610 lists '../../checks/wizard/configs/UiTestConfig.tsx' in an fs.readFileSync loop (L601-618), so deleting the file in increment 1 would fail it. StudioTestsPage.test.tsx L355 begins 'Tests page - create'; StudioRunsPage.test.tsx L219-228 is the 'Create Test' case."
+    },
+    {
+      "claim": "G9 settle bound",
+      "status": "HOLDS",
+      "evidence": "apiClient.ts L22 timeout 30000; L97-108 retries a GET at most 2 times (no response or 5xx) with delays 200 ms and 400 ms: 3 x 30 s + 0.6 s = 90.6 s. useRunGate.ts L290-323 (own test read), L338-358 (capabilities read, leaves 'unknown' on pending and failure), RunControl.tsx L139 and L181-187 are as described. The `fetched` flags the availability hook relies on exist (sourcesSlice L8/L15/L40/L45/L65, featuresSlice L10/L37/L64/L69/L84)."
+    },
+    {
+      "claim": "WCAG record placement",
+      "status": "HOLDS",
+      "evidence": "The audit rewrites docs/qa/accessibility/axe-results.json in afterAll (studioWcagAudit.test.tsx L243-275) with every finding and no timestamp, so git diff shows whether it moved. The describe title says 'seven' (L288). The plan drops surface 2 in 2.12 and surface 1 in 3.11, and moves each record into the increment that causes it, as the accessibility-scope rule requires."
+    }
+  ],
+  "d7Compliance": {
+    "result": "COMPLIANT",
+    "notes": [
+      "Increment 1 removes studio/:id, the bare studio route, the list[0] fallback, navigationConfig, CreateTestDialog and the legacy picker (spec §11; plan 1.11, 1.20-1.22, 1.25-1.26). Increment 2 removes studio/runs(/:executionId), the Runs page, the Runs nav child, the Runs-page builders and RunRow's test-name form (2.9, 2.13-2.16). Increment 3 removes studio/tests, the Tests page, the Studio nav group and the Tests-page-only modules including StudioListLayout, useUrlListState and LAST_RUN_FILTER_LABELS (3.10, 3.13-3.17). No old surface outlives its replacement.",
+      "The only interim targets are the Tests page (until increment 3) and the Runs page run link (until increment 2), each of which is the live, not-yet-replaced screen; they are repointed in the increment that replaces them. No redirect is added; the existing catch-all is the only fallback. No data migration or backward-compat layer is introduced; a stale stored draft of type UI_TEST is simply handled by the derived-availability rule."
+    ]
+  },
+  "specPlanAgreement": [
+    {
+      "increment": 1,
+      "result": "AGREE, minor gaps in CRIT-23",
+      "notes": "§11 removals map to 1.11, 1.14, 1.16, 1.18, 1.20, 1.21, 1.22, 1.25, 1.26. §11 repoints map to 1.16, 1.18, 1.14/1.15, 1.22-1.24. §12.4: UiTestConfig.test (1.26), the 12 re-mounts (1.6-1.10), editor-URL assertions (1.17, 1.19, 1.18, 1.14), dialog case rewrites (1.17, 1.19), referencePicker (1.27), E2E (1.31, 1.32) are all present. Gaps: pageStepTimeout L128 comment and part of the moved create-error cases."
+    },
+    {
+      "increment": 2,
+      "result": "AGREE",
+      "notes": "Detail page, Runs tab, drawer expectedTestId, back target and dialog links (2.4-2.11); StudioRunsPage and its test (2.13); sidebar Runs child and ChecksLayout L87 (2.14); runsListPath/runDetailsPath and runSnapshots L49-51 (2.15); single-test RunRow and scheduleProvenance L20-21 (2.16); surface 2 (2.12)."
+    },
+    {
+      "increment": 3,
+      "result": "AGREE",
+      "notes": "Rows, hook, filters, notices, Open Tests, Dashboard and palette (3.1-3.8); studio/tests route (3.10); surface 1 (3.11); dialog test TestRow import (3.12); Tests page and test (3.13); useStudioTests/TestRow/TestRowMenu (3.14); StudioListLayout and test, keeping studioListSx (3.15); useUrlListState, its test and LAST_RUN_FILTER_LABELS (3.16); sidebar group and ChecksLayout L86 (3.17); LayoutProvider and the a11y test path (3.18); harness E2E and the GET /checks handler (3.19)."
+    },
+    {
+      "increment": 4,
+      "result": "AGREE",
+      "notes": "D5 docs, AGENTS.md mirror, leftover scan, bundle check, consistency check of the WCAG record (4.1-4.7). Nothing else is assigned to this increment, as §11 says."
+    },
+    {
+      "increment": "link walk",
+      "result": "NO DANGLING LINK at any boundary",
+      "notes": "Walked each source in PC-15 through plan exits 1, 2, 3: editor back and Open Tests, dialog run links (every host), Tests-page row, Create Test actions, Runs-page test link and drawer testHref, Runs-tab drawer, detail Delete, Dashboard and palette, sidebar, LayoutProvider, ChecksLayout. Every target exists at its boundary. The only defects are the two gate commands (CRIT-19, CRIT-20)."
+    }
+  ],
+  "planTaskRules": {
+    "subtasks": 78,
+    "blocked": 0,
+    "maxFilesPerSubtask": 3,
+    "overThreeFiles": [],
+    "service": "frontend 67, infra 11; one service per subtask",
+    "verification": "every subtask has one (75 command, 3 manual: 1.32, 4.5, 4.6)",
+    "packageManager": "no npm, yarn or npx anywhere in the plan; commands use pnpm run/exec",
+    "dependencyOrder": "no missing or forward dependency; subtask ids are unique",
+    "filesExist": "every named existing file exists; the rest are new files",
+    "note": "Checked programmatically with js-yaml. The two defects are about whether two verification commands can pass (CRIT-19, CRIT-20), not about their presence."
+  },
+  "summary": {
+    "highIssues": 0,
+    "mediumIssues": 2,
+    "lowIssues": 5,
+    "autoFixable": 6,
+    "checksEvaluated": 21,
+    "checksPassed": 17,
+    "dimensionChecks": {
+      "accuracy": { "passed": ["acc-2", "acc-3", "acc-4"], "failed": ["acc-1 (CRIT-21)"] },
+      "completeness": { "passed": ["comp-1", "comp-3", "comp-4", "comp-5"], "failed": ["comp-2 (CRIT-23)"] },
+      "consistency": { "passed": ["con-1", "con-3"], "failed": ["con-2 (CRIT-22)", "con-4 (CRIT-20, CRIT-24)"] },
+      "feasibility": { "passed": ["feas-1", "feas-3", "feas-4"], "failed": ["feas-2 (CRIT-19)"] },
+      "alignment": { "passed": ["align-1", "align-3", "align-4"], "failed": ["align-2 (CRIT-25)"] }
+    }
+  },
+  "nextAction": "Return the plan to @architect for CRIT-19 and CRIT-20 (two gate fixes, no re-sequencing), together with the LOW plan items (CRIT-22, CRIT-23). @pm applies CRIT-21, CRIT-24 and the spec half of CRIT-25 as text edits. A narrow re-check of those points is enough; no further full critique is needed. Do not start implementation before the user approves the plan.",
+  "autoFixes": [
+    {
+      "issueId": "CRIT-19",
+      "location": "plan/implementation.yaml 2.18 verification.command",
+      "original": "! grep -rn \"/studio/runs\" src e2e",
+      "suggested": "! grep -rnE \"['\\\"`](/checks)?/studio/runs\" src e2e"
+    },
+    {
+      "issueId": "CRIT-20",
+      "location": "plan/implementation.yaml 1.11 notes",
+      "original": "Update the L734 comment, which still says tests are created on the Tests page.",
+      "suggested": "Update the L734 comment (tests are created in Create Check) and the L694 comment, which cites /checks/studio/:id and App.tsx:114."
+    },
+    {
+      "issueId": "CRIT-21",
+      "location": "spec.md#12.4",
+      "original": "These are 11 sites in 10 files (PL-03, plan lineReverification)",
+      "suggested": "These are 12 sites in 10 files (PL-03, plan lineReverification)"
+    }
+  ],
+  "evidence": {
+    "inputHashes": {
+      "spec.md": "65fc8b04ec6afb5ad8d14f8e88764e9a13ae039fe778c26e92cff57167f5fa79",
+      "requirements.json": "bb6c72692a7ade4cf13c329d4eb829cd55b0b275912a045cca5aa65d40ed8c7f",
+      "complexity.json": "05254a4a2ad96a823a4279076f1d38722d56139c37a8fed2ebfb1a56a63a3d46",
+      "plan/implementation.yaml": "b9e85ccbc71c859ed1060d88d6e0a59f742f58b674c3942ff8ae6342b2315140"
+    },
+    "checksPerformed": [
+      "Read requirements.json changelog entries 3-5 and the spec sections they changed (§1.3-1.4, §3.2, §5-7, §10-14, §17-21), plus the revised FR-06/08/27/28, AC-06/09/26/27 and CON-03/08, NFR-09.",
+      "Re-ran greps over frontend/src and frontend/e2e to verify PC-15, PC-16, the 12 bare mounts, K2-K4, and the lists in §11/§12.4.",
+      "Read the whole plan (78 subtasks), checked its task rules with a js-yaml script, and compared each phase's subtasks with spec §11/§12.4/§12.5/§14.",
+      "Walked the link table (§14.1 and the plan's linkWalkAtExit entries) against the code at each boundary.",
+      "Dry-ran the plan's gate regexes against the current tree to see what they match (CRIT-19, CRIT-20).",
+      "ADR-SC-006 check: no accessibility work added; the audit only gets re-mounted and shrinks."
+    ],
+    "notPerformed": [
+      "No test, type-check, lint, build or E2E was run.",
+      "The harness move to All Checks (3.19) was checked by reading the handlers and fixtures, not executed; the response shape of the new empty GET /checks handler was not compared with fetchChecks' expectations.",
+      "The audit's actual axe diff after the editor framing change is unknown until the plan runs 1.33."
+    ]
+  },
+  "selfCritique": {
+    "performed": true,
+    "framework": ".aiox-core/development/tasks/spec-critique.md",
+    "verdictRulesApplied": "No HIGH issues, but 2 MEDIUM issues are present (plan gate commands that cannot pass), so NEEDS_REVISION even though the weighted average is 4.13 and all dimensions are >= 3.",
+    "scopeDistinction": "Specification and plan readiness only. The spec itself has only LOW text issues; the MEDIUM items belong to the plan. No implementation verdict. Accessibility items were not raised (ADR-SC-006)."
+  }
+}

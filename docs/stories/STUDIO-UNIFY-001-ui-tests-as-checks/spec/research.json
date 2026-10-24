@@ -1,0 +1,439 @@
+{
+  "storyId": "STUDIO-UNIFY-001-ui-tests-as-checks",
+  "researchedAt": "2026-10-23T20:43:59Z",
+  "researchedBy": "@analyst (Atlas)",
+  "complexity": "STANDARD",
+  "researchMode": "codebase",
+  "toolFallback": "Codebase research only, as the spawn prompt asked. Context7 and EXA were not used: every question is about this repository's behaviour, and no new library is introduced.",
+  "method": "Files were read on branch brunobuger/ui-studio at HEAD b39359f78, with the dirty working tree as it is. Every finding cites file:line. No code was executed, no test was run, and nothing was changed. 'verification: code-read' means the behaviour was traced by reading the code. 'unverified' means it was inferred or not checked at all.",
+  "dependencies": [
+    {
+      "name": "Studio run gate (RunControl, useRunGate, runEnablement)",
+      "type": "library",
+      "version": "in-repo",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "in-repo",
+        "usageLocations": [
+          "frontend/src/components/studio/run/RunControl.tsx:139",
+          "frontend/src/components/studio/run/RunControl.tsx:181-187",
+          "frontend/src/components/studio/run/useRunGate.ts:360-367",
+          "frontend/src/components/studio/run/useRunGate.ts:383",
+          "frontend/src/components/studio/run/useRunGate.ts:480-513",
+          "frontend/src/components/studio/run/runEnablement.ts:39-44",
+          "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx:1117-1139"
+        ]
+      },
+      "documentation": {
+        "url": "frontend/src/components/studio/run/useRunGate.ts:18-54",
+        "relevantSections": ["One Run, three modes", "VAL-039 fresh key per activation"]
+      },
+      "patterns": [
+        {
+          "name": "Programmatic run token",
+          "description": "runRequest is a monotonically increasing token. It is served only while runnable && !isRunning. Otherwise it is NOT consumed, and it is re-checked on every render until it becomes runnable (RunControl.tsx:181-187). FR-13 depends on this, and RQ-01/RQ-03 show that the deferral is unbounded in time."
+        },
+        {
+          "name": "Fresh-read mode decision",
+          "description": "Run saves if dirty, then a fresh GET /tests/{id} decides the mode: READY replays through POST /execute; UNLEARNED and NEEDS_RELEARN start a guided session; LEARNING starts nothing (useRunGate.ts:480-513)."
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [],
+        "conflicts": ["The held-token semantic conflicts with FR-13/NFR-05 once autorun=1 becomes the only Run entry (see RQ-01, RQ-03)."]
+      }
+    },
+    {
+      "name": "Guided session hook (useGuidedSession)",
+      "type": "library",
+      "version": "in-repo",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "in-repo",
+        "usageLocations": [
+          "frontend/src/components/studio/guided/useGuidedSession.ts:41-48",
+          "frontend/src/components/studio/guided/useGuidedSession.ts:335-383",
+          "frontend/src/components/studio/guided/useGuidedSession.ts:385-398",
+          "frontend/src/components/studio/guided/useGuidedSession.ts:488-489",
+          "frontend/src/components/studio/guided/useGuidedSession.ts:543-544",
+          "frontend/src/components/studio/guided/useGuidedSession.ts:549-580"
+        ]
+      },
+      "documentation": {
+        "url": "frontend/src/components/studio/guided/useGuidedSession.ts:33-70",
+        "relevantSections": ["Pointer in sessionStorage", "HTTP outcomes", "finalize latch"]
+      },
+      "patterns": [
+        {
+          "name": "Per-tab pointer and client-only finalize",
+          "description": "The session pointer is stored in sessionStorage, which is per tab, and written before the start POST. Polling stops when the page unmounts. Finalize is sent by this hook when it sees FINALIZING, and no server job finalizes. A learn started from the editor is therefore published only while an editor for that test is mounted in the same tab."
+        }
+      ],
+      "compatibility": {"preferred": true, "alternatives": [], "conflicts": []}
+    },
+    {
+      "name": "Studio public API (tests, executions, SSE, video)",
+      "type": "api",
+      "version": "docs/specs/studio/openapi.yaml (frozen)",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "in-repo",
+        "usageLocations": [
+          "backend/src/main/java/com/citi/put/checks/studio/StudioController.java:51-64",
+          "backend/src/main/java/com/citi/put/checks/studio/StudioController.java:75-87",
+          "backend/src/main/java/com/citi/put/checks/studio/StudioController.java:112-125",
+          "backend/src/main/java/com/citi/put/checks/studio/StudioController.java:131-135",
+          "backend/src/main/java/com/citi/put/checks/studio/StudioController.java:155-169",
+          "backend/src/main/java/com/citi/put/checks/studio/sse/ExecutionEventsController.java:70-79",
+          "backend/src/main/java/com/citi/put/checks/studio/ExecutionVideoController.java:54-61",
+          "frontend/src/services/api/studioApi.ts:66-130"
+        ]
+      },
+      "documentation": {
+        "url": "docs/specs/studio/openapi.yaml:288-297",
+        "relevantSections": ["GET /tests list projection carries readiness", "403 STUDIO_FORBIDDEN non-disclosure"]
+      },
+      "patterns": [
+        {
+          "name": "Readiness on the list",
+          "description": "GET /studio/tests returns readiness for each row (StudioService.java:176-190; openapi.yaml:295-297), so FR-16 chips can come from the list. firstChangedStepId is always null on the list (UITestDto.java:114-116). The Javadoc at StudioService.java:169-170 says readiness is null on the list, which is stale."
+        },
+        {
+          "name": "List query vocabulary",
+          "description": "sort accepts name | updatedAt | lastRunAt with ,asc|,desc. Default is updatedAt,desc with id as the tie-breaker. An unknown value is 400 INVALID_QUERY (StudioListQuery.java:49-67, 111-123). q is a case-insensitive substring match on name or description only (StudioRepositoryCustomImpl.java:72-76). The lastRun filter takes PASSED|FAILED|ERROR|NEVER (StudioRepositoryCustomImpl.java:77-86). There is no readiness filter. size is capped at 100 (StudioService.java:178)."
+        }
+      ],
+      "compatibility": {"preferred": true, "alternatives": [], "conflicts": []}
+    },
+    {
+      "name": "Readiness and revision derivation (ExecutionReadinessService, ConfigurationChangeClassifier, IncrementalChangeService)",
+      "type": "service",
+      "version": "in-repo",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "in-repo",
+        "usageLocations": [
+          "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java:64-91",
+          "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java:120-137",
+          "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java:225-254",
+          "backend/src/main/java/com/citi/put/checks/studio/authoring/ConfigurationChangeClassifier.java:16-21",
+          "backend/src/main/java/com/citi/put/checks/studio/authoring/ConfigurationChangeClassifier.java:43-60",
+          "backend/src/main/java/com/citi/put/checks/studio/authoring/IncrementalChangeService.java:42-58",
+          "backend/src/main/java/com/citi/put/checks/studio/authoring/IncrementalAuthoringIdentity.java:245-299",
+          "backend/src/main/java/com/citi/put/checks/studio/StudioService.java:323-424",
+          "backend/src/main/java/com/citi/put/checks/studio/StudioService.java:508-530"
+        ]
+      },
+      "documentation": {
+        "url": "backend/src/test/java/com/citi/put/checks/studio/ConfigurationRevisionTest.java:23-91",
+        "relevantSections": ["nameAndDescriptionChangesPreserveTheConfirmation", "everyExecutionAffectingFieldAdvancesTheConfigurationRevision", "ChangeDetectionTest.configurationChangesSelectFirstStep"]
+      },
+      "patterns": [],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [],
+        "conflicts": ["Stale comments say NEEDS_RELEARN is never emitted (StudioReadiness.java:15-18; StudioService.java:432-433; frontend studioTypes.ts:115-116). ExecutionReadinessService.java:129-133 does emit it."]
+      }
+    },
+    {
+      "name": "Execute acceptance and dispatch ledger (StudioAcceptanceService, IdempotencyFilter)",
+      "type": "service",
+      "version": "in-repo",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "in-repo",
+        "usageLocations": [
+          "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java:272-307",
+          "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java:336-365",
+          "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java:464-489",
+          "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java:541-556",
+          "backend/src/main/java/com/citi/put/checks/config/IdempotencyFilter.java:1-60",
+          "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java:125-132",
+          "backend/src/main/resources/application.yml:346-349"
+        ]
+      },
+      "documentation": {"url": "backend/src/main/java/com/citi/put/checks/studio/StudioController.java:100-125", "relevantSections": ["Idempotency-Key mandatory"]},
+      "patterns": [
+        {
+          "name": "Dedup scope",
+          "description": "An execute is deduplicated only by (principal, Idempotency-Key) in the ledger (StudioAcceptanceService.java:295-303). There is no per-test 'already running' guard. The only bounds are the pending quotas: 20 per CSI and 200 global."
+        }
+      ],
+      "compatibility": {"preferred": true, "alternatives": [], "conflicts": []}
+    },
+    {
+      "name": "Guided session lifecycle (GuidedSessionService, GuidedSessionReaper, GuidedCsiBudget)",
+      "type": "service",
+      "version": "in-repo",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "in-repo",
+        "usageLocations": [
+          "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionProperties.java:13",
+          "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:656-728",
+          "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:746-747",
+          "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:1658-1671",
+          "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:2710-2740",
+          "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionReaper.java:17-50",
+          "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java:202-208",
+          "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedCsiBudget.java:35-56",
+          "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedCsiBudgetProperties.java:16",
+          "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationController.java:28-36"
+        ]
+      },
+      "documentation": {"url": "helm-chart/put-checks/values.yaml:686", "relevantSections": ["maxSessionSeconds 600 s default"]},
+      "patterns": [],
+      "compatibility": {"preferred": true, "alternatives": [], "conflicts": []}
+    },
+    {
+      "name": "studio-runner guided capacity",
+      "type": "infrastructure",
+      "version": "in-repo",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "in-repo",
+        "usageLocations": [
+          "studio-runner/src/guided/transport.ts:100",
+          "studio-runner/src/guided/ownership.ts:47",
+          "studio-runner/src/guided/ownership.ts:126-128"
+        ]
+      },
+      "documentation": {"url": "studio-runner/src/server/capacity.ts:1-24", "relevantSections": ["saturation vs draining"]},
+      "patterns": [
+        {
+          "name": "One guided slot per runner",
+          "description": "The guided bridge refuses any capacity other than 1 (transport.ts:100). An assignment occupies the slot until it is confirmed stopped (ownership.ts:47)."
+        }
+      ],
+      "compatibility": {"preferred": true, "alternatives": [], "conflicts": []}
+    },
+    {
+      "name": "Global filter slice (dashboardSlice.searchContext) and GlobalSearch",
+      "type": "library",
+      "version": "in-repo",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "in-repo",
+        "usageLocations": [
+          "frontend/src/store/slices/dashboardSlice.ts:43",
+          "frontend/src/store/slices/dashboardSlice.ts:152-162",
+          "frontend/src/components/home/GlobalSearch.tsx:196",
+          "frontend/src/store/index.ts:59-66",
+          "frontend/src/pages/AllChecksPage/AllChecksPage.tsx:143-151"
+        ]
+      },
+      "documentation": {"url": "frontend/src/components/home/GlobalSearch.tsx:191-225", "relevantSections": ["Filters dialog"]},
+      "patterns": [],
+      "compatibility": {"preferred": true, "alternatives": [], "conflicts": []}
+    },
+    {
+      "name": "MUI and React Router (installed versions)",
+      "type": "library",
+      "version": "@mui/material 5.18.0; react-router-dom 6.30.1",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "@mui/material 5.18.0; react-router-dom 6.30.1",
+        "usageLocations": [
+          "frontend/package.json:27",
+          "frontend/package.json:39",
+          "frontend/pnpm-lock.yaml:673",
+          "frontend/pnpm-lock.yaml:3325",
+          "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx:1156"
+        ]
+      },
+      "documentation": {"url": "frontend/pnpm-lock.yaml", "relevantSections": []},
+      "patterns": [
+        {
+          "name": "Replace navigation",
+          "description": "React Router 6.30 supports navigate(to, { replace: true }) and useSearchParams. These are the tools to consume autorun=1 (RQ-03) and do the create-then-replace step in FR-02. No new dependency is needed."
+        }
+      ],
+      "compatibility": {
+        "preferred": true,
+        "alternatives": [],
+        "conflicts": ["CON-05 and CLAUDE.md say MUI v7 and React Router v7. The lockfile pins MUI 5.18.0 and react-router-dom 6.30.1, and the code uses the v5 Grid 'item' API (ChecksStudioPage.tsx:1156)."]
+      }
+    },
+    {
+      "name": "Centralized API client (apiClient)",
+      "type": "library",
+      "version": "in-repo",
+      "verified": true,
+      "source": "codebase",
+      "existing": {
+        "installed": true,
+        "currentVersion": "in-repo",
+        "usageLocations": [
+          "frontend/src/services/api/apiClient.ts:81-95",
+          "frontend/src/services/api/apiClient.ts:97-109",
+          "frontend/src/services/api/apiClient.ts:111-121"
+        ]
+      },
+      "documentation": {"url": "frontend/src/services/api/apiClient.ts:60-125", "relevantSections": ["401 login trigger", "GET retry on 5xx/no response, max 2", "error normalized to data.error"]},
+      "patterns": [],
+      "compatibility": {"preferred": true, "alternatives": [], "conflicts": []}
+    }
+  ],
+  "findings": [
+    {
+      "id": "RQ-01",
+      "question": "What does ?autorun=1 do per readiness, what does the user see when a run or learn cannot start, and is anything silently dropped?",
+      "answer": "autorun=1 is read once, on mount, and requests one run through RunControl. The fresh GET /tests/{id} then decides what happens: READY replays, UNLEARNED learns, NEEDS_RELEARN re-learns from the server's first changed step, and LEARNING starts nothing. The request is never dropped. It is held until the gate becomes runnable, and it can fire minutes later without any action from the user. Three paths behave badly today: it runs a different test, it is silently ignored, or it shows no feedback.",
+      "verification": "code-read",
+      "confidence": "high for the traced paths; the deferred-fire scenarios were not exercised by a test",
+      "details": [
+        "Trigger: the initial-load effect has deps [] (ChecksStudioPage.tsx:482-522). It reads autorun at L493-494 and bumps runRequest after the detail read (L504-511). The route-change effect (L705-717) never reads location.search, so autorun on a route change while the editor is mounted is silently ignored.",
+        "Wrong test today: listTests() has no params, so the server default size is 20 (StudioController.java:59). chosen falls back to list[0] when the URL id is not in that page (ChecksStudioPage.tsx:495-499), and autorun then runs list[0] (L500-511). FR-06 removes the fallback. The spec must also tie autorun to the id-loaded test.",
+        "Gate predicate: runnable = gate.canRun && hasSteps && !(sessionUnreadable && mode !== 'replay') (RunControl.tsx:139). canRun requires the test to be loaded, readiness != LEARNING, replay mode or startLearn present, phase idle, and permission not 'denied' (useRunGate.ts:360-367).",
+        "Per readiness, decided on a fresh read after any save (useRunGate.ts:480-513). READY: POST /tests/{id}/execute under a fresh UUID key (L511-514). UNLEARNED: GET /tests/{id}/capabilities, then startLearn with the exact context and no hints (L415-458, L502-504). NEEDS_RELEARN: the same, with baseRevisionId = confirmedRevisionId and firstLearnStepId = firstChangedStepId, or step 1 when readinessReason is BASE_IDENTITY_INCOMPLETE (L195-202, L506-508). LEARNING: busy, Run disabled. If this page follows the session, Run shows Stop. Otherwise the caption 'Another Run is learning this test, so Run is off…' appears (RunControl.tsx:154, 324-333; guidedNarratives.ts:638-648).",
+        "Held token: the effect returns without consuming the token when the gate is not runnable or is running (RunControl.tsx:183). It re-evaluates on every render, because gate is a new object each render. Contrast learnRequest, which is consumed either way (L191-198).",
+        "Deferred fire (a): LEARNING, and this page follows the session (same tab; for example a reload during a learn, or Back to the autorun URL). When the session ends, guidedRefresh changes refreshToken (ChecksStudioPage.tsx:825-842, 1119). The gate re-reads, sees READY, and the held token starts a replay on its own. This breaks the page's own rule that learning completion never causes a second execution (L820-823).",
+        "Deferred fire (b): LEARNING in another tab or by another user. The held token fires when the user presses 'Refresh test information' (L1482-1491, then reloadScenarios at L524-535, which changes the readiness in refreshToken), which is the remedy the caption itself suggests. A reload fires it too, because autorun is still in the URL.",
+        "Deferred fire (c): a test with no steps (a newly created UI test, Execute from All Checks). The token is held with the caption 'Add a step to run this test.' (RunControl.tsx:302-311). The first keystroke in 'Add a test step' makes hasPendingStep true (ChecksStudioPage.tsx:407, 1122-1124). gate.run() then saves the partial text as a step (L752-757) and starts a learn.",
+        "Permission denied: the token is held forever, Run is disabled, and RUN_NOT_PERMITTED_REASON is shown (RunControl.tsx:143, 290-300). Nothing fires.",
+        "Visible refusals for replay: 403, 429 (pending quota) and 503 get status narratives, and 409 gets a narrative by code (executeRefusals.ts:166-183). They render in the run-alerts slot (RunControl.tsx:205-238, 360). Statuses without a narrative show the server message in a red caption (useRunGate.ts:520-527; RunControl.tsx:349-358). Examples: 400 UNKNOWN_REFERENCE for an unvalued plain variable or a secret the user may not use (StudioAcceptanceService.java:541-556; ChecksExceptionHandler.java:156-168), and 400 STEP_LIMIT_EXCEEDED (StudioAcceptanceService.java:341-346).",
+        "Misleading but visible: 503 VAULT_UNAVAILABLE or VAULT_NOT_CONFIGURED on execute (ChecksExceptionHandler.java:183-210) maps by status to 'Running tests is switched off right now… across the platform' (executeRefusals.ts:119-127, 176-177).",
+        "Replay refusals thrown as GuidedSessionException answer {code, message:'Observed execution refused'} (StudioController.java:216-222; ObservedReplayAuthorizer.java:42-65). The frontend branches on data.error (useRunGate.ts:150-158), so a 409 renders the 'no wording for' narrative with an empty code, and a 403 renders the forbidden narrative.",
+        "Guided start feedback is visible. Capability unavailable: FORBIDDEN_SCOPE shows the forbidden narrative, RUNTIME_INCOMPATIBLE shows 'Studio could not start learning for this test…' plus the code (useRunGate.ts:446-450; GuidedCompletion.tsx:335-338). Capability context mismatch shows the 'revisionNotReady' warning (useRunGate.ts:452-455; RunControl.tsx:249-253). Start refused with 400/403/409/429 (useGuidedSession.ts:375-377): MISSING_SOURCE shows 'A step uses a saved input or secret that this test does not declare' with Open Variables. BUDGET_EXCEEDED shows the CSI budget copy with Retry-After, or the per-session copy. The other cases are POLICY_NOT_APPROVED, ORIGIN_NOT_ALLOWED and REVISION_CONFLICT (GuidedCompletion.tsx:347-388). A capability read that fails with a non-403, or a start with no response after 3 attempts, shows the caption 'The run could not be started' (useRunGate.ts:427-439, 459-463).",
+        "Silent: a guided start answered 503 or 401 sets pending NOT_READY or REAUTHENTICATION_REQUIRED and keeps the pointer (useGuidedSession.ts:367-374). The page renders pending only inside a session view (ChecksStudioPage.tsx:1571-1583), and RunControl gets no pending prop (L1117-1139). Nothing is shown; a 401 also triggers the platform login (apiClient.ts:81-90). Because the pointer is kept, the hydrate effect re-sends the same start, same key and body, the next time the editor mounts for that test (useGuidedSession.ts:385-398), without a new Run press.",
+        "Login-required is a run outcome (a guided result or replay failure with LOGIN_REQUIRED), not a start refusal (LoginRequiredNotice.tsx:7-37)."
+      ],
+      "affects": ["FR-05", "FR-06", "FR-13", "FR-19", "NFR-05", "AC-06", "AC-14", "OQ-06", "ASM-01"]
+    },
+    {
+      "id": "RQ-02",
+      "question": "Does saving only name, description or environment create a new revision or change readiness?",
+      "answer": "Name and description: no revision, no readiness change, no schedule invalidation. Environment: configurationRevision goes up by 1, the schedule is invalidated with LEARN_REQUIRED, and readiness moves READY -> NEEDS_RELEARN from step 1 (or UNLEARNED when no learned base exists). The learned revision never replays against a different environment. In Flow 1's frontend, environment is the only metadata field the user can edit. Name and description are set at create and never edited.",
+      "verification": "code-read, backed by existing backend tests that were read but not run",
+      "confidence": "high",
+      "details": [
+        "The classifier lets name and description drive neither revision (ConfigurationChangeClassifier.java:16-18). Environment, variables, viewport, timeout, browser and wait strategy drive configurationRevision (L50-58). Resubmitting the same content advances nothing (L20-21).",
+        "updateAuthoringDraft caps the bump at +1 per dimension (StudioService.java:323-359). updateMetadata bumps only on a classified change, and calls invalidateSchedule(LEARN_REQUIRED) only when anyChanged (L390-424, invalidation at L418-422). persistAuthoring bumps only on a step or context identity change (L508-530).",
+        "Tests: ConfigurationRevisionTest.nameAndDescriptionChangesPreserveTheConfirmation asserts revisions stay 1/1 after a rename (ConfigurationRevisionTest.java:50-62). everyExecutionAffectingFieldAdvancesTheConfigurationRevision includes withEnvironment('Staging') (L78-85).",
+        "Readiness never reads name or description (READINESS_QUERY, ExecutionReadinessService.java:64-82; IncrementalChangeService.java:46-49). Environment seeds the configuration hash at the head of every step chain (IncrementalAuthoringIdentity.java:247-255), so a change gives boundary 0 (ChangeDetectionTest.java:73-90). readiness() then returns NEEDS_RELEARN when a base revision exists and UNLEARNED otherwise (ExecutionReadinessService.java:121-137).",
+        "Term 7 compares the draft configuration hash, including environment, with the learned artifact's configurationHash (ExecutionReadinessService.java:75-79, 242-246). Execute therefore refuses 409 LEARN_REQUIRED, and Run starts a relearn instead of a replay.",
+        "Frontend: the editor has no name or description input. saveDraft sends test.name and test.description from the last server read (ChecksStudioPage.tsx:760-764). Environment is the select at L1201-1214, and it counts toward isDirty (L399). Run saves a dirty draft first (useRunGate.ts:469-478), so changing the environment and pressing Run starts a full relearn."
+      ],
+      "affects": ["FR-09", "FR-10", "FR-16", "OQ-07", "ASM-04"]
+    },
+    {
+      "id": "RQ-03",
+      "question": "Is autorun=1 removed after use? Does reload or Back start a second run? Is there server-side dedup?",
+      "answer": "autorun=1 is not removed, and nothing in the app strips it. A reload, or browser Back to the ?autorun=1 history entry, remounts the editor and requests another run with a new Idempotency-Key. For a READY test the server accepts it as a second, concurrent execution. It is not deduplicated: the ledger dedupes only an identical (principal, key) pair, and no per-test guard exists. For a test that is learning, the reload holds the token and a replay fires automatically when the learn ends (RQ-01 deferred fire a).",
+      "verification": "code-read",
+      "confidence": "high",
+      "details": [
+        "The only navigate calls on the page are L1061 and L1194. No replace and no search-param removal exist. No in-app producer of autorun=1 exists today: grep finds it only in ChecksStudioPage.tsx, RunControl.tsx and runGate.test.tsx.",
+        "One fresh key per activation, minted before any await (useRunGate.ts:175-182, 382-383). The frontend sends it as the Idempotency-Key header (studioApi.ts:96-101).",
+        "The server dedupes on ledger.findByPrincipalAndIdempotencyKey only (StudioAcceptanceService.java:295-303). The IdempotencyFilter response cache is also keyed by the header (IdempotencyFilter.java COVERED_PATHS includes /api/v1/studio/**). acceptCore checks lifecycle, readiness, authorization, step limit, references and quotas (L272-365), but nothing like 'one active execution per test'. Bounds: pending quota of 20 per CSI and 200 global (StudioAcceptanceService.java:464-489; StudioExecutionProperties.java:125-132; application.yml:346-349).",
+        "After a reload the page does not reattach to a replay that is still running: currentExecutionIdRef is set only in beginRun (ChecksStudioPage.tsx:574-584). So a second replay starts while the first is still running.",
+        "Guided: the start key is persisted in sessionStorage and reused only for a start that was never answered with the same body (useGuidedSession.ts:559-576). The server dedupes by (principal, testId) namespace plus key and digest (GuidedSessionService.java:665-676). Start has no per-test live-session guard (L656-728), and V14__guided_sessions.sql has no such unique index. Only the per-CSI concurrency budget of 3 bounds it (GuidedCsiBudget.java:44-56).",
+        "History: FR-13 navigates by push. Editor back goes to the detail page (FR-07), then browser Back returns to …/studio?autorun=1, a fresh mount, and a second run."
+      ],
+      "affects": ["FR-13", "FR-19", "NFR-05", "AC-14", "RQ-03-followup"]
+    },
+    {
+      "id": "RQ-04",
+      "question": "How do the execution, SSE and video endpoints answer for an absent, forbidden or soft-deleted test? Is the 403 still indistinguishable?",
+      "answer": "Per-id test reads are indistinguishable: GET /studio/tests/{id} answers the same 403 STUDIO_FORBIDDEN for absent, forbidden, soft-deleted and quarantined. The execution routes key on the execution, not the test. GET /studio/executions?testId= never answers 403: it returns an empty page for an absent or forbidden test, and the run history for a soft-deleted one. GET /studio/executions/{id}, SSE and video answer 403 only for an absent execution or an unreadable CSI. They answer 200 for runs of a soft-deleted test, and 200 to the user who started the run even after that user lost read access to its CSI.",
+      "verification": "code-read",
+      "confidence": "high (the malformed-id case is unverified)",
+      "details": [
+        "UITest carries @SQLRestriction('deleted_at IS NULL AND quarantined_at IS NULL') (entity/UITest.java:17). findById therefore misses soft-deleted and quarantined rows, and readAuthoringDraft throws StudioAccessDeniedException (StudioService.java:303-320). The handler returns 403 {error:'STUDIO_FORBIDDEN', message:'You do not have access to this Studio resource'} (ChecksExceptionHandler.java:74-90; StudioAccessDeniedException.java:3-25).",
+        "List executions is scoped by the caller's readable CSIs and filtered by e.testId equality (StudioService.java:872-886; UITestExecutionRepositoryCustomImpl.java:94-96). The test row is never looked up, so: absent -> 200 empty; test in an unreadable CSI -> 200 empty; soft-deleted test -> 200 with its runs, with testName null (StudioService.java:899-912).",
+        "GET /executions/{id}: an unknown id, or a null execution CSI, gives 403. The initiating principal skips the CSI read check, and everyone else needs read on the execution's own CSI (StudioService.java:845-857). The parent test's deletion is not consulted (StudioController.java:127-130, 'equally for a soft-deleted test').",
+        "SSE uses the same readExecution before opening the stream, so the statuses match GET (ExecutionEventsController.java:70-79). The 403 is JSON with an explicit content type (ChecksExceptionHandler.java:77-83).",
+        "Video authorizes through findExecutionById first. Only after that does it return 404/410/416 evidence refusals, so they disclose nothing (ExecutionVideoService.java:85-100; ChecksExceptionHandler.java:92-117).",
+        "unverified: a non-UUID id in the path (/tests/{id}, /executions/{id}) or in ?testId= fails UUID conversion. No handler maps MethodArgumentTypeMismatchException (ChecksExceptionHandler.java handler list), so Spring's default 400 is inferred, not 403."
+      ],
+      "affects": ["FR-11", "FR-12", "FR-25", "NFR-03", "AC-12", "AC-13", "AC-24", "ASM-03"]
+    },
+    {
+      "id": "RQ-05",
+      "question": "Do the global environment filter values match what GET /studio/tests?environment= accepts?",
+      "answer": "Yes for the four values the UIs produce: Production, Staging, Development and UAT. They are the same title-case strings everywhere, and the server filter is exact and case-sensitive after a trim. One gap: the editor's Environment select offers only Development, Staging and Production. A UAT UI test can be created, but the editor cannot select UAT and shows the stored value outside its options.",
+      "verification": "code-read",
+      "confidence": "high (the MUI out-of-range rendering is unverified)",
+      "details": [
+        "Global filter options are ['Production','Staging','Development','UAT'] (GlobalSearch.tsx:196). This Autocomplete has no freeSolo; freeSolo is on the tags Autocomplete at L204. The value is stored by setSearchFilters (dashboardSlice.ts:152-162) and rehydrated from localStorage without validation (store/index.ts:59-66).",
+        "All Checks applies it to checks by exact equality, client-side (AllChecksPage.tsx:149-151).",
+        "Create Check offers ['Development','Staging','Production','UAT'] (CreateCheckPage.tsx:56). STUDIO_TEST_ENVIRONMENTS is the same four (testListPresentation.ts:56).",
+        "Server: StudioListQuery.Tests.parse trims and maps blank to null (StudioListQuery.java:111-123, 188-193). SQL is 't.environment = :environment', exact and case-sensitive (StudioRepositoryCustomImpl.java:68-71). The csiId filter is exact equality too (L64-67).",
+        "No vocabulary is enforced on the server. ui_tests.environment is VARCHAR(50) NOT NULL with no CHECK (V1__init.sql:134), checks.environment is VARCHAR(50) and nullable (V1__init.sql:60), and CheckRequest.environment is unvalidated (CheckRequest.java:11).",
+        "Editor gap: the select maps ['Development','Staging','Production'] (ChecksStudioPage.tsx:1212) while value={environment} (L1207). An existing UAT fixture is queried at studioContract.test.ts:1399."
+      ],
+      "affects": ["FR-01", "FR-15", "ASM-05", "CON-02"]
+    },
+    {
+      "id": "RQ-06",
+      "question": "Does an abandoned guided learn session expire on the server, how, and after how long?",
+      "answer": "Yes. Every session has a hard expiresAt = createdAt + studio.guided-authoring.max-session-seconds (default 600 s; no override in application.yml or the Helm values). GuidedSessionReaper runs every 10 s (reaper-delay-ms) on the scheduler role and stops expired non-terminal sessions as EXPIRED, with a durable, re-driven runner teardown. Until then the test reads LEARNING, and the session holds one of the CSI's 3 concurrent learn slots and the runner's single guided slot. A learn whose editor was left is never published, because finalize is sent only by the client.",
+      "verification": "code-read",
+      "confidence": "high for expiry; medium for runner-slot holding and for unattended progress (inferred from the runner code, not executed)",
+      "details": [
+        "Lifetime: maxSessionSeconds is @DefaultValue 600 (GuidedSessionProperties.java:13). expiresAt is set at start (GuidedSessionService.java:746-747). No application.yml or Helm override was found (grep; helm-chart/put-checks/values.yaml:686 only mentions the default).",
+        "Reaper: @Profile('!api | worker'), @Scheduled(fixedDelay = ${studio.guided-authoring.reaper-delay-ms:10000}) (GuidedSessionReaper.java:17-19, 45-50). expire() selects expires_at <= now and non-terminal (GuidedSessionRepository.java:202-208) and calls stop(session,'EXPIRED') (GuidedSessionService.java:1658-1671). stop records a PENDING teardown and queues the runner stop (L2710-2740), re-driven within PT15M (GuidedSessionReaper.java:27).",
+        "Until expiry: LEARNING_QUERY counts any non-terminal session with expires_at > now (ExecutionReadinessService.java:88-91, 125-128), so All Checks would show the 'Learning' chip for up to about 10 minutes. The CSI budget counts the same live sessions against maxConcurrentSessions, default 3 (GuidedCsiBudget.java:44-56; GuidedCsiBudgetProperties.java:16). The runner's guided capacity is fixed at 1, and an assignment occupies the slot until it is stopped (studio-runner/src/guided/transport.ts:100; ownership.ts:47, 126).",
+        "Client side: polling stops on unmount (useGuidedSession.ts:543-544). Finalize is sent only by the hook on FINALIZING (L488-489), through POST /studio/guided-sessions/{id}/finalize (GuidedPublicationController.java:28-36). No @Scheduled bean finalizes (backend grep of @Scheduled). The pointer lives in sessionStorage, so returning to the editor in the same tab resumes and finalizes. Another tab shows the learningElsewhere caption instead.",
+        "Guided sessions are not executions. Only StudioAcceptanceService.java:379 creates UITestExecution rows, so a learn never appears in GET /studio/executions?testId= or in the Runs tab."
+      ],
+      "affects": ["FR-26", "AC-25", "EC-07", "ASM-02"]
+    }
+  ],
+  "resolvedOpenQuestions": [
+    {"id": "OQ-06", "resolution": "Resolved, ASM-01 confirmed. Autorun learns an UNLEARNED test, re-learns NEEDS_RELEARN from firstChangedStepId, replays READY, and starts nothing while LEARNING (the request is held, not dropped). The copy for non-READY tests stays a UX call; the facts are in RQ-01, R-04 and R-05."},
+    {"id": "OQ-07", "resolution": "Resolved, ASM-04 now known. A rename or description change never changes revision or readiness. An environment change does (READY -> NEEDS_RELEARN from step 1, schedule invalidated). Flow 1 has no rename surface in the frontend."},
+    {"id": "ASM-02", "resolution": "Partly holds. The expiry job exists (600 s default, 10 s tick). But a learn left mid-way is never published, is not shown in the Runs tab, and holds LEARNING plus CSI and runner capacity until expiry. See R-03 and R-11."},
+    {"id": "ASM-03", "resolution": "Confirmed. GET /executions/{id} is authorized on the execution's CSI and principal, never on the route's test, so FR-12's testId guard is required."},
+    {"id": "ASM-05", "resolution": "Confirmed for filtering. The four values match exactly. Caveat: the editor select lacks UAT (R-07)."}
+  ],
+  "unverifiedClaims": [
+    {"claim": "The deferred autorun fires as traced in RQ-01 (a) after a followed learn ends, (b) on 'Refresh test information' or a reload, and (c) on the first keystroke into an empty test.", "reason": "Traced from RunControl.tsx:181-187 and the page wiring only. No test or browser run was executed. The existing test checks only a 50 ms window (runGate.test.tsx:638-649).", "action": "needs_validation"},
+    {"claim": "A non-UUID id in a Studio path or in ?testId= answers 400, not 403.", "reason": "Inferred from Spring's default handling of MethodArgumentTypeMismatchException. No handler or test in the repository covers it.", "action": "needs_validation"},
+    {"claim": "An unattended learn keeps running on the runner until it needs a clarification or reaches FINALIZING, and holds the runner's guided slot until the teardown is confirmed.", "reason": "Inferred from GuidedTranslationCoordinator's @Scheduled poll and studio-runner ownership.ts. Not executed.", "action": "acceptable_risk"},
+    {"claim": "GET /studio/tests at size=100 is expensive, because readiness is derived per row.", "reason": "StudioService.java:176-190 calls ExecutionReadinessService.readiness per row, which runs several queries plus observed.verify. Not measured.", "action": "needs_validation"},
+    {"claim": "MUI renders the UAT value in the editor select as out of range and warns.", "reason": "This is known MUI Select behaviour. It was not reproduced here.", "action": "acceptable_risk"},
+    {"claim": "GET /studio/tests/{id}/schedule and /capabilities answer 403 for a soft-deleted test.", "reason": "Not checked. The detail page uses the schedule summary (FR-10).", "action": "needs_validation"}
+  ],
+  "recommendations": [
+    {"id": "R-01", "type": "prefer", "subject": "Autorun applies only to the test loaded by route id", "affects": ["FR-06", "FR-13", "AC-06", "AC-07", "AC-14"], "rationale": "Today autorun runs list[0] when the id is beyond the first page (ChecksStudioPage.tsx:495-511). The spec should say in AC-06/AC-14 that autorun fires only after GET /studio/tests/{id} succeeds for the route id, and never after a 403 or a failed read. This sits inside FR-06. No new feature."},
+    {"id": "R-02", "type": "prefer", "subject": "Consume autorun exactly once (design call for @architect, RQ-03-followup)", "affects": ["FR-13", "FR-19", "NFR-05", "AC-14"], "rationale": "RQ-03 confirms that a reload or Back starts a second accepted run, and RQ-01 shows unbounded deferred fires. The spec should require that the editor drops autorun from the URL with a replace navigation when it reads it, and that one autorun request is evaluated once, when the gate first settles. If the gate is not runnable at that moment, the request is discarded, and the existing visible caption (learning elsewhere, no steps, not permitted) explains why nothing started. Where this lives is the open design call: the page, or RunControl, whose runRequest token is shared with 'Run again' (ChecksStudioPage.tsx:1667). This is behaviour, not layout (CON-02), and frontend-only (CON-01)."},
+    {"id": "R-03", "type": "avoid", "subject": "Claiming AC-25 for learn runs", "affects": ["FR-26", "AC-25", "EC-07", "ASM-02"], "rationale": "For UNLEARNED and NEEDS_RELEARN tests, Run (and therefore every Execute) starts a guided session. A guided session is not an execution: it never appears in GET /studio/executions or the Runs tab, and it is published only while an editor for that test is mounted in the same tab (client-only finalize; RQ-06). AC-25 holds for READY replays only, so the spec should scope FR-26 and AC-25 to replays and state what happens to a learn that is left. Showing learns in the Runs tab would need a backend change, which CON-01 forbids. Per the complexity flags, that goes to the user, and the scope does not widen."},
+    {"id": "R-04", "type": "consider", "subject": "Facts for the Execute and 'Run in Studio' copy on non-READY tests", "affects": ["OQ-06", "FR-13", "FR-19"], "rationale": "Facts only; the wording is a UX call. On a non-READY test, Execute starts learning, not a replay: it uses model calls and one of the CSI's 3 concurrent learn slots, may ask the author a question, and must stay open in the editor until the result is saved. On LEARNING tests Execute opens an editor where Run is off. Nothing new needs inventing."},
+    {"id": "R-05", "type": "consider", "subject": "Status after an environment edit", "affects": ["FR-09", "FR-10", "FR-16", "OQ-07"], "rationale": "Saving a new environment moves a READY test to 'Needs re-learn' and invalidates its schedule (LEARN_REQUIRED). Name and description edits never do. FR-16 already defers to server readiness, so no requirement changes. Whether the detail header warns about this is a design call; it is not required."},
+    {"id": "R-06", "type": "prefer", "subject": "Gate every detail, Runs and drawer render on a successful test read", "affects": ["FR-11", "FR-12", "FR-25", "NFR-03", "AC-13", "AC-24"], "rationale": "The execution routes never refuse because of the test. The list returns an empty page or a soft-deleted test's history, and GET /executions/{id} returns 200 for a soft-deleted parent, or to the initiating principal without CSI read (RQ-04). The spec should require that nothing from the runs list or a run snapshot renders until GET /studio/tests/{id} has succeeded for the route id, even if the reads run in parallel. Keep FR-12's testId check. FR-25's single message should also cover a 400 from a malformed id (inferred)."},
+    {"id": "R-07", "type": "consider", "subject": "UI test environment option set (design call for @architect and @ux-design-expert)", "affects": ["FR-01", "ASM-05", "CON-02"], "rationale": "FR-01 does not list its options. The global filter and Create Check use four values including UAT, but the editor select has three (ChecksStudioPage.tsx:1212). Either FR-01 offers only the three values the editor can show, or the editor's option list gains UAT. The second is an option-list change, not a layout change. Development (D4) is in both sets."},
+    {"id": "R-08", "type": "prefer", "subject": "Correct the CON-05 stack versions", "affects": ["CON-05"], "rationale": "The lockfile pins @mui/material 5.18.0 and react-router-dom 6.30.1 (pnpm-lock.yaml:673, 3325), and the code uses the v5 Grid 'item' API. The spec and plan should name v5 and v6 so nobody writes v7-only APIs. CLAUDE.md says v7 too, but changing it is outside this story unless D5 is widened."},
+    {"id": "R-09", "type": "consider", "subject": "Studio list cost on All Checks", "affects": ["NFR-01", "NFR-02", "FR-15"], "rationale": "Readiness is derived per row on GET /studio/tests (StudioService.java:176-190). The cost is unmeasured. Sending search text as q on every keystroke would repeat that cost, so the plan should debounce q and cancel stale requests (studioApi.listTests accepts an AbortSignal, studioApi.ts:66-70). No backend change."},
+    {"id": "R-10", "type": "consider", "subject": "Data for OQ-02 (sort) and OQ-03 (status filter)", "affects": ["OQ-02", "OQ-03", "FR-16"], "rationale": "Server sort values are name, updatedAt and lastRunAt (asc|desc; default updatedAt,desc). q matches name and description only. lastRun accepts PASSED|FAILED|ERROR|NEVER. There is no readiness filter, so readiness filtering stays client-side over at most 100 rows (EC-05)."},
+    {"id": "R-11", "type": "consider", "subject": "Abandoned learn: no frontend action, optional backend follow-up", "affects": ["FR-26", "ASM-02"], "rationale": "The server expires an abandoned learn by itself (600 s plus a 10 s tick plus teardown), so FR-26 needs no frontend action. Releasing LEARNING, the CSI slot and the runner slot sooner would be a backend follow-up outside Flow 1."},
+    {"id": "R-12", "type": "consider", "subject": "Pre-existing feedback gaps that autorun will expose more often (not in scope)", "affects": ["FR-13"], "rationale": "These exist today and the story requests no copy changes, so they are recorded as follow-ups. (1) A guided start answered 503 or 401 shows nothing on the page and is re-sent automatically on the next editor mount (useGuidedSession.ts:367-374, 385-398; ChecksStudioPage.tsx:1571-1583). (2) A Vault 503 on execute is worded as 'Running tests is switched off… across the platform'. (3) GuidedSessionException refusals on execute use body key 'code', so they render as the 'no wording for' narrative."}
+  ],
+  "docDrift": [
+    "StudioReadiness.java:15-18, StudioService.java:432-433 and frontend studioTypes.ts:115-116 say NEEDS_RELEARN is not emitted yet. ExecutionReadinessService.java:129-133 emits it.",
+    "StudioService.java:169-170 says readiness is null on the list projection. The code sets it (L176-190), and openapi.yaml:295-297 agrees with the code.",
+    "ChecksStudioPage.tsx:734 says 'a draft is created once, on the Tests page'. FR-02 and FR-27 make that stale.",
+    "CON-05 and CLAUDE.md say MUI v7 and React Router v7. Installed: MUI 5.18.0 and React Router 6.30.1."
+  ],
+  "escalation": "No finding requires a backend change for Flow 1 as long as AC-25 is scoped to replays (R-03). If the user wants learn sessions shown in the Runs tab or released sooner, that is backend work outside CON-01 and must go back to the user.",
+  "researchNotes": "The task's preferences path .aiox-core/development/data/technical-preferences.md does not exist. The file is .aiox-core/data/technical-preferences.md, and its presets are generic, so the project stack in CLAUDE.md was used, corrected by the lockfile (R-08). .aiox/gotchas.json does not exist. Every answer comes from reading code. The four highest-impact items for the spec writer: R-01 (autorun runs the wrong test today), R-02 (autorun duplicates and deferred fires), R-03 (learns are not runs) and R-06 (execution routes do not enforce the test's 403)."
+}

@@ -1,0 +1,1559 @@
+# Implementation plan: STUDIO-UNIFY-001-ui-tests-as-checks (Flow 1, frontend-only)
+# Task: .aiox-core/development/tasks/plan-create-implementation.md (execution-pipeline Phase 1 - Plan)
+# Revision 2: re-sequenced for user decision D7 (2026-10-23) and spec iteration 3.
+# This is a proposal for user approval. Implementation is NOT authorized by this file.
+
+storyId: STUDIO-UNIFY-001-ui-tests-as-checks
+storyIdNote: >-
+  The task schema's storyId pattern (^[A-Z]+-\d+$) does not admit this story's folder id. The folder id is kept
+  so this plan matches spec/, requirements.json and critique.json.
+createdAt: "2026-10-23T21:29:27Z"
+revisedAt: "2026-10-23T23:54:42Z"
+revision: 4
+revisionNote: >-
+  Revision 3 answered critique round 3 (CRIT-19, CRIT-20, CRIT-22, CRIT-23, CRIT-25(a), and the mount count of
+  12 sites in 10 files). Revision 4 answers critique round 4 (spec/critique-4.json, APPROVED 4.38): CRIT-26,
+  the editor's outer availability gate in 1.15, and CRIT-27, the refreshed pins.
+createdBy: "@architect (Aria)"
+status: pending
+complexity: STANDARD
+estimatedEffort: >-
+  STANDARD band. Four increments sized S-M, M, M and S (spec §14). Advisory, not a delivery commitment.
+executionAuthorized: false
+approvalRequiredBeforeExecution: true
+
+qualityGate:
+  latestCritique:
+    artifact: docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/spec/critique-4.json
+    round: 4
+    verdict: APPROVED
+    average: 4.38
+    sha256: c7a1cf63a821a25a796514231a1b853f9c36048093ec60aa8e724ea6e9ffc4a2
+    planSideItems: [CRIT-26, CRIT-27]
+  lastApproved:
+    artifact: docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/spec/critique-4.json
+    round: 4
+    verdict: APPROVED
+    average: 4.38
+  previousRounds: "critique.json round 2 APPROVED 4.20; critique-3.json round 3 NEEDS_REVISION 4.13 (sha256 cd22717377646c8e74f7b8448a994e100d26003d6be20a01567ef6cbc04c9d2d)"
+  specIteration: 6
+  specSha256: 93a67de406bba299f77f6d050e6f7aab8abe8a6039f23398cacb54ea1854d9d7
+  requirementsSha256: ee4628416a38891a0988e5b0afe6274609d2a7f000d6fa298007da30213cebb5
+  pinnedAt: "2026-10-23T23:54:42Z"
+  repoHead: b39359f78118d87be7d94a9429a5dde9d16634c8
+  repoHeadNote: >-
+    Lines were verified against the working tree, which is dirty on top of this HEAD. The coder re-checks the
+    lines in each subtask before editing.
+  meaning: Specification quality only. No implementation verdict.
+
+governingDecision:
+  D7: >-
+    "UI studio is a new feature thats not even in dev yet, this is brand new, no old routes or data should be
+    kept, just update the references if is the case." Each old route, page or fallback is removed in the
+    increment that replaces it, and its references are repointed in that same increment. Each WCAG baseline
+    move is recorded in the increment that causes it.
+  revisionEffect: >-
+    The no-id list[0] fallback and the bare-mount sweep are in phase 1. Each removal sits in the increment that
+    replaces it. Old blocked subtasks 4.14-4.18 became phase-1 work and old 4.9 became phase-3 work. Blocked
+    count: 0. CRIT-25(a) also moves the two test-local /studio/tests/:id route shapes onto
+    /checks/ui-tests/:id/studio in phase 1.
+
+inputs:
+  spec: docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/spec/spec.md
+  requirements: docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/spec/requirements.json
+  research: docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/spec/research.json
+  complexity: docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/spec/complexity.json
+  critique: docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/spec/critique-4.json
+
+dependencies: []   # No new package (spec §3.3). MUI 5.18.0, react-router-dom 6.30.1, msw 2.15.0 as installed.
+
+isolation:
+  maxFilesPerSubtask: 3
+  singleService: true
+  serviceNote: >-
+    Code and test subtasks use service frontend. Documentation-only and evidence subtasks use service infra,
+    because the schema has no docs value.
+  sequence: >-
+    Subtasks run in the listed order. Several touch the same file (ChecksStudioPage.tsx, App.tsx,
+    AllChecksPage.tsx, CreateCheckPage.tsx), each for a distinct concern after the one before it. A subtask
+    that would need a fourth file is split. Gate subtasks only verify. Every line a gate can reject is owned
+    by an earlier subtask that lists its file.
+
+verificationConventions:
+  workingDirectory: frontend/
+  packageManager: pnpm only (never npm or yarn)
+  narrowest: >-
+    pnpm exec vitest run <files>, pnpm exec eslint <files>, pnpm run type-check (tsc has no narrower mode), and
+    the specific Playwright spec with --project=msw where E2E entry points change. pnpm run lint (whole src)
+    runs only at phase gates.
+  wcagGuard: >-
+    pnpm exec vitest run src/test/a11y/studioWcagAudit.test.tsx rewrites docs/qa/accessibility/axe-results.json
+    in afterAll (L243-260). The file has no timestamp, so git diff on it shows whether the baseline moved.
+    A moved baseline is never committed silently. Its reason is recorded in
+    docs/qa/accessibility/studio-wcag-audit.md in the same increment (ADR-SC-006,
+    .claude/rules/accessibility-scope.md). No surface is ever added.
+  e2eMsw: pnpm exec playwright test --project=msw <spec>
+  e2eRealBackend: >-
+    CHECKS_E2E_REAL_BACKEND=1 pnpm exec playwright test --project=real-backend e2e/studio-authoring-real-backend.spec.ts
+    (needs a running backend; manual, conditional).
+  removedRouteScans:
+    principle: >-
+      The scans match route strings only, never module import paths. Imports such as
+      '@/components/studio/runs/RunRow' contain "/studio/runs" (CRIT-19), so a bare substring scan can never
+      pass. Every scan is anchored on one of three things:
+      - "/checks/studio" (no import path contains "/checks/");
+      - a quote, backtick or "}" directly before "/studio/..." (a route literal or a template-built path);
+      - App.tsx's path="studio...".
+      API client strings ('/studio/tests', '/studio/executions/...') are never matched, because the scans only
+      look for /checks/studio, /studio/runs (the API has no such path), the test-local /studio/tests/:id route
+      shape and path="studio". Line-level exclusion: guidedNarratives.ts L59 cites the Java package path
+      backend/.../com/citi/put/checks/studio and is filtered by "citi/put/checks/studio".
+    S1:
+      usedBy: "1.33"
+      purpose: No bare /checks/studio, /checks/studio/:id, /checks/studio/{id}, test-local /studio/tests/:id or no-id '/studio' route, and no path="studio" or path="studio/:id"
+      command: >-
+        ! (grep -rn "/checks/studio" src e2e | grep -v "citi/put/checks/studio" | grep -vE "/checks/studio/(tests|runs)([^A-Za-z0-9_]|$)")
+        && ! grep -rnE "['\"\`]/studio/tests/:id|path: '/studio'|path=\"studio(/:id)?\"" src e2e
+      dryRun2026-10-23: >-
+        Dry-run on 2026-10-23: 25 lines. The command exits 1, which is expected before phase 1. Every line is owned by a phase-1 subtask:
+        - navigationConfig.ts L28 (1.22)
+        - navigationSetup.ts L75 (1.23)
+        - CommandPalette.tsx L16 and DashboardPage.tsx L753 (1.24)
+        - testListPresentation.ts L69 (1.16)
+        - ChecksLayout.tsx L85 (1.22)
+        - LayoutProvider.tsx L70, made explicit in 1.22
+        - ChecksStudioPage.tsx L694 comment (1.11, CRIT-20)
+        - StudioRunsPage.test.tsx L107, L274 (1.19)
+        - StudioTestsPage.test.tsx L228, L273, L422 (1.17)
+        - studio-variables.spec.ts L104, L174, L233, L234 and studio-guided.spec.ts L185 (1.31)
+        - App.tsx L110, L114, L139, L143 (1.21)
+        - pageGuidedRun.test.tsx L1015 (1.8)
+        - studioRunTransport.node.test.tsx L170, L174 (1.9)
+        Lines that hold an allowed /checks/studio/tests or /checks/studio/runs reference pass.
+    S2:
+      usedBy: "2.18"
+      purpose: No studio/runs route string remains (federated, standalone, template-built, or App path)
+      command: >-
+        ! grep -rnE "/checks/studio/runs|[}'\"\`]/studio/runs|path=\"studio/runs" src e2e
+      dryRun2026-10-23: >-
+        Dry-run on 2026-10-23: 24 lines, none of them an import (checked: 0 lines starting with 'import'). The command exits 1, which is expected before phase 2. Every line is owned:
+        - App.tsx L112-113, L141-142 (2.9)
+        - navigationSetup.ts L30, L73 and ChecksLayout.tsx L87 (2.14)
+        - StudioScheduleDialog.test.tsx L145, L234, L252 (2.11)
+        - scheduleProvenance.test.tsx L20-21 (2.16)
+        - StudioScheduleDialog.tsx L28 (1.14)
+        - runSnapshots.test.ts L49-51 (2.15) and L52-53 (1.18)
+        - runLinks.ts L9 and the L12 comment (2.15)
+        - StudioRunsPage.test.tsx L28, L105-106, L175 (deleted in 2.13)
+        It matches none of the 17 '@/components/studio/runs/...' import lines that the revision-2 pattern hit.
+    S3:
+      usedBy: ["3.20", "4.7"]
+      purpose: No /checks/studio reference of any kind, no studio/runs literal, no test-local old route shape, and no path="studio..." in App.tsx
+      command: >-
+        ! (grep -rn "/checks/studio" src e2e | grep -v "citi/put/checks/studio")
+        && ! grep -rnE "path=\"studio|[}'\"\`]/studio/runs|['\"\`]/studio/tests/:id|path: '/studio'" src e2e
+      dryRun2026-10-23: >-
+        Dry-run on 2026-10-23: the first half matches 50 lines in 18 files, the second half 21 lines; 0 import lines; the command exits 1, which is expected before phase 3. All of them are
+        owned by phases 1-3: the S1 and S2 lines, plus the allowed tests/runs references that phase 3 removes
+        (ChecksLayout L86, LayoutProvider L70, navigationSetup L19-33 and L74, ChecksStudioPage L1061 and
+        L1194, harness.spec.ts L57, L94, L142, ChecksLayout.a11y.test.tsx L45, StudioScheduleDialog.test.tsx
+        L27 and L233, real-backend spec L128). The second half matches the App.tsx route lines and the S1/S2
+        test-local lines. All are expected before phase 3.
+    S4:
+      usedBy: "4.1"
+      purpose: Leftover scan (S3 plus the names of every removed module)
+      command: >-
+        ! (grep -rnE "/checks/studio|path=\"studio|[}'\"\`]/studio/runs|['\"\`]/studio/tests/:id|path: '/studio'|CreateTestDialog|StudioTestsPage|StudioRunsPage|StudioListLayout|useUrlListState|useStudioTests|navigationConfig|UiTestConfig|LAST_RUN_FILTER_LABELS" src e2e
+        | grep -v "citi/put/checks/studio")
+      dryRun2026-10-23: >-
+        Dry-run on 2026-10-23: hits in 40 files (the S3 files plus the module-name files); 0 import lines; the command exits 1, which is expected before phase 4. Each module-name file is deleted or edited in phases 1-3: App.tsx, ReviewStep, the UiTestConfig trio, the StudioListLayout pair,
+        referencePicker.test, CreateTestDialog, testListPresentation, useStudioTests, the useUrlListState
+        pair, CreateCheckPage, both page folders, and studioWcagAudit.test (12 mentions, cleaned in 2.12 and
+        3.11). No UiTestConfiguration identifier exists in frontend/src, so UiTestConfig has no false match.
+
+lineReverification:
+  note: >-
+    Re-read on branch brunobuger/ui-studio on 2026-10-23 (ASM-06), working tree on top of HEAD b39359f78. The
+    coder re-checks each subtask's lines before editing.
+  verified:
+    - "App.tsx: two route trees L103-125 and L127-160; bare studio L110 and L139; studio/tests and studio/runs L111-113 and L140-142; studio/:id L114 and L143; lazy StudioRunsPage/StudioTestsPage L22-23; ModuleShell L87-97; catch-all L123, L160"
+    - "ChecksStudioPage.tsx: StudioUnavailable L166; runRequest L319; list-based load L483-522 (autorun read L494, list[0] L495-499, fired L507-511); reloadScenarios L524-535; handleScenarioSelect L654-690; comment citing '/checks/studio/:id, App.tsx:114' L694 (CRIT-20); route-change detector L705-717; stale comment L734; header back L1058-1066 (route literal L1061); schedule summary/dialog L1142-1144; 'Open Tests' L1194; environment options L1212; Run again L1667; outer gate L1936-1940"
+    - "useRunGate.ts L290-358 (own read; capabilities read leaves 'unknown' on pending and failure); RunControl.tsx L48/L118 hasSteps, L139 runnable, L180-186 held runRequest"
+    - "apiClient.ts L22 timeout 30000; L97-108 GET retry at most 2 (no response or 5xx), backoff 200/400 ms. studioSchedulesApi.ts L11 capabilities() without __doNotRetry"
+    - "sourcesSlice.ts fetched flag L8-16 and L37-61, fail-open L66-69; featuresSlice.ts L84 selectFeaturesFetched, fail-open L86-91; store/index.ts L89-90 bootstrap dispatch"
+    - "CreateCheckPage.tsx L56 environments, L58 steps, L85-127 legacy UI_TEST state and effects, L130 Production default, L160, L209, L276, L296-310 legacy branches, L236-262 save and draft removal, L314-330 step 0, L451-476 action bar (Test Now fetch L465). ReviewStep.tsx L185-205, L258-263. CheckTypeSelector.tsx L109-122. checkTypes.ts L64-73"
+    - "testErrors.ts: statusOf L13, CREATE_ERRORS L23, createErrorMessage L30 (reused by Create Check, DC-24); today imported only by CreateTestDialog"
+    - "StudioScheduleDialog.tsx L11 runDetailsPath import, L26-28 pathname derivation, L179 and L214 links; hosts ChecksStudioPage L1144 and StudioTestsPage L173"
+    - "CreateTestDialog consumers: StudioTestsPage L7, L29, L42, L75 (header), L106 (empty state), L175-182; StudioRunsPage L20, L64, L145, L172, L238-245"
+    - "runLinks.ts: runsListPath, runDetailsPath, studioTestPath, studioTestsPath (imported by nothing), copyText; RUNS_SEGMENT L9 and the L12 comment. testListPresentation.ts L69 testHref. StudioListLayout imported by StudioTestsPage L5 and StudioRunsPage. useUrlListState imported by StudioListLayout, useStudioTests and StudioRunsPage. studioListSx imported by RunRow, TestRow, StudioListLayout and both pages"
+    - "RunRow.tsx props L11-23, RunRowMenu at L102; RunDetailsDrawer props L47-60, not-found on 403/404 L185-188"
+    - "AllChecksPage.tsx L104 fetchChecks limit 100; L116-138 prefs; L138-191 filters; L194-198 paging; L339-341 whole-page ErrorState when the checks load fails; L409-413 status options; L425-432 Type options; L530 row link; L618-640 menu"
+    - "navigationSetup.ts: Studio group L19-33 (Runs child L30); page ids L73 runs, L74 tests, L75 bare studio. LayoutProvider.tsx L70. ChecksLayout.tsx L85 bare, L86 tests, L87 runs. CommandPalette.tsx L16. DashboardPage.tsx L753. navigationConfig.ts L28 (imported by nothing)"
+    - "Tests on old URLs or the dialog: StudioTestsPage.test.tsx L228, L273, L355-439 'Tests page — create' (counter L376, system field L389, create-and-open L404-423, refusals L425-430); StudioRunsPage.test.tsx L28, L105-107, L175, L219-228 (Create Test), L274; runSnapshots.test.ts L49-53; scheduleProvenance.test.tsx L20-28; StudioScheduleDialog.test.tsx L17, L27, L53-56, L145, L233-234, L252; ChecksLayout.a11y.test.tsx L45; referencePicker.test.tsx L610 (UiTestConfig path); pageStepTimeout.test.tsx L128 comment 'The Tests page creates a draft'"
+    - "Bare-router editor mounts: 12 sites in 10 files (CRIT-21a). pageAuthoringUx L91; pageEvidence L108, L123, L227; pageGuidedRun L151; pageIncrementalRecording L142; pageReplayAndReferences L158; pageRunGate L130; pageSaveAndStop L104; pageStepTimeout L68; test/pageBootstrapShape L68; studioWcagAudit renderPage L203-208 (one site serving the five surface calls L314, L326, L337, L357, L372)"
+    - "Test-local old route shapes (CRIT-25a): pageGuidedRun.test.tsx L1012-1024 (initialEntries and Route path '/studio/tests/:id' L1015, nav.go L1024); studioRunTransport.node.test.tsx L170-176 (Route '/studio/tests/:id' L170 and no-id '/studio' L174), renderAt calls L224, L253, L312, L343, L393, nav.go L362"
+    - "WCAG audit: imports L26-27; pins L95-103; header comments naming both pages around L86-90; describe title 'seven' L288; surface 1 L289-297; surface 2 L299-310"
+    - "E2E: harness.spec.ts L57, L94, L142 (record GET /api/v1/studio/tests); previewBootstrapHandlers.ts L33-35 serve sources, features and csi, but not GET /checks; studio-variables.spec.ts L95-98, L104, L174, L233-234; studio-guided.spec.ts L185; studio-authoring-real-backend.spec.ts L128-151"
+    - "MSW demo fixtures: 25 tests, createdAt = updatedAt + 7 days (demoFixtures.ts L71-97, L258), so createdAt order equals updatedAt order and fits one 25-row page"
+
+critiqueFold:
+  CRIT-14: >-
+    Applied in spec (DC-18, G10). Hook useUiTestAvailability() returns 'pending' | 'on' | 'off', derived on
+    every render. Subtasks 1.3, 1.24, 1.28, 1.29, 1.30, 2.5, 3.2, 3.5, 3.9.
+  CRIT-15: Applied in spec (§6, AC-30, G8), with the environmentChosen rule. Subtasks 1.29, 1.30.
+  CRIT-16: Superseded by D7. The fallback is deleted in 1.11, after every bare mount moves to a route id (1.5-1.10).
+  CRIT-17: >-
+    (a) The dialog test's TestRow import goes with TestRow in phase 3 (3.12).
+    (b) studioListSx.ts stays.
+    (c) Withdrawn. StudioTestsPage.tsx L5 imports StudioListLayout, so it is deleted in 3.15.
+    (d) AC-23 entry gating lands in 1.24.
+  CRIT-18: Applied in spec (§7.2, G9). The wait is bounded by apiClient at about 90.6 s worst case, with drop on activity. Subtasks 1.12, 1.13.
+  CRIT-19: >-
+    Fixed. Scan S2 (2.18) anchors on /checks/studio/runs, a quote, backtick or "}" before /studio/runs, or
+    path="studio/runs", so imports never match. S1, S3 and S4 follow the same principle. The dry runs are
+    recorded under verificationConventions.removedRouteScans.
+  CRIT-20: >-
+    Fixed. 1.11 owns the ChecksStudioPage L694 comment. Every line that S1-S4 can reject is now owned by a
+    subtask that lists its file. 1.33, 2.18, 3.20 and 4.7 only verify.
+  CRIT-22: "Fixed: header hashes, spec iteration 5, critique round 3, repo HEAD; K1-K4 marked resolved."
+  CRIT-23: Fixed. 1.6 owns the pageStepTimeout L128 comment. 1.30 lists 400 with and without detail, 403, 409, 500, name over 255 rejected, and CSI required.
+  CRIT-25: >-
+    (a) Fixed. 1.8 and 1.9 move the two test-local /studio/tests/:id shapes (and the no-id '/studio') onto
+    /checks/ui-tests/:id/studio through renderStudioAt, in phase 1.
+    (b) Resolved in the spec (changelog entry 6: FR-24, AC-23, §7.1 "Availability gate"). The plan owns it
+    in 1.15 (CRIT-26).
+  CRIT-26: >-
+    Fixed. 1.15 also moves the editor's outer gate (ChecksStudioPage L1936-1940) onto useUiTestAvailability:
+    - 'off' shows StudioUnavailable (L166);
+    - 'pending' shows the existing "Loading test…" text (the L1167 string) with no Studio request;
+    - 'on' mounts the editor.
+    'pending' always ends, because sourcesSlice and featuresSlice set fetched on rejection. 1.15 adds a
+    narrow test for this, and its dependencies now include 1.3.
+  CRIT-27: "Fixed: pins refreshed to spec iteration 6, both hashes, and critique-4.json. Spec Metadata lines are @pm's (spec side)."
+
+specGapsStatus: >-
+  G1-G10 from revision 1 were applied by @pm (requirements.json changelog entry 3). G7 is superseded by D7.
+  G11 (ARCH.md placement: L36 and L391) stands.
+
+conflictsStatus:
+  - {id: K1, status: resolved, by: "spec DC-24; requirements.json changelog entry 4 (CreateTestDialog removed in increment 1; every Create Test goes to /checks/create?type=UI_TEST)"}
+  - {id: K2, status: resolved, by: "spec §12.4 increment 3; changelog entry 5 (empty GET */api/v1/checks E2E handler, plan 3.19)"}
+  - {id: K3, status: resolved, by: "spec §12.4 increment 1; changelog entry 5 (referencePicker.test.tsx L610 in increment 1, plan 1.27)"}
+  - {id: K4, status: resolved, by: "spec §12.4 increment 1; changelog entry 5 (dialog cases rewritten in increment 1, plan 1.17, 1.19, 1.30)"}
+
+openSpecItems:
+  - "CRIT-27 (spec side, housekeeping): spec Metadata still names 'critique.json (iteration 2)' and 'plan revision 2'. @pm refreshes it at approval. CRIT-21, CRIT-24 and CRIT-25(b) were resolved by changelog entry 6"
+
+storySplit:
+  recommendation: >-
+    Four @sm stories, one per increment, each QA-gated and shippable on its own. Ids are suggestions; @sm owns
+    them. No story files are created by this plan.
+  stories:
+    - {id: STUDIO-UNIFY-001.1, title: "Editor route, load by id, autorun once, Create Check UI Test, increment-1 removals", phase: phase-1}
+    - {id: STUDIO-UNIFY-001.2, title: "UI test detail page; Runs page removed", phase: phase-2, dependsOn: [STUDIO-UNIFY-001.1]}
+    - {id: STUDIO-UNIFY-001.3, title: "All Checks lists UI tests; Tests page and Studio nav removed", phase: phase-3, dependsOn: [STUDIO-UNIFY-001.2]}
+    - {id: STUDIO-UNIFY-001.4, title: "D5 docs and leftovers", phase: phase-4, dependsOn: [STUDIO-UNIFY-001.3]}
+
+phases:
+  # ─────────────────────────────────────────────────────────────────────────────────────────────
+  - id: phase-1
+    name: Increment 1 - editor by id, autorun once, Create Check UI Test, increment-1 removals
+    description: >-
+      - The editor moves to ui-tests/:id/studio and always loads by route id.
+      - The no-id fallback, studio/:id, the bare studio route, navigationConfig, CreateTestDialog and the
+        legacy picker are removed.
+      - Every bare editor mount, including WCAG surfaces 3-7, moves to a route-id mount.
+      - Autorun is consumed once at a bounded settle.
+      - Create Check gains the UI Test form.
+      - Dashboard and palette go to the Tests page, gated.
+      FR-01-FR-06, FR-07 (breadcrumb, CSI), FR-08 (inc 1), FR-13 (editor), FR-24 (card, routes, entries),
+      FR-25 (editor), FR-27 (inc 1), FR-28 (re-mount).
+    stories: [STUDIO-UNIFY-001.1]
+    linkWalkAtExit:
+      - "Create Check UI Test -> ui-tests/{newId}/studio (replace)"
+      - "Tests page row -> ui-tests/{id}/studio; Tests page and Runs page 'Create Test' -> /checks/create?type=UI_TEST"
+      - "Runs page test link and drawer testHref -> ui-tests/{id}/studio"
+      - "Schedule dialog run links (hosts: editor, Tests page) -> /checks/studio/runs/{executionId} (exists until phase 2)"
+      - "Editor back and 'Open Tests' -> /checks/studio/tests; breadcrumb 'All Checks' -> /checks/all"
+      - "Dashboard 'Open Checks Studio' and palette 'Studio' -> /checks/studio/tests, only when availability is 'on'"
+      - "Sidebar Studio group -> Tests and Runs (both exist)"
+      - "studio and studio/{id} -> catch-all to module home"
+    risks:
+      - "R1: load-by-id breaks the stream-closing switch (L654-690) or the SCEN-1 change detector (L705-717). Re-mounting the suites first (1.5-1.10) keeps them as the safety net before the fallback is removed (1.11)"
+      - "R2: autorun consumption disturbs 'Run again' (L1667). A separate autorunRequest prop and its tests (1.12-1.13)"
+      - "R14: earlier removals break links or tests mid-story. Link walk above, route test 1.21, gate 1.33"
+    rollback: Revert the phase-1 commits. Frontend only, with no data or contract change.
+    subtasks:
+      - id: "1.1"
+        description: Capture the pre-change baseline (initial bundle size, WCAG guard state) for later comparisons
+        service: infra
+        files: [docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/implementation/baseline.json]
+        verification:
+          type: command
+          command: pnpm run build && pnpm exec vitest run src/test/a11y/studioWcagAudit.test.tsx && git diff --exit-code -- ../docs/qa/accessibility/axe-results.json
+        status: pending
+        dependencies: []
+        coverage: [NFR-02, FR-28]
+        notes: >-
+          Record the entry-asset byte sizes from the production build and the axe-results.json sha256. If
+          axe-results.json already differs from HEAD, stop and report the pre-existing drift.
+
+      - id: "1.2"
+        description: Create the UI test path helpers (detail, runs, run, editor with/without autorun) as the single route source
+        service: frontend
+        files: [frontend/src/components/studio/uiTestPaths.ts, frontend/src/components/studio/uiTestPaths.test.ts]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/components/studio/uiTestPaths.test.ts && pnpm exec eslint src/components/studio/uiTestPaths.ts
+        status: pending
+        dependencies: []
+        coverage: [FR-05, FR-11, CON-06, CON-09]
+        notes: >-
+          uiTestPath, uiTestRunsPath, uiTestRunPath and uiTestEditorPath(id, {autorun}). Each takes an explicit
+          base defaulting to '/checks' (the convention at AllChecksPage L530). Never search the pathname for
+          '/studio'. Ids are URI-encoded. Tests cover base '/checks' and ''.
+
+      - id: "1.3"
+        description: Add the derived UI test availability hook ('pending'|'on'|'off') used by every switch-off consumer (DC-18)
+        service: frontend
+        files: [frontend/src/hooks/useUiTestAvailability.ts, frontend/src/hooks/useUiTestAvailability.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/hooks/useUiTestAvailability.test.tsx
+        status: pending
+        dependencies: []
+        coverage: [FR-24, AC-23]
+        notes: >-
+          The state is 'pending' until sources.fetched and features.fetched. After that it is 'on' iff
+          UI_TEST and STUDIO are enabled (fail-open: missing entries and empty lists count as on), else
+          'off'. Tests include a late fetch that moves on to off.
+
+      - id: "1.4"
+        description: Extract the empty-draft create request builder used by Create Check's UI Test form
+        service: frontend
+        files: [frontend/src/components/studio/tests/newTestRequest.ts, frontend/src/components/studio/tests/newTestRequest.test.ts]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/components/studio/tests/newTestRequest.test.ts
+        status: pending
+        dependencies: []
+        coverage: [FR-02, AC-02]
+        notes: >-
+          The body is the one at CreateTestDialog.tsx L80-92: authoringSchemaVersion 2, steps [], variables [],
+          defaultConfiguration(), trimmed name, csiId, description, environment. The dialog itself is deleted
+          in 1.20.
+
+      - id: "1.5"
+        description: Add the shared route-id mount helper for editor tests
+        service: frontend
+        files: [frontend/src/test/renderStudioAt.tsx]
+        verification:
+          type: command
+          command: pnpm run type-check && pnpm exec eslint src/test/renderStudioAt.tsx
+        status: pending
+        dependencies: ["1.2"]
+        coverage: [FR-06, NFR-09]
+        notes: >-
+          renderStudioAt(id, node, options) mounts node at uiTestEditorPath(id) inside MemoryRouter + Routes
+          (path '/checks/ui-tests/:id/studio'). It optionally accepts initial search and a nav handle for
+          route-change tests. A mount change only.
+
+      - id: "1.6"
+        description: Re-mount the run-gate, evidence and step-timeout editor suites on a route id
+        service: frontend
+        files: [frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx, frontend/src/pages/ChecksStudioPage/pageEvidence.test.tsx, frontend/src/pages/ChecksStudioPage/pageStepTimeout.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/pages/ChecksStudioPage/pageRunGate.test.tsx src/pages/ChecksStudioPage/pageEvidence.test.tsx src/pages/ChecksStudioPage/pageStepTimeout.test.tsx
+        status: pending
+        dependencies: ["1.5"]
+        coverage: [FR-06, NFR-09]
+        notes: >-
+          The bare mounts are pageRunGate L130, pageEvidence L108, L123 and L227, and pageStepTimeout L68. Each
+          uses the id that the file's list fixture puts first, which today's code already selects by URL id.
+          Assertions are unchanged. Also update the pageStepTimeout L128 comment ("The Tests page creates a
+          draft…") to name Create Check, the only create path from this increment (CRIT-23a). These suites stay
+          green before and after 1.11.
+
+      - id: "1.7"
+        description: Re-mount the authoring, save/stop and replay/reference editor suites on a route id
+        service: frontend
+        files: [frontend/src/pages/ChecksStudioPage/pageAuthoringUx.test.tsx, frontend/src/pages/ChecksStudioPage/pageSaveAndStop.test.tsx, frontend/src/pages/ChecksStudioPage/pageReplayAndReferences.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/pages/ChecksStudioPage/pageAuthoringUx.test.tsx src/pages/ChecksStudioPage/pageSaveAndStop.test.tsx src/pages/ChecksStudioPage/pageReplayAndReferences.test.tsx
+        status: pending
+        dependencies: ["1.5"]
+        coverage: [FR-06, NFR-09]
+
+      - id: "1.8"
+        description: Re-mount the incremental-recording, guided-run and bootstrap-shape suites on a route id
+        service: frontend
+        files: [frontend/src/pages/ChecksStudioPage/pageIncrementalRecording.test.tsx, frontend/src/pages/ChecksStudioPage/pageGuidedRun.test.tsx, frontend/src/test/pageBootstrapShape.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/pages/ChecksStudioPage/pageIncrementalRecording.test.tsx src/pages/ChecksStudioPage/pageGuidedRun.test.tsx src/test/pageBootstrapShape.test.tsx
+        status: pending
+        dependencies: ["1.5"]
+        coverage: [FR-06, NFR-09]
+        notes: >-
+          The bare mounts are pageIncrementalRecording L142, pageGuidedRun L151 and pageBootstrapShape L68.
+          pageGuidedRun's route-switch case (L1012-1024) also moves off the old route shape (CRIT-25a):
+          renderStudioAt(unlearnedDraft.id, ..., {navHandle}) replaces the Route '/studio/tests/:id' at L1015,
+          and nav.go at L1024 uses uiTestEditorPath(needsRelearnDraft.id). pageBootstrapShape keeps its
+          fail-open intent; only its editor mount changes. replayFailure.test.tsx is not touched (G6).
+
+      - id: "1.9"
+        description: Move the transport test's test-local routes ('/studio/tests/:id' and no-id '/studio') onto the new editor path
+        service: frontend
+        files: [frontend/src/pages/ChecksStudioPage/studioRunTransport.node.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/pages/ChecksStudioPage/studioRunTransport.node.test.tsx src/services/mocks/studio/executionScenarioMatrix.test.ts src/services/mocks/studio/executionFixtureMatrix.test.ts
+        status: pending
+        dependencies: ["1.5"]
+        coverage: [FR-06, NFR-09]
+        notes: >-
+          CRIT-25a. The Routes at L170-176 become one route at '/checks/ui-tests/:id/studio'; the no-id
+          '/studio' route is deleted. The renderAt calls (L224, L253, L312, L343, L393) and nav.go (L362) use
+          uiTestEditorPath. Mounting stays createElement-based (.node test). Assertions are unchanged.
+
+      - id: "1.10"
+        description: Re-mount WCAG surfaces 3-7 on a route id and record any baseline move with its reason
+        service: frontend
+        files: [frontend/src/test/a11y/studioWcagAudit.test.tsx, docs/qa/accessibility/axe-results.json, docs/qa/accessibility/studio-wcag-audit.md]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/test/a11y/studioWcagAudit.test.tsx && git diff --stat -- ../docs/qa/accessibility/
+        status: pending
+        dependencies: ["1.5", "1.1"]
+        coverage: [FR-28, CON-04, AC-27]
+        notes: >-
+          renderPage (L203-208) uses renderStudioAt for surfaces 3-7 only. Surfaces 1-2 keep their own mount
+          until phases 3 and 2. No change is expected. If the baseline moves, add a dated line to
+          studio-wcag-audit.md: "mount changed to a route id (D7), no surface added". If it does not move,
+          leave both docs untouched.
+
+      - id: "1.11"
+        description: Make ChecksStudioPage always load the route-id test by GET /studio/tests/{id} and delete the no-id list[0] fallback
+        service: frontend
+        files: [frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx, frontend/src/pages/ChecksStudioPage/pageLoadById.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/pages/ChecksStudioPage src/test/pageBootstrapShape.test.tsx src/test/a11y/studioWcagAudit.test.tsx && pnpm run type-check
+        status: pending
+        dependencies: ["1.6", "1.7", "1.8", "1.9", "1.10"]
+        coverage: [FR-06, FR-25, AC-06, AC-07]
+        notes: >-
+          Initial load (L483-522):
+          - With params.id, read getTest(id), merge its header into scenarios and select it.
+          - On 403 or 400, show "This UI test doesn't exist or you don't have access" and select nothing.
+          - Delete L495-499 (list[0]).
+          Route-change detector (L705-717): an id not in scenarios is read by id instead of being ignored. Keep
+          the lastRouteId semantics and go through handleScenarioSelect, so stream closing (AC-13) still runs.
+          reloadScenarios (L524-535) re-merges the selected header.
+          Without params.id (a test-only mount), send no Studio request and render the existing "No test
+          selected." panel (L1192-1195). That is the minimal render the spec left to the Plan; nothing is
+          runnable.
+          Do not touch autorun here (1.12). Two stale comments are owned here:
+          - L734 still says tests are created on the Tests page.
+          - L694 cites "/checks/studio/:id, App.tsx:114" (CRIT-20); rewrite it to describe the ui-tests editor
+            route without the old path. Scan S1 in 1.33 rejects the old wording.
+          Tests: an id beyond page 1 on load and on route change; reload keeps the selection; 403 and 400; a
+          no-id mount sends no request and no run.
+
+      - id: "1.12"
+        description: Consume autorun once at a bounded gate settle via a capabilities-settled signal and a dedicated autorun request (DC-01, G9)
+        service: frontend
+        files: [frontend/src/components/studio/run/useRunGate.ts, frontend/src/components/studio/run/RunControl.tsx, frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/components/studio/run src/pages/ChecksStudioPage/pageRunGate.test.tsx && pnpm run type-check
+        status: pending
+        dependencies: ["1.11"]
+        coverage: [FR-13, NFR-05, AC-29]
+        notes: >-
+          useRunGate: capabilitiesSettled resets on testId change and is set when the capabilities promise
+          settles.
+          RunControl: an optional autorunRequest {token, testId}, separate from runRequest, so "Run again" is
+          unchanged. It is evaluated once, when the gate's read is done, capabilitiesSettled is true and hasSteps
+          is known. It is served if runnable (L139), and dropped otherwise.
+          Page: when params.id and autorun=1, replace-navigate without autorun first. Arm the request only after
+          the route id's draft is loaded. Clear it on a draft edit, Run or Stop, a route-id change or unmount.
+          Remove the autorun use of setRunRequest (L507-511). The bound comes from apiClient (about 90.6 s worst
+          case).
+
+      - id: "1.13"
+        description: Add the AC-29 autorun tests (each readiness, settle, drop-on-activity) and the capabilitiesSettled gate test
+        service: frontend
+        files: [frontend/src/pages/ChecksStudioPage/pageAutorun.test.tsx, frontend/src/components/studio/run/runGate.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/pages/ChecksStudioPage/pageAutorun.test.tsx src/components/studio/run/runGate.test.tsx
+        status: pending
+        dependencies: ["1.12"]
+        coverage: [AC-29, FR-13]
+        notes: >-
+          Cases from the §7.2 table:
+          - READY: one execute, and the history entry has no autorun.
+          - Remount: nothing sent.
+          - Capabilities read fails and execute answers 403: one execute, then the forbidden narrative.
+          - UNLEARNED: one guided start.
+          - LEARNING, no steps, or canManage false: nothing sent.
+          - Failed test read: nothing sent.
+          - Before settle: nothing sent.
+          - An edit before settle: nothing sent.
+          - "Run again" still runs once.
+
+      - id: "1.14"
+        description: Make StudioScheduleDialog take its run-link builder from its host; the Tests page host targets the Runs page run
+        service: frontend
+        files: [frontend/src/components/studio/scheduling/StudioScheduleDialog.tsx, frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx, frontend/src/pages/StudioTestsPage/StudioTestsPage.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/components/studio/scheduling src/pages/StudioTestsPage/StudioTestsPage.test.tsx
+        status: pending
+        dependencies: []
+        coverage: [FR-08, AC-09, DC-20]
+        notes: >-
+          New required prop: runHref(executionId). Drop the L26-28 derivation and the L11 import. The
+          StudioTestsPage host (L173) passes the /checks/studio/runs/{id} builder. The dialog test passes
+          runHref in its renders (L27, L56, L233) and keeps its Runs-page href assertions.
+
+      - id: "1.15"
+        description: Frame the editor (breadcrumb, back to the Tests page, read-only CSI chip, UAT option, editor-hosted dialog links to the Runs page run)
+        service: frontend
+        files: [frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx, frontend/src/pages/ChecksStudioPage/pageFraming.test.tsx]
+        verification:
+          type: command
+          command: >-
+            pnpm exec vitest run src/pages/ChecksStudioPage/pageFraming.test.tsx &&
+            pnpm exec vitest run src/pages/ChecksStudioPage src/test/pageBootstrapShape.test.tsx src/test/a11y/studioWcagAudit.test.tsx &&
+            pnpm run type-check
+        status: pending
+        dependencies: ["1.11", "1.14", "1.3"]
+        coverage: [FR-07, FR-08, FR-01, FR-24, AC-08, AC-09, AC-01, AC-23]
+        notes: >-
+          - Outer availability gate (CRIT-26, spec §7.1). ChecksStudioPage (L1936-1940) reads
+            useUiTestAvailability() instead of selectIsSourceEnabled and selectIsFeatureEnabled:
+            - 'off': the existing local StudioUnavailable (L166);
+            - 'pending': the existing "Loading test…" text (the L1167 string, as a plain caption), with
+              ChecksStudioPageInner not mounted, so no Studio request is sent;
+            - 'on': the editor.
+            'pending' ends even when a bootstrap fetch fails, because both slices set fetched on rejection
+            (sourcesSlice L42-45, featuresSlice L66-69).
+            pageFraming.test covers three cases: pending (sources answer delayed: the caption shows and zero
+            /studio requests are sent), off (UI_TEST disabled: StudioUnavailable and zero /studio requests),
+            and a sources fetch failure (fail-open: the editor mounts).
+            The second command checks that the existing editor suites, pageBootstrapShape and the WCAG surfaces
+            still find the editor after 'pending'. A suite that asserts synchronously before the bootstrap
+            fetches settle waits with findBy; there is no other change.
+          - Breadcrumb "All Checks › {name}"; "All Checks" goes to /checks/all.
+          - The in-page back (L1058-1066) goes to /checks/studio/tests and keeps the leave guard.
+          - "Open Tests" (L1194) stays on /checks/studio/tests.
+          - CSI is a read-only chip.
+          - L1212 offers Development, Staging, UAT and Production.
+          - The L1144 dialog host passes the Runs-page run builder.
+          - The layout is unchanged.
+          Tests use renderStudioAt.
+
+      - id: "1.16"
+        description: Repoint the Tests page row to the new editor path and its Create Test actions to /checks/create?type=UI_TEST; drop testHref
+        service: frontend
+        files: [frontend/src/components/studio/tests/testListPresentation.ts, frontend/src/components/studio/tests/TestRow.tsx, frontend/src/pages/StudioTestsPage/StudioTestsPage.tsx]
+        verification:
+          type: command
+          command: pnpm run type-check && pnpm exec eslint src/components/studio/tests src/pages/StudioTestsPage
+        status: pending
+        dependencies: ["1.2", "1.14"]
+        coverage: [FR-08, FR-27, AC-26]
+        notes: >-
+          Remove testHref (L69). TestRow L32 uses uiTestEditorPath. StudioTestsPage openCreate (L42) and the
+          empty action navigate to /checks/create?type=UI_TEST, and the CreateTestDialog usage (L7, L29,
+          L175-182) is removed (K1).
+
+      - id: "1.17"
+        description: Update the Tests page tests (editor URLs; Create Test now navigates to Create Check)
+        service: frontend
+        files: [frontend/src/pages/StudioTestsPage/StudioTestsPage.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/pages/StudioTestsPage/StudioTestsPage.test.tsx
+        status: pending
+        dependencies: ["1.16"]
+        coverage: [FR-08, AC-26]
+        notes: >-
+          L228 and L273 move to /checks/ui-tests/{id}/studio. The "Tests page — create" cases (L355-439: counter
+          L376, system field L389, create-and-open L404-423, refusals L425-430) are replaced by one case: Create
+          Test (header L75 and empty state L106) lands on /checks/create?type=UI_TEST (K4). L422's old URL goes
+          with them. The name, system and refusal cases move to 1.30.
+
+      - id: "1.18"
+        description: Repoint the Runs page test links, drawer testHref and Create Test; remove studioTestPath and the dead studioTestsPath
+        service: frontend
+        files: [frontend/src/pages/StudioRunsPage/StudioRunsPage.tsx, frontend/src/components/studio/runs/runLinks.ts, frontend/src/components/studio/runs/runSnapshots.test.ts]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/components/studio/runs/runSnapshots.test.ts && pnpm run type-check
+        status: pending
+        dependencies: ["1.2"]
+        coverage: [FR-08, FR-27, AC-26]
+        notes: >-
+          testHref (L113-117) uses uiTestEditorPath. Create Test (L145, L172) navigates to
+          /checks/create?type=UI_TEST, and the dialog (L20, L64, L238-245) is removed. Delete studioTestPath and
+          studioTestsPath, and the runSnapshots assertions at L52-53. runsListPath and runDetailsPath stay until
+          phase 2.
+
+      - id: "1.19"
+        description: Update the Runs page and schedule provenance tests (editor URL, Create Test navigation, testHref)
+        service: frontend
+        files: [frontend/src/pages/StudioRunsPage/StudioRunsPage.test.tsx, frontend/src/components/studio/scheduling/scheduleProvenance.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/pages/StudioRunsPage/StudioRunsPage.test.tsx src/components/studio/scheduling/scheduleProvenance.test.tsx
+        status: pending
+        dependencies: ["1.18"]
+        coverage: [FR-08, AC-26]
+        notes: >-
+          StudioRunsPage.test: L107 route and L274 location go to /checks/ui-tests/:id/studio, and L219-228
+          now asserts navigation to /checks/create?type=UI_TEST (K4). scheduleProvenance L28 testHref uses
+          uiTestEditorPath.
+
+      - id: "1.20"
+        description: Delete the Studio create dialog, now replaced by Create Check -> UI Test
+        service: frontend
+        files: [frontend/src/components/studio/tests/CreateTestDialog.tsx]
+        verification:
+          type: command
+          command: pnpm run type-check && ! grep -rn "CreateTestDialog" src
+        status: pending
+        dependencies: ["1.16", "1.18", "1.4"]
+        coverage: [FR-27, AC-26]
+        notes: It has no test file of its own (FR-27).
+
+      - id: "1.21"
+        description: Add ui-tests/:id/studio and remove studio/:id and the bare studio route in both trees, with a per-tree route test
+        service: frontend
+        files: [frontend/src/App.tsx, frontend/src/App.routes.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/App.routes.test.tsx && pnpm run type-check
+        status: pending
+        dependencies: ["1.11"]
+        coverage: [FR-05, FR-27, CON-09, AC-06, AC-26]
+        notes: >-
+          Both trees get ui-tests/:id/studio behind FeatureGate STUDIO, and lose L110/L114 and L139/L143. The
+          route test renders <App/> at /checks/... and /..., with ChecksLayout as a passthrough and the lazy
+          pages as sentinels (G5). It asserts that ui-tests/{id}/studio renders the editor and that studio and
+          studio/{id} land on module home. The removed-path list grows in 2.9 and 3.10.
+
+      - id: "1.22"
+        description: Delete the unused navigationConfig module, drop ChecksLayout's bare studio clause, and map ui-tests to Checks in LayoutProvider
+        service: frontend
+        files: [frontend/src/utils/constants/navigationConfig.ts, frontend/src/components/layout/ChecksLayout/ChecksLayout.tsx, frontend/src/components/layout/LayoutProvider/LayoutProvider.tsx]
+        verification:
+          type: command
+          command: pnpm run type-check && pnpm exec eslint src/utils/constants src/components/layout
+        status: pending
+        dependencies: ["1.21"]
+        coverage: [FR-08, FR-27, AC-09, AC-26]
+        notes: >-
+          Delete navigationConfig.ts, which nothing imports. Remove ChecksLayout L85. In LayoutProvider
+          (L66-72), add /checks/ui-tests -> 'all-checks'. L70 becomes two explicit prefixes,
+          startsWith('/checks/studio/tests') || startsWith('/checks/studio/runs'), because the bare route is
+          gone and scan S1 allows only those two. The runs prefix is removed in 2.15 and the line itself in
+          3.18.
+
+      - id: "1.23"
+        description: Map ui-tests paths to the Checks sidebar item in navigationSetup and cover the page-id mapping
+        service: frontend
+        files: [frontend/src/utils/navigation/navigationSetup.ts, frontend/src/utils/navigation/navigationSetup.test.ts]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/utils/navigation/navigationSetup.test.ts
+        status: pending
+        dependencies: []
+        coverage: [FR-08, AC-09]
+        notes: getCurrentPageId maps /checks/ui-tests to 'checks'. The bare-studio line L75 goes, because that route is removed in 1.21. The Studio group is untouched.
+
+      - id: "1.24"
+        description: Repoint the Dashboard quick action and command palette entry to /checks/studio/tests, shown only when availability is 'on'
+        service: frontend
+        files: [frontend/src/components/home/CommandPalette.tsx, frontend/src/pages/DashboardPage/DashboardPage.tsx, frontend/src/components/home/entryPoints.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/components/home/entryPoints.test.tsx && pnpm run type-check
+        status: pending
+        dependencies: ["1.3"]
+        coverage: [FR-08, FR-24, AC-09, AC-23, DC-23]
+        notes: CommandPalette NAV_ITEMS L12-18 and DashboardPage L753. The entries are absent while availability is 'pending' or 'off'. Retargeted again in 3.8.
+
+      - id: "1.25"
+        description: Remove the legacy UI_TEST picker branches from Create/Review and the stale uiTest check-type field
+        service: frontend
+        files: [frontend/src/pages/CreateCheckPage/CreateCheckPage.tsx, frontend/src/components/checks/wizard/ReviewStep.tsx, frontend/src/types/checks/checkTypes.ts]
+        verification:
+          type: command
+          command: pnpm run type-check && pnpm exec eslint src/pages/CreateCheckPage src/components/checks/wizard/ReviewStep.tsx src/types/checks
+        status: pending
+        dependencies: []
+        coverage: [FR-04, AC-05]
+        notes: >-
+          CreateCheckPage: L85, L90-127, L160, L209, L276, L296-310, and the availableUITests prop. ReviewStep:
+          L185-205 and L258-263. checkTypes.ts: L64-73. 'UI_TEST' stays in the CheckType union.
+
+      - id: "1.26"
+        description: Delete the legacy UiTestConfig picker component, its test and its barrel export
+        service: frontend
+        files: [frontend/src/components/checks/wizard/configs/UiTestConfig.tsx, frontend/src/components/checks/wizard/configs/UiTestConfig.test.tsx, frontend/src/components/checks/wizard/configs/index.ts]
+        verification:
+          type: command
+          command: pnpm run type-check && pnpm exec eslint src/components/checks/wizard/configs
+        status: pending
+        dependencies: ["1.25"]
+        coverage: [FR-04, FR-27, AC-05]
+
+      - id: "1.27"
+        description: Drop the deleted UiTestConfig path from the referencePicker static-source scan
+        service: frontend
+        files: [frontend/src/components/studio/references/referencePicker.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/components/studio/references/referencePicker.test.tsx
+        status: pending
+        dependencies: ["1.26"]
+        coverage: [FR-04]
+        notes: L610 (K3).
+
+      - id: "1.28"
+        description: Gate the UI Test type card on derived availability (both flags) and disable it on the edit page
+        service: frontend
+        files: [frontend/src/components/checks/wizard/CheckTypeSelector.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/test/pageBootstrapShape.test.tsx && pnpm run type-check
+        status: pending
+        dependencies: ["1.3", "1.8"]
+        coverage: [FR-01, FR-24, AC-23, AC-30]
+        notes: >-
+          The UI_TEST card is dimmed and not selectable unless availability is 'on'. A new optional
+          disabledTypes prop serves edit/:id. pageBootstrapShape mounts this selector under a fail-open store
+          and must stay green.
+
+      - id: "1.29"
+        description: Add the Create Check UI Test one-form branch with the environment-chosen rule, ?type preselect and derived switch-off
+        service: frontend
+        files: [frontend/src/components/checks/wizard/UiTestCreateForm.tsx, frontend/src/pages/CreateCheckPage/CreateCheckPage.tsx]
+        verification:
+          type: command
+          command: pnpm run type-check && pnpm exec eslint src/components/checks/wizard/UiTestCreateForm.tsx src/pages/CreateCheckPage
+        status: pending
+        dependencies: ["1.2", "1.3", "1.4", "1.25", "1.28"]
+        coverage: [FR-01, FR-02, FR-03, FR-24, AC-01, AC-02, AC-03, AC-04, AC-23, AC-30]
+        notes: >-
+          The form:
+          - Name (at most TEST_NAME_MAX_LENGTH), Description, the existing registered-CSI select, and
+            Environment from STUDIO_TEST_ENVIRONMENTS.
+          - "Create and open Studio" calls studioApi.createTest(newTestRequest(...)). On success it removes
+            'checks:create:draft' and navigates to uiTestEditorPath(id) with replace, without autorun. On
+            failure it shows createErrorMessage(failure) from components/studio/tests/testErrors.ts L30 inline
+            (DC-24) and stays.
+          The page, for an effective type of UI_TEST on the create route:
+          - It hides the stepper, steps, Back/Next, Test Now, Create Check and tags. CheckTypeSelector stays.
+          - Switching back restores the stepper and keeps the fields.
+          - environmentChosen rule (§6): the flag is set by a user change or by restoring a UI_TEST draft.
+            Entering UI Test sets Development only while the flag is false.
+          - ?type=UI_TEST is held while 'pending', applied when 'on', and ignored when 'off'.
+          - A UI_TEST type is reset on 'off'.
+
+      - id: "1.30"
+        description: Add Create Check UI Test component tests (one form, precedence, preselect, switch-off incl. late sources, create and errors)
+        service: frontend
+        files: [frontend/src/pages/CreateCheckPage/CreateCheckPage.uiTest.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/pages/CreateCheckPage/CreateCheckPage.uiTest.test.tsx
+        status: pending
+        dependencies: ["1.29"]
+        coverage: [AC-01, AC-02, AC-03, AC-04, AC-05, AC-23, AC-30]
+        notes: >-
+          Serve sources, features and csi inline, as studioWcagAudit L105-109 does. Cases:
+          - The AC-30 sequence, plus ?type with a restored UI_TEST draft (its environment is kept).
+          - One POST with the builder body; the draft is removed; history is replaced.
+          - Inline create errors through createErrorMessage, moved from the Tests page test (K4, CRIT-23b):
+            400 with a detail message, 400 without detail, 403, 409 and 500. Each keeps the route and the
+            entered fields.
+          - Name over 255 characters is rejected; the counter shows n/255, and Create stays disabled.
+          - System (CSI) required: with no CSI chosen, Create stays disabled and no request is sent.
+          - edit/:id cannot select UI Test.
+          - Switch off.
+          - Sources arriving disabled after the first render.
+          - No picker on any type.
+
+      - id: "1.31"
+        description: Move the MSW E2E specs that open the editor by URL to ui-tests/{id}/studio
+        service: frontend
+        files: [frontend/e2e/studio-variables.spec.ts, frontend/e2e/studio-guided.spec.ts]
+        verification:
+          type: command
+          command: >-
+            pnpm exec playwright test --project=msw e2e/studio-guided.spec.ts &&
+            CHECKS_VARIABLES354_EVIDENCE_DIR="$(mktemp -d)/variables354-visual/images" pnpm exec playwright test --project=msw e2e/studio-variables.spec.ts
+        status: pending
+        dependencies: ["1.21"]
+        coverage: [FR-05, NFR-09]
+        notes: studio-variables L104, L174, L233-234; studio-guided L185 (G1). The evidence directory is a temp directory, not the repo.
+
+      - id: "1.32"
+        description: Rewrite the real-backend authoring E2E to start from Create Check -> UI Test
+        service: frontend
+        files: [frontend/e2e/studio-authoring-real-backend.spec.ts]
+        verification:
+          type: manual
+          instructions: >-
+            With a running local backend (CHECKS_SOURCE_UI_TEST=true), run CHECKS_E2E_REAL_BACKEND=1 pnpm exec
+            playwright test --project=real-backend e2e/studio-authoring-real-backend.spec.ts. Without a backend,
+            run pnpm run type-check and record "not run: no backend" in the story.
+        status: pending
+        dependencies: ["1.29", "1.21"]
+        coverage: [FR-01, FR-02, NFR-08]
+        notes: >-
+          L128-150 go to /checks/create?type=UI_TEST and then "Create and open Studio". The L151 id parse reads
+          the segment before /studio.
+
+      - id: "1.33"
+        description: Run the phase-1 gate (type-check, lint, WCAG guard, touched suites, removed-route scan for the bare and id studio routes)
+        service: infra
+        files: [docs/qa/accessibility/axe-results.json, docs/qa/accessibility/studio-wcag-audit.md]
+        verification:
+          type: command
+          command: >-
+            pnpm run type-check && pnpm run lint && pnpm exec vitest run src/test/a11y/studioWcagAudit.test.tsx
+            src/pages/ChecksStudioPage src/test/pageBootstrapShape.test.tsx src/components src/pages/StudioTestsPage
+            src/pages/StudioRunsPage src/pages/CreateCheckPage src/App.routes.test.tsx src/hooks src/utils/navigation
+            src/services/mocks/studio
+            && ! (grep -rn "/checks/studio" src e2e | grep -v "citi/put/checks/studio" | grep -vE "/checks/studio/(tests|runs)([^A-Za-z0-9_]|$)")
+            && ! grep -rnE "['\"\`]/studio/tests/:id|path: '/studio'|path=\"studio(/:id)?\"" src e2e
+            && git diff --stat -- ../docs/qa/accessibility/
+        status: pending
+        dependencies: ["1.10", "1.13", "1.15", "1.17", "1.19", "1.20", "1.22", "1.23", "1.24", "1.27", "1.30", "1.31"]
+        coverage: [FR-27, FR-28, NFR-09, CON-04, AC-09, AC-26, AC-27]
+        notes: >-
+          The gate only verifies; it edits nothing. Scan S1 (verificationConventions.removedRouteScans) rejects
+          any /checks/studio reference other than /checks/studio/tests or /checks/studio/runs, the test-local
+          '/studio/tests/:id' and no-id '/studio' route shapes, and App.tsx path="studio" and
+          path="studio/:id". Its 25 hits in today's tree are each owned by a phase-1 subtask, including the
+          ChecksStudioPage L694 comment (1.11, CRIT-20) and the two test-local routes (1.8, 1.9, CRIT-25a).
+          /checks/studio/tests and /checks/studio/runs are still valid targets at this boundary.
+          The editor framing changes surfaces 3-7. If the baseline moves:
+          - On a critical or serious rule, fix the regression.
+          - Otherwise keep the regenerated file and record "editor framing (increment 1), no surface added" in
+            studio-wcag-audit.md.
+          The baseline change and its reason stay in this increment.
+
+  # ─────────────────────────────────────────────────────────────────────────────────────────────
+  - id: phase-2
+    name: Increment 2 - UI test detail page; Runs page removed
+    description: >-
+      - Adds ui-tests/:id with the header, Overview and Runs (single-test RunRow, drawer bound by
+        expectedTestId).
+      - Editor back and every schedule-dialog host move to the ui-tests paths.
+      - Removes studio/runs and studio/runs/:executionId, StudioRunsPage, the Runs nav child, the Runs-page
+        builders, RunRow's test-name form and WCAG surface 2.
+      FR-07 (back), FR-08 (inc 2), FR-09-FR-12, FR-13 (detail), FR-25 (detail), FR-26, FR-27 (inc 2),
+      FR-28 (surface 2).
+    stories: [STUDIO-UNIFY-001.2]
+    linkWalkAtExit:
+      - "Editor back -> ui-tests/{id}; 'Open Tests' -> /checks/studio/tests (still exists)"
+      - "Schedule dialog run links (hosts: editor, detail, Tests page) -> ui-tests/{testId}/runs/{executionId}"
+      - "Detail: Edit in Studio -> ui-tests/{id}/studio; Run in Studio -> ui-tests/{id}/studio?autorun=1; Delete -> /checks/all"
+      - "Runs tab drawer testHref -> ui-tests/{testId}/studio; Copy link -> origin + ui-tests/{id}/runs/{executionId}"
+      - "Tests page row -> editor; Tests page 'Create Test' -> /checks/create?type=UI_TEST"
+      - "Sidebar Studio group -> Tests only; Dashboard and palette -> /checks/studio/tests (gated)"
+      - "studio/runs and studio/runs/{id} -> catch-all to module home"
+    risks:
+      - "R4: run leakage for an inaccessible or soft-deleted test. Mitigated by the test-read gate (2.5) and expectedTestId (2.4); AC-13 tests"
+      - "R14: deleting the Runs page before every link is repointed. Ordering: routes and links first (2.9-2.11), WCAG surface 2 (2.12), then the files (2.13)"
+    rollback: >-
+      Revert the phase-2 commits. This restores the Runs page, its routes and links, and the phase-1 dialog
+      targets.
+    subtasks:
+      - id: "2.1"
+        description: Extract the editor's local StudioUnavailable into a shared component for the detail page
+        service: frontend
+        files: [frontend/src/components/studio/StudioUnavailable.tsx, frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/test/pageBootstrapShape.test.tsx src/pages/ChecksStudioPage/pageRunGate.test.tsx && pnpm run type-check
+        status: pending
+        dependencies: []
+        coverage: [FR-24, AC-23]
+        notes: Move L166 unchanged in text and DOM. L1939 imports it.
+
+      - id: "2.2"
+        description: Add the shared UI test status mapping (readiness and last run to chip, colour and filter group) per spec §9.3
+        service: frontend
+        files: [frontend/src/components/studio/tests/uiTestStatus.ts, frontend/src/components/studio/tests/uiTestStatus.test.ts]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/components/studio/tests/uiTestStatus.test.ts
+        status: pending
+        dependencies: []
+        coverage: [FR-16, AC-16, DC-08]
+        notes: Seven cases. Readiness states belong to their own filter values only. Used by 2.6 and 3.1.
+
+      - id: "2.3"
+        description: Add an optional testId to useStudioRuns for the list and running-count requests
+        service: frontend
+        files: [frontend/src/components/studio/runs/useStudioRuns.ts]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/pages/StudioRunsPage/StudioRunsPage.test.tsx && pnpm run type-check
+        status: pending
+        dependencies: []
+        coverage: [FR-11, AC-12]
+        notes: StudioRunsQuery (L13-22) gains testId?, passed at L84 and L89. When testId is absent, behaviour is identical.
+
+      - id: "2.4"
+        description: Bind RunDetailsDrawer to an expected test id so a mismatched read or live snapshot shows not-found (G3)
+        service: frontend
+        files: [frontend/src/components/studio/runs/RunDetailsDrawer.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/pages/StudioRunsPage/StudioRunsPage.test.tsx && pnpm run type-check
+        status: pending
+        dependencies: []
+        coverage: [FR-12, AC-13]
+        notes: On first paint, on the getExecution read and on every snapshot, a testId other than expectedTestId sets the existing 'not-found' state.
+
+      - id: "2.5"
+        description: Add the detail page shell with availability gating, the test-read gate and the error states
+        service: frontend
+        files: [frontend/src/pages/UiTestDetailsPage/UiTestDetailsPage.tsx, frontend/src/pages/UiTestDetailsPage/useUiTestDetail.ts, frontend/src/pages/UiTestDetailsPage/index.ts]
+        verification:
+          type: command
+          command: pnpm run type-check && pnpm exec eslint src/pages/UiTestDetailsPage
+        status: pending
+        dependencies: ["2.1", "1.3"]
+        coverage: [FR-09, FR-12, FR-24, FR-25, NFR-03, NFR-06, AC-23, AC-24]
+        notes: >-
+          - 'pending': a loading state with no request.
+          - 'off': StudioUnavailable.
+          - 'on': getTest(id). On 403 or 400, show the single message. Any other failure shows a load error
+            with Retry.
+          - Never call /checks/{id}.
+          - Tabs (Overview index, Runs) and the header render through Outlet only after the read succeeds.
+
+      - id: "2.6"
+        description: Add the detail header (name, status, UI Test chip, CSI, environment, last run) with Edit, Schedule, Run in Studio and Delete
+        service: frontend
+        files: [frontend/src/pages/UiTestDetailsPage/UiTestDetailHeader.tsx]
+        verification:
+          type: command
+          command: pnpm run type-check && pnpm exec eslint src/pages/UiTestDetailsPage/UiTestDetailHeader.tsx
+        status: pending
+        dependencies: ["2.2", "2.5", "1.14"]
+        coverage: [FR-09, FR-13, AC-10, AC-14]
+        notes: >-
+          - Edit in Studio: uiTestEditorPath(id).
+          - Run in Studio: uiTestEditorPath(id, {autorun:true}); no execute is sent.
+          - Schedule: StudioScheduleDialog with runHref = uiTestRunPath.
+          - Delete: DeleteTestDialog, then /checks/all.
+          - The CSI shows its name from the store, or the id.
+
+      - id: "2.7"
+        description: Add the read-only Overview tab (numbered steps, readiness, variables with secret reference names, schedule summary)
+        service: frontend
+        files: [frontend/src/pages/UiTestDetailsPage/UiTestOverviewTab.tsx]
+        verification:
+          type: command
+          command: pnpm run type-check && pnpm exec eslint src/pages/UiTestDetailsPage/UiTestOverviewTab.tsx
+        status: pending
+        dependencies: ["2.5"]
+        coverage: [FR-10, NFR-04, AC-11, AC-25]
+        notes: >-
+          Variables show name and kind. A secretRef shows only its secretId, and a plain value is never
+          rendered. StudioScheduleSummary takes the refreshToken built as at ChecksStudioPage L1142-1143.
+
+      - id: "2.8"
+        description: Add the Runs tab (replays only, note, own header, paging, live refresh, test-bound drawer and copy-link)
+        service: frontend
+        files: [frontend/src/pages/UiTestDetailsPage/UiTestRunsTab.tsx]
+        verification:
+          type: command
+          command: pnpm run type-check && pnpm exec eslint src/pages/UiTestDetailsPage/UiTestRunsTab.tsx
+        status: pending
+        dependencies: ["2.3", "2.4", "2.5"]
+        coverage: [FR-11, FR-12, FR-26, AC-12, AC-13, AC-25]
+        notes: >-
+          - Data: useStudioRuns({testId, page, pageSize}) with TablePagination. No filters, and no
+            StudioListLayout.
+          - The note reads "Runs lists replays of this test. Learning happens in Studio."
+          - useLiveRunsRefresh keeps rows live.
+          - The drawer gets expectedTestId = id, testHref = uiTestEditorPath and copy-link = copyText(origin +
+            uiTestRunPath).
+          - Rows use RunRow, which becomes single-test in 2.16.
+
+      - id: "2.9"
+        description: Add the detail routes and remove studio/runs and studio/runs/:executionId in both trees; extend the route test
+        service: frontend
+        files: [frontend/src/App.tsx, frontend/src/App.routes.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/App.routes.test.tsx && pnpm run type-check
+        status: pending
+        dependencies: ["2.5", "2.7", "2.8", "1.21"]
+        coverage: [FR-09, FR-11, FR-27, CON-09, AC-26]
+        notes: >-
+          ui-tests/:id gets an index child (Overview), runs and runs/:executionId (Runs), behind FeatureGate
+          STUDIO. Remove L112-113 and L141-142 and the lazy StudioRunsPage import (L22). The route test asserts
+          that the detail paths render and the two runs paths land on module home.
+
+      - id: "2.10"
+        description: Retarget the editor's in-page back to the detail page and every schedule-dialog host to ui-tests run links
+        service: frontend
+        files: [frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx, frontend/src/pages/StudioTestsPage/StudioTestsPage.tsx, frontend/src/pages/ChecksStudioPage/pageFraming.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/pages/ChecksStudioPage/pageFraming.test.tsx src/pages/StudioTestsPage/StudioTestsPage.test.tsx
+        status: pending
+        dependencies: ["2.9", "1.15"]
+        coverage: [FR-07, FR-08, AC-08, AC-09, DC-20]
+        notes: The back goes to uiTestPath(id). The L1144 and Tests-page L173 hosts pass runHref = (e) => uiTestRunPath(test.id, e).
+
+      - id: "2.11"
+        description: Update the schedule dialog test's run-link assertions to the ui-tests run path
+        service: frontend
+        files: [frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/components/studio/scheduling/StudioScheduleDialog.test.tsx
+        status: pending
+        dependencies: ["2.10"]
+        coverage: [FR-08, AC-09]
+        notes: L145, L234 and L252.
+
+      - id: "2.12"
+        description: Drop WCAG surface 2 (StudioRunsPage) and its pin, regenerate the baseline and record 'surfaces deleted'
+        service: frontend
+        files: [frontend/src/test/a11y/studioWcagAudit.test.tsx, docs/qa/accessibility/axe-results.json, docs/qa/accessibility/studio-wcag-audit.md]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/test/a11y/studioWcagAudit.test.tsx && git diff --stat -- ../docs/qa/accessibility/
+        status: pending
+        dependencies: ["2.9"]
+        coverage: [FR-28, CON-04, AC-27]
+        notes: >-
+          Remove the L27 import, the L97 pin and L299-310, and set the describe title to "six". Also update the
+          header comments that name StudioRunsPage (around L86-90), because 2.13 asserts that no source
+          mentions it. axe-results.json may differ only by the removed StudioRunsPage entry. In studio-wcag-audit.md, drop the surface 2 rows
+          (L63, L75, L87 and the StudioRunsPage mentions at L13, L103, L145) and add a dated entry: "surfaces
+          deleted (StudioRunsPage, increment 2); no surface added".
+
+      - id: "2.13"
+        description: Delete the Studio Runs page (the cross-test runs list, D3), its barrel and its test
+        service: frontend
+        files: [frontend/src/pages/StudioRunsPage/StudioRunsPage.tsx, frontend/src/pages/StudioRunsPage/index.ts, frontend/src/pages/StudioRunsPage/StudioRunsPage.test.tsx]
+        verification:
+          type: command
+          command: pnpm run type-check && ! grep -rn "StudioRunsPage" src
+        status: pending
+        dependencies: ["2.9", "2.12"]
+        coverage: [FR-27, AC-26, D3]
+
+      - id: "2.14"
+        description: Remove the sidebar Runs child, its page-id mapping and ChecksLayout's runs clause
+        service: frontend
+        files: [frontend/src/utils/navigation/navigationSetup.ts, frontend/src/utils/navigation/navigationSetup.test.ts, frontend/src/components/layout/ChecksLayout/ChecksLayout.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/utils/navigation/navigationSetup.test.ts && pnpm run type-check
+        status: pending
+        dependencies: ["2.13"]
+        coverage: [FR-27, AC-26]
+        notes: navigationSetup L30 and L73; ChecksLayout L87.
+
+      - id: "2.15"
+        description: Remove the remaining Runs-page route references (runLinks builders and their tests, LayoutProvider's runs prefix)
+        service: frontend
+        files: [frontend/src/components/studio/runs/runLinks.ts, frontend/src/components/studio/runs/runSnapshots.test.ts, frontend/src/components/layout/LayoutProvider/LayoutProvider.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/components/studio/runs/runSnapshots.test.ts && pnpm run type-check
+        status: pending
+        dependencies: ["2.13"]
+        coverage: [FR-27]
+        notes: >-
+          Delete runsListPath, runDetailsPath, RUNS_SEGMENT (L9) and the L12 comment, and the L49-51
+          assertions. copyText stays in runLinks.ts. In LayoutProvider, L70 keeps only the
+          '/checks/studio/tests' prefix set in 1.22.
+
+      - id: "2.16"
+        description: Make RunRow the single-test form (short id link, no 'Open test') now that the Runs tab is its only consumer
+        service: frontend
+        files: [frontend/src/components/studio/runs/RunRow.tsx, frontend/src/components/studio/runs/RunRowMenu.tsx, frontend/src/components/studio/scheduling/scheduleProvenance.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/components/studio/scheduling/scheduleProvenance.test.tsx && pnpm run type-check
+        status: pending
+        dependencies: ["2.13"]
+        coverage: [FR-11, DC-17, AC-12]
+        notes: >-
+          No prop (DC-17). The first cell is the run's short id as the link, with the trigger below it.
+          onOpenTest is removed from RunRow and RunRowMenu. scheduleProvenance L20-21 is updated to the
+          single-test form, and its href literals change from /studio/runs/... to uiTestRunPath values,
+          because the 2.18 scan rejects /studio/runs.
+
+      - id: "2.17"
+        description: Add detail-page and Runs-tab component tests (header actions, Overview, gating, errors, test binding, learn vs replay)
+        service: frontend
+        files: [frontend/src/pages/UiTestDetailsPage/UiTestDetailsPage.test.tsx, frontend/src/pages/UiTestDetailsPage/UiTestRunsTab.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/pages/UiTestDetailsPage
+        status: pending
+        dependencies: ["2.6", "2.7", "2.8", "2.9", "2.16"]
+        coverage: [AC-10, AC-11, AC-12, AC-13, AC-14, AC-23, AC-24, AC-25]
+        notes: >-
+          Cases:
+          - Header targets; no execute is sent.
+          - Overview with a secret.
+          - 403 test with a 200 execution: message only, and zero /checks/{id} calls.
+          - 400; 500 with Retry.
+          - 'pending' and 'off'.
+          - Runs: testId, gating, note, own header, short-id link, no "Open test", second page.
+          - Drawer deep link, testHref and copy-link.
+          - Mismatched testId shows not-found.
+          - LEARNING: no row, and the chip reads "Learning".
+          - A live replay reaches its terminal state.
+
+      - id: "2.18"
+        description: Run the phase-2 gate (type-check, lint, WCAG guard, touched suites, removed-route scan for studio/runs)
+        service: infra
+        files: [docs/qa/accessibility/axe-results.json]
+        verification:
+          type: command
+          command: >-
+            pnpm run type-check && pnpm run lint && pnpm exec vitest run src/test/a11y/studioWcagAudit.test.tsx
+            src/pages src/components/studio src/App.routes.test.tsx src/utils/navigation
+            && ! grep -rnE "/checks/studio/runs|[}'\"\`]/studio/runs|path=\"studio/runs" src e2e
+            && git diff --exit-code -- ../docs/qa/accessibility/axe-results.json
+        status: pending
+        dependencies: ["2.11", "2.12", "2.14", "2.15", "2.16", "2.17"]
+        coverage: [FR-27, FR-28, NFR-09, AC-09, AC-26, AC-27]
+        notes: >-
+          The gate only verifies. Scan S2 matches studio/runs route strings only: "/checks/studio/runs", a quote,
+          backtick or "}" directly before "/studio/runs", or path="studio/runs". Import paths such as
+          '@/components/studio/runs/RunRow' are excluded by design (CRIT-19), and the API has no /studio/runs
+          path. Its 24 hits in today's tree are each owned by a phase-1 or phase-2 subtask. The axe diff is
+          checked against the baseline committed in 2.12.
+
+  # ─────────────────────────────────────────────────────────────────────────────────────────────
+  - id: phase-3
+    name: Increment 3 - All Checks lists UI tests; Tests page and Studio nav removed
+    description: >-
+      - Merges Studio tests into All Checks.
+      - Moves "Open Tests", the Dashboard and the palette to /checks/all?type=UI_TEST.
+      - Removes studio/tests, StudioTestsPage, the Studio nav group, useStudioTests, TestRow, TestRowMenu,
+        StudioListLayout, useUrlListState, LAST_RUN_FILTER_LABELS and WCAG surface 1.
+      - Moves the harness E2E to All Checks.
+      FR-07 (Open Tests), FR-08 (inc 3), FR-14-FR-24, FR-27 (inc 3), FR-28 (surface 1).
+    stories: [STUDIO-UNIFY-001.3]
+    linkWalkAtExit:
+      - "All Checks UI row -> ui-tests/{id}; Edit in Studio -> ui-tests/{id}/studio; Execute -> ui-tests/{id}/studio?autorun=1"
+      - "All Checks row Schedule -> dialog with ui-tests run links; Delete -> list refresh; empty state -> /checks/create?type=UI_TEST"
+      - "Editor 'Open Tests' -> /checks/all?type=UI_TEST; editor back -> ui-tests/{id}"
+      - "Dashboard and palette -> /checks/all?type=UI_TEST (gated)"
+      - "Sidebar: no Studio group; ui-tests paths highlight Checks"
+      - "studio/tests -> catch-all to module home. No /checks/studio target remains"
+    risks:
+      - "R5: the cost of GET /studio/tests?size=100. Mitigated by one request per settled change, cancellation, and a 300 ms debounce (useUrlListState's default L94, copied as a constant before that hook is deleted)"
+      - "CRIT-14 race on a late sources answer. Mitigated by derived availability and the late-sources test (3.9)"
+      - "K2: the harness at /checks/all needs a GET /checks E2E handler (3.19)"
+    rollback: Revert the phase-3 commits. All Checks returns to checks only, and the Tests page, route and nav group come back.
+    subtasks:
+      - id: "3.1"
+        description: Build the pure catalog-row union (kind, dedupe with UI test winning, createdAt/id order, status, filters, tag hiding, CSI fallback)
+        service: frontend
+        files: [frontend/src/pages/AllChecksPage/catalogRows.ts, frontend/src/pages/AllChecksPage/catalogRows.test.ts]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/pages/AllChecksPage/catalogRows.test.ts
+        status: pending
+        dependencies: ["2.2"]
+        coverage: [FR-14, FR-16, FR-18, AC-15, AC-16, AC-18, DC-07, DC-08, DC-16]
+        notes: kind is derived from the type (the Flow 2 seam). Order is createdAt descending, then id. An active tag filter hides uiTest rows.
+
+      - id: "3.2"
+        description: Add the UI test catalog hook (availability-gated GET /studio/tests with server filters, debounce, cancellation, error, retry, total)
+        service: frontend
+        files: [frontend/src/pages/AllChecksPage/useUiTestCatalog.ts, frontend/src/pages/AllChecksPage/useUiTestCatalog.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/pages/AllChecksPage/useUiTestCatalog.test.tsx
+        status: pending
+        dependencies: ["1.3"]
+        coverage: [FR-15, FR-20, FR-21, NFR-01, NFR-07, AC-15, AC-20, AC-21, AC-23]
+        notes: >-
+          The request is listTests({csiId, environment, q, sort:'updatedAt,desc', size:100}, {signal}). A
+          superseded request is aborted. Nothing is sent while 'pending' or 'off'. The hook returns
+          {tests, totalElements, loading, error, retry}.
+
+      - id: "3.3"
+        description: Add the UI test catalog row (cells per §9.2, disabled checkbox, Execute and row menu with Schedule and Delete)
+        service: frontend
+        files: [frontend/src/pages/AllChecksPage/UiTestCatalogRow.tsx]
+        verification:
+          type: command
+          command: pnpm run type-check && pnpm exec eslint src/pages/AllChecksPage/UiTestCatalogRow.tsx
+        status: pending
+        dependencies: ["3.1", "1.2", "1.14"]
+        coverage: [FR-13, FR-14, FR-17, FR-19, NFR-05, AC-14, AC-15, AC-17, AC-19]
+        notes: >-
+          - Execute (tooltip "Run in Studio") goes to the autorun editor path.
+          - The menu offers Open, Edit in Studio, Schedule (runHref = uiTestRunPath) and Delete
+            (DeleteTestDialog, then refresh).
+
+      - id: "3.4"
+        description: Wire the merged rows into AllChecksPage (data, rendering, bulk and select-all restricted to check ids)
+        service: frontend
+        files: [frontend/src/pages/AllChecksPage/AllChecksPage.tsx]
+        verification:
+          type: command
+          command: pnpm run type-check && pnpm exec eslint src/pages/AllChecksPage/AllChecksPage.tsx
+        status: pending
+        dependencies: ["3.1", "3.2", "3.3"]
+        coverage: [FR-14, FR-17, AC-15, AC-17]
+        notes: Filters (L138-191) and paging (L194-198) run over CatalogRow. Select-all (L200-209) and toggleRow take only check ids. L104 is unchanged.
+
+      - id: "3.5"
+        description: Extend AllChecksPage filters (readiness values, UI Test type option, ?type preselect, derived switch-off, prefs persistence)
+        service: frontend
+        files: [frontend/src/pages/AllChecksPage/AllChecksPage.tsx]
+        verification:
+          type: command
+          command: pnpm run type-check && pnpm exec eslint src/pages/AllChecksPage/AllChecksPage.tsx
+        status: pending
+        dependencies: ["3.4"]
+        coverage: [FR-16, FR-18, FR-22, FR-24, AC-04, AC-16, AC-18, AC-23]
+        notes: >-
+          - Status options (L409-413) gain the readiness values.
+          - The UI_TEST type option (L432) shows only when 'on'.
+          - ?type beats the restored prefs when 'on'.
+          - Effective type = 'on' ? raw : (raw === 'UI_TEST' ? '' : raw).
+          - The prefs save (L132-138) is skipped while 'pending' and writes the effective value otherwise.
+
+      - id: "3.6"
+        description: Add the cap notice, the failure-with-Retry notice and the 'No UI tests yet' empty state
+        service: frontend
+        files: [frontend/src/pages/AllChecksPage/UiTestCatalogNotices.tsx, frontend/src/pages/AllChecksPage/AllChecksPage.tsx]
+        verification:
+          type: command
+          command: pnpm run type-check && pnpm exec eslint src/pages/AllChecksPage
+        status: pending
+        dependencies: ["3.5"]
+        coverage: [FR-20, FR-21, FR-23, NFR-06, AC-20, AC-21, AC-22]
+
+      - id: "3.7"
+        description: Retarget the editor's 'Open Tests' (no-test state) to /checks/all?type=UI_TEST
+        service: frontend
+        files: [frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx, frontend/src/pages/ChecksStudioPage/pageFraming.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/pages/ChecksStudioPage/pageFraming.test.tsx src/pages/ChecksStudioPage/pageLoadById.test.tsx
+        status: pending
+        dependencies: ["3.5"]
+        coverage: [FR-07, AC-08]
+        notes: L1194.
+
+      - id: "3.8"
+        description: Retarget the Dashboard quick action and command palette entry to /checks/all?type=UI_TEST (still gated)
+        service: frontend
+        files: [frontend/src/components/home/CommandPalette.tsx, frontend/src/pages/DashboardPage/DashboardPage.tsx, frontend/src/components/home/entryPoints.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/components/home/entryPoints.test.tsx
+        status: pending
+        dependencies: ["3.5", "1.24"]
+        coverage: [FR-08, FR-24, AC-09, AC-23, DC-23]
+
+      - id: "3.9"
+        description: Add All Checks page tests (mixed rows, params, order, cancel, chips and filters, bulk, tags, actions, cap, failure, empty, switch-off incl. late sources, preselect)
+        service: frontend
+        files: [frontend/src/pages/AllChecksPage/AllChecksPage.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/pages/AllChecksPage
+        status: pending
+        dependencies: ["3.6"]
+        coverage: [AC-04, AC-14, AC-15, AC-16, AC-17, AC-18, AC-19, AC-20, AC-21, AC-22, AC-23]
+        notes: >-
+          Serve GET /checks inline, since no MSW handler exists for it. The cases include sources resolving
+          disabled after the first render: zero Studio requests, and no UI_TEST written.
+
+      - id: "3.10"
+        description: Remove studio/tests from both trees and extend the route test
+        service: frontend
+        files: [frontend/src/App.tsx, frontend/src/App.routes.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/App.routes.test.tsx && pnpm run type-check
+        status: pending
+        dependencies: ["3.7", "3.8", "2.10"]
+        coverage: [FR-27, CON-09, AC-26]
+        notes: Remove L111 and L140 and the lazy StudioTestsPage import (L23). studio/tests then lands on module home.
+
+      - id: "3.11"
+        description: Drop WCAG surface 1 (StudioTestsPage) and its pin, regenerate the baseline and record 'surfaces deleted'
+        service: frontend
+        files: [frontend/src/test/a11y/studioWcagAudit.test.tsx, docs/qa/accessibility/axe-results.json, docs/qa/accessibility/studio-wcag-audit.md]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/test/a11y/studioWcagAudit.test.tsx && git diff --stat -- ../docs/qa/accessibility/
+        status: pending
+        dependencies: ["3.10"]
+        coverage: [FR-28, CON-04, AC-27]
+        notes: >-
+          Remove the L26 import, the L96 pin and L289-297, and set the describe title to "five". Also update the
+          header comments that name StudioTestsPage (around L86-90), because 3.13 asserts that no source
+          mentions it. In
+          studio-wcag-audit.md, drop the surface 1 rows (L62, L74, L86 and the StudioTestsPage mentions at
+          L14, L103, L145) and add a dated entry: "surfaces deleted (StudioTestsPage, increment 3); no surface
+          added".
+
+      - id: "3.12"
+        description: Remove the TestRow-based case and the Tests-page entries from the schedule dialog test
+        service: frontend
+        files: [frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/components/studio/scheduling/StudioScheduleDialog.test.tsx
+        status: pending
+        dependencies: ["3.10"]
+        coverage: [FR-27, CRIT-17]
+        notes: Remove L17 and L53-56; the entries at L27 and L233 move off /studio/tests.
+
+      - id: "3.13"
+        description: Delete the Studio Tests page, its barrel and its test
+        service: frontend
+        files: [frontend/src/pages/StudioTestsPage/StudioTestsPage.tsx, frontend/src/pages/StudioTestsPage/index.ts, frontend/src/pages/StudioTestsPage/StudioTestsPage.test.tsx]
+        verification:
+          type: command
+          command: pnpm run type-check && ! grep -rn "StudioTestsPage" src
+        status: pending
+        dependencies: ["3.10", "3.11"]
+        coverage: [FR-27, AC-26]
+
+      - id: "3.14"
+        description: Delete the Tests-page-only helpers useStudioTests, TestRow and TestRowMenu
+        service: frontend
+        files: [frontend/src/components/studio/tests/useStudioTests.ts, frontend/src/components/studio/tests/TestRow.tsx, frontend/src/components/studio/tests/TestRowMenu.tsx]
+        verification:
+          type: command
+          command: pnpm run type-check && ! grep -rnE "useStudioTests|TestRowMenu|from '.*/TestRow'" src
+        status: pending
+        dependencies: ["3.12", "3.13"]
+        coverage: [FR-27, AC-26]
+        notes: DeleteTestDialog, newTestRequest, uiTestStatus and testListPresentation (READINESS, readinessFor, STUDIO_TEST_ENVIRONMENTS, TEST_NAME_MAX_LENGTH) stay.
+
+      - id: "3.15"
+        description: Delete StudioListLayout (with SortableHeaderCell) and its test, keeping studioListSx
+        service: frontend
+        files: [frontend/src/components/studio/list/StudioListLayout.tsx, frontend/src/components/studio/list/StudioListLayout.test.tsx]
+        verification:
+          type: command
+          command: pnpm run type-check && pnpm exec vitest run src/components/studio/runs
+        status: pending
+        dependencies: ["3.13"]
+        coverage: [FR-27, DC-10, AC-26]
+        notes: studioListSx.ts stays, because RunRow imports hideBelowMd.
+
+      - id: "3.16"
+        description: Delete the list-URL hook and LAST_RUN_FILTER_LABELS that only the deleted Tests page used (G4)
+        service: frontend
+        files: [frontend/src/hooks/useUrlListState.ts, frontend/src/hooks/useUrlListState.test.tsx, frontend/src/components/studio/tests/testListPresentation.ts]
+        verification:
+          type: command
+          command: pnpm run type-check && ! grep -rnE "useUrlListState|LAST_RUN_FILTER_LABELS" src
+        status: pending
+        dependencies: ["3.14", "3.15", "3.2"]
+        coverage: [FR-27, AC-26]
+        notes: The All Checks debounce (3.2) must not import this hook. It uses its own 300 ms constant.
+
+      - id: "3.17"
+        description: Remove the sidebar Studio group, its page-id mapping and ChecksLayout's tests clause
+        service: frontend
+        files: [frontend/src/utils/navigation/navigationSetup.ts, frontend/src/utils/navigation/navigationSetup.test.ts, frontend/src/components/layout/ChecksLayout/ChecksLayout.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/utils/navigation/navigationSetup.test.ts && pnpm run type-check
+        status: pending
+        dependencies: ["3.10"]
+        coverage: [FR-27, NFR-08, AC-26]
+        notes: navigationSetup L19-33 and L74 (the studioVisible predicate goes as well, if nothing else uses it); ChecksLayout L86.
+
+      - id: "3.18"
+        description: Drop LayoutProvider's studio mapping and update the ChecksLayout a11y test's entry path
+        service: frontend
+        files: [frontend/src/components/layout/LayoutProvider/LayoutProvider.tsx, frontend/src/components/layout/ChecksLayout/ChecksLayout.a11y.test.tsx]
+        verification:
+          type: command
+          command: pnpm exec vitest run src/components/layout/ChecksLayout/ChecksLayout.a11y.test.tsx && pnpm run type-check
+        status: pending
+        dependencies: ["3.17"]
+        coverage: [AC-26, AC-27]
+        notes: >-
+          LayoutProvider L70; ChecksLayout.a11y L45 becomes /checks/all (entry path only). If the a11y file
+          fails at file level because @put/core-components does not resolve (G5), record that as pre-existing.
+
+      - id: "3.19"
+        description: Move the MSW harness E2E to All Checks and give the E2E proxy an empty GET /checks answer
+        service: frontend
+        files: [frontend/e2e/harness.spec.ts, frontend/e2e/previewBootstrapHandlers.ts]
+        verification:
+          type: command
+          command: pnpm exec playwright test --project=msw e2e/harness.spec.ts
+        status: pending
+        dependencies: ["3.10", "3.6"]
+        coverage: [NFR-09, CON-10]
+        notes: >-
+          L57, L94 and L142 move from /checks/studio/tests to /checks/all. The handler is
+          http.get('*/api/v1/checks', ...) returning an empty page, because AllChecksPage L339-341 replaces the
+          page on a checks failure (K2). The L106-110 first-name check holds: 25 demo tests, createdAt order
+          equals updatedAt order, all on one page.
+
+      - id: "3.20"
+        description: Run the phase-3 gate (type-check, lint, WCAG guard, touched suites, full removed-route scan)
+        service: infra
+        files: [docs/qa/accessibility/axe-results.json]
+        verification:
+          type: command
+          command: >-
+            pnpm run type-check && pnpm run lint && pnpm exec vitest run src/test/a11y/studioWcagAudit.test.tsx
+            src/pages src/components src/hooks src/utils/navigation src/App.routes.test.tsx
+            && ! (grep -rn "/checks/studio" src e2e | grep -v "citi/put/checks/studio")
+            && ! grep -rnE "path=\"studio|[}'\"\`]/studio/runs|['\"\`]/studio/tests/:id|path: '/studio'" src e2e
+            && git diff --exit-code -- ../docs/qa/accessibility/axe-results.json
+        status: pending
+        dependencies: ["3.9", "3.11", "3.14", "3.15", "3.16", "3.17", "3.18", "3.19"]
+        coverage: [FR-27, FR-28, NFR-09, AC-09, AC-26, AC-27]
+        notes: >-
+          The gate only verifies. Scan S3 rejects any /checks/studio reference, any studio/runs literal, the
+          old test-local route shapes, and any App.tsx path="studio...". Every line it matches in today's tree
+          is owned by a subtask in phases 1-3: ChecksStudioPage L694 by 1.11, L1061 by 2.10, L1194 by 3.7.
+          The axe diff is checked against the baseline committed in 3.11.
+
+  # ─────────────────────────────────────────────────────────────────────────────────────────────
+  - id: phase-4
+    name: Increment 4 - D5 docs and leftovers
+    description: >-
+      The final leftover grep, the bundle comparison and the D5 documents (§13). The WCAG records from phases
+      1-3 are only checked for consistency here. FR-27 (leftovers), FR-29, NFR-02.
+    stories: [STUDIO-UNIFY-001.4]
+    linkWalkAtExit:
+      - "No in-app link changes in this increment. Every target is a ui-tests, all or create route"
+    risks:
+      - "Doc edits drift from the code. Each doc subtask re-reads its lines first"
+    rollback: Revert the phase-4 commits (docs only, plus any leftover removal).
+    subtasks:
+      - id: "4.1"
+        description: Scan for leftover Studio routes and removed modules and record the result
+        service: infra
+        files: [docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/implementation/leftover-scan.txt]
+        verification:
+          type: command
+          command: >-
+            ! (grep -rnE "/checks/studio|path=\"studio|[}'\"\`]/studio/runs|['\"\`]/studio/tests/:id|path: '/studio'|CreateTestDialog|StudioTestsPage|StudioRunsPage|StudioListLayout|useUrlListState|useStudioTests|navigationConfig|UiTestConfig|LAST_RUN_FILTER_LABELS" src e2e
+            | grep -v "citi/put/checks/studio")
+        status: pending
+        dependencies: ["3.20"]
+        coverage: [FR-27, AC-26]
+        notes: >-
+          Scan S4 is S3 plus the removed module names. API strings ('/studio/tests', '/studio/executions/...')
+          and import paths are deliberately not matched (CRIT-19). Any hit becomes its own subtask of at most 3
+          files: remove it, then re-scan. Write the scan output (expected: empty) to leftover-scan.txt.
+
+      - id: "4.2"
+        description: Compare the initial bundle with the phase-1 baseline (NFR-02)
+        service: infra
+        files: [docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/implementation/bundle-check.json]
+        verification:
+          type: command
+          command: pnpm run build
+        status: pending
+        dependencies: ["1.1", "4.1"]
+        coverage: [NFR-02]
+        notes: Record the same entry-asset sizes as 1.1. The initial bundle must stay under 500 KB; the detail page is a lazy chunk. FCP is recorded as not measured.
+
+      - id: "4.3"
+        description: Update PRD.md for the two-panel Studio, Studio scheduling status, the V1 catalog view and the removed compile wording (D5)
+        service: infra
+        files: [PRD.md]
+        verification:
+          type: command
+          command: >-
+            ! grep -nE "three-panel|compiled to confirmed|Studio scheduling is post-V1|Schedule configuration is post-V1|Studio Compiler" ../PRD.md
+        status: pending
+        dependencies: []
+        coverage: [FR-29, AC-28]
+        notes: >-
+          L76; L78; L90-L99; L111; L115 (catalog view in V1 as a frontend view; other projections stay Later);
+          L128, L158, L229. L121 is unchanged. Re-read the lines first.
+
+      - id: "4.4"
+        description: Update CLAUDE.md and its AGENTS.md mirror (two-panel Studio; nav tree with UI tests under Checks and no Studio entry)
+        service: infra
+        files: [CLAUDE.md, AGENTS.md]
+        verification:
+          type: command
+          command: >-
+            ! grep -nE "Three-Panel|Checks Studio - UI testing" ../CLAUDE.md ../AGENTS.md
+        status: pending
+        dependencies: []
+        coverage: [FR-29, AC-28, DC-21]
+        notes: CLAUDE.md L101-117 and AGENTS.md L100-117. The stack versions are out of scope.
+
+      - id: "4.5"
+        description: Update studio-execution.md and ARCH.md for the frontend UI_TEST catalog view, separate aggregates and Flow 2 deferral
+        service: infra
+        files: [docs/architecture/studio-execution.md, ARCH.md]
+        verification:
+          type: manual
+          instructions: >-
+            Review against AC-28. studio-execution.md: L20 and L229 (scheduling status); L23 and L235 (catalog
+            view on the ui-tests routes, separate aggregates, Flow 2 deferred). ARCH.md: L36 and L391 (G11). M5
+            at L198 and the compile-era API lines stay as they are.
+        status: pending
+        dependencies: []
+        coverage: [FR-29, AC-28]
+
+      - id: "4.6"
+        description: Check studio-wcag-audit.md for consistency with the increment 1-3 records (consistency only, no new baseline)
+        service: infra
+        files: [docs/qa/accessibility/studio-wcag-audit.md]
+        verification:
+          type: manual
+          instructions: >-
+            The document lists five ChecksStudioPage surfaces. It carries the dated records from 1.10/1.33 (if
+            the baseline moved), 2.12 and 3.11, and no record or surface beyond them. pnpm exec vitest run
+            src/test/a11y/studioWcagAudit.test.tsx passes, and git diff --exit-code on axe-results.json is
+            clean.
+        status: pending
+        dependencies: ["3.20"]
+        coverage: [FR-28, FR-29, AC-27, AC-28]
+
+      - id: "4.7"
+        description: Run the final gate (type-check, lint, all touched suites, removed-route scan, WCAG guard)
+        service: infra
+        files: [docs/qa/accessibility/axe-results.json]
+        verification:
+          type: command
+          command: >-
+            pnpm run type-check && pnpm run lint && pnpm exec vitest run src/test/a11y/studioWcagAudit.test.tsx
+            src/App.routes.test.tsx src/pages src/components src/hooks src/utils/navigation
+            && ! (grep -rn "/checks/studio" src e2e | grep -v "citi/put/checks/studio")
+            && ! grep -rnE "path=\"studio|[}'\"\`]/studio/runs|['\"\`]/studio/tests/:id|path: '/studio'" src e2e
+            && git diff --exit-code -- ../docs/qa/accessibility/axe-results.json
+        status: pending
+        dependencies: ["4.1", "4.2", "4.3", "4.4", "4.5", "4.6"]
+        coverage: [AC-09, AC-26, AC-27, AC-28, NFR-09]

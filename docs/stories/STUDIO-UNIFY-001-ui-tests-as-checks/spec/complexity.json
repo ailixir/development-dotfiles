@@ -1,0 +1,99 @@
+{
+  "storyId": "STUDIO-UNIFY-001-ui-tests-as-checks",
+  "assessedAt": "2026-10-23T20:30:38Z",
+  "assessedBy": "@architect",
+  "result": "STANDARD",
+  "overridden": false,
+  "dimensions": {
+    "scope": {
+      "score": 5,
+      "notes": "More than 20 files, all in frontend/ and docs/. New: UiTestDetailsPage (header, Overview and Runs child routes), uiTestPaths.ts, newTestRequest.ts, catalogRows.ts, useUiTestCatalog.ts. Changed: App.tsx (both route trees), ChecksStudioPage.tsx (load by id at L483-512 and the route-change effect at L705-716, back action L1061, 'Open Tests' L1194), CreateCheckPage.tsx, ReviewStep.tsx, CheckTypeSelector.tsx, AllChecksPage.tsx, useStudioRuns.ts, StudioScheduleDialog.tsx, runLinks.ts, testListPresentation.ts, navigationSetup.ts, LayoutProvider.tsx, ChecksLayout.tsx, CommandPalette.tsx, DashboardPage.tsx, types/checks/checkTypes.ts. Deleted: the StudioTestsPage and StudioRunsPage folders, CreateTestDialog, useStudioTests, TestRow, TestRowMenu, UiTestConfig (+ test, + index export), navigationConfig.ts. Tests: 3 deleted, about 5 unit specs and 4 E2E specs updated, the WCAG audit and its baseline, plus new narrow specs. Docs: PRD.md, CLAUDE.md, ARCH.md, studio-execution.md, studio-wcag-audit.md. The file count gives 5 even though the change is frontend-only; at 4 the class would not change."
+    },
+    "integration": {
+      "score": 2,
+      "notes": "Existing internal APIs only, no new endpoint and no external system (CON-01). Checks: GET /checks (CheckController.java:46). Studio: tests list, read, create and delete (StudioController.java:51-94), executions by testId (:155-171), execution read (:131), SSE events (ExecutionEventsController.java:70), video (ExecutionVideoController.java:55) and schedule (StudioScheduleController.java:32-80). All of them go through the existing apiClient and Studio transports. New integration logic is limited to a client-side union of two list sources (CatalogRow) and matching Studio's 403 non-disclosure on new screens."
+    },
+    "infrastructure": {
+      "score": 1,
+      "notes": "None. No backend, schema, Flyway, Helm, env var, feature flag or dependency change. Existing flags (STUDIO feature, UI_TEST source) gate the new surfaces unchanged."
+    },
+    "knowledge": {
+      "score": 2,
+      "notes": "Known stack (React 18, strict TS, MUI v5 (5.18.0), React Router v6 (6.30.1) nested routes, Redux Toolkit, MSW in Node; corrected 2026-10-23 per CON-05 and critique CRIT-13, score unchanged), with existing Studio components reused (RunRow, RunDetailsDrawer, useLiveRunsRefresh, StudioScheduleDialog, StudioScheduleSummary, DeleteTestDialog, readinessFor). New patterns: a kind-tagged catalog union with dedupe as the Flow 2 seam, tab child routes with a deep-linked drawer, and changing ChecksStudioPage selection without breaking its AC-13 subscription-switch and SCEN-1 change-detector guards (ChecksStudioPage.tsx:654-717). Two behaviours are unverified (OQ-06 autorun per readiness, OQ-07 readiness after a metadata edit), hence research."
+    },
+    "risk": {
+      "score": 3,
+      "notes": "Medium. Studio is unreleased and default-off (application.yml:56), so few users are exposed, but it is the flagship feature and the change hits sensitive seams. (1) The ChecksStudioPage load path drives selection, live-stream lifecycle and the autorun trigger (L507-511). A regression shows the wrong test or leaves streams open. (2) autorun=1 becomes the only Run entry from every list and the detail page (NFR-05). [inferred] The page does not strip autorun=1 after using it, so a reload or Back may start a second run. (3) New screens must keep Studio's indistinguishable 403 (NFR-03), with no probe into the checks namespace. (4) Removals have no redirects (CON-03). They are reversible in code, but old links land on module home. (5) The WCAG baseline is regenerated: guard only, never extended (CON-04). Not 4: no backend, data or authorization change, and server-side gates (canExecute, the run gate's readiness predicate) stay authoritative."
+    }
+  },
+  "totalScore": 13,
+  "pipelinePhases": [
+    "gather",
+    "assess",
+    "research",
+    "spec",
+    "critique",
+    "plan"
+  ],
+  "nextPhase": "research",
+  "flags": [
+    "The class is robust: scope 4 to 5 and risk 3 to 4 keep the total between 12 and 15, which is STANDARD in every case. COMPLEX would need a backend change, which CON-01 forbids.",
+    "If research shows that any requirement needs a backend change (for example the autorun behaviour per readiness), escalate to the user. Do not widen scope, because D1 and CON-01 are binding.",
+    "Highest-regression area: the FR-06 load-by-id change in ChecksStudioPage. Critique must check that it keeps the AC-13 stream-closing switch, the SCEN-1 change detector and autorun-after-load ordering, and that the many page tests that mount without a route id (pageRunGate, pageEvidence and others) still pass.",
+    "One story, four dependency-ordered increments (CON-08). The spec should give each increment its own acceptance-criteria subset so increments 1 to 3 ship before the removals in increment 4.",
+    "WCAG audit: remove surfaces 1 and 2 with the recorded reason 'surfaces deleted', regenerate axe-results.json and update studio-wcag-audit.md. Do not add the new pages (ADR-SC-006).",
+    "Brief §4.5 line ranges were not re-verified (ASM-06). Phase 1 corrected PRD V1 deferrals to L111, L115 and L121, found the second list-bound selection at ChecksStudioPage.tsx L705-716, found that StudioUnavailable is local to ChecksStudioPage (L166, L1939), and found that CLAUDE.md L106 'Three-Panel Interface' is also stale. The plan must re-verify every file:line.",
+    "No product code before an approved spec and a Ready story. Preserve the existing dirty working tree."
+  ],
+  "researchQuestions": [
+    {
+      "id": "RQ-01",
+      "source": "OQ-06, ASM-01",
+      "question": "For each readiness value, what does ui-tests/{id}/studio?autorun=1 do? Trace RunControl.tsx:181-186 (runRequest → gate.run()), useRunGate.ts:532 and runEnablement.ts:37-43. Expected: UNLEARNED learns, NEEDS_RELEARN re-learns from the first changed step, READY replays, LEARNING is not runnable. Confirm each, and say whether the LEARNING case drops the request silently or shows something. Also state what the user sees when a guided learn cannot start: guided runner or gateway unavailable, capabilities off, login-required notice, unvalued variables or secrets. Is that a visible refusal or a silent no-op?",
+      "why": "FR-13 and NFR-05 make autorun the only Run entry from All Checks and the detail page. Copy, the tooltip, and whether Execute should be offered for non-READY tests depend on this."
+    },
+    {
+      "id": "RQ-02",
+      "source": "OQ-07, ASM-04",
+      "question": "Does a metadata-only PUT /studio/tests/{id} (name, description or environment, with steps unchanged) change sourceRevision or configurationRevision (StudioService.java:328-406) and thereby the derived readiness (readiness/StudioReadiness.java, ExecutionReadinessService.java)? Does a changed environment force re-learn, or does replay keep the learned revision against a different environment?",
+      "why": "This decides whether a status chip that flips to 'Needs re-learn' or 'Not learned' after a cosmetic edit is expected (FR-16). It also decides whether the detail header's environment should warn."
+    },
+    {
+      "id": "RQ-03",
+      "source": "new (risk 2)",
+      "question": "Is autorun=1 removed from the URL after the editor uses it? Is the execute Idempotency-Key fresh for each gate.run()? What happens on a browser reload of, or Back navigation to, ui-tests/{id}/studio?autorun=1: a second accepted execution, a deduplicated one, or nothing?",
+      "why": "Duplicate UI runs (each with video and a runner slot) become reachable from every Execute button. The answer decides whether the spec must require stripping the parameter with a replace navigation."
+    },
+    {
+      "id": "RQ-04",
+      "source": "FR-11, FR-12, FR-25",
+      "question": "How do GET /studio/executions?testId= and GET /studio/executions/{id} answer for a testId that is absent, forbidden or soft-deleted: an empty page or 403 STUDIO_FORBIDDEN? Does GET /studio/tests/{id} answer 403 for a soft-deleted test?",
+      "why": "The Runs tab and its deep-linked drawer must show the single 'doesn't exist or no access' message consistently, with no partial content, and must not reveal existence."
+    },
+    {
+      "id": "RQ-05",
+      "source": "ASM-05",
+      "question": "Are the global environment filter values (dashboard searchContext.environment) exactly the values GET /studio/tests?environment= matches, including case and spelling? Compare CreateCheckPage.tsx:56, STUDIO_TEST_ENVIRONMENTS and StudioListQuery.",
+      "why": "FR-15 sends the global environment to the server unchanged. A vocabulary mismatch would silently hide UI tests."
+    },
+    {
+      "id": "RQ-06",
+      "source": "ASM-02 (low priority)",
+      "question": "When a user leaves the editor during a guided learn session, what ends the session server-side (expiry job, timeout), and does it hold a runner slot until then?",
+      "why": "This confirms that FR-26 needs no frontend action. Otherwise it is a backend follow-up outside Flow 1."
+    }
+  ],
+  "designCallsForSpec": [
+    {"id": "OQ-01", "owner": "@ux-design-expert", "note": "Precedence of all?type=UI_TEST over the persisted 'checks:catalog:prefs', and whether the override is persisted."},
+    {"id": "OQ-02", "owner": "@architect with @ux-design-expert", "note": "Sort sent to GET /studio/tests and the order of mixed rows. The difference between search fields (server q matches name and description only; client search also matches CSI name and tags) is a factual given, so this is a design call."},
+    {"id": "OQ-03", "owner": "@ux-design-expert", "note": "Status-filter grouping of Not learned, Needs re-learn and Learning."},
+    {"id": "OQ-04", "owner": "@ux-design-expert", "note": "New targets for the Dashboard action and the command-palette entry, and whether the breadcrumb link carries type=UI_TEST."},
+    {"id": "OQ-05", "owner": "@ux-design-expert with @architect", "note": "Runs tab paging and filters, and whether it reuses StudioListLayout."},
+    {"id": "OQ-08", "owner": "@pm with @architect", "note": "D5 doc line scope (PRD L111, L115, L121; CLAUDE.md L103-110; ARCH.md; studio-execution.md). Close before increment 4."},
+    {"id": "OQ-09", "owner": "@ux-design-expert", "note": "Whether the 'UI Test' Type-filter option is hidden or disabled when the switch is off."},
+    {"id": "RQ-03-followup", "owner": "@architect", "note": "If RQ-03 confirms a re-run on reload or Back, the spec decides how autorun is consumed (for example a replace navigation that drops the parameter). This may change ChecksStudioPage behaviour, not its layout (CON-02)."}
+  ],
+  "estimatedEffort": "1-3 days typical STANDARD band for spec work; delivery is four increments sized S-M, M, M and S. Advisory, not a delivery promise.",
+  "inputRequirements": "docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/spec/requirements.json",
+  "inputBrief": "Main-session source brief STUDIO-UNIFY-001 (2026-10-23), decisions D1-D6"
+}

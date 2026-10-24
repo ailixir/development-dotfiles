@@ -37,10 +37,10 @@ The current implementation is a **frontend-only micro-frontend module** designed
    - Adaptive layout system that detects standalone vs federated deployment modes
 
 2. **Mock Backend (MSW - Mock Service Worker):**
-   - Browser-intercepted API layer providing realistic responses during development
+   - Node-side API mocks in the Vitest server and Playwright `msw` project proxy; no browser service worker
    - Comprehensive mock data for all check types, CSI entities, execution results
    - Located in `src/services/mocks/` with handlers organized by domain
-   - Enables full application functionality without backend dependency
+   - Tests use realistic handlers without a backend; development servers proxy `/api/v1` to the configured backend
 
 3. **Platform Integration:**
    - **Federated Mode:** Webpack dev server on port 3002 (`pnpm run dev`)
@@ -49,7 +49,7 @@ The current implementation is a **frontend-only micro-frontend module** designed
    - Event-based communication with platform shell for navigation updates
 
 4. **Development Workflow:**
-   - Mock-first development using MSW for all API interactions
+   - MSW runs in Node for unit/E2E tests; Vite uses `VITE_API_URL` and Webpack uses `REACT_APP_API_BASE_URL` with `/api` removed (both default to `http://localhost:8080`)
    - Component-driven development with isolated testing
    - Build outputs optimized for Module Federation consumption
 
@@ -99,6 +99,8 @@ The UI is built using the following technology stack:
 To enable independent frontend development and facilitate the prototype-first approach, a mock service layer is a mandatory first step.
 
 - **Implementation:** We will use **Mock Service Worker (MSW)**. MSW intercepts outgoing requests from the browser, allowing the UI to be fully developed without any dependency on a live backend.
+
+> **Current implementation note — 2026-10-20 (STUDIO-OBS-011, CLN-51).** The preceding browser-interception sentence is historical plan text. The current frontend registers no browser worker. MSW runs in Node through `frontend/src/services/mocks/studio/server.ts` (Vitest) and `frontend/e2e/mswProxy.ts` (Playwright). Development servers proxy `/api/v1` to the backend as described in §2.1.
     
 - **Benefit:** This allows the UI team to build and test the entire application, including complex flows like the "Checks Studio," against a predictable mock backend, paving the way for stakeholder demos and approval.
     

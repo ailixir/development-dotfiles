@@ -1,0 +1,158 @@
+{
+  "storyId": "STUDIO-UNIFY-001-ui-tests-as-checks",
+  "critiquedAt": "2026-10-24T00:20:00Z",
+  "critiquedBy": "@qa",
+  "specVersion": 6,
+  "iteration": 4,
+  "scope": "Verification only: CRIT-19..25 from critique-3.json, against spec iteration 6 (changelog entry 6), plan revision 3 and the code. Dimensions not touched by those fixes keep their round-3 scores.",
+  "verdict": "APPROVED",
+  "verdictReason": "All seven round-3 issues are resolved. The changed grep gates (S1-S4) no longer match import paths and every line they match today is owned by a planned subtask that lists its file. The editor's 'pending' wording uses existing text only. No HIGH or MEDIUM issue was introduced; two LOW housekeeping items remain (the plan has no subtask yet for the editor's outer availability gate, and some document pins are stale). Weighted average 4.38, all dimensions >= 3. Proceed to plan approval after the plan's small follow-up (CRIT-26).",
+  "scores": {
+    "accuracy": 4.5,
+    "completeness": 4,
+    "consistency": 4.5,
+    "feasibility": 4.5,
+    "alignment": 4.5,
+    "average": 4.38,
+    "rescored": ["consistency 4 -> 4.5 (CRIT-20, CRIT-22, CRIT-24)", "feasibility 3.5 -> 4.5 (CRIT-19, CRIT-20)"],
+    "kept": ["accuracy 4.5 (CRIT-21 fixed, offset by the wording point in CRIT-26)", "completeness 4 (CRIT-23 fixed, offset by the unowned editor gate in CRIT-26)", "alignment 4.5 (CRIT-25 fixed)"]
+  },
+  "issues": [
+    {
+      "id": "CRIT-26",
+      "severity": "LOW",
+      "category": "completeness",
+      "check": "comp-2",
+      "description": "The spec's CRIT-25(b) fix (FR-24, AC-23, §7.1 'Availability gate') moves the editor's outer gate (ChecksStudioPage.tsx L1936-1940, still the source/feature selectors) onto the availability hook: 'off' shows StudioUnavailable, 'pending' shows the 'Loading test…' text with no Studio request, 'on' mounts the editor. No plan subtask owns that edit: 1.15 (editor framing) does not mention it, 2.1 only extracts StudioUnavailable, and the plan's openSpecItems still lists CRIT-25(b) as open. Two smaller points. (a) The wording 'uses only existing renders' is slightly loose: 'Loading test…' (L1167) exists as a string, but only inside the editor's left panel under `scenariosLoading`, so the outer gate must render that string on its own (a bare Typography with the existing text, no new copy or component). (b) Editor tests are unaffected: test/setup.ts settles both slices to fetched=true with fail-open defaults before each file, so they read 'on'; studioRunTransport.node.test.tsx resets modules and bootstraps its own store, so it may briefly render the loading text before the editor.",
+      "location": "plan/implementation.yaml subtask 1.15 (and 2.1), openSpecItems; spec.md#7.1, AC-23",
+      "suggestion": "Add one bullet to 1.15 (it already lists ChecksStudioPage.tsx and has room): the outer gate reads useUiTestAvailability, 'off' -> StudioUnavailable, 'pending' -> the existing 'Loading test…' text, 'on' -> the editor; cover it in pageFraming.test.tsx. Drop CRIT-25(b) from openSpecItems. Optionally say 'the existing text' instead of 'existing renders' in §7.1.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-27",
+      "severity": "LOW",
+      "category": "consistency",
+      "check": "con-2",
+      "description": "Housekeeping pins are one step behind. plan qualityGate pins specIteration 5 and the hashes of spec.md 65fc8b04... / requirements.json bb6c7269... (the revision critiqued in round 3); the spec is now iteration 6 (93a67de4... / ee462841...). The plan's qualityGate still shows lastApproved round 2 and latestCritique round 3. The spec Metadata still names 'critique.json (iteration 2, APPROVED)' and 'plan revision 2', and the plan is revision 3. These always lag by one revision, so they only matter at the moment of approval.",
+      "location": "plan/implementation.yaml qualityGate; spec.md Metadata",
+      "suggestion": "When the user approves, refresh the plan's pins (spec iteration, both hashes, latestCritique = critique-4.json) and the spec Metadata lines in one pass.",
+      "autoFixable": true
+    }
+  ],
+  "roundThreeStatus": [
+    {
+      "issueId": "CRIT-19",
+      "status": "RESOLVED",
+      "evidence": [
+        "Plan 2.18 now runs S2: `! grep -rnE \"/checks/studio/runs|[}'\\\"`]/studio/runs|path=\\\"studio/runs\" src e2e`. I ran it on the tree: 24 lines, 0 imports (no line starts with `import` or contains `from '`). The revision-2 pattern hit the 17 '@/components/studio/runs/...' import lines; the new anchors (/checks/studio/runs, or a quote, backtick or } directly before /studio/runs) do not.",
+        "Every one of the 24 lines is owned: App.tsx L112-113/L141-142 (2.9); navigationSetup L30/L73 and ChecksLayout L87 (2.14); StudioScheduleDialog.tsx L28 (1.14); StudioScheduleDialog.test L145/L234/L252 (2.11); scheduleProvenance.test L20-21 (2.16); runSnapshots.test L49-51 (2.15) and L52-53 (1.18); runLinks L9/L12 (2.15); StudioRunsPage.test L28/L105-106/L175 (deleted 2.13). The only line added during phase 1 (LayoutProvider's explicit runs prefix, 1.22) is removed in 2.15, which lists LayoutProvider.tsx. 2.18 depends on 2.11, 2.12, 2.14, 2.15, 2.16, 2.17, which transitively cover 2.9 and 2.13."
+      ]
+    },
+    {
+      "issueId": "CRIT-20",
+      "status": "RESOLVED",
+      "evidence": [
+        "1.11 now lists ChecksStudioPage.tsx and owns both stale comments: L734 and L694 (`/checks/studio/:id`, `App.tsx:114`). 1.33, 2.18, 3.20 and 4.7 carry notes that they only verify.",
+        "S1 (1.33) run on the tree: part A 18 lines, part B 7 lines = the 25 hits the plan states. Part A: navigationConfig L28 and ChecksLayout L85 (1.22), navigationSetup L75 (1.23), CommandPalette L16 and DashboardPage L753 (1.24), testListPresentation L69 (1.16), LayoutProvider L70 (1.22, now two explicit tests/runs prefixes, which S1 allows), ChecksStudioPage L694 (1.11), StudioRunsPage.test L107/L274 (1.19), StudioTestsPage.test L228/L273/L422 (1.17), studio-guided L185 and studio-variables L104/L174/L233/L234 (1.31). Part B: App.tsx L110/L114/L139/L143 (1.21), pageGuidedRun L1015 (1.8), studioRunTransport L170/L174 (1.9). 1.33 depends on all of these (directly or through 1.11/1.15/1.22).",
+        "S3 (3.20/4.7): 50 `/checks/studio` lines + 21 other literal hits; the 32 extra lines beyond S1 are the allowed tests/runs references (navigationSetup, dialog test, runSnapshots.test, runLinks comments, ChecksLayout L86-87, ChecksLayout.a11y, StudioRunsPage.test, ChecksStudioPage L1061/L1194, StudioTestsPage.test, harness/real-backend E2E), each removed by 1.14-3.19 as the plan states. S4 (4.1): 148 lines in 40 files; the module-name hits are all in files the plan deletes or edits (App.tsx, ReviewStep, CreateCheckPage, UiTestConfig trio, StudioListLayout pair, CreateTestDialog, useStudioTests, useUrlListState pair, both page folders, referencePicker.test, testListPresentation, studioWcagAudit.test, navigationConfig)."
+      ]
+    },
+    {
+      "issueId": "CRIT-21",
+      "status": "RESOLVED",
+      "evidence": [
+        "Spec §12.4 says '12 sites in 10 files'; the list sums to 12 and matches the code (pageAuthoringUx 1, pageEvidence 3, pageGuidedRun 1, pageIncrementalRecording 1, pageReplayAndReferences 1, pageRunGate 1, pageSaveAndStop 1, pageStepTimeout 1, pageBootstrapShape 1, studioWcagAudit renderPage 1). The plan states the same count with line numbers. No '11 sites' remains in spec, requirements or plan.",
+        "K2 text now reads: the proxy serves `*/api/v1/checks/sources`, `*/api/v1/features` and `*/api/v1/csi` (L33-35) but not GET /api/v1/checks. §18 and Metadata record the re-sequenced plan as done and name plan approval, then @sm, as next."
+      ]
+    },
+    {
+      "issueId": "CRIT-22",
+      "status": "RESOLVED",
+      "evidence": [
+        "The plan header was refreshed: revision 3, specIteration 5, the hashes of the critiqued spec, repoHead b39359f78 (matches git HEAD), critique-3.json with its sha256 (cd227173..., matches the file), and K1-K4 listed as resolved with their spec references.",
+        "Residual lag of one revision is tracked as CRIT-27 (LOW)."
+      ]
+    },
+    {
+      "issueId": "CRIT-23",
+      "status": "RESOLVED",
+      "evidence": [
+        "1.6 owns the pageStepTimeout L128 comment, and its notes now list the real bare-mount lines (pageRunGate L130, pageEvidence L108/L123/L227, pageStepTimeout L68).",
+        "1.30 lists the moved create-error cases (400 with detail, 400 without detail, 403, 409, 500, each keeping the route and fields), the 255-character name rejection with the n/255 counter, and the required CSI, matching spec §12.2 and §12.4 (K4) and the originals at StudioTestsPage.test.tsx L426-430."
+      ]
+    },
+    {
+      "issueId": "CRIT-24",
+      "status": "RESOLVED",
+      "evidence": [
+        "Spec §12.5 row 1, FR-28 and AC-27 name both causes for increment 1 ('mount changed to a route id' and/or 'editor framing (increment 1: breadcrumb, read-only CSI, UAT option)', 'no surface added'), say axe-results.json records every finding (studioWcagAudit.test.tsx L243-275), and restate the rule: fix a regression, otherwise regenerate and record. This now matches plan 1.10 and 1.33. No surface is added (ADR-SC-006)."
+      ]
+    },
+    {
+      "issueId": "CRIT-25",
+      "status": "RESOLVED",
+      "evidence": [
+        "(a) 1.8 moves pageGuidedRun's route-switch case (L1012-1024) onto renderStudioAt/uiTestEditorPath; 1.9 replaces studioRunTransport.node's L170-176 routes (and the no-id '/studio') with one `/checks/ui-tests/:id/studio` route and updates renderAt/nav.go. Both files are in their subtasks' `files`, and the S1/S3/S4 test-local patterns would catch the route literals.",
+        "(b) Spec §7.1, FR-24, AC-23 and §10 now specify the editor's outer gate: StudioUnavailable when 'off', the existing 'Loading test…' text (ChecksStudioPage.tsx L1167) when 'pending' with no Studio request, the editor when 'on'. 'pending' always ends because both fetched flags are set on rejection (sourcesSlice L40-45, featuresSlice L64-69). Only existing text and the existing StudioUnavailable are used, so the wording requirement is met; the plan has to own the edit (CRIT-26)."
+      ]
+    }
+  ],
+  "summary": {
+    "highIssues": 0,
+    "mediumIssues": 0,
+    "lowIssues": 2,
+    "autoFixable": 2,
+    "checksEvaluated": 21,
+    "checksPassed": 19,
+    "dimensionChecks": {
+      "accuracy": { "passed": ["acc-1", "acc-2", "acc-3", "acc-4"], "failed": [] },
+      "completeness": { "passed": ["comp-1", "comp-3", "comp-4", "comp-5"], "failed": ["comp-2 (CRIT-26)"] },
+      "consistency": { "passed": ["con-1", "con-3", "con-4"], "failed": ["con-2 (CRIT-27)"] },
+      "feasibility": { "passed": ["feas-1", "feas-2", "feas-3", "feas-4"], "failed": [] },
+      "alignment": { "passed": ["align-1", "align-2", "align-3", "align-4"], "failed": [] }
+    }
+  },
+  "planTaskRules": {
+    "subtasks": 78,
+    "overThreeFiles": [],
+    "verificationPresent": "all 78 (75 command, 3 manual)",
+    "pnpmOnly": true,
+    "dependencyOrder": "no missing or forward dependency; ids unique",
+    "note": "Re-checked with js-yaml against plan revision 3 (unchanged counts)."
+  },
+  "nextAction": "Proceed to plan approval by the user. First add the editor outer-gate bullet to plan subtask 1.15 and drop CRIT-25(b) from openSpecItems (CRIT-26), then refresh the pins in one pass at approval time (CRIT-27). No further critique round is needed. Do not start implementation before the user approves the plan.",
+  "autoFixes": [
+    {
+      "issueId": "CRIT-26",
+      "location": "plan/implementation.yaml 1.15 notes",
+      "original": "- The layout is unchanged.",
+      "suggested": "- The outer gate (L1936-1940) reads useUiTestAvailability: 'off' renders StudioUnavailable, 'pending' renders the existing \"Loading test…\" text and sends no Studio request, 'on' mounts the editor. Covered in pageFraming.test.tsx.\n- The layout is unchanged."
+    }
+  ],
+  "evidence": {
+    "inputHashes": {
+      "spec.md": "93a67de406bba299f77f6d050e6f7aab8abe8a6039f23398cacb54ea1854d9d7",
+      "requirements.json": "ee4628416a38891a0988e5b0afe6274609d2a7f000d6fa298007da30213cebb5",
+      "plan/implementation.yaml": "dbc8b694b42d542f88f3e3b0a33e3fc8b562ccfa6a880860e122b3e0a449d057",
+      "critique-3.json": "cd22717377646c8e74f7b8448a994e100d26003d6be20a01567ef6cbc04c9d2d"
+    },
+    "checksPerformed": [
+      "Ran the four plan scans (S1 parts A and B, S2, S3 parts A and B, S4) myself in frontend/ and compared every matching line with the subtask that owns it.",
+      "Read the exact `verification.command` of 1.33, 2.18, 3.20, 4.1 and 4.7 from the parsed YAML and checked their anchors and pipeline logic.",
+      "Re-counted the 12 bare mounts in the code and compared with spec §12.4 and the plan.",
+      "Checked 1.6, 1.8, 1.9, 1.11, 1.30 notes against the round-3 findings; checked the spec's changed sections (§7.1, §10, §12.4, §12.5, §18, Metadata, FR-24, FR-28, AC-23, AC-27).",
+      "Checked the existing 'Loading test…' text (ChecksStudioPage L1167), the outer gate (L1936-1940), the fetched flags, and test/setup.ts's bootstrap isolation."
+    ],
+    "notPerformed": [
+      "No test, type-check, lint or build was run; the scans were run as greps only.",
+      "The gate pipelines were not executed as whole commands (they begin with pnpm run steps); only their grep parts were run, and the pre-phase exit status 1 is expected.",
+      "The effect of the editor's pending gate on studioRunTransport.node.test.tsx (its own store after vi.resetModules) was reasoned from the setup file, not run."
+    ]
+  },
+  "selfCritique": {
+    "performed": true,
+    "framework": ".aiox-core/development/tasks/spec-critique.md",
+    "verdictRulesApplied": "No HIGH, no MEDIUM, all dimensions >= 3, weighted average 4.38 >= 4.0, so APPROVED.",
+    "scopeDistinction": "Specification and plan readiness only. No implementation verdict. Accessibility items were not raised (ADR-SC-006)."
+  }
+}

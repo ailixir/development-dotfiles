@@ -1,0 +1,1207 @@
+{
+  "storyId": "STUDIO-UNIFY-001-ui-tests-as-checks",
+  "gatheredAt": "2026-10-23T20:25:52Z",
+  "source": "existing",
+  "gatheredBy": "@pm",
+  "elicitationVersion": "2.0",
+  "status": "Phase 1 (Gather) output, revised in Phase 4 (Write Spec) from research.json and the main session's design calls (see changelog). All open questions closed. Not approved; QA critique pending.",
+  "userAuthorization": "User chose 'Flow 1: UI tests appear as checks, frontend only, Flow-2-ready' and asked for the Spec Pipeline on it. User decisions D1-D6 (2026-10-23) are binding; everything else in the source brief is the agreed UX/architect design, which this phase restates without extending.",
+  "sources": [
+    "Source brief STUDIO-UNIFY-001 (main session, 2026-10-23): §1 request, §2 decisions D1-D6, §3 verified state, §4 agreed design",
+    "PRD.md (v2.2) L76, L78, L90, L99, L111, L115, L121, L128, L229",
+    "CLAUDE.md (project): stack, centralized API client, MUI + sx, pnpm, bundle targets, nav tree",
+    ".claude/rules/accessibility-scope.md and docs/architecture/ADR-SC-006-accessibility-scope-functional-only.md",
+    "docs/architecture/ADR-SC-005-single-path-observed-authoring.md (compile/confirm removed)",
+    "Standing rule: single path, no back-compat/legacy routes or redirects (Studio unreleased)"
+  ],
+  "priorityLegend": "Every FR below is in scope for story Done. P0 = core journey, safety or decision-mandated removal. P1 = supporting behaviour. No P2 items: nothing optional was requested.",
+  "functional": [
+    {
+      "id": "FR-01",
+      "description": "Create Check offers a 'UI Test (Checks Studio)' type card. Selecting it shows one step with Name (required, max 255 characters), System/CSI (required, registered CSIs only), Environment (Development, Staging, UAT or Production; defaults to Development) and Description (optional). There is no tags field. The editor's environment select offers the same four values. On the create page, selecting the UI Test card replaces the four-step stepper with this one form. The Check Configuration, Scheduling and Review steps, Back/Next, Test Now, Create Check and the tags field are not shown, and the only submit action is 'Create and open Studio'. The environment counts as chosen once the user changes the Environment select, or once a stored draft whose type is UI Test is restored. Selecting the UI Test card, by click or through ?type=UI_TEST, sets the environment to Development only while no environment has been chosen. That overrides the page's Production mount default and the environment of a restored non-UI-Test draft. So with ?type=UI_TEST and a restored UI Test draft, the restored environment is kept, and re-selecting the card after switching away keeps a chosen environment. Selecting another type card brings back the four-step stepper at Basic Information, keeps name, description, CSI and the current environment, and leaves regular-check behaviour unchanged. The edit page (edit/:id) does not offer the UI Test card.",
+      "priority": "P0",
+      "rationale": "Create a UI test the same way as a regular check, without removing the Studio authoring page. Create Check, the global filter and the server all use four values, but the editor select lacks UAT, so a UAT test would show an unlisted value. CreateCheckPage is a four-step wizard (L58) that sets 'Production' on mount (L130); D4 requires Development for UI tests.",
+      "acceptance": [
+        "AC-01",
+        "AC-30"
+      ],
+      "source": "brief §1, §4.1.1; D4; research RQ-05, R-07; spec DC-04; critique CRIT-6 (main session verified CreateCheckPage.tsx:58 and :130), CRIT-15 (plan critiqueFold environmentChosen; plan gap G8); spec DC-15"
+    },
+    {
+      "id": "FR-02",
+      "description": "'Create and open Studio' sends one create request (POST /studio/tests) through the centralized API client. The request carries the same empty-draft payload the Studio create dialog sends today: authoringSchemaVersion 2, no steps, no variables, default configuration. On success the Create Check wizard draft is cleared and the app navigates, replacing the history entry, to the new test's editor. On failure the error appears inline on the form and no navigation occurs; the inline message reuses the existing createErrorMessage mapping. From increment 1, Create Check is the only create path. The Studio create dialog is deleted, and every other 'Create Test' action (the Tests page and the Runs page, both the header button and the empty state) goes to /checks/create?type=UI_TEST.",
+      "priority": "P0",
+      "rationale": "Single-step create hands off straight to the existing authoring page.",
+      "acceptance": [
+        "AC-02",
+        "AC-03"
+      ],
+      "source": "brief §4.1.1, §4.6"
+    },
+    {
+      "id": "FR-03",
+      "description": "Create Check accepts the query parameter type=UI_TEST and preselects the UI Test card. The query parameter wins over a type restored from the stored Create Check draft. When the UI test switch (FR-24) is off, the card cannot be selected and the parameter is ignored.",
+      "priority": "P1",
+      "rationale": "Entry point for the 'Create UI test' empty-state action. Neither page reads query params today.",
+      "acceptance": [
+        "AC-04"
+      ],
+      "source": "brief §4.2, §4.4, §4.10"
+    },
+    {
+      "id": "FR-04",
+      "description": "Remove the Create Check UI_TEST path that picks an existing Studio test as a check configuration, together with its Create and Review step branches, and the stale uiTest field on the frontend check type model.",
+      "priority": "P0",
+      "rationale": "The path only works against mocks. The backend has no UI_TEST check configuration or executor, and UI_TEST is disabled in application.yml.",
+      "acceptance": [
+        "AC-05"
+      ],
+      "source": "brief §3, §4.5, §4.8 increment 1; single-path rule"
+    },
+    {
+      "id": "FR-05",
+      "description": "The Studio authoring page (ChecksStudioPage) is served at ui-tests/:id/studio in both route trees (federated and standalone), behind the STUDIO feature gate. The autorun=1 query parameter still works. The layout does not change.",
+      "priority": "P0",
+      "rationale": "A type-segmented route keeps check ids and UI test ids in separate namespaces and survives shared ids in Flow 2.",
+      "acceptance": [
+        "AC-06"
+      ],
+      "source": "brief §4.2; D2; D6"
+    },
+    {
+      "id": "FR-06",
+      "description": "When the route carries a test id, the editor loads that test by id (GET /studio/tests/{id}) no matter where it sits in any list page. This holds on first load and when the route id changes while the editor is mounted. The editor never falls back to another test, and a list reload keeps the current selection. The list[0] fallback is deleted in increment 1 (D7). Without a route id, which only a test mount can produce once the bare studio route is gone, the editor loads no test and offers nothing to run; the Plan decides the minimal render. Every test that mounts the editor, including WCAG audit surfaces 3-7, mounts it with a test id. This is a mount change only (ADR-SC-006).",
+      "priority": "P0",
+      "rationale": "Bug fix: the editor picks the URL id from the first list page (default size 20) and falls back to the first item, so a deep link beyond page 1 opens a different test. The route-change path ignores an id that is not in the loaded list.",
+      "acceptance": [
+        "AC-06",
+        "AC-07"
+      ],
+      "source": "brief §3 (bug), §4.5 ChecksStudioPage changes; verified ChecksStudioPage.tsx L483-499 and L705-716; critique CRIT-1, CRIT-16; D7 (reverses the earlier no-id fallback call DC-19)"
+    },
+    {
+      "id": "FR-07",
+      "description": "The editor's breadcrumb reads 'All Checks › {test name}'. Its 'All Checks' item goes to /checks/all, and its back action goes to the UI test detail page. CSI is shown read-only. The existing leave guard (in-page dialog plus beforeunload) stays. The sidebar and browser Back stay unguarded, as today. The 'Open Tests' action in the no-test state goes to All Checks filtered to UI tests.",
+      "priority": "P1",
+      "rationale": "Frame the authoring page as part of the Checks area without changing its layout.",
+      "acceptance": [
+        "AC-08"
+      ],
+      "source": "brief §4.1.2, §4.5; CSI immutability §3"
+    },
+    {
+      "id": "FR-08",
+      "description": "Every in-app entry point that reaches a UI test, its editor or its runs uses the new routes: schedule-dialog run links, run links, command palette, dashboard action, layout area detection and sidebar highlighting. ui-tests paths belong to the Checks area. The Dashboard 'Open Checks Studio' quick action and the command palette 'Studio' entry are repointed in increment 1, when their target /checks/studio is removed. Until increment 3 they go to the Tests page (/checks/studio/tests); from increment 3 they go to /checks/all?type=UI_TEST. They are shown only when the UI test switch (FR-24) reads 'on', like the sidebar's Studio entry today. From increment 1, the Studio schedule dialog receives its run-link target from its host instead of deriving it from the pathname. In increment 1 that target is the existing Runs page run URL, and from increment 2 (when that page is removed) it is the UI test run path for every host. Links are re-walked at each increment boundary, so none points at a deleted route.",
+      "priority": "P0",
+      "rationale": "Old routes are removed without redirects, so no link may still target them.",
+      "acceptance": [
+        "AC-09"
+      ],
+      "source": "brief §4.5 (StudioScheduleDialog, runLinks, CommandPalette, DashboardPage, LayoutProvider, ChecksLayout, navigationSetup), §4.8 increments 1 and 4; critique CRIT-3 (main session verified StudioScheduleDialog.tsx:27-28), CRIT-7; spec DC-09, DC-12, DC-23; D7"
+    },
+    {
+      "id": "FR-09",
+      "description": "A UI test detail page at ui-tests/:id. Its header shows name, status chip, a 'UI Test' chip, CSI, environment and last run. Actions: Edit in Studio (opens the editor), Schedule (opens the existing Studio schedule dialog), Run in Studio (see FR-13), and Delete in an overflow menu (existing delete confirmation, then navigate to /checks/all).",
+      "priority": "P0",
+      "rationale": "UI tests get a detail page equivalent to a check's, so Studio's Tests page can be removed.",
+      "acceptance": [
+        "AC-10"
+      ],
+      "source": "brief §1, §4.1.3, §4.2"
+    },
+    {
+      "id": "FR-10",
+      "description": "The detail page's Overview tab (the default, at ui-tests/:id) shows read-only numbered steps, readiness (with the FR-16 labels, so an open learn shows 'Learning'), read-only variables (name and kind; a secret shows only its vault reference name) and the existing schedule summary. Steps and variables can be edited only in Studio.",
+      "priority": "P0",
+      "rationale": "Users can inspect a test without opening the authoring page.",
+      "acceptance": [
+        "AC-11"
+      ],
+      "source": "brief §4.1.3"
+    },
+    {
+      "id": "FR-11",
+      "description": "The detail page's Runs tab (ui-tests/:id/runs) lists only this test's replay executions, using GET /studio/executions with testId set to the route id. Runs are listed newest first with the existing server paging and no filter controls. Learn sessions are not executions and never appear here, and the tab states in one line that it lists replays and that learning happens in Studio. Rows use the existing Studio run row, changed in increment 2 to a single-test form. Its only other consumer, the Runs page, is deleted in the same increment (D7), so no prop is added. The test-name link is replaced by the run's short id (still the row's link), with the trigger source below it, and the row menu offers no 'Open test'. The Runs tab renders its own table header. Selecting a row opens the existing run details drawer (steps, logs, video evidence, seek-to-step) at ui-tests/:id/runs/:executionId, and that URL also opens the drawer directly. The drawer's test link (testHref) targets the editor at ui-tests/{testId}/studio, and its copy-link action copies the run's ui-tests URL using the existing copyText. The drawer gains an expectedTestId prop (plan gap G3). Nothing from the runs list or drawer renders until GET /studio/tests/{id} has succeeded for the route id. Runs refresh live using the existing mechanism.",
+      "priority": "P0",
+      "rationale": "D3: runs live only on each UI test's detail page. Research RQ-06: guided sessions never create executions. Research RQ-04: execution reads are authorized on the execution, not the test.",
+      "acceptance": [
+        "AC-12"
+      ],
+      "source": "brief §4.1.3, §4.2, §4.6; D3; research RQ-04, RQ-06, R-03, R-06; spec DC-02, DC-03, DC-10, DC-17; critique CRIT-4, CRIT-8 (RunRow.tsx L11-23 has no column prop; RunDetailsDrawer.tsx L53-57 requires onCopyLink and testHref)"
+    },
+    {
+      "id": "FR-12",
+      "description": "If a run loaded under ui-tests/:id/runs/:executionId belongs to a different test than the route id, the page shows not-found and does not render that run. No run snapshot renders before GET /studio/tests/{id} succeeds for the route id. The run details drawer reads and streams the URL's execution itself and paints first from the page's rows, so it receives expectedTestId (the route id). On a mismatch in the read, or in any live snapshot, it uses its existing not-found state.",
+      "priority": "P0",
+      "rationale": "Keeps a run URL bound to its test. Research RQ-04 confirmed the need: GET /studio/executions/{id} answers 200 for a soft-deleted parent, or to the initiating principal without CSI read.",
+      "acceptance": [
+        "AC-13"
+      ],
+      "source": "brief §4.1.3; research RQ-04, R-06 (ASM-03 confirmed); spec DC-03, DC-17; plan gap G3"
+    },
+    {
+      "id": "FR-13",
+      "description": "Every Run or Execute action, on the detail page and on All Checks UI test rows, navigates to the editor with autorun=1 so the run goes through the editor's existing run gate. Neither the lists nor the detail page sends an execute request. The editor consumes autorun once. It removes the parameter from the URL with a replace navigation before it requests the run, and it requests the run only for the test loaded by the route id, after GET /studio/tests/{id} succeeds. It never requests the run after a failed read. The request is evaluated once, when the run gate first settles. The gate has settled when three things are true: its own initial GET /studio/tests/{id} has completed, its capabilities read has resolved or failed, and the editor draft for the route id is loaded, so that 'has steps' is known. If the gate is not runnable at that point, the request is dropped and the existing caption explains why. That covers readiness LEARNING, no steps, a session view that cannot be read, a run already in progress, and execute permission already 'denied'. A permission still 'unknown', because the capabilities read failed, does not block. In that case the run proceeds and the server's refusal (for example 403) is the visible outcome, so the server stays the authority. The API client bounds the wait: a 30 s timeout per attempt and at most 2 GET retries, about 90.6 s in the worst case, after which the read counts as failed. The pending request is dropped if, before settle, the user edits a step, a variable or the environment, presses Run or Stop, or the route id changes, or if the editor unmounts. A reload or Back never starts another run.",
+      "priority": "P0",
+      "rationale": "A single, readiness-governed run entry; executing directly from a list would bypass the run gate. Research RQ-01 and RQ-03: autorun is never removed from the URL, each run gets a fresh Idempotency-Key and there is no per-test guard, so a reload or Back starts a second accepted run. A held request can also fire later on its own, and today autorun can run list[0].",
+      "acceptance": [
+        "AC-14",
+        "AC-29"
+      ],
+      "source": "brief §4.1.4, §4.3; research RQ-01, RQ-03, R-01, R-02; spec DC-01; critique CRIT-2 (useRunGate.ts L292-323 test read, L325-347 capabilities read, canRun predicate; RunControl.tsx L139 runnable), CRIT-18 (plan critiqueFold: apiClient.ts L22 timeout, L97-108 retries; plan gap G9)"
+    },
+    {
+      "id": "FR-14",
+      "description": "All Checks shows UI tests and checks in one catalog. Each row has a kind (check or UI test) derived from its type. Rows are deduplicated by id, and the UI test row wins. A UI test row shows its CSI name, taken from the existing CSI store. The store loads only the first page of 20 CSIs, so when it has no entry for the test's CSI the row shows the CSI id instead, as the run row already does. No CSI request is added. Mixed rows are ordered by creation time, newest first, with id as the tie-break. This keeps the current check order, because GET /checks sorts by createdAt descending. A UI test row fills the table's columns as follows:\n- Check Name: the test name linking to ui-tests/{id}, a caption line with the CSI name (or id), then the description, as for checks.\n- Type: the UI test icon and 'UI Test'.\n- Status: the FR-16 chip.\n- Last Execution: lastRunAt, formatted as for checks, or 'Never'.\n- Actions: FR-19.\nThe environment is not shown, as for checks.",
+      "priority": "P0",
+      "rationale": "Unify Studio's Tests page into Checks. The dedupe is the seam where Flow 2's GET /checks UI_TEST rows will merge.",
+      "acceptance": [
+        "AC-15"
+      ],
+      "source": "brief §1, §4.3, §4.9; TestDto has no csiName (§3); critique CRIT-5 (csiApi.ts L14-16 default limit 20; RunRow.tsx csiName ?? csiId), CRIT-11 (AllChecksPage columns); spec DC-07, DC-16"
+    },
+    {
+      "id": "FR-15",
+      "description": "All Checks loads the Studio test list only when both the UI_TEST source and the STUDIO feature are on. The request (GET /studio/tests) carries the global CSI and environment filters, the search text as q (it matches name and description only), sort=updatedAt,desc (the server default, so the cap keeps the 100 most recently updated tests) and size 100. A request superseded by a newer filter or search change is cancelled.",
+      "priority": "P0",
+      "rationale": "Filters run server-side because the Studio list is capped at 100 per page. Research: the sort values are name, updatedAt and lastRunAt. Readiness is derived per row, at a cost that has not been measured.",
+      "acceptance": [
+        "AC-15",
+        "AC-23"
+      ],
+      "source": "brief §4.3, §4.6; StudioService page cap (§3); research dependencies 'List query vocabulary', R-09, R-10; spec DC-07"
+    },
+    {
+      "id": "FR-16",
+      "description": "UI test status chips follow this mapping. UNLEARNED → 'Not learned' (warning). LEARNING → 'Learning' (info). NEEDS_RELEARN → 'Needs re-learn' (warning). READY takes the last run outcome: PASSED → Passing, FAILED → Failing, ERROR → 'Error' (in the Warning filter group), no run → 'Not run' (in the Pending filter group). When a test is not READY, readiness decides the chip. The All Checks status filter gains the readiness values. 'Not learned', 'Learning' and 'Needs re-learn' can be selected only by their own filter values. Warning covers WARNING checks and Error UI tests, and Pending covers PENDING checks and Not run UI tests.",
+      "priority": "P0",
+      "rationale": "Studio readiness and run vocabularies differ from check statuses (PASSING/FAILING).",
+      "acceptance": [
+        "AC-16"
+      ],
+      "source": "brief §3 (studioTypes readiness and run status), §4.3"
+    },
+    {
+      "id": "FR-17",
+      "description": "UI test rows cannot be bulk-selected. Their selection controls are disabled, and no bulk action ever receives a UI test id.",
+      "priority": "P0",
+      "rationale": "Bulk execute would bypass the run gate.",
+      "acceptance": [
+        "AC-17"
+      ],
+      "source": "brief §4.3"
+    },
+    {
+      "id": "FR-18",
+      "description": "While any tag filter is active, whether global or on the page, UI test rows are hidden, because UI tests carry no tags.",
+      "priority": "P1",
+      "rationale": "TestDto has no tags, and UI tests are created without tags.",
+      "acceptance": [
+        "AC-18"
+      ],
+      "source": "brief §3, §4.1.1, §4.3"
+    },
+    {
+      "id": "FR-19",
+      "description": "Each UI test row on All Checks offers Execute (tooltip 'Run in Studio', see FR-13) and a menu with Open (detail page), Edit in Studio, Schedule (existing Studio schedule dialog) and Delete (existing delete confirmation).",
+      "priority": "P0",
+      "rationale": "Row actions match the check rows but keep the run gate and the Studio-owned scheduler.",
+      "acceptance": [
+        "AC-19"
+      ],
+      "source": "brief §4.3; D1 (Studio scheduler owns UI test schedules)"
+    },
+    {
+      "id": "FR-20",
+      "description": "When the Studio list reports more than 100 UI tests in total, All Checks shows 'Showing 100 of N UI tests — narrow by system or search'.",
+      "priority": "P1",
+      "rationale": "There is no server-side union of checks and tests, so the client view is capped.",
+      "acceptance": [
+        "AC-20"
+      ],
+      "source": "brief §4.3, §4.6"
+    },
+    {
+      "id": "FR-21",
+      "description": "If the Studio list request fails, All Checks keeps its check rows and shows an inline 'UI tests could not be loaded · Retry'. Retry repeats the request.",
+      "priority": "P0",
+      "rationale": "A Studio failure must not hide regular checks.",
+      "acceptance": [
+        "AC-21"
+      ],
+      "source": "brief §4.3"
+    },
+    {
+      "id": "FR-22",
+      "description": "All Checks accepts the query parameter type=UI_TEST and preselects the Type filter to UI Test. On load the query parameter wins over the stored catalog preferences, and the resulting filter is then saved like any other filter change. When the UI test switch (FR-24) is off, a UI_TEST type from the URL or from the stored preferences is not applied, the Type filter shows All Types, and UI_TEST is not written to the stored preferences.",
+      "priority": "P1",
+      "rationale": "Target for the editor's 'Open Tests' action and other UI-test-scoped entry points.",
+      "acceptance": [
+        "AC-04"
+      ],
+      "source": "brief §4.2, §4.5 ('Open Tests' → all?type=UI_TEST), §4.10"
+    },
+    {
+      "id": "FR-23",
+      "description": "With Type = UI Test and no UI tests, All Checks shows 'No UI tests yet' and a 'Create UI test' action that opens Create Check with type=UI_TEST.",
+      "priority": "P1",
+      "rationale": "Empty-state path into the new create flow.",
+      "acceptance": [
+        "AC-22"
+      ],
+      "source": "brief §4.4"
+    },
+    {
+      "id": "FR-24",
+      "description": "One availability switch governs UI tests: the STUDIO feature and the UI_TEST source. If either is off, the app does not fetch Studio tests, shows no UI test rows, hides the 'UI Test' option of the All Checks Type filter, does not apply a UI_TEST type from the URL or stored preferences on either page, dims the UI Test type card in Create Check, hides the Dashboard and command palette UI test entries (FR-08), and shows the feature-unavailable state on ui-tests routes. Availability is derived on every render, never a load-time snapshot, and has three states. It is 'pending' until both sources and features have been fetched. After that it is 'on' if the UI_TEST source and the STUDIO feature are both on (missing entries count as on, so an empty list means on), and 'off' otherwise. While 'pending', no Studio request is sent; a UI_TEST type from the URL, the stored preferences or the stored create draft is held (not applied, not written, not dropped); the detail routes show a loading state, and the editor's outer gate shows its existing 'Loading test…' text (ChecksStudioPage L1167) with no Studio request. When 'off', the editor shows its existing StudioUnavailable (L166). 'pending' always ends, because both fetched flags are also set on a failed fetch (sourcesSlice L42-45; featuresSlice L66-69). On 'off', the held value is dropped and never written, and a selected UI Test create type is reset. On 'on', the held value is applied. An empty sources list still means everything is on.",
+      "priority": "P0",
+      "rationale": "Today the type card checks only the source, and the sidebar checks both the source and the flag.",
+      "acceptance": [
+        "AC-23"
+      ],
+      "source": "brief §4.4; CheckTypeSelector and navigationSetup gating (§3); critique CRIT-7, CRIT-14 (plan critiqueFold; store/index.ts L89-90 async bootstrap; plan gap G10); spec DC-12, DC-18; critique 3 CRIT-25"
+    },
+    {
+      "id": "FR-25",
+      "description": "On the detail page (including its runs routes) and in the editor, a 403 (STUDIO_FORBIDDEN) on the test read, or a 400 for a malformed id, shows one message: 'This UI test doesn't exist or you don't have access'. Any other failure of the test read on the detail page shows a load error with Retry, and nothing from the test or its runs. No other test is shown instead, and the app never probes check endpoints with a UI test id.",
+      "priority": "P0",
+      "rationale": "Studio answers absent, forbidden, soft-deleted and quarantined tests with the same 403. Check and test ids are separate namespaces. That a malformed id answers 400 is inferred (research R-06).",
+      "acceptance": [
+        "AC-07",
+        "AC-24"
+      ],
+      "source": "brief §3, §4.2 rationale, §4.4; research RQ-04, R-06; spec DC-13"
+    },
+    {
+      "id": "FR-26",
+      "description": "Leaving the editor during a replay closes its live subscription. The replay continues on the server and appears, updating live, in the test's Runs tab. A learn is not a run and never appears in the Runs tab. While a learn is open, the status chip, Overview and All Checks show 'Learning'. A learn left before it is saved is published only if the user returns to that test's editor in the same tab; otherwise the server expires it (600 s by default). No frontend action is added for this.",
+      "priority": "P1",
+      "rationale": "Navigating away is not cancellation, and the replay stays visible. Research RQ-06: guided sessions are not executions, finalize is client-only, and the reaper expires abandoned sessions. Showing learns in the Runs tab would need a backend change, which CON-01 forbids.",
+      "acceptance": [
+        "AC-25"
+      ],
+      "source": "brief §4.4; research RQ-06, R-03, R-11; spec DC-02"
+    },
+    {
+      "id": "FR-27",
+      "description": "Remove the old Studio routes, pages and helpers from both route trees with no redirects (the catch-all sends to module home), each in the increment that replaces it (D7). Increment 1: studio/:id, the bare studio route, the editor's no-id fallback, the unused navigationConfig module, and the Studio create dialog (CreateTestDialog, replaced by Create Check → UI Test; it has no test file of its own). Increment 2: studio/runs, studio/runs/:executionId, the Runs page (the cross-test runs list) and the sidebar's Runs child. Increment 3: studio/tests, the Tests page, the sidebar Studio group and the components and helpers only those used: useStudioTests, TestRow, TestRowMenu, StudioListLayout, the list-URL hook useUrlListState and LAST_RUN_FILTER_LABELS. Increment 4: anything left over.",
+      "priority": "P0",
+      "rationale": "D3 drops the cross-test runs list. The single-path rule and D7 forbid legacy routes, pages or fallbacks surviving an increment, since Studio is unreleased. Plan gap G4: useUrlListState and LAST_RUN_FILTER_LABELS become dead with the deleted pages.",
+      "acceptance": [
+        "AC-26"
+      ],
+      "source": "brief §4.2, §4.5 Deleted, §4.8; D3; D7; single-path rule; plan gap G4"
+    },
+    {
+      "id": "FR-28",
+      "description": "WCAG regression guard. The guard changes in three increments: in increment 1, surfaces 3-7 are re-mounted on a route id, a mount change only; in increment 2, surface 2 (the Runs page) is removed with its pins; in increment 3, surface 1 (the Tests page) is removed with its pins. Each increment that moves the axe baseline regenerates it and records the reason in studio-wcag-audit.md in that same increment: 'mount changed to a route id' and/or 'editor framing (increment 1: breadcrumb, read-only CSI, UAT option)', with 'no surface added', for increment 1, and 'surfaces deleted' for increments 2 and 3. The record is never deferred to the increment 4 docs. Do not add the new pages to the audit. The existing audit and the ChecksLayout a11y test stay green; only the latter's entry path changes, in increment 3.",
+      "priority": "P0",
+      "rationale": "ADR-SC-006: the audit is a regression guard only and must not be extended. Deleted surfaces cannot stay pinned.",
+      "acceptance": [
+        "AC-27"
+      ],
+      "source": "brief §3 (audit imports), §4.7; ADR-SC-006; .claude/rules/accessibility-scope.md (regenerate with a recorded reason); D7; plan critiqueFold CRIT-16; critique 3 CRIT-24"
+    },
+    {
+      "id": "FR-29",
+      "description": "Update the documentation (D5, last increment). PRD.md: L76 compile wording; L78 Studio scheduling status (STUDIO-SCHED-001 implemented, off by default); L90-L99 three-panel to two-panel, plus L99 compile/confirm and 'Schedule configuration is post-V1'; L111 Scheduling in the Later column; L115 unified UI_TEST catalog moves to V1 as a frontend view, while application-component/report projections and generic scheduling integration stay later; L128, L158 and L229 compile wording. L121 is unchanged. CLAUDE.md L101-117 (three-panel description and nav tree), and the same text mirrored in AGENTS.md (three-panel at L106, nav entry at L117). docs/architecture/studio-execution.md: L20, L23, L229 heading and L235. ARCH.md: UI tests in the All Checks catalog as a frontend view on the ui-tests routes, with the aggregates still separate. docs/qa/accessibility/studio-wcag-audit.md: checked for consistency with the records written in increments 1-3 (FR-28); the guard rule requires each record in the increment that moves the baseline.",
+      "priority": "P1",
+      "rationale": "Core documents must describe the shipped information architecture. This is in scope for Done per D5.",
+      "acceptance": [
+        "AC-28"
+      ],
+      "source": "D5; brief §3 (PRD stale lines), §4.8 increment 4; spec DC-11 (line scope, checked in Phase 4); critique CRIT-10 (AGENTS.md mirror added by main-session call)"
+    }
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "AC-01",
+      "description": "Given the UI_TEST source and the STUDIO feature are on, when the user opens Create Check and selects 'UI Test (Checks Studio)', then one step shows Name (required, rejects more than 255 characters), System/CSI (required, lists registered CSIs only), Environment preset to Development with exactly the options Development, Staging, UAT and Production, and an optional Description, with no tags field. Given a UAT test, when its editor opens, then the environment select shows UAT as one of its listed options. While UI Test is selected on the create page, the stepper, the Check Configuration, Scheduling and Review steps, Back/Next, Test Now and Create Check are absent, and 'Create and open Studio' is the only submit action."
+    },
+    {
+      "id": "AC-02",
+      "description": "Given a valid UI test form, when the user clicks 'Create and open Studio', then exactly one POST /studio/tests is sent with authoringSchemaVersion 2, empty steps and variables and the default configuration; the Create Check stored draft is removed; the app is at ui-tests/{newId}/studio; and browser Back does not return to the filled create form."
+    },
+    {
+      "id": "AC-03",
+      "description": "Given POST /studio/tests fails, when the user clicks 'Create and open Studio', then the error shows inline on the form and the route does not change."
+    },
+    {
+      "id": "AC-04",
+      "description": "Given the URL create?type=UI_TEST (or all?type=UI_TEST), when the page opens, then the UI Test card is preselected (or the All Checks Type filter shows UI Test), even when a stored create draft or stored catalog preferences hold another type. Afterwards the stored catalog preferences hold UI Test."
+    },
+    {
+      "id": "AC-05",
+      "description": "Given Create Check, when any type is chosen, then no step offers picking an existing Studio test as a check configuration, the Review step has no UI-test-picker section, and the frontend check type model has no uiTest configuration field (type-check passes)."
+    },
+    {
+      "id": "AC-06",
+      "description": "Given a test that is not in the first page of GET /studio/tests, when the user opens ui-tests/{id}/studio directly, or the route changes to that id while the editor is mounted, then the editor reads GET /studio/tests/{id} and shows that test; a later list reload keeps it selected; no other test is ever shown in its place. Given the editor is mounted without a route id, then no test is selected or loaded for editing and no run is requested (the list[0] fallback is gone, D7)."
+    },
+    {
+      "id": "AC-07",
+      "description": "Given GET /studio/tests/{id} answers 403 STUDIO_FORBIDDEN, when the editor opens ui-tests/{id}/studio, then it shows 'This UI test doesn't exist or you don't have access' and loads no other test."
+    },
+    {
+      "id": "AC-08",
+      "description": "Given the editor is open on a test, then the breadcrumb reads 'All Checks › {name}' and its 'All Checks' item targets /checks/all; the in-page back action targets ui-tests/{id}; CSI cannot be edited; with unsaved edits the in-page back opens the existing leave dialog and beforeunload still warns; the 'Open Tests' action targets all?type=UI_TEST."
+    },
+    {
+      "id": "AC-09",
+      "description": "Given the built frontend, when its source and the rendered nav, command palette, dashboard, schedule dialog and run links are inspected, then none target a removed studio route; the Dashboard 'Open Checks Studio' quick action and the command palette 'Studio' entry open /checks/studio/tests in increments 1-2 and /checks/all?type=UI_TEST from increment 3; at every increment boundary no in-app link targets a route deleted so far; after increment 1, the schedule dialog's 'Inspect run' and 'View run' links opened from the editor resolve to an existing run route (the Runs page run in increment 1, ui-tests/{id}/runs/{executionId} from increment 2); and on ui-tests paths the layout treats the page as part of the Checks area."
+    },
+    {
+      "id": "AC-10",
+      "description": "Given an accessible UI test, when ui-tests/{id} opens, then the header shows name, status chip, 'UI Test' chip, CSI, environment and last run. Edit in Studio goes to ui-tests/{id}/studio. Schedule opens the existing Studio schedule dialog. Run in Studio goes to ui-tests/{id}/studio?autorun=1. Delete confirms in the existing dialog, then goes to /checks/all."
+    },
+    {
+      "id": "AC-11",
+      "description": "Given a test with steps and variables including a secret, when the Overview tab shows, then steps are numbered and read-only, readiness is shown, each variable shows name and kind, the secret shows only its vault reference name, no edit controls exist, and the schedule summary is shown."
+    },
+    {
+      "id": "AC-12",
+      "description": "Given a test with more runs than one page, when the Runs tab opens, then the request to GET /studio/executions carries testId equal to the route id; no row or drawer content renders before GET /studio/tests/{id} has succeeded; rows render newest first under the tab's own header, with the run's short id as the row link instead of a test name and no 'Open test' menu item; the tab states that it lists replays and that learning happens in Studio; the next page is reachable through the existing paging; selecting a row opens the run details drawer at ui-tests/{id}/runs/{executionId}; opening that URL directly opens the same drawer; the drawer's test link targets ui-tests/{id}/studio and its copy-link action copies the ui-tests run URL; and a running execution updates live."
+    },
+    {
+      "id": "AC-13",
+      "description": "Given ui-tests/{id}/runs/{executionId} where the execution belongs to another test, when the page loads, then not-found is shown and none of that run's steps, logs or video render. Given GET /studio/tests/{id} answers 403 while GET /studio/executions/{executionId} answers 200 (soft-deleted parent), then only the FR-25 message is shown and no run content renders. Given the drawer is open and a live snapshot arrives whose testId differs from expectedTestId, then the drawer switches to its not-found state."
+    },
+    {
+      "id": "AC-14",
+      "description": "Given the detail page or an All Checks UI test row, when Run in Studio or Execute is used, then the app navigates to ui-tests/{id}/studio?autorun=1, no execute request is sent from the detail page or All Checks, and the run starts only if the editor's run gate admits it."
+    },
+    {
+      "id": "AC-15",
+      "description": "Given flags on and both lists returning data, when All Checks loads, then check rows and UI test rows render in one table; UI test rows show the CSI name from the CSI store, or the CSI id when the store has no entry for it; each UI test row shows its name linking to ui-tests/{id}, 'UI Test' in Type, the FR-16 chip in Status and lastRunAt (or 'Never') in Last Execution; GET /studio/tests is sent with the global csiId and environment, the search text as q, sort=updatedAt,desc and size=100; rows are ordered by createdAt descending, with id as the tie-break; a request superseded by a newer search is cancelled; and a check and a UI test with the same id render as one UI test row."
+    },
+    {
+      "id": "AC-16",
+      "description": "Given UI tests in each state (UNLEARNED, LEARNING, NEEDS_RELEARN, and READY with PASSED, FAILED, ERROR or no run), when All Checks renders them, then the chips read Not learned, Learning, Needs re-learn, Passing, Failing, Error and Not run. The Warning status filter includes the Error test and no readiness-state test, the Pending filter includes the Not run test and no readiness-state test, and each new readiness filter value selects exactly the tests in that readiness."
+    },
+    {
+      "id": "AC-17",
+      "description": "Given All Checks showing check rows and UI test rows, when the user uses row checkboxes or select-all, then UI test checkboxes are disabled and the bulk selection contains only check ids."
+    },
+    {
+      "id": "AC-18",
+      "description": "Given a global or page tag filter is active, when All Checks renders, then no UI test rows are shown; when the tag filter is cleared, they reappear."
+    },
+    {
+      "id": "AC-19",
+      "description": "Given a UI test row, then Execute shows the tooltip 'Run in Studio' and behaves as AC-14, and the row menu offers Open (→ ui-tests/{id}), Edit in Studio (→ ui-tests/{id}/studio), Schedule (existing Studio dialog) and Delete (existing confirmation)."
+    },
+    {
+      "id": "AC-20",
+      "description": "Given GET /studio/tests reports totalElements 150, when All Checks renders, then 'Showing 100 of 150 UI tests — narrow by system or search' is shown; with totalElements of 100 or fewer, no notice is shown."
+    },
+    {
+      "id": "AC-21",
+      "description": "Given GET /studio/tests fails and GET /checks succeeds, when All Checks loads, then check rows render and 'UI tests could not be loaded · Retry' shows inline; Retry sends GET /studio/tests again and on success UI test rows appear."
+    },
+    {
+      "id": "AC-22",
+      "description": "Given no UI tests exist and Type = UI Test, when All Checks renders, then 'No UI tests yet' and 'Create UI test' are shown, and 'Create UI test' opens create?type=UI_TEST."
+    },
+    {
+      "id": "AC-23",
+      "description": "Given the STUDIO feature is off, or the UI_TEST source is disabled, then no GET /studio/tests is sent, no UI test rows render, the All Checks Type filter has no 'UI Test' option, the UI Test type card is dimmed and cannot be selected, and every ui-tests route shows the feature-unavailable state. all?type=UI_TEST, or stored preferences holding UI_TEST, show All Types and leave no UI_TEST in the stored preferences. create?type=UI_TEST preselects nothing. The Dashboard 'Open Checks Studio' quick action and the command palette 'Studio' entry are absent. Given sources and features have not been fetched yet ('pending'), then no GET /studio/tests is sent and a UI_TEST type from the URL, stored preferences or stored draft is neither applied nor written. When sources then arrive with UI_TEST disabled, that type is dropped, never written, and no UI Test form or submit is shown. Given an empty sources list with the STUDIO feature on, UI tests behave as enabled. Given ui-tests/{id}/studio is opened while availability is 'pending', then the editor shows its existing 'Loading test…' text and sends no Studio request until availability is 'on'."
+    },
+    {
+      "id": "AC-24",
+      "description": "Given GET /studio/tests/{id} answers 403 (or 400 for a malformed id), when ui-tests/{id} or a runs route under it opens, then 'This UI test doesn't exist or you don't have access' is shown and no request is sent to /checks/{id}. Given the read fails with 500 or no response, then a load error with Retry is shown, nothing from the test or its runs renders, and Retry repeats the read."
+    },
+    {
+      "id": "AC-25",
+      "description": "Given a replay in progress in the editor, when the user navigates to the detail page's Runs tab, then the editor's live subscription is closed and the replay appears in progress in the Runs tab and updates to its terminal state. Given a learn in progress (the server reports LEARNING), when the user opens the detail page, then the Runs tab lists no entry for the learn, and the status chip and Overview read 'Learning'."
+    },
+    {
+      "id": "AC-26",
+      "description": "Given the end of increment 1, then studio and studio/{id} land on module home through the catch-all in both route trees, the editor has no list[0] fallback, navigationConfig and the Studio create dialog are gone, and every 'Create Test' action on the Tests and Runs pages opens /checks/create?type=UI_TEST. Given the end of increment 2, then studio/runs and studio/runs/{executionId} land on module home too, the Runs page is gone, and the sidebar has no Runs child. Given the end of increment 3, then studio/tests lands on module home too; the Tests page, the sidebar Studio group, useStudioTests, TestRow, TestRowMenu, StudioListLayout, useUrlListState and LAST_RUN_FILTER_LABELS are gone. There is never a redirect to a ui-tests route."
+    },
+    {
+      "id": "AC-27",
+      "description": "Given the Studio WCAG audit, when it runs at the end of each increment, then it passes. After increment 1, surfaces 3-7 mount the editor on a route id. After increment 2, surface 2 is gone. After increment 3, surface 1 is gone. Any baseline move is regenerated, with its reason recorded in that increment ('mount changed to a route id' and/or 'editor framing', with 'no surface added', for increment 1; 'surfaces deleted' for increments 2 and 3). If a change breaks the audit, the regression is fixed instead (accessibility-scope rule). No surface is added for the new pages, and the ChecksLayout a11y test passes with its entry path updated in increment 3."
+    },
+    {
+      "id": "AC-28",
+      "description": "Given the D5 documents, when they are reviewed, then: PRD L115 no longer defers the unified UI_TEST catalog view, while application-component/report projections and generic scheduling integration stay later; PRD L78, L99 and L111 state Studio scheduling is implemented and off by default; PRD L90-L99 describe a two-panel Studio; PRD L76, L99, L128, L158 and L229 no longer describe compile/confirm; PRD L121 is unchanged; CLAUDE.md L101-117, and the AGENTS.md mirror (L106, L117), describe a two-panel Studio and a nav tree with UI tests under Checks and no Studio entry; studio-execution.md L20, L23, L229 and L235 and ARCH.md describe the frontend catalog view and the ui-tests routes; and studio-wcag-audit.md no longer lists surfaces 1 and 2 and records 'surfaces deleted'."
+    },
+    {
+      "id": "AC-29",
+      "description": "Given ui-tests/{id}/studio?autorun=1 for a READY test with steps, whose capabilities read answers canManage true, when the gate settles, then exactly one POST /studio/tests/{id}/execute is sent, the current history entry no longer carries autorun, and a reload of the page, or Back to that entry, sends no further execute. Given the same URL for an UNLEARNED test with steps, then exactly one guided start is sent. Given the same URL for a LEARNING test, for a test with no steps, or with a capabilities read that answers canManage false before the gate settles, then no execute and no guided start is sent at settle or later in that mount (after the learn ends, after 'Refresh test information', or on the first typed step), and the existing caption explains why. Given the capabilities read fails (permission stays unknown) and POST /execute answers 403, then exactly one execute is sent and the existing forbidden narrative is shown. Given GET /studio/tests/{id} fails, then no run is requested. Given the test read has not completed yet, then no run is requested before it does. Given the user edits a step, a variable or the environment, presses Run or Stop, or changes the route id before the gate settles, then the autorun request is dropped and nothing is sent when the reads later complete."
+    },
+    {
+      "id": "AC-30",
+      "description": "Given Create Check on the create route with a stored draft whose environment is Staging and whose type is HTTP, when the user selects the UI Test card (or opens create?type=UI_TEST), then the environment shows Development. When the user then picks UAT, UAT is kept. When the user then selects the HTTP card, the four-step stepper returns at Basic Information with name, description, CSI and UAT kept. Given a stored draft whose type is UI_TEST and whose environment is Staging, when the page restores it, then Staging is kept, and with create?type=UI_TEST as well, Staging is still kept. Given the user picked UAT on UI Test and switched to HTTP, when they re-select the UI Test card, then UAT is kept. Given edit/{id}, then the UI Test card cannot be selected."
+    }
+  ],
+  "nonFunctional": [
+    {
+      "id": "NFR-01",
+      "category": "performance",
+      "description": "All Checks builds UI test rows from one Studio list request per load or filter/search change (size 100), plus the existing CSI store. No extra request is made for CSI names, and none is made while the switch is off.",
+      "metric": "Request-count assertions in component tests: zero GET /studio/tests when off; one per settled filter or search change when on, with superseded requests cancelled; no CSI-name request.",
+      "source": "brief §4.3, §4.4; research R-09 (per-row readiness cost unmeasured)"
+    },
+    {
+      "id": "NFR-02",
+      "category": "performance",
+      "description": "The new detail page and route changes keep the module within the project bundle and paint targets.",
+      "metric": "Initial bundle under 500 KB and First Contentful Paint under 1.5 s (project CLAUDE.md targets); no regression against the current build.",
+      "source": "CLAUDE.md Bundle Optimization"
+    },
+    {
+      "id": "NFR-03",
+      "category": "security",
+      "description": "Absent and forbidden UI tests are indistinguishable in the UI. Type-segmented routes mean no endpoint is probed with an id from the other namespace.",
+      "metric": "Same message text for 403 on detail, runs and editor; zero /checks/{id} requests for UI test ids in tests.",
+      "source": "brief §4.2 rationale, §4.4"
+    },
+    {
+      "id": "NFR-04",
+      "category": "security",
+      "description": "Secret variables show only their vault reference name outside Studio. All HTTP goes through the centralized API client, with no direct fetch() and no hardcoded credentials.",
+      "metric": "Overview renders no secret value; lint and review find no direct fetch in new or changed lines. The existing Test Now fetch in CreateCheckPage.tsx (L465) predates this story and is out of scope; the UI Test branch does not show Test Now.",
+      "source": "brief §4.1.3; CLAUDE.md Code Quality and Security"
+    },
+    {
+      "id": "NFR-05",
+      "category": "reliability",
+      "description": "The editor's run gate is the only way to start a UI test run. No list, detail page or bulk path can start one.",
+      "metric": "Tests assert Execute and Run in Studio navigate to autorun=1 and send no execute request; bulk selection excludes UI test ids.",
+      "source": "brief §4.1.4, §4.3"
+    },
+    {
+      "id": "NFR-06",
+      "category": "reliability",
+      "description": "Each source fails on its own: a Studio list failure leaves check rows working, and a 403 never makes the editor or detail page show another test.",
+      "metric": "Failure-path component tests (AC-07, AC-21, AC-24) pass.",
+      "source": "brief §3 bug, §4.3, §4.4"
+    },
+    {
+      "id": "NFR-07",
+      "category": "scalability",
+      "description": "The client never pages through all UI tests. It loads at most 100 per request and shows the cap notice when there are more.",
+      "metric": "Exactly one Studio list page requested per load (size=100); notice shown when totalElements is over 100.",
+      "source": "brief §4.3, §4.6"
+    },
+    {
+      "id": "NFR-08",
+      "category": "usability",
+      "description": "UI tests are created, found, opened, scheduled and run from the same places as regular checks (Create Check, All Checks, a detail page), without a separate Studio navigation group. The responsive, mobile-first layout is kept.",
+      "metric": "E2E entry points start from Create Check and All Checks; no Studio sidebar group; responsive layout unchanged.",
+      "source": "brief §1, §4.1; CLAUDE.md responsive layout; ADR-SC-006 'still required'"
+    },
+    {
+      "id": "NFR-09",
+      "category": "reliability",
+      "description": "Narrow test coverage for the changed behaviour, covering: catalog-row mapping unit tests; the detail page (403 message, runs request carries testId, Execute goes to autorun); Create Check UI test (create request, then navigation); the editor (id beyond first page opens that test, 403 does not fall back); All Checks (UI rows render, checkboxes disabled). One route test per App.tsx tree (federated /checks and standalone) covers the ui-tests routes and the paths removed so far. It mocks ChecksLayout as a passthrough and the lazy pages as sentinels, because ChecksLayout mounts PlatformSidebar from @put/core-components (plan gap G5). Tests and E2E specs that reference a removed page or route are deleted or updated in the increment that removes it (plan gaps G1, G2). Every editor test that mounts ChecksStudioPage without a route id moves to a route-id mount in increment 1 (D7). Increment 1 also rewrites the Create Test dialog test cases and drops the UiTestConfig path from referencePicker.test.tsx's source scan; increment 3 adds an empty GET */api/v1/checks handler to the E2E MSW handler set for the harness spec (plan gaps K2-K4).",
+      "metric": "pnpm run type-check, lint and test pass; the updated E2E specs pass in the MSW project; the WCAG audit stays green.",
+      "source": "brief §4.7; CLAUDE.md Testing; pnpm-only rule; critique CRIT-1, CRIT-12, CRIT-16; CON-09; D7; plan gaps G1, G2, G5, G6"
+    }
+  ],
+  "constraints": [
+    {
+      "id": "CON-01",
+      "type": "technical",
+      "description": "Frontend-only for V1. No backend, API contract, database or Flyway change. Studio's own scheduler (/studio/tests/{id}/schedule) owns UI test schedules.",
+      "impact": "All behaviour is built on the existing endpoints listed in brief §4.6. Known server gaps (no union of checks and tests, no readiness filter, 100-per-page cap, no tags or csiName on TestDto) are handled client-side.",
+      "source": "D1; brief §3, §4.6"
+    },
+    {
+      "id": "CON-02",
+      "type": "business",
+      "description": "ChecksStudioPage stays the authoring page, and its two-panel layout does not change.",
+      "impact": "Only routing, loading-by-id, breadcrumb/back and links change in the editor.",
+      "source": "D2; brief §3 (two-panel)"
+    },
+    {
+      "id": "CON-03",
+      "type": "business",
+      "description": "Single path, no backward compatibility: removed routes, pages, the legacy UI_TEST picker and the editor's no-id fallback get no redirects, aliases or fallbacks. D7 (user, 2026-10-23, verbatim): 'UI studio is a new feature thats not even in dev yet, this is brand new, no old routes or data should be kept, just update the references if is the case.' No old route, page or fallback survives across increments. Each one is removed in the increment that replaces it, and its references are repointed in that same increment.",
+      "impact": "Old bookmarks land on module home through the catch-all. Every in-app link is migrated in the increment that removes its target, and the links are re-walked at each increment boundary. D7 applies within Flow 1's frontend scope; there is no backend data change (D1, CON-01).",
+      "source": "Standing rule (Studio unreleased); brief §2, §4.2; D7"
+    },
+    {
+      "id": "CON-04",
+      "type": "business",
+      "description": "Accessibility is functional-only (ADR-SC-006). No screen-reader, live-region, keyboard-shortcut, reduced-motion, axe/contrast or a11y-review work, and no WCAG ACs. The existing audit stays green as a regression guard only and is never extended.",
+      "impact": "The new detail page and All Checks changes carry no a11y criteria. The audit only drops deleted surfaces.",
+      "source": "ADR-SC-006; .claude/rules/accessibility-scope.md; brief §4.7"
+    },
+    {
+      "id": "CON-05",
+      "type": "technical",
+      "description": "Use the installed stack and conventions: React 18 with strict TypeScript, MUI v5 (@mui/material 5.18.0) with the sx prop, React Router v6 (react-router-dom 6.30.1), Redux Toolkit 2, MSW 2 in Node, and the centralized API client. Write no v7-only APIs. Use pnpm only. Reuse the existing Studio components named in the design (schedule dialog, schedule summary, delete dialog, run row, run details drawer, video evidence panel, live runs refresh).",
+      "impact": "No new libraries. New surfaces compose existing components (REUSE over CREATE).",
+      "source": "CLAUDE.md; brief §2 standing rules, §4.1.3; IDS principles; research dependency 'MUI and React Router (installed versions)', R-08; frontend/package.json and pnpm-lock.yaml. Observation, not fixed: CLAUDE.md says MUI v7 and React Router v7. That mismatch predates this story and is outside D5."
+    },
+    {
+      "id": "CON-06",
+      "type": "technical",
+      "description": "Flow 2 forward-compatibility: a later backend link (one id shared by a check and a test, UI_TEST check configuration, GET /checks returning UI_TEST rows, CheckDetailsPage redirecting UI_TEST to the UI test path) must land with no change to routes, screens or the create flow.",
+      "impact": "Type-segmented ui-tests routes, id dedupe with the UI test row winning, and UI test path helpers as the single route source. No Flow 2 work in this story.",
+      "source": "D6; brief §4.2 rationale, §4.9"
+    },
+    {
+      "id": "CON-07",
+      "type": "technical",
+      "description": "Checks and Studio tests stay separate aggregates. Nothing in this story creates checks rows for UI tests, and SharedSchedulingIT's zero-UI_TEST-checks assertion stays valid.",
+      "impact": "The catalog merge is a frontend projection only.",
+      "source": "brief §3 (SharedSchedulingIT.java:341); D1"
+    },
+    {
+      "id": "CON-08",
+      "type": "business",
+      "description": "One spec, planned as four increments in order, each removing what it replaces (D7). (1) Editor route, load by id with the no-id fallback deleted, Create Check UI test as the only create path, picker removal; the bare studio and studio/:id routes and the Studio create dialog go. (2) Detail page with Overview, Runs and autorun Execute; studio/runs, studio/runs/:executionId, the Runs page and the Runs nav child go. (3) All Checks merge; studio/tests, the Tests page, the Studio nav group and their components go (StudioListLayout among them, since the Tests page imports it at L5). (4) D5 docs plus anything left over.",
+      "impact": "The plan phase must keep each increment shippable and leave no link pointing at a deleted route at any boundary (spec §14 link walk).",
+      "source": "D6; D7; brief §4.8"
+    },
+    {
+      "id": "CON-09",
+      "type": "technical",
+      "description": "Both App.tsx route trees (federated under /checks and standalone) carry the same ui-tests routes behind the STUDIO feature gate.",
+      "impact": "Path helpers must work in both deployment modes.",
+      "source": "brief §4.2; CLAUDE.md deployment modes"
+    },
+    {
+      "id": "CON-10",
+      "type": "technical",
+      "description": "Tests run against the Node MSW harnesses (the Vitest server and the Playwright mswProxy). There is no browser service worker. The real-backend E2E project is selected with CHECKS_E2E_REAL_BACKEND=1.",
+      "impact": "New mocked scenarios go into the existing Node MSW handlers. The real-backend authoring spec is rewritten to start from Create Check → UI Test.",
+      "source": "CLAUDE.md API Development and Test Mocks; brief §4.7"
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-01",
+      "description": "For an UNLEARNED test, the autorun run gate starts a learn session rather than a replay.",
+      "risk": "medium",
+      "risk_if_wrong": "'Run in Studio' or Execute on an unlearned test may be refused or behave unexpectedly, so copy or status guidance would need a change.",
+      "validation_needed": false,
+      "source": "brief §4.10 [inferred]",
+      "status": "Confirmed by research RQ-01: READY replays, UNLEARNED learns, NEEDS_RELEARN re-learns and LEARNING starts nothing. The held-request hazard is closed by FR-13 (DC-01)."
+    },
+    {
+      "id": "ASM-02",
+      "description": "A learn session abandoned by navigating away ends through the existing server-side expiry job.",
+      "risk": "low",
+      "risk_if_wrong": "Abandoned sessions could hold capacity, which would need a frontend or backend follow-up outside Flow 1.",
+      "validation_needed": false,
+      "source": "brief §4.4 [inferred]",
+      "status": "Partly holds (research RQ-06). The reaper expires a session after 600 s by default. Until then the test reads LEARNING and holds one of the CSI's 3 learn slots and the runner's guided slot. A learn that is left is never published, because finalize is client-only. Releasing it sooner is a backend follow-up outside Flow 1 (R-11)."
+    },
+    {
+      "id": "ASM-03",
+      "description": "A run snapshot can be reached under a different test's route, for example through a hand-edited URL, so the testId guard is needed.",
+      "risk": "low",
+      "risk_if_wrong": "FR-12 is redundant but harmless.",
+      "validation_needed": false,
+      "source": "brief §4.1.3 [inferred need]",
+      "status": "Confirmed by research RQ-04: execution reads are authorized on the execution's CSI and principal, never on the route's test."
+    },
+    {
+      "id": "ASM-04",
+      "description": "Renaming a test in Studio may or may not change its readiness. The status chip always reflects the server-derived readiness on the next read.",
+      "risk": "low",
+      "risk_if_wrong": "Users might see 'Needs re-learn' after a cosmetic edit. The chip mapping still stays truthful to the server.",
+      "validation_needed": false,
+      "source": "brief §4.10 [inferred]",
+      "status": "Resolved by research RQ-02. Name and description edits never change revision or readiness. An environment change moves READY to NEEDS_RELEARN from step 1 and invalidates the schedule (existing behaviour). Flow 1 has no rename surface."
+    },
+    {
+      "id": "ASM-05",
+      "description": "Check and Studio environment values use the same vocabulary (Development, Staging, UAT, Production), so the global environment filter can be sent unchanged to GET /studio/tests.",
+      "risk": "low",
+      "risk_if_wrong": "Server-side environment filtering of UI tests would return wrong results and need value mapping.",
+      "validation_needed": true,
+      "source": "brief §4.3 (send global environment to server); observed STUDIO_TEST_ENVIRONMENTS and MSW check fixtures",
+      "status": "Confirmed by research RQ-05: the four title-case values match exactly. The editor select's missing UAT is fixed in FR-01 (DC-04)."
+    },
+    {
+      "id": "ASM-06",
+      "description": "The file and line references in brief §4.5 were not re-verified by the main session. This phase spot-checked the facts in §3 (see verification) but not every §4.5 line range.",
+      "risk": "low",
+      "risk_if_wrong": "Plan-phase file lists may need correcting. No requirement depends on an exact line.",
+      "validation_needed": true,
+      "source": "brief §4.5 header"
+    }
+  ],
+  "domainModel": [
+    {
+      "entity": "Check",
+      "description": "A generic check (HTTP/TCP/SPLUNK in the backend today) with its own executions and schedules, listed by GET /checks. Carries type, CSI id and name, environment, tags and status (PASSING/FAILING/WARNING/PENDING).",
+      "relationships": [
+        "belongs_to CSI",
+        "has_many execution results",
+        "has_one generic schedule"
+      ]
+    },
+    {
+      "entity": "UI test",
+      "description": "A Studio test (ui_tests): name, description, immutable CSI id, environment, steps, variables, server-derived readiness (UNLEARNED/LEARNING/READY/NEEDS_RELEARN), last run time and status (PASSED/FAILED/ERROR). No tags and no CSI name. Deleting it is a soft delete that invalidates its schedule.",
+      "relationships": [
+        "belongs_to CSI",
+        "has_many runs",
+        "has_one Studio schedule"
+      ]
+    },
+    {
+      "entity": "UI test run",
+      "description": "A Studio execution (ui_test_executions) with steps, logs, video evidence and a terminal status of PASSED, FAILED or ERROR. Its check_id column exists but is never set (Flow 2 seam).",
+      "relationships": [
+        "belongs_to UI test"
+      ]
+    },
+    {
+      "entity": "Studio schedule",
+      "description": "The schedule a UI test owns, managed through /studio/tests/{id}/schedule, not the generic scheduler.",
+      "relationships": [
+        "belongs_to UI test"
+      ]
+    },
+    {
+      "entity": "Catalog row",
+      "description": "A frontend-only projection for All Checks: kind 'check' (with the check) or kind 'uiTest' (with the test and the CSI name from the CSI store). Rows are deduplicated by id, and the UI test row wins.",
+      "relationships": [
+        "references Check or UI test",
+        "references CSI (name)"
+      ]
+    },
+    {
+      "entity": "CSI",
+      "description": "Citi System Inventory entry, the primary grouping for both checks and UI tests. Only registered CSIs can be selected.",
+      "relationships": [
+        "has_many checks",
+        "has_many UI tests"
+      ]
+    }
+  ],
+  "interactions": [
+    {
+      "flow": "Create UI test",
+      "description": "All Checks → Create Check → 'UI Test (Checks Studio)' card → single step (Name, System/CSI, Environment = Development, Description) → 'Create and open Studio' → POST /studio/tests → wizard draft cleared → editor at ui-tests/{id}/studio (history replaced).",
+      "states": [
+        "form idle",
+        "validation error (required name or CSI, name too long)",
+        "creating",
+        "create error inline",
+        "type card dimmed when switch off"
+      ]
+    },
+    {
+      "flow": "Author in Studio",
+      "description": "The editor loads the test by route id. The breadcrumb reads 'All Checks › {name}' and back goes to the detail page. CSI is read-only. The leave guard covers the in-page back and beforeunload.",
+      "states": [
+        "loading",
+        "loaded",
+        "403 refusal message",
+        "unsaved changes leave dialog",
+        "no test selected → Open Tests (all?type=UI_TEST)"
+      ]
+    },
+    {
+      "flow": "Manage on the detail page",
+      "description": "ui-tests/{id}: the header (status, UI Test chip, CSI, environment, last run) with Edit in Studio, Schedule, Run in Studio and Delete. The Overview tab shows read-only steps, readiness, variables and schedule summary. The Runs tab lists this test's runs and opens the run drawer at ui-tests/{id}/runs/{executionId}.",
+      "states": [
+        "loading",
+        "loaded",
+        "403 refusal message",
+        "feature unavailable",
+        "no runs",
+        "run in progress (live)",
+        "run drawer open",
+        "run belongs to another test → not-found",
+        "deleting → /checks/all"
+      ]
+    },
+    {
+      "flow": "Run",
+      "description": "Run in Studio (detail page) or Execute (All Checks row) → ui-tests/{id}/studio?autorun=1 → the editor's run gate admits or refuses → live progress → the run is visible in the Runs tab.",
+      "states": [
+        "gate admits",
+        "gate refuses",
+        "user leaves mid-run (subscription closed, run continues)"
+      ]
+    },
+    {
+      "flow": "Browse All Checks",
+      "description": "Check rows and UI test rows in one table. Global CSI/environment and search reach the Studio list request. Status and type filters cover UI tests, a tag filter hides them, and their bulk selection is disabled. Row actions are Execute and the menu (Open, Edit in Studio, Schedule, Delete).",
+      "states": [
+        "loading",
+        "loaded (mixed rows)",
+        "UI tests failed to load · Retry",
+        "cap notice (Showing 100 of N)",
+        "no UI tests yet (Type = UI Test)",
+        "switch off (no UI rows, no fetch)"
+      ]
+    }
+  ],
+  "edgeCases": [
+    {
+      "id": "EC-01",
+      "scenario": "Deep link or route change to a test beyond the first list page",
+      "handling": "Load it by id and never fall back to the first test (FR-06).",
+      "severity": "high"
+    },
+    {
+      "id": "EC-02",
+      "scenario": "403 STUDIO_FORBIDDEN (absent, forbidden, soft-deleted or quarantined test) or 400 (malformed id) on the detail page, runs routes or editor",
+      "handling": "Show 'This UI test doesn't exist or you don't have access', show no other test and no run content, and send no check-endpoint probe (FR-25, FR-12). Other read failures show a load error with Retry.",
+      "severity": "high"
+    },
+    {
+      "id": "EC-03",
+      "scenario": "STUDIO feature off or UI_TEST source off",
+      "handling": "No Studio fetch, no UI test rows, a dimmed type card and a feature-unavailable state on ui-tests routes. An empty sources list means on. Before sources and features are fetched, availability is 'pending': nothing is fetched, and a UI_TEST type is held without being applied or written (FR-24).",
+      "severity": "medium"
+    },
+    {
+      "id": "EC-04",
+      "scenario": "The Studio list request fails while checks load",
+      "handling": "Keep check rows and show the inline 'UI tests could not be loaded · Retry' (FR-21).",
+      "severity": "medium"
+    },
+    {
+      "id": "EC-05",
+      "scenario": "More than 100 UI tests match",
+      "handling": "Show the cap notice. Readiness filtering applies client-side to the loaded 100 only, because there is no server-side readiness filter (FR-20, brief §4.6).",
+      "severity": "medium"
+    },
+    {
+      "id": "EC-06",
+      "scenario": "No UI tests yet",
+      "handling": "With Type = UI Test, show 'No UI tests yet' and 'Create UI test' → create?type=UI_TEST (FR-23).",
+      "severity": "low"
+    },
+    {
+      "id": "EC-07",
+      "scenario": "The user leaves the editor during a replay or a learn",
+      "handling": "Replay: the subscription closes on unmount, and the replay continues and shows live in the Runs tab. Learn: it never appears in the Runs tab; the test reads 'Learning' until the learn ends; it is published only if the user returns to that editor in the same tab, and otherwise expires on the server after 600 s by default (FR-26, research RQ-06).",
+      "severity": "medium"
+    },
+    {
+      "id": "EC-08",
+      "scenario": "A run URL whose execution belongs to another test",
+      "handling": "Show not-found and render nothing of the run (FR-12).",
+      "severity": "medium"
+    },
+    {
+      "id": "EC-09",
+      "scenario": "A check and a UI test share an id (Flow 2, or a collision)",
+      "handling": "Render one row, the UI test row (FR-14).",
+      "severity": "low"
+    },
+    {
+      "id": "EC-10",
+      "scenario": "An old bookmarked studio route",
+      "handling": "The catch-all sends it to module home, with no redirect (FR-27, CON-03).",
+      "severity": "low"
+    },
+    {
+      "id": "EC-11",
+      "scenario": "Bulk select-all on a mixed page",
+      "handling": "Select only check rows. UI test checkboxes are disabled (FR-17).",
+      "severity": "high"
+    },
+    {
+      "id": "EC-12",
+      "scenario": "Create request fails (validation, permission, network)",
+      "handling": "Show the error inline and do not navigate (FR-02).",
+      "severity": "medium"
+    },
+    {
+      "id": "EC-14",
+      "scenario": "Reload or Back to an editor URL that carried autorun=1, or an Execute on a test that cannot run yet",
+      "handling": "autorun is removed from the URL with a replace navigation before the run is requested, so a reload or Back starts nothing. A request that the gate cannot serve when it first settles is dropped, and the existing caption explains why (FR-13, AC-29).",
+      "severity": "high"
+    },
+    {
+      "id": "EC-13",
+      "scenario": "Delete from the detail page",
+      "handling": "Use the existing confirmation, then go to /checks/all. The server soft-deletes the test and invalidates its schedule (TEST_DELETED).",
+      "severity": "low"
+    }
+  ],
+  "terminology": [
+    {
+      "term": "UI test",
+      "definition": "A Checks Studio test, shown as a check-like row in All Checks and managed on its own detail page. It is not a generic check record in Flow 1.",
+      "aliases": [
+        "Studio test",
+        "scenario (internal editor code term)",
+        "UI_TEST (type value)"
+      ],
+      "avoid": [
+        "UI check (implies a checks row exists)"
+      ]
+    },
+    {
+      "term": "Check",
+      "definition": "A generic check record (the checks table) with its own executions and schedules.",
+      "aliases": [
+        "regular check"
+      ]
+    },
+    {
+      "term": "Editor / Studio",
+      "definition": "ChecksStudioPage at ui-tests/:id/studio, the only authoring surface.",
+      "aliases": [
+        "Checks Studio",
+        "authoring page"
+      ]
+    },
+    {
+      "term": "UI test detail page",
+      "definition": "ui-tests/:id with the Overview and Runs tabs.",
+      "aliases": [
+        "UI test details"
+      ]
+    },
+    {
+      "term": "Readiness",
+      "definition": "Server-derived authoring state: UNLEARNED, LEARNING, READY or NEEDS_RELEARN. When not READY, it decides the status chip.",
+      "aliases": [
+        "learn state"
+      ]
+    },
+    {
+      "term": "Run",
+      "definition": "A Studio execution (replay) of a UI test, with PASSED, FAILED or ERROR outcome and video evidence. Only runs appear in the Runs tab.",
+      "aliases": [
+        "execution",
+        "replay"
+      ]
+    },
+    {
+      "term": "Learn",
+      "definition": "A guided session that records a test's steps (for UNLEARNED or NEEDS_RELEARN). It is not an execution, never appears in the Runs tab and shows as 'Learning' while open.",
+      "aliases": [
+        "guided session",
+        "re-learn"
+      ]
+    },
+    {
+      "term": "Run gate",
+      "definition": "The editor's readiness-governed run control, the only place a UI test run is started (reached through autorun=1).",
+      "aliases": [
+        "RunControl"
+      ]
+    },
+    {
+      "term": "Catalog row",
+      "definition": "The All Checks row union of kind 'check' or kind 'uiTest'.",
+      "aliases": [
+        "CatalogRow"
+      ]
+    },
+    {
+      "term": "Flow 1 / Flow 2",
+      "definition": "Flow 1 is this story: a frontend-only unification. Flow 2 is the later backend link between check and test, out of scope here.",
+      "aliases": []
+    }
+  ],
+  "outOfScope": [
+    {
+      "item": "Flow 2 backend link: shared check/test id migration, UiTestConfiguration in CheckConfiguration, check row written on test create, populating ui_test_executions.check_id, run outcomes in check history, UI_TEST check reads with Studio-style 403, generic schedule/bulk refusing UI_TEST, CheckDetailsPage redirect",
+      "source": "D6; brief §4.9"
+    },
+    {
+      "item": "Any backend, API, schema or Flyway change",
+      "source": "D1"
+    },
+    {
+      "item": "A cross-test runs list (today's Studio Runs page) in any form",
+      "source": "D3"
+    },
+    {
+      "item": "Any ChecksStudioPage layout change",
+      "source": "D2"
+    },
+    {
+      "item": "Tags on UI tests",
+      "source": "brief §4.1.1, §4.3"
+    },
+    {
+      "item": "Direct or bulk execute of UI tests from lists; bulk actions on UI tests",
+      "source": "brief §4.1.4, §4.3"
+    },
+    {
+      "item": "Acknowledge/assign for UI tests",
+      "source": "brief §4.3"
+    },
+    {
+      "item": "Server-side union of checks and tests; server-side readiness filter",
+      "source": "brief §4.6"
+    },
+    {
+      "item": "Redirects or aliases for removed studio routes",
+      "source": "brief §4.2; single-path rule"
+    },
+    {
+      "item": "Guarding sidebar or browser Back against unsaved edits",
+      "source": "brief §4.1.2"
+    },
+    {
+      "item": "Editing steps, variables or secrets outside Studio",
+      "source": "brief §4.1.3"
+    },
+    {
+      "item": "Scheduling UI tests through the generic check scheduler",
+      "source": "D1"
+    },
+    {
+      "item": "Any accessibility work, including adding the new pages to the WCAG audit",
+      "source": "ADR-SC-006; brief §4.7"
+    },
+    {
+      "item": "Application-component and report projections for UI tests (still deferred in the PRD V1 table)",
+      "source": "PRD.md L115"
+    },
+    {
+      "item": "Showing learn sessions in the Runs tab, or releasing an abandoned learn sooner than the server expiry (backend work)",
+      "source": "research R-03, R-11; CON-01"
+    },
+    {
+      "item": "Raising the CSI store's first-page load of 20 CSIs, which also limits Create Check's CSI select (pre-existing; FR-14 falls back to the CSI id)",
+      "source": "critique CRIT-5; CON-01 (no new endpoint)"
+    },
+    {
+      "item": "Replacing the existing direct fetch behind Create Check's Test Now (CreateCheckPage.tsx L465)",
+      "source": "critique CRIT-9"
+    },
+    {
+      "item": "Fixing existing editor feedback gaps (known issues, follow-ups): a guided start answered 503 or 401 shows nothing and is re-sent on the next editor mount; a Vault 503 on execute is worded as a platform-wide switch-off; GuidedSessionException refusals render the 'no wording for' narrative",
+      "source": "research RQ-01, R-12; spec DC-05"
+    }
+  ],
+  "openQuestions": [
+    {
+      "id": "OQ-01",
+      "resolved": true,
+      "resolution": "Closed (spec DC-06). On load the query parameter wins over the stored catalog preferences and over a stored create draft's type. The result is then saved by the existing preferences effect like any filter change. Rationale: the link states explicit intent (brief §4.2), and saving it needs no special case (AllChecksPage.tsx L120-138).",
+      "question": "AllChecksPage restores and persists statusFilter/typeFilter in localStorage ('checks:catalog:prefs', verified L120-138). Does all?type=UI_TEST override the stored preference, and is the overridden value then persisted?",
+      "priority": "medium",
+      "blocksProgress": false,
+      "assignedTo": "@ux-design-expert",
+      "gate": "Close in spec phase"
+    },
+    {
+      "id": "OQ-02",
+      "resolved": true,
+      "resolution": "Closed (spec DC-07). Send sort=updatedAt,desc, the server default, so the cap keeps the 100 most recently updated tests. Order mixed rows by createdAt descending, with id as the tie-break, which keeps today's check order (CheckService.java:115). UI tests match search on name and description only. Rationale: All Checks has no sort control, and the server sorts only by name, updatedAt or lastRunAt (research).",
+      "question": "All Checks has no sort control, and its client search matches name, description, CSI name and tags, while UI tests are filtered by the server's q. What sort value is sent, how are mixed rows ordered, and is the search mismatch acceptable?",
+      "priority": "medium",
+      "blocksProgress": false,
+      "assignedTo": "@architect with @ux-design-expert",
+      "gate": "Close in spec phase"
+    },
+    {
+      "id": "OQ-03",
+      "resolved": true,
+      "resolution": "Closed (spec DC-08). The readiness states can be selected only by their own values. Warning covers WARNING checks and Error UI tests, and Pending covers PENDING checks and Not run UI tests. Rationale: brief §4.3 groups only Error and Not run, and a chip's colour does not make a filter group.",
+      "question": "The status filter gains readiness values, and the brief places only Error in Warning and Not run in Pending. Are the warning-coloured 'Not learned' and 'Needs re-learn' also in the Warning group, and 'Learning' in Pending, or are they selectable only by their own values?",
+      "priority": "medium",
+      "blocksProgress": false,
+      "assignedTo": "@ux-design-expert",
+      "gate": "Close in spec phase"
+    },
+    {
+      "id": "OQ-04",
+      "resolved": true,
+      "resolution": "Closed (spec DC-09). The Dashboard 'Open Checks Studio' quick action and the command palette 'Studio' entry go to /checks/all?type=UI_TEST: both labels open existing UI tests, and the Dashboard's 'Create New Check' already covers creation. The breadcrumb's 'All Checks' item goes to /checks/all, because its label names the unfiltered list, and 'Open Tests' covers the filtered one.",
+      "question": "The Dashboard action (DashboardPage.tsx L753) and the command palette entry (L16) navigate to the removed /checks/studio, and the brief names no new target. Should they go to all?type=UI_TEST or create?type=UI_TEST? Should the editor breadcrumb's 'All Checks' link carry type=UI_TEST?",
+      "priority": "low",
+      "blocksProgress": false,
+      "assignedTo": "@ux-design-expert",
+      "gate": "Close in spec phase"
+    },
+    {
+      "id": "OQ-05",
+      "resolved": true,
+      "resolution": "Closed (spec DC-10). The Runs tab uses the existing server paging (newest first, existing page size) with no status or search filters. Reusing StudioListLayout is a Plan component choice (brief §4.5). Rationale: brief §4.1.3 lists no filters, and without paging, runs beyond the first page would be unreachable (useStudioRuns is server-paged).",
+      "question": "The Runs tab's executions request defaults to size 20. Does the tab paginate, or offer status/search filters as the removed Runs page did, and does it reuse StudioListLayout?",
+      "priority": "medium",
+      "blocksProgress": false,
+      "assignedTo": "@ux-design-expert with @architect",
+      "gate": "Close in spec phase"
+    },
+    {
+      "id": "OQ-06",
+      "resolved": true,
+      "resolution": "Closed by research RQ-01 (ASM-01 confirmed). The Execute and 'Run in Studio' copy stays as brief §4.3 fixed it, for every readiness (spec DC-14). The editor's existing run surface and captions explain learning, re-learning and 'Run is off'.",
+      "question": "For an UNLEARNED test, does autorun start a learn session or a replay (ASM-01)? Does Execute/'Run in Studio' need different copy for tests that are not READY?",
+      "priority": "medium",
+      "blocksProgress": false,
+      "assignedTo": "@architect",
+      "gate": "Verify in research"
+    },
+    {
+      "id": "OQ-07",
+      "resolved": true,
+      "resolution": "Closed by research RQ-02 (ASM-04). A rename never changes readiness. An environment change moves READY to NEEDS_RELEARN (existing behaviour, no change).",
+      "question": "Does a rename in Studio change readiness (ASM-04)?",
+      "priority": "low",
+      "blocksProgress": false,
+      "assignedTo": "@architect",
+      "gate": "Verify in research"
+    },
+    {
+      "id": "OQ-08",
+      "resolved": true,
+      "resolution": "Closed (spec DC-11). The doc list is the brief's D5 list plus CLAUDE.md L101-117. PRD L76, L78, L90-L99, L111, L115, L128, L158 and L229 change, and L121 stays because it is still accurate. studio-execution.md L20, L23, L229 and L235 change. In ARCH.md only the frontend catalog view and routes change; its compile-era API lines are pre-existing drift outside this story (brief §3 ties the compile wording to the PRD lines).",
+      "question": "Several D5 doc scopes are unclear. (a) The brief cites PRD L119 as a V1 deferral, but L119 is the video-evidence paragraph; the deferrals are L111 (Execution: Scheduling), L115 (Integration) and L121. Which lines change, given this story delivers only a frontend catalog view and app-component/report projections stay deferred? (b) CLAUDE.md L103-110 also describes a 'Three-Panel Interface'. Does 'two-panel layout' cover that section? (c) What changes in ARCH.md and studio-execution.md?",
+      "priority": "medium",
+      "blocksProgress": false,
+      "assignedTo": "@pm (spec) with @architect",
+      "gate": "Close before increment 4"
+    },
+    {
+      "id": "OQ-09",
+      "resolved": true,
+      "resolution": "Closed (spec DC-12). Hide the option. Rationale: with the switch off there are no UI test rows to select (FR-24), and the sidebar already hides Studio when it is off (navigationSetup.ts).",
+      "question": "The All Checks Type filter already lists 'UI Test' (AllChecksPage.tsx L432). Is that option hidden or disabled when the switch is off?",
+      "priority": "low",
+      "blocksProgress": false,
+      "assignedTo": "@ux-design-expert",
+      "gate": "Close in spec phase"
+    }
+  ],
+  "verification": {
+    "method": "Read the cited lines on branch brunobuger/ui-studio, 2026-10-23.",
+    "held": [
+      "ChecksStudioPage.tsx L483-499: listTests() with no params (server default size 20, StudioController L58-60), picks the URL id from that page, falls back to list[0]",
+      "ChecksStudioPage.tsx L1152-1153: two-panel comment and Grid",
+      "navigationSetup.ts L15-34 Studio group behind isSourceOn('UI_TEST') && isFeatureOn('STUDIO'), L73-75 studio active-path mapping; navigationConfig.ts imported by nothing",
+      "studioTypes.ts L118 readiness values; L353 lastRunStatus PASSED|FAILED|ERROR; TestDto has no tags or csiName",
+      "CheckConfiguration.java permits only HTTP/TCP/SPLUNK; application.yml L56 UI_TEST: false",
+      "AllChecksPage.tsx L104 limit 100, L195-198 client paging; StudioService.java L178 Math.min(size,100), L338 CSI_IMMUTABLE, L696-704 soft delete with TEST_DELETED",
+      "StudioController.java L155-171 GET /executions accepts testId; STUDIO_FORBIDDEN is StudioAccessDeniedException.CODE",
+      "studioWcagAudit.test.tsx L26-27 imports StudioTestsPage and StudioRunsPage",
+      "CreateTestDialog.tsx L82-91 payload (authoringSchemaVersion 2, steps [], variables [], defaultConfiguration()); EMPTY_FORM environment 'Development'; TEST_NAME_MAX_LENGTH 255",
+      "SharedSchedulingIT.java L341 asserts zero checks WHERE type='UI_TEST'",
+      "App.tsx catch-all path='*' → Navigate to '.' in both trees (L123, L160)"
+    ],
+    "drift": [
+      "PRD L119 is the video-evidence paragraph, not a V1 deferral. The deferrals are L111, L115 and L121 (see OQ-08).",
+      "The route-change effect in ChecksStudioPage.tsx L705-716 also ignores an id that is not in the loaded list, a second instance of the §3 bug. It is folded into FR-06.",
+      "StudioUnavailable is a local component inside ChecksStudioPage.tsx (L166, used at L1939), not a shared module. The detail page cannot import it as-is (a how-level note only).",
+      "CLAUDE.md L106 'Three-Panel Interface' is also stale, but D5 does not list it (see OQ-08)."
+    ]
+  },
+  "autoDecisions": [
+    "[AUTO-DECISION] Source mode? → existing (reason: the user's answers and the agreed design are recorded in the brief; no live elicitation was requested).",
+    "[AUTO-DECISION] Priority split? → every FR in scope; P0 core/safety/removals, P1 supporting (reason: nothing in the brief is optional).",
+    "[AUTO-DECISION] Include the route-change path in the load-by-id fix? → yes, in FR-06 (reason: the same defect was verified at L705-716, and the brief's fix says 'no fallback when an id is given').",
+    "[AUTO-DECISION] Test coverage as an FR or an NFR? → NFR-09 (reason: requirements state WHAT; the test file list belongs to the plan).",
+    "[AUTO-DECISION] Keep the [inferred need] testId guard? → FR-12 at P1 with ASM-03 (reason: it is part of the agreed design and marked inferred, so it is flagged, not dropped).",
+    "[AUTO-DECISION] Gaps found in code (persisted filter prefs, missing targets for the removed entry points, Runs tab paging) → openQuestions, not resolved (reason: Article IV, No Invention)."
+  ],
+  "gatherNote": "All nine taxonomy categories were extracted from the source brief, PRD.md and project rules, with no new features. Facts were spot-checked in code (see verification). Every open question is non-blocking for Phase 2 (assess), and each carries the phase by which it must close. Next: @architect *assess-complexity.",
+  "changelog": [
+    {
+      "date": "2026-10-23",
+      "phase": "Phase 4 (Write Spec)",
+      "by": "@pm",
+      "inputs": "research.json RQ-01..RQ-06 and R-01..R-12; complexity.json; main-session design calls 1-6; Phase 4 code checks (spec §3)",
+      "changes": [
+        "CON-05: corrected to MUI v5 (5.18.0), React Router v6 (6.30.1), Redux Toolkit 2 and MSW 2 (R-08). The CLAUDE.md 'v7' mismatch is recorded as an observation and not fixed (outside D5).",
+        "FR-01, AC-01: the environment offers four values with default Development, and the editor select gains UAT (RQ-05, R-07; DC-04).",
+        "FR-13, AC-29 (new): autorun is consumed once (removed by replace navigation, only for the route-id test after a successful read, dropped if the gate is not runnable on first settle); a reload or Back starts nothing (RQ-01, RQ-03, R-01, R-02; DC-01).",
+        "FR-11, AC-12: the Runs tab lists replays only, carries the learning-happens-in-Studio note, uses server paging, and renders nothing before the test read succeeds (RQ-04, RQ-06, R-03, R-06; DC-02, DC-03, DC-10).",
+        "FR-12, AC-13: the run render is gated on the test read; priority raised P1 to P0 because research confirmed the need (RQ-04; ASM-03).",
+        "FR-26, AC-25: scoped to replays; learns never appear in Runs and show 'Learning' while open; an abandoned learn expires on the server (RQ-06, R-03, R-11; DC-02). FR-10 shows 'Learning' too.",
+        "FR-25, AC-24: a 400 for a malformed id shows the same message (R-06, inferred); other read failures show a load error with Retry (DC-13).",
+        "FR-14, FR-15, AC-15, NFR-01: sort=updatedAt,desc; mixed rows by createdAt desc; q matches name and description; superseded requests cancelled (R-09, R-10; DC-07).",
+        "FR-16, AC-16: readiness states selectable only by their own filter values (DC-08).",
+        "FR-03, FR-22, AC-04: the query parameter wins over the stored draft and preferences, then is saved (DC-06).",
+        "FR-07, FR-08, AC-08, AC-09: breadcrumb 'All Checks' goes to /checks/all; the Dashboard and command palette go to /checks/all?type=UI_TEST (DC-09).",
+        "FR-24, AC-23: the Type filter's 'UI Test' option is hidden when the switch is off (DC-12).",
+        "FR-29, AC-28: D5 line scope named (DC-11).",
+        "Assumptions ASM-01..ASM-05 given research status; EC-02 and EC-07 updated; EC-14 added; 'Learn' term added; out-of-scope gains learns in Runs/earlier release and the existing feedback gaps (DC-05).",
+        "OQ-01..OQ-09 closed."
+      ]
+    },
+    {
+      "date": "2026-10-23",
+      "phase": "Revise (after Phase 5 critique, iteration 1: NEEDS_REVISION 3.65)",
+      "by": "@pm",
+      "inputs": "critique.json CRIT-1..CRIT-13; main-session verification of CRIT-3 and CRIT-6; Phase 4 revise code checks (spec §3.2 PC-08..PC-14)",
+      "changes": [
+        "CRIT-1 FR-06, AC-06: no-id behaviour stated. The list[0] fallback stays only without a route id (the studio route until increment 4, tests, WCAG surfaces 3-7), and autorun is ignored there. NFR-09: no-id editor tests stay unchanged.",
+        "CRIT-2 FR-13, AC-29: 'gate settles' defined as the gate's test read done, its capabilities read resolved or failed, and the draft loaded. Permission 'unknown' proceeds and the server refusal shows. AC-29 only claims 'no execute' when canManage is false at settle.",
+        "CRIT-3 FR-08, AC-09: from increment 1 the schedule dialog's run links come from its host (Runs page run in increment 1, ui-tests run path from increment 2).",
+        "CRIT-4 FR-11, AC-12: RunRow adapted with a single-test prop (run id as link, no 'Open test'); the Runs tab owns its header; the prop is removed in increment 4. Drawer testHref goes to the editor.",
+        "CRIT-5 FR-14, AC-15: CSI id shown when the 20-CSI store page has no name; no new request.",
+        "CRIT-6 FR-01, AC-01, AC-30 (new): the UI Test card replaces the stepper with one form; environment precedence (card selection sets Development, a later user choice is kept, a restored UI Test draft keeps its value); switching back restores the stepper; edit/:id does not offer the card.",
+        "CRIT-7 FR-03, FR-08, FR-22, FR-24, AC-23: with the switch off, UI_TEST from the URL or prefs is ignored and not saved, and the Dashboard and command palette entries are hidden.",
+        "CRIT-8 FR-11: copyText stays, used by the drawer's copy-link in the Runs tab.",
+        "CRIT-9 NFR-04: metric scoped to new or changed lines; the existing Test Now fetch is out of scope.",
+        "CRIT-10 FR-29, AC-28: AGENTS.md mirror added to the D5 list (main-session call).",
+        "CRIT-11 FR-14, AC-15: column mapping for UI test rows.",
+        "CRIT-12 NFR-09: one route test per App.tsx tree; spec §12.4 lists the omitted tests.",
+        "CRIT-13: complexity.json knowledge notes corrected to MUI v5 and React Router v6 (score unchanged).",
+        "Out of scope gains the 20-CSI store page limit and the existing Test Now fetch."
+      ]
+    },
+    {
+      "date": "2026-10-23",
+      "phase": "Spec patch after user approval (plan gaps G1-G10 and user decision D7)",
+      "by": "@pm",
+      "inputs": "plan/implementation.yaml specGaps G1-G10, critiqueFold CRIT-14..CRIT-18 and its 6 blocked subtasks; critique.json iteration 2 (APPROVED 4.20); user decision D7 (2026-10-23, verbatim in CON-03)",
+      "changes": [
+        "D7, CON-03, CON-08: no old route, page or fallback survives an increment. Removals move from increment 4 to the increment that replaces each item, and references are repointed in that same increment.",
+        "D7, FR-06, AC-06: the no-id list[0] fallback is deleted in increment 1 (reverses DC-19). A no-id mount loads nothing and offers nothing to run, and the Plan decides the minimal render. Every editor test, including WCAG surfaces 3-7, mounts with a test id. NFR-09 updated.",
+        "D7, FR-27, AC-26: removals by increment. 1: studio/:id, bare studio, fallback, navigationConfig. 2: studio/runs(/:executionId), Runs page, Runs nav child. 3: studio/tests, Tests page, create dialog, Studio nav group, useStudioTests, TestRow, TestRowMenu, StudioListLayout, useUrlListState, LAST_RUN_FILTER_LABELS. 4: leftovers.",
+        "D7, FR-08, AC-09: Dashboard and command palette repointed in increment 1 to /checks/studio/tests (the interim target, which exists until increment 3) and gated on availability 'on'; /checks/all?type=UI_TEST from increment 3. The schedule-dialog run link goes to the Runs page in increment 1 and the ui-tests run path from increment 2 for every host. Links are re-walked at each boundary.",
+        "D7, FR-11: RunRow becomes the single-test form in increment 2 with no prop, because the Runs page is deleted in the same increment.",
+        "D7, FR-28, AC-27: WCAG surfaces 3-7 re-mounted on a route id in increment 1, surface 2 dropped in increment 2, surface 1 dropped in increment 3. Each baseline move is recorded in the increment that causes it (accessibility-scope rule). FR-29 now only checks studio-wcag-audit.md for consistency in increment 4.",
+        "G1, G2 (NFR-09; spec §12.4, §14): the editor-URL E2E (studio-variables, studio-guided), the real-backend rewrite, and the Tests and Runs page tests' editor-URL assertions are fixed in increment 1. harness.spec.ts and ChecksLayout.a11y.test.tsx move with studio/tests to increment 3.",
+        "G3, FR-11, FR-12, AC-13: the run drawer gains an expectedTestId prop; a mismatch in the read or a live snapshot uses its existing not-found state.",
+        "G4, FR-27: the dead code useUrlListState (with its test) and LAST_RUN_FILTER_LABELS is listed for removal in increment 3.",
+        "G5, NFR-09: the per-tree route test mocks ChecksLayout as a passthrough and the lazy pages as sentinels.",
+        "G6: replayFailure.test.tsx removed from the editor-mount list (it does not mount the page).",
+        "G8 (CRIT-15), FR-01, AC-30: an 'environment chosen' rule. ?type=UI_TEST plus a restored UI Test draft keeps the restored environment, and re-selecting the card keeps a chosen environment.",
+        "G9 (CRIT-18), FR-13, AC-29: the settle wait is bounded by the API client (about 90.6 s worst case). The request is dropped on user activity, a route change or unmount before settle.",
+        "G10 (CRIT-14), FR-24, AC-23, EC-03: availability is derived as 'pending' | 'on' | 'off'. While 'pending' a UI_TEST type is held, not applied, written or dropped; on 'off' it is dropped; late-sources scenario added.",
+        "CRIT-17 (folded): StudioScheduleDialog.test's TestRow import moves with TestRow to increment 3; studioListSx.ts stays; AC-23's entry gating lands in increment 1. PC-11 stands: StudioTestsPage.tsx L5 imports StudioListLayout, so the plan's CRIT-17(c) correction does not apply and StudioListLayout is deleted in increment 3, not 2.",
+        "G7 superseded by D7 (the fallback is removed). G11 (ARCH.md placement) is unchanged in the spec."
+      ]
+    },
+    {
+      "date": "2026-10-23",
+      "phase": "Spec fix after the D7 patch (main-session call: decided 2026-10-23, main session, applying D7)",
+      "by": "@pm",
+      "inputs": "Coordinator resolution of the CreateTestDialog conflict raised in the D7 patch; code check of CreateTestDialog consumers and the 'Create Test' entry points (StudioTestsPage L42, L75, L106; StudioRunsPage L64, L145, L172)",
+      "changes": [
+        "FR-02, FR-27, AC-26, CON-08: CreateTestDialog is deleted in increment 1, because Create Check → UI Test replaces it. It has no test file of its own. From increment 1 the Tests and Runs pages' 'Create Test' actions (header and empty state) go to /checks/create?type=UI_TEST, so there is one create path.",
+        "FR-02: the Create Check inline error reuses createErrorMessage (testErrors.ts), so that helper stays; STUDIO_TEST_ENVIRONMENTS and TEST_NAME_MAX_LENGTH stay as shared constants.",
+        "CON-08: StudioListLayout stays until increment 3, because StudioTestsPage imports it at L5.",
+        "FR-28: each WCAG baseline move is recorded with its reason in the increment that moves it (1: the surfaces 3-7 remount, if it moves; 2: surface 2; 3: surface 1). The record is never deferred to the increment 4 docs."
+      ]
+    },
+    {
+      "date": "2026-10-23",
+      "phase": "Spec patch from the re-sequenced plan (78 subtasks), gaps K2-K4",
+      "by": "@pm",
+      "inputs": "plan/implementation.yaml K2-K4 (K1 already fixed by DC-24); code checked: AllChecksPage.tsx L339-341 (error state), e2e/mswProxy.ts L28-31 and e2e/previewBootstrapHandlers.ts L33 (only */api/v1/checks/sources), referencePicker.test.tsx L600-618 (fs.readFileSync over a file list including UiTestConfig.tsx), StudioTestsPage.test.tsx L355-439, StudioRunsPage.test.tsx L219-228",
+      "changes": [
+        "K2, NFR-09, spec §12.4 increment 3: an empty GET */api/v1/checks handler in e2e/previewBootstrapHandlers.ts (plan 3.19) so harness.spec.ts can move to /checks/all.",
+        "K3, NFR-09, spec §12.4 increment 1: referencePicker.test.tsx L610 drops the UiTestConfig.tsx path from its static-source scan; the conditional increment 3 line is removed.",
+        "K4, NFR-09, spec §12.4 increment 1: the Create Test dialog cases (StudioTestsPage.test L355-439, StudioRunsPage.test L219-228) are rewritten in increment 1; one navigation assertion stays per page, and the name, system and refusal cases move to the Create Check UI Test test."
+      ]
+    },
+    {
+      "date": "2026-10-23",
+      "phase": "Critique round 3 LOW fixes (spec side)",
+      "by": "@pm",
+      "inputs": "spec/critique-3.json CRIT-21, CRIT-24, CRIT-25 (spec part); code checked: ChecksStudioPage.tsx L166 (StudioUnavailable), L1167 ('Loading test…'), L1936-1940 (outer gate); sourcesSlice.ts L42-45 and featuresSlice.ts L66-69 (fetched set on rejection); e2e/previewBootstrapHandlers.ts L33-35",
+      "changes": [
+        "CRIT-21: the re-mount count is now 12 sites in 10 files (spec §12.4); the K2 handler text says the proxy serves sources, features and csi but not GET /checks; spec §18 and Metadata record plan revision 2 as done, with plan approval and @sm next.",
+        "CRIT-24, FR-28, AC-27: the increment 1 WCAG reason names both causes, 'mount changed to a route id' and/or 'editor framing (breadcrumb, read-only CSI, UAT option)', with 'no surface added'. The accessibility-scope rule (fix a regression, otherwise regenerate and record) is stated.",
+        "CRIT-25 (spec part), FR-24, AC-23: the editor's outer gate reads the availability hook. 'off' shows the existing StudioUnavailable, 'pending' shows the existing 'Loading test…' text with no Studio request, and 'on' mounts the editor. 'pending' always ends, because the fetched flags are set on failure. The test-local /studio/tests/:id route shapes are noted as not product routes (spec §12.4).",
+        "The re-mount count is corrected wherever the spec states it (spec §12.4 is the only place)."
+      ]
+    }
+  ]
+}

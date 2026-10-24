@@ -130,10 +130,18 @@ Local-volume query evidence (not production volume): 40 tests × 50 confirmed re
 
 ## Configuration and local verification
 
+> **Dated correction — 2026-10-18, STUDIO-OBS-011 CLN-49 (G11).** The following flag paragraph
+> records the retired v1/v2 rollout; it is not an enablement procedure for the single observed
+> path. Its UI selector and authoring/incremental feature flags no longer exist. Current local
+> wiring is documented in [Studio integrations](studio-integrations.md), and guided/replay
+> deployment inputs in [the runner runbook §14](studio-runner.md#14-one-entrypoint-tls-everywhere-the-one-pod-guard-and-the-new-secrets-studio-obs-009).
+> Gateway configuration remains a separate deployment decision; this note authorizes no provider
+> call or shared-environment enablement.
+
 Keep `STUDIO_GATEWAY_PROVIDER=disabled`, `STUDIO_AUTHORING_V2_ENABLED=false`, and `STUDIO_INCREMENTAL_ENABLED=false` until their respective prerequisites pass. `STUDIO_GATEWAY_MAX_OUTPUT_TOKENS` defaults to 32768. After V19 and compatible API/runner deployment, the v2 authoring UI is separately selected by `window.__CHECKS_CONFIG__.studioAuthoringV2=true` before the bundle loads; the default UI remains compatible with v1. Enabling v2 authoring alone does not enable a model or incremental eligibility.
 
 The maintained Google Gen AI adapter pins1.71.0 and bounds service-account, user ADC and compute ADC credential transport. Service-account/user stalled refresh and socket cancellation have local wire evidence; compute was source-inspected. External/executable/impersonated credential providers fail closed until separately supported. Live R2D2 auth/model/schema/quota evidence remains SPK-01.
 
-Run development evaluation through `studio-runner/evaluation/README.md`. Its CLI executes the complete API lifecycle and independent fixture oracles, but always reports release readiness false. The sample corpus and scripted lifecycle tests do not substitute for a frozen held-out release corpus. Typed assertion-failure origin is not exposed by the current execution API; intended-failure live cases cannot claim correctness without that evidence.
+Run development evaluation through `studio-runner/evaluation/README.md`. Its CLI provides independent fixture oracles, but always reports release readiness false. The sample corpus and scripted lifecycle tests do not substitute for a frozen held-out release corpus. Typed assertion-failure origin is not exposed by the current execution API; intended-failure live cases cannot claim correctness without that evidence.
 
 The existing frontend local dependency is `file:../../put-core-components`; ensure it resolves to the real built PUT core-components checkout before typecheck/build. This session repaired only the local node_modules symlink to the existing built checkout, without changing the package dependency or adding a replacement library.

@@ -1,0 +1,80 @@
+{
+  "recordedAt": "2026-10-24T00:55:30.199Z",
+  "task": "STUDIO-UNIFY-001.1 / 1.1",
+  "command": "pnpm run build (frontend/, webpack production)",
+  "result": "exit 0, 1 warning (asset size limit)",
+  "note": "Pre-change baseline. New increment-1 helper files created in wave 1b are not imported by any module yet, so they are absent from the bundle. The WCAG half of task 1.1 was removed by user decision 2026-10-23.",
+  "entryAssets": [
+    {
+      "file": "main.acc1689031dfd3125ac7.js",
+      "size": "9.43 KiB",
+      "bytes": 9656
+    },
+    {
+      "file": "remoteEntry.js",
+      "size": "8.23 KiB",
+      "bytes": 8428
+    }
+  ],
+  "emittedAssets": [
+    {
+      "file": "490.5f4615fd0b07a0c67ff4.chunk.js",
+      "size": "232 KiB",
+      "bytes": 237568
+    },
+    {
+      "file": "991.f7e97bc6ce1b9e1fd440.chunk.js",
+      "size": "158 KiB",
+      "bytes": 161792
+    },
+    {
+      "file": "374.f08a525848c799c0f0b0.chunk.js",
+      "size": "92.4 KiB",
+      "bytes": 94618
+    },
+    {
+      "file": "502.a09318b76a1d56ccdf33.chunk.js",
+      "size": "63.8 KiB",
+      "bytes": 65331
+    },
+    {
+      "file": "78.c0da441a13cfff1e29b0.chunk.js",
+      "size": "63.7 KiB",
+      "bytes": 65229
+    },
+    {
+      "file": "main.acc1689031dfd3125ac7.js",
+      "size": "9.43 KiB",
+      "bytes": 9656
+    },
+    {
+      "file": "remoteEntry.js",
+      "size": "8.23 KiB",
+      "bytes": 8428
+    },
+    {
+      "file": "index.html",
+      "size": "3.39 KiB",
+      "bytes": 3471
+    },
+    {
+      "file": "config.js",
+      "size": "58 bytes",
+      "bytes": 58
+    }
+  ],
+  "sizeWarningAssets": [
+    {
+      "file": "789.baf35b95f6b145175f90.chunk.js",
+      "size": "3.88 MiB"
+    },
+    {
+      "file": "79.b451454ec6f0fb4dab6a.chunk.js",
+      "size": "540 KiB"
+    },
+    {
+      "file": "170.9de47158fcdb04b2ed1f.chunk.js",
+      "size": "3.83 MiB"
+    }
+  ]
+}

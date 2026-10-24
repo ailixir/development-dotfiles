@@ -1,0 +1,268 @@
+{
+  "storyId": "STUDIO-UNIFY-001-ui-tests-as-checks",
+  "critiquedAt": "2026-10-23T21:35:00Z",
+  "critiquedBy": "@qa",
+  "specVersion": 2,
+  "iteration": 2,
+  "verdict": "APPROVED",
+  "verdictReason": "All 13 round-1 issues are resolved after independent re-verification against the code: 7 MEDIUM and 6 LOW, none open or partial. The revision also holds up against its new design calls (single-test RunRow prop, Create Check one-form branch and switch-back rule, hiding the Dashboard and palette entries, deleting StudioListLayout, host-supplied schedule-dialog run links, and the run-gate settle definition). No HIGH or MEDIUM issue was introduced. Five LOW items remain: switch-off handling is not stated as derived state, the AC-30 precedence has two small ambiguities, the kept no-id list[0] path is test-only code after increment 4, a few test and file bookkeeping gaps, and the settle wait has no bound. None blocks the Plan; weighted average 4.20, all dimensions >= 3.",
+  "scores": {
+    "accuracy": 4.5,
+    "completeness": 4,
+    "consistency": 4,
+    "feasibility": 4,
+    "alignment": 4.5,
+    "average": 4.2
+  },
+  "issues": [
+    {
+      "id": "CRIT-14",
+      "severity": "LOW",
+      "category": "completeness",
+      "check": "comp-1",
+      "description": "DC-18 says a UI_TEST type from the URL or stored preferences is 'not applied and not saved' when the switch is off, but not whether this is derived state or a load-time check. Sources and features are fetched asynchronously at store creation (store/index.ts L89-90), and an empty list counts as on, so the first render can see the switch 'on' and apply and save UI_TEST before sources arrive disabled. The same gap applies to a stored Create Check draft whose type is UI_TEST when the card is later dimmed: the one-form branch would show with its submit enabled.",
+      "location": "spec.md#1.4 DC-18, #6, #9.4, AC-23",
+      "suggestion": "State that the effective Type filter (and the effective create type) is derived from the current switch value, so it reacts when sources load. A stored UI_TEST is dropped, and not written, whenever the switch reads off. Add a test where sources arrive after the first render.",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-15",
+      "severity": "LOW",
+      "category": "consistency",
+      "check": "con-4",
+      "description": "Two small ambiguities in the environment precedence (§6, AC-30). (a) `create?type=UI_TEST` counts as a card selection (sets Development), yet a restored UI Test draft keeps its environment; with both present the outcome is unstated. (b) 'Selecting the UI Test card sets Development' would also reset a value the user had already chosen if they switch to another card and back, which sits oddly with 'a later user choice is kept'.",
+      "location": "spec.md#6 (Environment precedence), AC-30",
+      "suggestion": "Add one sentence: with `?type=UI_TEST` and a stored UI Test draft, the restored environment wins (or Development wins; pick one). State whether re-selecting the card after switching away resets the environment or keeps the current value.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-16",
+      "severity": "LOW",
+      "category": "alignment",
+      "check": "align-2",
+      "description": "DC-19 keeps the editor's list[0] fallback for a mount without a route id. After increment 4 no product route reaches it (§7.1), so it survives only for ~12 test files and WCAG surfaces 3-7. The standing single-path rule (no legacy path or compat layer) argues against code kept only for tests. The call is recorded as a main-session routine decision, and the alternative (re-mount ~12 test files in a route with an id) is a large sweep, so this is acceptable if it is explicit.",
+      "location": "spec.md#1.4 DC-19, #7.1, #12.4, #12.5",
+      "suggestion": "Record in §7.1 or §16 that the no-id fallback is retained only as test support after increment 4 and is a candidate for removal with a test re-mount in a later story. Ask the user to confirm if the single-path rule should override.",
+      "autoFixable": false
+    },
+    {
+      "id": "CRIT-17",
+      "severity": "LOW",
+      "category": "consistency",
+      "check": "con-4",
+      "description": "Bookkeeping gaps in the increments and removals. (a) §12.4 updates StudioScheduleDialog.test.tsx 'in increments 1 and 2', but it imports TestRow (StudioScheduleDialog.test.tsx L17, L53), which is deleted in increment 4, so a further change is needed by then. (b) `studioListSx.ts` (imported by RunRow and TestRow) must stay when StudioListLayout is deleted; §11 'Staying' omits it. (c) PC-11 says StudioListLayout is used by StudioTestsPage, but only StudioRunsPage and its own test import it. (d) §14 lists AC-23 whole under increment 3, while the Dashboard/palette hiding in AC-23 lands in increment 4.",
+      "location": "spec.md#11, #12.4, #14 (rows 3-4), PC-11",
+      "suggestion": "Add the increment 4 test change for the dialog test, add `studioListSx.ts` to 'Staying', correct PC-11, and write 'AC-23 (excluding entries)' for increment 3.",
+      "autoFixable": true
+    },
+    {
+      "id": "CRIT-18",
+      "severity": "LOW",
+      "category": "feasibility",
+      "check": "feas-2",
+      "description": "The settle rule waits for the capabilities read to 'resolve or fail' (§7.2). The hook cannot tell pending from failed today (useRunGate.ts L343-352 leaves permission 'unknown' in both cases), so the Plan adds a signal, which the spec says. But a read that never answers keeps the request pending indefinitely, and a late answer could start a run after the user has moved on. apiClient retries and timeouts probably bound this in practice; I did not verify them.",
+      "location": "spec.md#7.2, R2",
+      "suggestion": "Add one line: if the capabilities read has not finished by a stated bound (or by the time the user edits), the request is dropped rather than held. Alternatively say that the client timeout bounds it and add a test.",
+      "autoFixable": false
+    }
+  ],
+  "resolvedIssues": [
+    {
+      "issueId": "CRIT-1",
+      "status": "RESOLVED",
+      "evidence": [
+        "spec.md §7.1 and DC-19 now state the no-id behaviour (list[0], autorun ignored). It is the right fix: ChecksStudioPage.tsx L495-499 is the fallback, and App.tsx L110 and L139 keep the `studio` route mounting it until increment 4.",
+        "§12.4 'Unchanged' list checked against the repo: of the ChecksStudioPage test files only pageGuidedRun.test.tsx (L1012-1018, Route path '/studio/tests/:id') and studioRunTransport.node.test.tsx (L140-175, initialEntries with Routes) use routes with ids; all others use a bare router. This matches the spec's claim exactly.",
+        "§12.5: studioWcagAudit.test.tsx renderPage (L202-208) is a bare MemoryRouter, so surfaces 3-7 stay as they are. No test uses `?autorun` through the page (only runGate.test.tsx L640 passes runRequest to RunControl directly), so 'autorun ignored without an id' breaks nothing."
+      ]
+    },
+    {
+      "issueId": "CRIT-2",
+      "status": "RESOLVED",
+      "evidence": [
+        "§7.2 defines settle as three conditions: gate test read complete (useRunGate.ts L290-323, loading/loadError), capabilities read resolved or failed (L338-358), editor draft loaded. PC-13 describes the hook accurately (executePermission 'unknown' on pending and failed, canRun blocks only on 'denied', L362-367).",
+        "RunControl.tsx L139 (runnable includes hasSteps and session readability) and L181-187 (held token) match the table. AC-29 now claims 'no execute' only when canManage is false at settle, and adds a failed-read scenario where the server's 403 is the visible outcome. The earlier contradiction is gone.",
+        "Residual: the pending/failed distinction is not exposed by the hook, and the spec says the Plan adds it (R2). See CRIT-18 (LOW)."
+      ]
+    },
+    {
+      "issueId": "CRIT-3",
+      "status": "RESOLVED",
+      "evidence": [
+        "DC-20 and §14: the dialog takes its run-link target from its host from increment 1. StudioScheduleDialog.tsx L26-28 derives the path with pathname.indexOf('/studio'), used at L179 and L214, so the old derivation is what broke. Hosts are only ChecksStudioPage (L1144) and StudioTestsPage (L173), as PC-08 says.",
+        "Increment walk: inc 1 editor host passes the Runs page run base (route exists until inc 4); inc 2 switches all hosts to `ui-tests/{id}/runs/{executionId}` (route exists from inc 2); inc 3 adds the All Checks host with ui-tests links; the Runs page and its drawer still use `studio/runs` until inc 4. No increment boundary leaves a link to a missing route. §5 forbids searching the pathname for '/studio' when resolving the module base. AC-09 and the §12.2 dialog row test both stages."
+      ]
+    },
+    {
+      "issueId": "CRIT-4",
+      "status": "RESOLVED",
+      "evidence": [
+        "DC-17/§8.4/§3.3: RunRow is now ADAPTED. RunRow.tsx L11-23 has no column prop today and the primary cell is the test-name link with '#shortId · trigger' below (L42-70), so a single-test prop with the short id as the link is a small change. RunRowMenu.tsx already makes onOpenTest optional, so 'no Open test' needs no change there.",
+        "RunDetailsDrawer.tsx L53-57 requires testHref and onCopyLink; DC-17 defines both targets. The prop is removed in increment 4, leaving one form, which respects the single-path rule."
+      ]
+    },
+    {
+      "issueId": "CRIT-5",
+      "status": "RESOLVED",
+      "evidence": [
+        "PC-12 verified: csiApi.ts L14-16 default limit 20; csiSlice fetchCSIs calls listCsis with no limit. DC-16/FR-14/AC-15 add the CSI-id fallback, R6 records the risk, and §16.1 records that Create Check's CSI select shares the limit (pre-existing, same as the old Studio create dialog).",
+        "Residual by decision: a user whose CSI is beyond the first 20 still cannot pick it at create time. This was the same before the change and is explicitly out of scope; I treat it as accepted, not open."
+      ]
+    },
+    {
+      "issueId": "CRIT-6",
+      "status": "RESOLVED",
+      "evidence": [
+        "PC-09 verified: steps array at CreateCheckPage.tsx L58; Production mount default L130; CheckTypeSelector in step 0 (L318) with Name/Description/CSI/Environment; Back/Next/Test Now/Create Check at the bottom (direct fetch at L465); `edit/:id` reuses the page (App.tsx L16, L109, L136).",
+        "§6 and DC-15 now specify the one-form branch, what is hidden, the Development rule over the mount default and stored draft, the switch-back rule, and no UI Test card on edit. AC-01 and the new AC-30 cover them. Two small ambiguities remain (CRIT-15, LOW)."
+      ]
+    },
+    {
+      "issueId": "CRIT-7",
+      "status": "RESOLVED",
+      "evidence": [
+        "DC-18/§9.4/§10/AC-23: with the switch off the URL and stored UI_TEST are ignored and not saved, create?type preselects nothing, and the Dashboard and palette entries are hidden. DashboardPage.tsx quick action and CommandPalette.tsx L16 are ungated static targets today, so hiding them is feasible (NAV_ITEMS is a plain array that can be filtered).",
+        "Residual: whether this is derived state and the async-sources race are not stated (CRIT-14, LOW)."
+      ]
+    },
+    {
+      "issueId": "CRIT-8",
+      "status": "RESOLVED",
+      "evidence": [
+        "§11 'Staying' now says copyText stays because the Runs-tab drawer's copy-link uses it (DC-17). RunDetailsDrawer requires onCopyLink (L53), so the consumer exists. runLinks.ts L35 and StudioRunsPage L39/L117 confirm copyText's only current consumer is the page being deleted, so the fix is consistent."
+      ]
+    },
+    {
+      "issueId": "CRIT-9",
+      "status": "RESOLVED",
+      "evidence": [
+        "NFR-04 now says 'new or changed lines', and notes the existing Test Now fetch (CreateCheckPage.tsx L465 verified) is out of scope; the UI Test branch does not show Test Now."
+      ]
+    },
+    {
+      "issueId": "CRIT-10",
+      "status": "RESOLVED",
+      "evidence": [
+        "DC-21/§13/AC-28 add AGENTS.md L106 and L117. Verified: AGENTS.md L106 is 'Three-Panel Interface' and L117 is the 'Checks Studio - UI testing' nav line. D5 is a user-enumerated list; the main session recorded the addition as a routine call, which is traceable."
+      ]
+    },
+    {
+      "issueId": "CRIT-11",
+      "status": "RESOLVED",
+      "evidence": [
+        "§9.2 column table matches AllChecksPage.tsx: columns checkbox, Check Name (link + description caption), Type, Status, Last Execution (toLocaleString or 'Never', L558-563), Actions (PC-14). The UI test row mapping (name link to ui-tests/{id}, 'UI Test', chip, lastRunAt) is complete; AC-15 covers it."
+      ]
+    },
+    {
+      "issueId": "CRIT-12",
+      "status": "RESOLVED",
+      "evidence": [
+        "§12.4 now lists the removed and updated tests, including scheduleProvenance.test.tsx (L28 passes a /studio/${id} testHref), StudioListLayout.test.tsx, and the unchanged editor test family. §12.2 adds one route test per App.tsx tree (CON-09). DC-10 decides StudioListLayout is deleted: StudioListLayout.tsx L101-131 shows required title/icon/query/filter props a filterless tab cannot satisfy.",
+        "Minor bookkeeping remains (CRIT-17, LOW)."
+      ]
+    },
+    {
+      "issueId": "CRIT-13",
+      "status": "RESOLVED",
+      "evidence": [
+        "complexity.json dimensions.knowledge.notes now reads MUI v5 (5.18.0) and React Router v6 (6.30.1) with the correction noted; totalScore 13 and result STANDARD are unchanged."
+      ]
+    }
+  ],
+  "summary": {
+    "highIssues": 0,
+    "mediumIssues": 0,
+    "lowIssues": 5,
+    "autoFixable": 2,
+    "checksEvaluated": 21,
+    "checksPassed": 16,
+    "dimensionChecks": {
+      "accuracy": {
+        "passed": ["acc-1", "acc-2", "acc-3", "acc-4"],
+        "failed": []
+      },
+      "completeness": {
+        "passed": ["comp-2", "comp-3", "comp-4", "comp-5"],
+        "failed": ["comp-1 (CRIT-14)"]
+      },
+      "consistency": {
+        "passed": ["con-1", "con-2", "con-3"],
+        "failed": ["con-4 (CRIT-15, CRIT-17)"]
+      },
+      "feasibility": {
+        "passed": ["feas-1", "feas-3", "feas-4"],
+        "failed": ["feas-2 (CRIT-18)"]
+      },
+      "alignment": {
+        "passed": ["align-1", "align-3", "align-4"],
+        "failed": ["align-2 (CRIT-16)"]
+      }
+    },
+    "round1": {
+      "issues": 13,
+      "resolved": 13,
+      "partial": 0,
+      "open": 0
+    }
+  },
+  "nextAction": "Proceed to the Plan phase (@architect *plan). Fold the five LOW items into the plan or a spec patch: derive the switch-off state reactively (CRIT-14), pin the AC-30 precedence (CRIT-15), record the test-only no-id path decision (CRIT-16), fix the bookkeeping (CRIT-17), bound the settle wait (CRIT-18). The Plan must still re-verify every file:line (ASM-06) and add the settle observable to useRunGate.",
+  "autoFixes": [
+    {
+      "issueId": "CRIT-15",
+      "location": "spec.md#6 Environment precedence",
+      "original": "Restoring a stored draft whose type is already UI Test keeps that draft's environment, because a restore is not a card selection.",
+      "suggested": "Restoring a stored draft whose type is already UI Test keeps that draft's environment, because a restore is not a card selection. When `?type=UI_TEST` is present as well, the restored environment is kept. Re-selecting the UI Test card after switching to another card keeps the current environment."
+    },
+    {
+      "issueId": "CRIT-17",
+      "location": "spec.md#11 Staying; #12.4; #14 row 3; PC-11",
+      "original": "(missing)",
+      "suggested": "Staying: studioListSx.ts (used by RunRow and the Runs tab). StudioScheduleDialog.test.tsx: remove its TestRow import in increment 4. Increment 3 ACs: AC-23 (excluding the Dashboard/palette entries). PC-11: used only by StudioRunsPage and its own test."
+    }
+  ],
+  "evidence": {
+    "inputHashes": {
+      "spec.md": "96c1d92179edea7d11dc632ed6beba926be6448628b5066a2888690fb7338699",
+      "requirements.json": "56d1d3cd038f1b0c9a7a0511a65fec95963428a417e68dae1f87b86198fea5a4",
+      "complexity.json": "05254a4a2ad96a823a4279076f1d38722d56139c37a8fed2ebfb1a56a63a3d46",
+      "research.json": "2b43ee4f02431b91ef6ffa24b472f7f2abbd01d1fba00d9af7ffcefd081842bc"
+    },
+    "requirementCoverage": {
+      "functional": 29,
+      "nonFunctional": 9,
+      "constraints": 10,
+      "acceptanceCriteria": 30,
+      "note": "AC-30 added in iteration 2. All FR-01..FR-29 appear in §2.1 and §19. New design calls DC-15..DC-21 each trace to a CRIT item or a recorded main-session decision (Article IV satisfied)."
+    },
+    "claimsReverifiedInCode": [
+      "useRunGate.ts L243 (executePermission), L290-323 (own test read), L338-358 (capabilities read, 'unknown' until resolved or failed), L362-367 (canRun blocks only on 'denied').",
+      "RunControl.tsx L139 (runnable), L181-187 (held token).",
+      "StudioScheduleDialog.tsx L26-28, L179, L214; hosts ChecksStudioPage L1144 and StudioTestsPage L173 only.",
+      "RunRow.tsx L11-23, L42-70; RunRowMenu optional onOpenTest; RunDetailsDrawer L53-57; StudioListLayout.tsx L101-131 and its sole consumer StudioRunsPage; studioListSx imported by RunRow and TestRow.",
+      "CreateCheckPage.tsx L58, L130, L318, L465; App.tsx L16, L109, L136 (edit route reuses the create page); CheckTypeSelector isEnabled fail-open.",
+      "AllChecksPage.tsx columns and Last Execution cell (L558-563); CommandPalette.tsx NAV_ITEMS L12-18; csiApi.ts L14-16; store/index.ts L89-90 (sources and features dispatched at store creation).",
+      "Test mounting: only pageGuidedRun.test.tsx and studioRunTransport.node.test.tsx use routes with ids; no page test uses ?autorun; AGENTS.md L106 and L117; StudioScheduleDialog.test.tsx L17 and L53 import TestRow."
+    ],
+    "checksPerformed": [
+      "Re-read the full revised spec.md, the second changelog entry, and the revised ACs (AC-01, 04, 09, 12, 15, 23, 26, 28, 29, 30) and complexity.json.",
+      "Re-verified each of CRIT-1..13 against the code rather than the revision log.",
+      "Walked the schedule-dialog run-link target through increments 1 to 4.",
+      "Stress-tested the settle definition and AC-29 against the hook and RunControl code.",
+      "Checked the new design calls (RunRow prop, Create Check branch, entry gating, StudioListLayout deletion) for feasibility, Article IV traceability, ADR-SC-006 (no accessibility work added), single path, pnpm and Flyway."
+    ],
+    "notPerformed": [
+      "No test suite, type-check, lint or build was run.",
+      "apiClient timeout and retry behaviour (relevant to CRIT-18) was not read.",
+      "The real CSI count and the cost of GET /studio/tests at size=100 remain unmeasured."
+    ],
+    "limits": [
+      "Fractional dimension scores are used where a dimension sits between rubric levels. The average is the weighted mean (0.25, 0.25, 0.20, 0.15, 0.15) = 4.20."
+    ]
+  },
+  "selfCritique": {
+    "performed": true,
+    "framework": ".aiox-core/development/tasks/spec-critique.md",
+    "verdictRulesApplied": "No HIGH issues, no MEDIUM issues, all dimensions >= 3, weighted average 4.20 >= 4.0, so APPROVED.",
+    "scopeDistinction": "Local specification gate only. No implementation verdict. Accessibility items were not raised (ADR-SC-006)."
+  }
+}
