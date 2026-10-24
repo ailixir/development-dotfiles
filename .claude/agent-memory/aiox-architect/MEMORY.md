@@ -36,7 +36,9 @@
 - [OBS-009 W1.5 R1/ADJ-1/A4](obs009_w15_part2_rulings.md) — R1 GO shared derivation; ADJ-1 (a) outcome-bound applyFinal disjunct, no V23; coordinator TLS, tripwire 0
 - [OBS-008 W5 unreadable + alias](obs008_w5_unreadable_alias_rulings.md) — drop pointer only on fresh UNLEARNED/NEEDS_RELEARN (READY masks LEARNING); alias deleted; start 422 undeclared
 - [OBS-009 pre-F-merge rulings](obs009_fmerge_prerulings.md) — fixture terminate oracle; lost-control-body=A12; connector path filter+API NetPol; tls-connector name blocker
-- [OBS-011 T0 prep](obs011_t0_prep.md) — 2026-10-18: claim 98/checkCommand 22 (AC-4c moot), AC-3 done by 009, runner sandboxes (verifyRunnerDist), REFUSED ruling
+- [OBS-011 T0 prep](obs011_t0_prep.md) — T0 record t0/t0-record.md + lanes.v3; S_011 061fc41f; branch A no Await.java; execution/ folder
 - [OBS-009 pre-G9 rulings](obs009_preg9_rulings.md) — F-A replay orphan carried RUN-ORPHAN-01; pre-Ready secretUse UNKNOWN_OUTCOME accepted, runner NOT_USED later
 - [MODEL-SIZING draft](model_sizing_ruling_draft.md) — 2026-10-18 A-ii: out 98304/in 786432 (maxima higher), 4096/call kept; awaits @pm ack; B8 user
 - [OBS-010 dated list cross-check](obs010_dated_list_crosscheck.md) — 2026-10-18 e5c58fa5 WITH-NOTES; RKO-09 surface; observed live via uat; $id refs dont move hashes
+- [Candidate B send cap](candidate_b_send_cap_ruling.md) — r067: TRANSPORT_STALL (capBound+no headers), cap 50, lease=deadline+2s, live call-seconds 60, no migration
+- [P3 UUID refId amendment](p3_uuid_refid_amendment.md) — 2026-10-23 r067: FE omits UUID-shaped referenceIds in action list only; API, safeLabel, flows unchanged

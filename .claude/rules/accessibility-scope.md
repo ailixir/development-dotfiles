@@ -22,7 +22,7 @@ This project has **no WCAG conformance target** and no assistive-technology user
 - Security styling of untrusted content (e.g. page-derived labels)
 - The responsive / mobile-first layout (project CLAUDE.md)
 - Semantic MUI components used as they come
-- The existing `frontend/src/test/a11y/studioWcagAudit.test.tsx` and `docs/qa/accessibility/` stay green as a **regression guard only**. Never extend them. If a change breaks them, fix the regression or regenerate the baseline with a recorded reason.
+- ~~The WCAG audit regression guard~~ **removed by user decision 2026-10-23** ("We dont need WCAG, ignore/remove all accessibility tasks"): `frontend/src/test/a11y/studioWcagAudit.test.tsx` was deleted in STUDIO-UNIFY-001.1. `docs/qa/accessibility/` is a historical record only; do not regenerate or gate on it. No axe assertions in tests.
 
 ## When drafting or validating stories
 

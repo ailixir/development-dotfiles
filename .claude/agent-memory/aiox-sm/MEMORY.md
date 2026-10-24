@@ -1,1 +1,2 @@
 - [STUDIO-OBSERVED story conventions](project_studio_observed_story_conventions.md) — OBS-006-shaped stories, AC source tags, security conditions verbatim as ACs, Decisions-pending table, one-story-with-lanes precedent
+- [STUDIO-UNIFY-001 stories](project_studio_unify_001_stories.md) — four per-increment stories drafted 2026-10-23, split-AC convention, script-generated task blocks, open items for @po

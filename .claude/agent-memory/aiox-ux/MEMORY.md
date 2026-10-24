@@ -1,0 +1,1 @@
+- [Studio harness B UI constraints](project_studio_harness_b_ui_constraints.md) — frozen visual190 harness pins seek button names, Saved text, POST ceilings; keep them in UX fixes

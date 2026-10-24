@@ -16,5 +16,7 @@ Drift facts measured 2026-10-18 that change the story's premises:
 
 Key rulings: F-1 `require(..RUNTIME_INCOMPATIBLE 409)` goes before `insertAction`; the instanceof conditionals are kept. Publication disabled + terminal → `REFUSED`. In-repo `Await`, no Awaitility. CLN-F2 retire (with @data-engineer co-sign).
 
+**T0 record (2026-10-18, during B1):** `docs/qa/evidence/STUDIO-OBS-011/t0/t0-record.md` + `lanes.v3.json` (`anchorsS011`) + `w-brief.v3.md`. S_011 = HEAD b39359f78, source 061fc41f (= 009 trigger-bound), dist 698a9365, helm 46070907; differs from G9b capture by 2 backend test files only. Rulings: R-5w v3 branch A (Awaitility direct, NO Await.java/helper); evidence folder `STUDIO-OBS-011/execution/` (lane receipts `execution/<lane>/`); K-17 IT-R prep runs read-only during B1; K-19 "tree open" gates first write; B2–B7 option A fresh recommended. GuidedSessionService unchanged (insertAction is :1441, not :1440); ReplayIT/TransportFaultIT/Planning/cli.mjs anchors moved.
+
 **Why:** future rulings on 011 lanes should start from these measured facts, not from the story's 2026-10-09 numbers.
 **How to apply:** before re-ruling 011 items, check the ratification record in `docs/qa/evidence/STUDIO-OBS-011/t0-<date>/`, and re-measure if source moved. Related: [[obs009-fmerge-prerulings]], [[obs009-preg9-rulings]].

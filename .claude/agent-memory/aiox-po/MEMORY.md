@@ -27,3 +27,5 @@
 - [010 T2 status owner + removals 2026-10-18](project_010_t2_status_owner.md) — @po does not move 010 to InProgress (@analyst/@dev); 16 RKG/RKO removals confirmed
 - [011 T0 ratification 2026-10-18](project_011_t0_ratification_20261018.md) — P-1..P-12 + RD-1..4; CLN-57..60; CFC-01 @pm-accepted; P-1 AC-5 row applied; policy owner = user
 - [009 local MET 2026-10-18](project_009_local_met_20261018.md) — trigger MET under C8 waiver (061fc41f); 011 starts satisfied; marks = dated notes; B2/B3 rulings owed by @po
+- [UNIFY-001 validation 2026-10-23](project_unify001_validation_20261023.md) — 4 stories GO/Ready (9,9,9,8); C-1 plan approval; out-of-§14 AC placements ruled correct
+- [009/010 closure 2026-10-23](project_009_010_closure_20261023.md) — Done via QA r075; items 4+6 done; rest → 016 AC-1..22 (Ready 9/10); 51+28 mapped

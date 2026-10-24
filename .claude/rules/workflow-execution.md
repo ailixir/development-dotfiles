@@ -1,5 +1,15 @@
 # Workflow Execution — Detailed Rules
 
+## Explicit AIOX Lean selection
+
+When Lean Delivery is explicitly requested, use the project-root AIOX Lean
+availability section and `docs/workflows/lean-delivery.json` to resolve its shared
+driver. This route precedes the default legacy workflows below; do not add a
+second SDC/spec controller or use the vendored generic runner for Lean. Help,
+doctor and context installation do not create a story or workflow state. Existing
+runs retain their workflow, ownership and evidence, and all project requirements,
+story authority, protected-data restrictions and required checks still apply.
+
 ## Task-First Principle
 
 **Workflows são compostos por tasks conectadas, não por agentes conectados.** Cada task define seus inputs, outputs, pre/post-conditions e execution modes. Os agentes listados abaixo são os **executores padrão** de cada task — mas a sequência, as regras e as dependências vêm das definições de tasks em `.aiox-core/development/tasks/`.
@@ -12,7 +22,7 @@ Uma task validada é lei: deve ser executada conforme configurada, com todas as 
 
 ### 1. Story Development Cycle (SDC) — PRIMARY
 
-**Full 4-phase workflow for all development work.**
+**Default 4-phase workflow when no explicit Lean selection applies.**
 
 #### Phase 1: Create (@sm)
 - **Task:** `create-next-story.md`
@@ -147,4 +157,4 @@ Every statement in spec.md MUST trace to FR-*, NFR-*, CON-*, or research finding
 | QA found issues, need iteration | QA Loop |
 | Complex feature needs spec | Spec Pipeline → then SDC |
 | Joining existing project | Brownfield Discovery |
-| Simple bug fix | SDC only (YOLO mode) |
+| Simple bug fix | Default SDC (YOLO mode), unless Lean was explicitly selected |

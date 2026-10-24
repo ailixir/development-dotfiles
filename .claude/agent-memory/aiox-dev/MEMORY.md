@@ -55,3 +55,9 @@
 - [Runner SIGKILL orphans](project_obs009_runner_sigkill_orphans.md) — replay child + browser outlive a runner kill until the step timeout; guided browser dies in 0.3 s
 - [Gate-hold patch prep](tooling_gate_hold_patch_prep.md) — Node epoch replica, generator in sandbox, publication-fixtures bundle pin (108+2), tsc/vitest-shim overlays
 - [Post-G9 batch gotchas](tooling_post_g9_batch_gotchas.md) — --tests FQCN uses package not dir; schema edit stales dist (pins reds); spotlessCheck gate
+- [ReplayIT TEST-001 prep](project_replayit_test001_prep.md) — 95 sleeps = 74 POLL + 21 DELIBERATE; why tests fail alone; plan in t0/early/11-IT-R
+- [W48 password label poisons hints](project_w48_password_label_poisons_hints.md) — labelled password blocked all textbox/label hints (431 step-2 loop); fix + isolated-world debug trick
+- [W53 login journey IT](project_w53_login_journey_it.md) — scripted-model backend+runner IT, pre-fix dist control via OBS009_RUNNER_DIST, case432 reading
+- [Sealed sources, scratch tree](project_sealed_sources_scratch_tree.md) — seal => rsync scratch backend, patches, no real-tree Gradle; V23 target bumps
+- [Contract reseal Merkle + ripples](tooling_contract_reseal_merkle_and_ripple.md) — required obligation field: fixture hash reseal script, epoch, pinned literals, BSD patch trap
+- [Scratch Gradle: stale dist, cold cap](tooling_scratch_gradle_stale_dist_and_cold_cap.md) — -x verifyRunnerDist; 1 s callTimeout flakes cold; checkstyle vs gjf lambda; sed -i ''

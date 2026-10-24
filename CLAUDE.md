@@ -78,13 +78,14 @@ cd backend/
 
 ## Development Approach
 
-### Mock-First Development
-**CRITICAL:** All API interactions use Mock Service Worker (MSW) during development. This enables:
-- Independent frontend development without backend dependency
-- Full functionality testing with realistic data
-- Stakeholder demos before backend completion
+### API Development and Test Mocks
+MSW handlers in `frontend/src/services/mocks/` run in Node: the Vitest server
+(`frontend/src/services/mocks/studio/server.ts`) and the Playwright `msw` project proxy
+(`frontend/e2e/mswProxy.ts`). The browser registers no mock service worker.
 
-Mock handlers are located in `frontend/src/services/mocks/` and provide realistic API responses for all check types, CSI data, and execution results.
+Development servers proxy `/api/v1` to the backend. Vite uses `VITE_API_URL`; Webpack
+uses `REACT_APP_API_BASE_URL` with `/api` removed. Both default to `http://localhost:8080`.
+The Playwright harness points Vite at its Node mock proxy or the selected real backend.
 
 ### Module Federation Integration
 The module exposes `./ChecksModule` via Module Federation and integrates with the PUT Platform Shell using:
@@ -139,7 +140,7 @@ backend/src/main/resources/db/migration/     # Flyway forward-only SQL
 ### Environment Configuration
 - **Vite dev server** (port 5173) → Standalone mode with full navigation
 - **Webpack dev server** (port 3002) → Federated mode for platform integration
-- Environment variables in `.env.development` control MSW enablement and API URLs
+- Environment variables in `.env.development` configure API URLs; MSW runs in the Node test harnesses above.
 
 ## Development Rules
 
@@ -193,3 +194,24 @@ backend/src/main/resources/db/migration/     # Flyway forward-only SQL
 - **Integration Tests:** Full user flows with MSW API mocking
 - **E2E Tests:** Playwright for critical paths like check creation and execution
 - **Mock Data:** Comprehensive test scenarios including error states and edge cases
+
+<!-- aiox-lean:begin -->
+## AIOX Lean Delivery
+
+The shared Lean workflow is available through this project's
+`docs/workflows/lean-delivery.md` and `docs/workflows/lean-delivery.json`.
+
+- Codex: `$aiox-lean` (also available in `/skills`).
+- Claude Code and Cursor: `/aiox-lean`.
+- Context aliases: `*lean` and `*run-workflow lean-delivery`.
+- Terminal: `node tools/aiox-lean.cjs --help` or `node tools/aiox-lean.cjs doctor`.
+
+On explicit Lean selection, require `node tools/aiox-lean.cjs doctor` to succeed,
+then read the registration and execute the shared `run-lean-delivery.md` driver
+before any generic AIOX workflow/persona dispatch. Do not bypass a failed registration.
+Do not route it through a local legacy SDC/spec engine. Loading context or running
+help/doctor does not start a feature, create workflow state or migrate active work.
+Existing SDC/spec/discovery runs retain their workflow, ownership, status and evidence.
+Project requirements, authority, protected-data boundaries and required checks
+remain applicable. Lean acceptance is separate from story closure, push and release.
+<!-- aiox-lean:end -->

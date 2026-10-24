@@ -8,3 +8,28 @@
 - [Story edits can break tests](gotcha_story_first_line.md) — backend reads story line 1; frontend copy table quotes story text; add-only edits
 - [OBS-009 pre-G9 review 2026-10-18](project_obs009_pre_g9_review_20261018.md) — 32000 output cap, ledger revoked_at no trigger, START_FAILED scope, lock path, C4 NOT_MET
 - [OBS-009 C10 + D2 record 2026-10-18](project_obs009_c10_d2_20261018.md) — C10 9/9 red; trigger MET under C8 waiver @ 061fc41f; rows all disclosure; ReplayIT Order(1)+(9)
+- [Case431 pair prep W44+W45](project_case431_pair_prep_w44.md) — W45+W46 (A') pair ACCEPTED 35/35; adapter, invoker path regex, output relocation gotchas
+- [Case431 human-pack QA W45](project_case431_human_pack_qa_w45.md) — CONCERNS then re-review PASS (F1-F9 fixed); F10 projector 430 names = Root carry-forward
+- [F10 projection route QA W46](project_f10_projection_qa_w46.md) — PASS; generator mirrors reader admit() exactly; low test/doc gaps P1-P4
+- [diagnostic431 collector QA W47](project_diagnostic431_qa_w47.md) — PASS; export shape verified by running cleanup.py SQL on throwaway PG14; optional O1-O4
+- [diagnostic431b QA W48](project_diagnostic431b_qa_w48.md) — CONCERNS R1: operation lives in actions.proposal not document; rest PASS
+- [provider-log432 QA W53](project_provider_log432_qa_w53.md) — PASS; PRESENT not context-gated (precision only)
+- [diagnostic433 QA W56](project_diagnostic433_qa_w56.md) — PASS; full+incremental export emulated on throwaway PG
+- [Qualified label QA r057](project_qualified_label_qa_r057.md) — PASS 2026-10-23; MJ9 incremental wiring survivor; epoch hash is of ref-expanded schema; lint red pre-existing
+- [code434 G2 QA r059](project_code434_g2_r059.md) — ACCEPT 2026-10-23; invoker CHECK_NAMES/817 stale in generator output, QA-fixed; .map not pinned
+- [catalog435 G2b r060](project_catalog435_g2b_r060.md) — ACCEPT 2026-10-23; real-loader proof, schema-epoch equality check, QA tool shas 54f76324/ae39f9f0/8e7fe761
+- [case436 G2'' r063](project_case436_g2c_r063.md) — ACCEPT 2026-10-23; call-seconds 45 single hunk; 37 checks; QA tools a01fc73f/af0e2562/6d059e47
+- [pair435 G3 r060](project_pair435_g3_r060.md) — ACCEPT 36/36 2026-10-23; context/admission/source-stage authoring order for invoker
+- [pair436 G3 r063](project_pair436_g3_r063.md) — ACCEPT 37/37 2026-10-23; same flow as pair435, Root-authorized admission
+- [pack433 QA r063](project_pack433_qa_r063.md) — PASS 2026-10-23; private pack shape proven via writer source + byte-size fingerprint; benign surviving mutants
+- [diagnostic436m QA r064](project_diagnostic436m_qa_r064.md) — PASS 2026-10-23; collect436m 3c83e0f7; stat-only precondition check; run tests as script under -I
+- [Video finalize QA r065](project_video_finalize_qa_r065.md) — PASS 2026-10-23; launcher sha not in catalog; dist pins refresh, no catalog re-derive
+- [case437 G1 r066](project_case437_g1_r066.md) — ACCEPT 2026-10-23; approval 1c27eff8, QA tools c1c253e6/bb6f57fb/3abd5bb9; qa-pair dir left empty for R6
+- [pair437 G3 r066](project_pair437_g3_r066.md) — ACCEPT 37/37 2026-10-23; same flow as pair436, receipt 648fded4
+- [pack437 QA r066](project_pack437_qa_r066.md) — PASS 2026-10-23; 3/3 pack size band 6410-6426 vs real 6412; mutation survivors are test gaps only
+- [UX fix QA r067](project_ux_fix_qa_r067.md) — PASS 2026-10-23; D1-D7+D10 harness-safe; D6 guard unobservable; scratch-copy mutation probe recipe
+- [Candidate B QA r067](project_candidate_b_qa_r067.md) — PASS 2026-10-23; 21-class delta (8 semantic), PlanningIT green 3/3 both sides, FQCN package trap
+- [code438 G1 r069](project_code438_g1_r069.md) — ACCEPT 2026-10-23; approval 83b24542 at qa-delta438; R1b = git apply in repo subdir skips silently
+- [case439 G1' r070](project_case439_g1b_r070.md) — ACCEPT 2026-10-23; 501+1 pin decomposition; independent-shift method to verify generated-tool diffs; tool shas
+- [pack439 QA r070](project_pack439_qa_r070.md) — NEEDS_WORK 2026-10-23; code PASS, sheet overclaims vs UX review (R1 template-only); pack 6418 bytes
+- [OBS-009 local gate r071](project_obs009_local_gate_r071.md) — CONCERNS 2026-10-23; lint red, IT unrun, no final-tree backend regression; Done blocked externally
