@@ -70,7 +70,9 @@ export function guidedRecordingKeys(csiId: string | null | undefined, sessionId:
 /** The `recording-evidence` callback body (AR-1 R3 `bridge#/definitions/recordingEvidence`). */
 export type RecordingEvidenceBody = BridgeRecordingEvidence;
 
-export type RecordingEvidenceCallback = (route: 'recording-evidence', message: RecordingEvidenceBody, idempotencyKey: string) => Promise<void>;
+export type RecordingEvidenceCallback = (
+  route: 'recording-evidence', message: RecordingEvidenceBody, idempotencyKey: string
+) => Promise<void>;
 
 export interface GuidedRecorderPorts {
   readonly store: ObjectStoreClient;
@@ -98,14 +100,20 @@ export interface GuidedRecorderPorts {
 
 export interface GuidedRecorder {
   /** Never throws: a session that cannot be recorded settles as `UNAVAILABLE`. */
-  open(session: { readonly sessionId: string; readonly csiId: string | null; readonly maxSessionSeconds: number }): Promise<GuidedSessionRecording>;
+  open(session: {
+    readonly sessionId: string; readonly csiId: string | null; readonly maxSessionSeconds: number
+  }): Promise<GuidedSessionRecording>;
 }
 
 export const MAX_RECORDING_CALLBACK_ATTEMPTS = 3;
 
 export function createGuidedRecorder(ports: GuidedRecorderPorts): GuidedRecorder {
   let scratch: Promise<RecordingScratch> | undefined;
-  const owned = (): Promise<RecordingScratch> => scratch ??= ports.recordingScratch ? Promise.resolve(ports.recordingScratch) : prepareRecordingScratch({ workerId: 'embedded-recorder', journalDirectory: ports.evidenceRoot ?? process.env.TMPDIR ?? tmpdir(), ...(ports.evidenceRoot === undefined ? {} : { evidenceRoot: ports.evidenceRoot }) });
+  const owned = (): Promise<RecordingScratch> => scratch ??= ports.recordingScratch ?
+    Promise.resolve(ports.recordingScratch) : prepareRecordingScratch({
+      workerId: 'embedded-recorder', journalDirectory: ports.evidenceRoot ?? process.env.TMPDIR ?? tmpdir(),
+      ...(ports.evidenceRoot === undefined ? {} : { evidenceRoot: ports.evidenceRoot })
+    });
   return {
     async open(session) {
       const keys = guidedRecordingKeys(session.csiId, session.sessionId);
@@ -158,8 +166,11 @@ function compareCodePoints(a: string, b: string): number {
 export function wireTimings(readings: readonly Reading[]): ActionTiming[] {
   return [...readings]
     .map(r => ({ ...r, startMs: Math.round(r.startMs), endMs: r.endMs === null ? null : Math.round(r.endMs) }))
-    .sort((a, b) => a.startMs - b.startMs || a.ordinal - b.ordinal || compareCodePoints(a.stepId, b.stepId) || compareCodePoints(a.admissionId, b.admissionId))
-    .map((r): ActionTiming => ({ kind: 'action', stepId: r.stepId, admissionId: r.admissionId, ordinal: r.ordinal, startMs: r.startMs, endMs: r.endMs }));
+    .sort((a, b) => a.startMs - b.startMs || a.ordinal - b.ordinal ||
+      compareCodePoints(a.stepId, b.stepId) || compareCodePoints(a.admissionId, b.admissionId))
+    .map((r): ActionTiming => ({
+      kind: 'action', stepId: r.stepId, admissionId: r.admissionId, ordinal: r.ordinal, startMs: r.startMs, endMs: r.endMs
+    }));
 }
 
 /**
@@ -169,7 +180,8 @@ export function wireTimings(readings: readonly Reading[]): ActionTiming[] {
  */
 export function timingScaleHolds(timings: readonly ActionTiming[], maxSessionSeconds: number): boolean {
   const bound = maxSessionSeconds * 1000;
-  return timings.every(t => Number.isSafeInteger(t.startMs) && t.startMs >= 0 && t.startMs <= bound && (t.endMs === null || (Number.isSafeInteger(t.endMs) && t.endMs >= t.startMs && t.endMs <= bound)));
+  return timings.every(t => Number.isSafeInteger(t.startMs) && t.startMs >= 0 && t.startMs <= bound &&
+    (t.endMs === null || (Number.isSafeInteger(t.endMs) && t.endMs >= t.startMs && t.endMs <= bound)));
 }
 
 export class GuidedSessionRecording {
@@ -231,24 +243,37 @@ export class GuidedSessionRecording {
    * Settles once: classify → upload → manifest → callback → delete the directory. Never rejects,
    * and resolves with the state reported (or attempted) on the wire.
    */
-  settle(input: { readonly identity: BridgeIdentity; readonly videoPath: string | null; readonly orderlyClose: boolean; readonly callback: RecordingEvidenceCallback }): Promise<GuidedRecordingState> {
+  settle(input: {
+    readonly identity: BridgeIdentity; readonly videoPath: string | null; readonly orderlyClose: boolean;
+    readonly callback: RecordingEvidenceCallback
+  }): Promise<GuidedRecordingState> {
     this.settlement ??= this.run(input).catch((): GuidedRecordingState => 'UNAVAILABLE');
     return this.settlement;
   }
 
-  private async run(input: { readonly identity: BridgeIdentity; readonly videoPath: string | null; readonly orderlyClose: boolean; readonly callback: RecordingEvidenceCallback }): Promise<GuidedRecordingState> {
+  private async run(input: {
+    readonly identity: BridgeIdentity; readonly videoPath: string | null; readonly orderlyClose: boolean;
+    readonly callback: RecordingEvidenceCallback
+  }): Promise<GuidedRecordingState> {
     let state: GuidedRecordingState = 'UNAVAILABLE';
     let partial = false;
     try {
       const redactor = createRedactor([]);
-      const ports = { store: this.ports.store, fileSystem: this.ports.fileSystem, bounds: this.ports.bounds, now: this.ports.now, sleep: this.ports.sleep, redactor };
+      const ports = {
+        store: this.ports.store, fileSystem: this.ports.fileSystem, bounds: this.ports.bounds,
+        now: this.ports.now, sleep: this.ports.sleep, redactor
+      };
       const window = openEvidenceWindow(ports);
       if (this.keys && this.requested && this.recorded) {
         const inspected = await (this.ports.inspect ?? inspectRecordingFile)(input.videoPath, input.orderlyClose)
-          .catch((): RecordingObservation => ({ attempted: true, path: null, bytes: null, header: false, error: 'RECORDING_FAILED', orderlyClose: input.orderlyClose }));
+          .catch((): RecordingObservation => ({
+            attempted: true, path: null, bytes: null, header: false, error: 'RECORDING_FAILED', orderlyClose: input.orderlyClose
+          }));
         const observed = evidenceFor(inspected);
         if (observed.state === 'PENDING') {
-          const uploaded = await uploadRecording(ports, window, { videoKey: this.keys.videoKey, path: observed.path, state: 'PENDING', partial: observed.partial });
+          const uploaded = await uploadRecording(ports, window, {
+            videoKey: this.keys.videoKey, path: observed.path, state: 'PENDING', partial: observed.partial
+          });
           state = uploaded.state === 'STORED' ? 'STORED' : 'FAILED';
           partial = state === 'STORED' && uploaded.partial;
         }
@@ -257,9 +282,15 @@ export class GuidedSessionRecording {
       let timings = state === 'STORED' ? wireTimings(this.readings) : [];
       if (!timingScaleHolds(timings, this.maxSessionSeconds)) timings = [];
       if (this.keys) {
-        const manifest = buildGuidedRecordingManifest({ sessionId: input.identity.sessionId, recordingId: this.recordingId, workerId: input.identity.workerId, ownerFence: input.identity.ownerFence, evidenceState: state, evidencePartial: partial, videoKey: this.keys.videoKey, manifestKey: this.keys.manifestKey, timings });
+        const manifest = buildGuidedRecordingManifest({
+          sessionId: input.identity.sessionId, recordingId: this.recordingId, workerId: input.identity.workerId,
+          ownerFence: input.identity.ownerFence, evidenceState: state, evidencePartial: partial,
+          videoKey: this.keys.videoKey, manifestKey: this.keys.manifestKey, timings
+        });
         // A lost manifest is a diagnostic, never an evidence state (as for replay, §6.1).
-        await writeResultManifest(ports, window, this.keys.manifestKey, serializeResultManifest(manifest, redactor), RESULT_MANIFEST_CONTENT_TYPE);
+        await writeResultManifest(
+          ports, window, this.keys.manifestKey, serializeResultManifest(manifest, redactor), RESULT_MANIFEST_CONTENT_TYPE
+        );
       }
       await this.deliver(input, { ...input.identity, recordingId: this.recordingId, state, partial, timings });
       return state;

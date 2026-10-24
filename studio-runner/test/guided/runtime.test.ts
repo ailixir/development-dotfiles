@@ -7,7 +7,7 @@ import { GuidedJournal } from '../../src/guided/journal.js';
 import { GuidedRuntime } from '../../src/guided/runtime.js';
 import { hash, identity, validate } from '../../src/guided/contracts.js';
 import { guidedContext, dispatch, proposal } from '../helpers/guided.js';
-import { GuidedLaunchFailure, GUIDED_START_BUDGET_MS, GUIDED_START_RESERVE_MS, GUIDED_START_TRANSPORT_CEILING_MS, launchFailureCause } from '../../src/run/guidedBrowser.js';
+import { GuidedLaunchFailure, GUIDED_RECORDING_FINALIZE_MS, GUIDED_START_BUDGET_MS, GUIDED_START_RESERVE_MS, GUIDED_START_TRANSPORT_CEILING_MS, launchFailureCause } from '../../src/run/guidedBrowser.js';
 import {PasswordNoEffect} from '../../src/run/passwordControl.js';
 import type { GuidedBrowser, GuidedRecordingRequest, GuidedStartup } from '../../src/run/guidedBrowser.js';
 import type { GuidedRuntimeOptions } from '../../src/guided/runtime.js';
@@ -33,7 +33,7 @@ describe('REL-001/D4 the guided start has one deadline',()=>{
   }
   const settledFlag=(promise:Promise<unknown>)=>{const flag={done:false};void promise.then(()=>{flag.done=true;});return flag;};
 
-  it('pins the budget to the backend 15 s transport ceiling minus the 3 s reserve (GuidedRunnerClient.transportDeadline)',()=>{
+  it('pins the budget to the backend 15 s transport ceiling minus the 3 s reserve (HttpRunnerDispatchClient.transportDeadline)',()=>{
     expect(GUIDED_START_TRANSPORT_CEILING_MS).toBe(15_000);expect(GUIDED_START_RESERVE_MS).toBe(3_000);
     expect(GUIDED_START_BUDGET_MS).toBe(15_000-3_000);expect(GUIDED_START_BUDGET_MS).toBe(12_000);
   });
@@ -193,6 +193,19 @@ describe('KL-015-D5 the runtime closes by start phase',()=>{
       await h.runtime.stop('CONTEXT_LOST');await h.runtime.recordingSettled;
       expect(h.browser.close).toHaveBeenCalledOnce();expect(h.browser.terminate).not.toHaveBeenCalled();expect(h.runtime.active).toBe(false);
       expect(double.settled.map(entry=>entry.orderlyClose)).toEqual([orderly]);vi.useRealTimers();
+    }
+  });
+  it('R065 the recording is settled orderly iff the recorder finished by itself, and only after finalizeRecording ran, before the file is read',async()=>{
+    for(const finalized of [true,false]){
+      const order:string[]=[];const double=recorderDouble();
+      const h=await started({orderly:false},{recorder:double.recorder});expect(await h.outcome).toBeNull();
+      const browser=h.browser as GuidedBrowser&{finalizeRecording?:(boundMs:number)=>Promise<boolean>;recordedVideo?:()=>Promise<string|null>};
+      browser.finalizeRecording=vi.fn(()=>{order.push('finalize');return Promise.resolve(finalized);});
+      browser.recordedVideo=vi.fn(()=>{order.push('path');return Promise.resolve('/tmp/x.webm');});
+      await h.runtime.stop('CONTEXT_LOST');await h.runtime.recordingSettled;
+      expect(browser.finalizeRecording).toHaveBeenCalledWith(GUIDED_RECORDING_FINALIZE_MS);
+      expect(order).toEqual(['finalize','path']);
+      expect(double.settled).toEqual([{orderlyClose:finalized,videoPath:'/tmp/x.webm'}]);vi.useRealTimers();
     }
   });
   it('U1 keeps the stop pending until the close settles, and releases the slot only then',async()=>{

@@ -18,11 +18,38 @@ export class BootstrapPageGuard<T> {
   subscribe(listener:()=>void):void{this.listener=listener;if(this.violated)listener();}
   private fail():void{this.violated=true;for(const page of this.pending)this.closeUnexpected(page);this.listener?.();}
 }
-export function boundedStartup<T>(work:()=>Promise<T>,deadline:number,signal?:AbortSignal,maxMs=30000):Promise<T>{
-  if(signal?.aborted)return Promise.reject(new Error('CANCELLED'));
-  if(Date.now()>=deadline)return Promise.reject(new Error('TIMEOUT'));
-  return new Promise<T>((resolve,reject)=>{const abort=()=>{reject(new Error('CANCELLED'));};const timer=setTimeout(()=>{reject(new Error('TIMEOUT'));},Math.max(1,Math.min(maxMs,deadline-Date.now())));signal?.addEventListener('abort',abort,{once:true});
-    const clear=()=>{clearTimeout(timer);signal?.removeEventListener('abort',abort);};
-    Promise.resolve().then(work).then(value=>{clear();if(signal?.aborted)reject(new Error('CANCELLED'));else if(Date.now()>=deadline)reject(new Error('TIMEOUT'));else resolve(value);},(error:unknown)=>{clear();reject(error instanceof Error?error:new Error('BOOTSTRAP_FAILED'));});
+// Private identity metadata: no Error property, subtype or wire change.
+const absoluteStartupTimeouts = new WeakMap<Error, number>();
+function absoluteStartupTimeout(error: Error, deadline: number): Error {
+  absoluteStartupTimeouts.set(error, deadline);
+  return error;
+}
+export function isAbsoluteStartupTimeout(error: unknown, deadline: number): boolean {
+  return error instanceof Error && absoluteStartupTimeouts.get(error) === deadline;
+}
+
+export function boundedStartup<T>(work: () => Promise<T>, deadline: number, signal?: AbortSignal, maxMs = 30000): Promise<T> {
+  if (signal?.aborted) return Promise.reject(new Error('CANCELLED'));
+  if (Date.now() >= deadline) return Promise.reject(absoluteStartupTimeout(new Error('TIMEOUT'), deadline));
+  return new Promise<T>((resolve, reject) => {
+    const abort = (): void => { reject(new Error('CANCELLED')); };
+    // Capture the existing delay-selection wall sample once.
+    const remaining = deadline - Date.now();
+    const timer = setTimeout(() => {
+      const error = new Error('TIMEOUT');
+      // A strictly earlier operation cap is not whole-start expiry; equality selects both boundaries.
+      reject(remaining <= maxMs ? absoluteStartupTimeout(error, deadline) : error);
+    }, Math.max(1, Math.min(maxMs, remaining)));
+    signal?.addEventListener('abort', abort, { once: true });
+    const clear = (): void => { clearTimeout(timer); signal?.removeEventListener('abort', abort); };
+    Promise.resolve().then(work).then(value => {
+      clear();
+      if (signal?.aborted) reject(new Error('CANCELLED'));
+      else if (Date.now() >= deadline) reject(absoluteStartupTimeout(new Error('TIMEOUT'), deadline));
+      else resolve(value);
+    }, (error: unknown) => {
+      clear();
+      reject(error instanceof Error ? error : new Error('BOOTSTRAP_FAILED'));
+    });
   });
 }

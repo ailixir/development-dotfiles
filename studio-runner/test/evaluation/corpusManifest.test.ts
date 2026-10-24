@@ -72,7 +72,8 @@ describe('frozen corpus manifest', () => {
   it('marks RS-1 on every case, [] written explicitly, with the value location and reachability for the three dataflow cases', () => {
     const manifest = frozenManifest();
     for (const entry of manifest.cases) {
-      expect(typeof entry.rs1.isRs1Case).toBe('boolean');
+      if (entry.status === 'EXTERNAL_BLOCKED' && entry.rs1.state === 'UNKNOWN_UNTIL_STAGING_PAGES_ARE_READ') expect(entry.rs1.isRs1Case).toBeNull();
+      else expect(typeof entry.rs1.isRs1Case).toBe('boolean');
       expect(Array.isArray(entry.rs1.valueLocations)).toBe(true);
     }
     const d3 = byId(manifest, 'D3-dataflow-multistep');
@@ -116,9 +117,37 @@ describe('frozen corpus manifest', () => {
 
   it('records the unratified rulings as RECOMMENDED_NOT_RULED rather than as decided', () => {
     const rulings = frozenManifest().rulings as Record<string, { state: string }>;
-    expect(rulings.B2?.state).toBe('RECOMMENDED_NOT_RULED');
-    expect(rulings.B3?.state).toBe('RECOMMENDED_NOT_RULED');
+    // Retain the historical test identity; B2/B3 now have the actual internal PO/architect ruling, B8 remains unratified.
+    expect(rulings.B2?.state).toBe('ADOPTED_INTERNAL_INTERPRETATION');
+    expect(rulings.B3?.state).toBe('ADOPTED_INTERNAL_INTERPRETATION');
     expect(rulings.B8?.state).toBe('UNKNOWN');
+  });
+});
+
+describe('inspection scope and source pins: groups 4 and 6', () => {
+  it('group4: explicitly blocked staging UNKNOWN is valid and never a known local zero', () => {
+    const manifest = frozenManifest();
+    for (const id of ['D2-login-staging-real', 'E1-sso-approved-origin']) byId(manifest, id).rs1.isRs1Case = null;
+    const errors = check(restamp(manifest));
+    expect(errors).not.toContain('RS1_MARK_MISSING: D2-login-staging-real');
+    expect(errors).not.toContain('RS1_MARK_MISSING: E1-sso-approved-origin');
+    expect(errors).toEqual([]);
+  });
+
+  it('group4: READY unknown and an inconsistent blocked unknown inspection are refused', () => {
+    const manifest = frozenManifest(); byId(manifest, 'C01-rf-example-url').rs1.isRs1Case = null;
+    expect(check(restamp(manifest))).toContain('RS1_UNKNOWN_INSPECTION: C01-rf-example-url');
+    const staging = frozenManifest(); const blocked = byId(staging, 'D2-login-staging-real');
+    blocked.rs1.isRs1Case = null; blocked.rs1.valueLocations = [{ value: 'unit-only', elementKind: 'span', reachableByGrant: false }];
+    expect(check(restamp(staging))).toContain('RS1_UNKNOWN_INSPECTION: D2-login-staging-real');
+  });
+
+  it('group6: missing or stale evaluator code pins refuse the existing validator before any client use', () => {
+    const missing = frozenManifest(); delete missing.sources.evaluator;
+    expect(check(restamp(missing))).toContain('REQUIRED_CODE_PIN: evaluator');
+    const stale = frozenManifest(); const pin = stale.sources.evaluator;
+    if (pin) pin.sha256 = 'f'.repeat(64);
+    expect(check(restamp(stale), true)).toContain('PIN_HASH_MISMATCH: sources.evaluator');
   });
 });
 
@@ -227,6 +256,8 @@ describe('manifest validator negative fixtures', () => {
 
   it('leaves the committed manifest file untouched by these fixtures', () => {
     const onDisk = JSON.parse(readFileSync(join(OBSERVED_AUTHORING_DIR, 'manifest.json'), 'utf8')) as CorpusManifest;
-    expect(onDisk.manifestSha256).toBe(manifestDigest(onDisk));
+    if (onDisk.manifestFrozenAt === null) expect(onDisk.manifestSha256).toBeNull();
+    else expect(onDisk.manifestSha256).toBe(manifestDigest(onDisk));
+    expect(validateCorpusManifest(onDisk, { repoRoot }).errors).toEqual([]);
   });
 });

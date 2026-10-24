@@ -46,7 +46,7 @@ import { tmpdir } from 'node:os';
 
 import type { BrowserFactory, BrowserHandle, BrowserLaunchRequest } from './browserFactory.js';
 import {BrowserStartupCleanupFailure} from './browserFactory.js';
-import {BootstrapPageGuard,boundedStartup} from './observedBootstrap.js';
+import {BootstrapPageGuard,boundedStartup,isAbsoluteStartupTimeout} from './observedBootstrap.js';
 import {readVersionPaths} from './versionProbe.js';
 import {validateAppVideoPath} from './appVideoOwnership.js';
 import { installObservationCollector } from './observationCollector.js';
@@ -545,6 +545,7 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
   let context:BrowserContext|undefined;
   let launching:Promise<BrowserContext>|undefined;
   let closed = false;
+  let gracefulStarted = false;
   let phase:GuidedLaunchPhase='PROFILE';
   let preparedProfile=join(scratchDirectory,SCRATCH_SUBDIRECTORIES.profile);
   // Run once: the graceful close, the hard teardown and a failed launch's cleanup can all reach it (KL-015-D5).
@@ -619,7 +620,7 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
   const acquired=context;
   // KL-015-D5 rule D5-1: a graceful close bounded by GUIDED_CLOSE_GRACE_MS, then always this launch's hard teardown. `closed` is
   // set first so the browser's own disconnect, which the kill causes, is not reported as a loss.
-  const stages = guidedCloseStages({ graceful: () => acquired.close(), hard: () => hardTeardown(acquired), onClosing: () => { closed = true; } });
+  const stages = guidedCloseStages({ graceful: () => { gracefulStarted = true; return acquired.close(); }, hard: () => hardTeardown(acquired), onClosing: () => { closed = true; } });
   const evidence = { kind: 'initialBlank' as const, sessionId: config.sessionId, contextId, creationId: randomUUID(), documentId: randomUUID(), bootstrapId: randomUUID(), url: 'about:blank' as const, origin: null, generation: 0 as const };
   const blankMatches = async (): Promise<boolean> => {
     try { const result = await cdp.send('Runtime.callFunctionOn', { objectId: blankId, functionDeclaration: 'function() { return this === document && location.href === "about:blank" && location.origin === "null"; }', returnByValue: true }); return !result.exceptionDetails && result.result.value === true; } catch { return false; }
@@ -636,6 +637,13 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
     control?.check();
   };
   const close = stages.close;
+  // The recorder outlives the hard stage on purpose (see `hardTeardown`). Wait for it to exit by itself, bounded; past the bound it is killed.
+  const finalizeRecording = async (boundMs: number): Promise<boolean> => {
+    if (!recording) return false;
+    if (await stages.gracefulFulfilledWithin(boundMs)) return true;
+    try { const killed = killLaunchTree(await launchMarkers(recording.dir)); await survivorsOf([...killed], 500); } catch { /* the settlement reports a salvaged prefix either way */ }
+    return false;
+  };
   // Valid after close: Playwright finalizes the webm when the context closes (§6.1).
   const recordedVideo = async (): Promise<string | null> => { if (!video) return null; try { return await video.path(); } catch { return null; } };
   // AC-1 parity: the recorded handle type the observed replay adapter consumes, same page/recording.
@@ -663,6 +671,7 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
     terminate: stages.terminate,
     orderlyClosed: stages.orderlyClosed,
     recordedVideo,
+    finalizeRecording,
     handle,
   };
   } catch(error) {
@@ -677,12 +686,15 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
     const settled=hardClose().then(()=>undefined,()=>undefined);
     // Past the deadline, or stopped: reject now, the runtime waits for the teardown through `close`. Any other failure rejects once the
     // teardown has settled, so a launch that rejects has already cleared its scratch (its `close` is then only the memo of that outcome).
-    if(signal?.aborted!==true&&Date.now()<deadline)await settled;
+    if(signal?.aborted!==true&&!isAbsoluteStartupTimeout(error,deadline)&&Date.now()<deadline)await settled;
     // A wait the signal ended says CANCELLED; the abort reason says whether that was the deadline or a stop. Any other error is the cause as it is.
     throw new GuidedLaunchFailure(hardClose,launchFailureCause(error,signal),phase);
   }
   async function hardTeardown(acquired:BrowserContext|undefined):Promise<void>{
-    const markers=await launchMarkers(scratchDirectory,recording?.dir);
+    // After a graceful stage was started, the recorder is spared: Playwright's ffmpeg names `recording.dir` in its argv, and a SIGKILL at the
+    // grace deadline leaves a webm with no Duration and no Cues (Chrome: duration Infinity). `finalizeRecording` waits for it, bounded, then kills it.
+    // Every other teardown (a start that failed, `terminate` alone) has no recording to finish and kills it with the rest, as before.
+    const markers=await launchMarkers(...(gracefulStarted?[scratchDirectory]:[scratchDirectory,recording?.dir]));
     // Throws when the process table cannot show this worker: "nothing to kill" must never mean "could not look".
     const seen=new Set<number>(killLaunchTree(markers));
     // An abandoned launch may still hand back a context, or spawn its Chrome, after that first listing. Where the

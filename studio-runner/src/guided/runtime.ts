@@ -10,7 +10,7 @@ import { randomUUID } from 'node:crypto';
 import { canonical, hash, identity, insist, sameIdentity, validate } from './contracts.js';
 import { GuidedJournal } from './journal.js';
 import type { Action, BridgeDispatch, BridgeIdentity, BridgeObservation, BridgeOrdinaryOutcome as BridgeOutcome, BridgePreparation, BridgeStop, ConsumerEdge, ExecutionEvidence, Producer, RunnerContext, ObservationRefresh } from './types.js';
-import { GuidedLaunchFailure, GUIDED_START_BUDGET_MS, GUIDED_START_RESERVE_MS } from '../run/guidedBrowser.js';
+import { GuidedLaunchFailure, GUIDED_RECORDING_FINALIZE_MS, GUIDED_START_BUDGET_MS, GUIDED_START_RESERVE_MS } from '../run/guidedBrowser.js';
 import type { GuidedBrowser, GuidedLossReason, GuidedRecordingRequest, GuidedStartup } from '../run/guidedBrowser.js';
 import { boundedStartup } from '../run/observedBootstrap.js';
 import type { ActionStamp, GuidedRecorder, GuidedSessionRecording } from './evidence.js';
@@ -61,6 +61,11 @@ async function endedWithin<T>(work: Promise<T>, ms: number): Promise<Ended<T>> {
 export type GuidedStartPhase = 'VALIDATE' | 'JOURNAL' | 'RECORDER' | 'LAUNCH' | 'WITHHOLD' | 'BLANK_MATCH' | 'BOOTSTRAP_CALLBACK' | 'STARTED';
 function argumentSlot(operation: Action['operation']): string {
   return operation.kind === 'navigate' ? 'navigate.destination' : operation.kind === 'fill' ? 'fill.value' : operation.kind === 'selectOption' ? 'selectOption.value' : 'assert.expected';
+}
+/** AUTHORED-ECHO-01: source literals are already visible in the authored source. Independent
+ * secret, captured-value and DOM-private provenance remains strict in the collector. */
+function privateAuthoredValues(inputs: RunnerContext['authoredInputs']['inputs']): string[] {
+  return inputs.flatMap(input => input.kind !== 'secretRef' && input.provenance.referenceKind === 'configuration' ? [input.value] : []);
 }
 interface LocalValue { value: string; producer: Producer; }
 export class GuidedRuntime {
@@ -236,7 +241,7 @@ export class GuidedRuntime {
     this.startPhase = 'WITHHOLD';
     insist(typeof this.browser.observations.withhold === 'function', 'CONTEXT_LOST');
     const started = this.browser;
-    await bounded(() => started.observations.withhold?.(input.inputs.flatMap(i => i.kind === 'secretRef' ? [] : [i.value])) ?? Promise.resolve());
+    await bounded(() => started.observations.withhold?.(privateAuthoredValues(input.inputs)) ?? Promise.resolve());
     this.live(); this.evidence = started.evidence;
     this.startPhase = 'BLANK_MATCH';
     const evidence = this.evidence;
@@ -278,7 +283,7 @@ export class GuidedRuntime {
     for (const producer of next.producers) insist(canonical(this.values.get(producer.bindingId)?.producer ?? null) === canonical(producer), 'CONTEXT_LOST');
     if (appended) {
       insist(this.browser, 'CONTEXT_LOST'); this.busy = true;
-      try { await this.browser.observations.withhold?.(next.authoredInputs.inputs.slice(this.context.authoredInputs.inputs.length).flatMap(i => i.kind === 'secretRef' ? [] : [i.value])); this.live(); }
+      try { await this.browser.observations.withhold?.(privateAuthoredValues(next.authoredInputs.inputs.slice(this.context.authoredInputs.inputs.length))); this.live(); }
       catch { await this.stop('CONTEXT_LOST'); throw new Error('CONTEXT_LOST'); }
       finally { this.busy = false; }
       this.prepared.clear();
@@ -613,8 +618,10 @@ export class GuidedRuntime {
     );
   }
   private async settleRecording(recording: GuidedSessionRecording, browser: GuidedBrowser | null, sessionIdentity: BridgeIdentity, orderlyClose: boolean): Promise<void> {
+    // The stop was answered at the 3 s grace; the recorder may still be finishing the webm. Wait for it here, off the stop's path.
+    const finalized = orderlyClose || await (browser?.finalizeRecording?.(GUIDED_RECORDING_FINALIZE_MS) ?? Promise.resolve(false)).catch(() => false);
     const videoPath = await browser?.recordedVideo?.().catch(() => null) ?? null;
-    await recording.settle({ identity: sessionIdentity, videoPath, orderlyClose, callback: (route, message, key) => this.options.callback(route, message, key) });
+    await recording.settle({ identity: sessionIdentity, videoPath, orderlyClose: finalized, callback: (route, message, key) => this.options.callback(route, message, key) });
   }
   async stop(reason: BridgeStop['reason']): Promise<void> {
     if (this.closing) return this.closing;

@@ -228,3 +228,125 @@ describe('REL-001/D4 — a launch hung by a frozen browser is cut off and fully 
     decoy.kill('SIGKILL');
   });
 });
+
+// Controlled timer/wall disagreement for pending009; not a reproduction of a historical native failure.
+describe('controlled startup timeout-origin handoff for 009', () => {
+  it('hands an absolute startup timeout to the caller before pending teardown when the wall sample is still before its deadline', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'guided-d4-timeout-origin-'));
+    cleanup.push(() => rm(root, { recursive: true, force: true }));
+    let rejectLaunch: (error: Error) => void = () => undefined;
+    let launching: Promise<unknown> | undefined;
+    let fakeTimersInstalled = false;
+    try {
+      vi.stubEnv('TMPDIR', root);
+      const heldWallNow = Date.now();
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+      fakeTimersInstalled = true;
+      vi.spyOn(Date, 'now').mockReturnValue(heldWallNow);
+      let entered: () => void = () => undefined;
+      const launchEntered = new Promise<void>(resolve => { entered = resolve; });
+      const pending = new Promise<Awaited<ReturnType<typeof chromium.launchPersistentContext>>>(
+        (_resolve, reject) => { rejectLaunch = reject; },
+      );
+      // Consume a setup-path rejection too, while passing the exact pending promise to the original launcher.
+      void pending.catch(() => undefined);
+      vi.spyOn(chromium, 'launchPersistentContext').mockImplementation(() => { entered(); return pending; });
+      let replied = false;
+      launching = launchGuidedBrowser(config, 'd4-timeout-origin', () => undefined, undefined, {
+        deadlineEpochMs: heldWallNow + 1_000,
+        signal: new AbortController().signal,
+      }).then(value => { replied = true; return value; }, (error: unknown) => { replied = true; return error; });
+      await Promise.race([
+        launchEntered,
+        launching.then(() => { throw new Error('controlled launch did not enter its mock'); }),
+      ]);
+      await vi.advanceTimersByTimeAsync(1_000);
+      await new Promise<void>(resolve => { setImmediate(resolve); });
+      // The required old-product assertion-red is false: old catch awaits the deliberately pending teardown.
+      expect(replied).toBe(true);
+      const failure = await launching;
+      expect(failure).toBeInstanceOf(GuidedLaunchFailure);
+      expect(failure).toMatchObject({ message: 'CONTEXT_LOST', cause: { message: 'TIMEOUT' }, phase: 'PROCESS' });
+      expect((await readdir(root)).filter(name => name.startsWith('checks-guided-'))).toHaveLength(1);
+      let closed = false;
+      const closing = (failure as GuidedLaunchFailure).close().then(() => { closed = true; });
+      await new Promise<void>(resolve => { setImmediate(resolve); });
+      expect(closed).toBe(false);
+      rejectLaunch(new Error('controlled launch settled'));
+      await closing;
+      await (failure as GuidedLaunchFailure).close();
+      expect(await readdir(root)).toEqual([]);
+    } finally {
+      // Also runs on the intentional red: settle the same launch and memoized close before restoring globals.
+      rejectLaunch(new Error('controlled regression cleanup'));
+      try {
+        if (launching !== undefined) {
+          const result = await launching;
+          if (result instanceof GuidedLaunchFailure) await result.close();
+        }
+        expect(await readdir(root)).toEqual([]);
+        if (fakeTimersInstalled) expect(vi.getTimerCount()).toBe(0);
+      } finally {
+        vi.useRealTimers();
+        vi.restoreAllMocks();
+        vi.unstubAllEnvs();
+      }
+    }
+  });
+
+  it('keeps an earlier operation-cap TIMEOUT on the ordinary cleanup-before-response path', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'guided-d4-operation-cap-'));
+    cleanup.push(() => rm(root, { recursive: true, force: true }));
+    let rejectLaunch: (error: Error) => void = () => undefined;
+    let launching: Promise<unknown> | undefined;
+    let fakeTimersInstalled = false;
+    try {
+      vi.stubEnv('TMPDIR', root);
+      const heldWallNow = Date.now();
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+      fakeTimersInstalled = true;
+      vi.spyOn(Date, 'now').mockReturnValue(heldWallNow);
+      let entered: () => void = () => undefined;
+      const launchEntered = new Promise<void>(resolve => { entered = resolve; });
+      const pending = new Promise<Awaited<ReturnType<typeof chromium.launchPersistentContext>>>(
+        (_resolve, reject) => { rejectLaunch = reject; },
+      );
+      void pending.catch(() => undefined);
+      vi.spyOn(chromium, 'launchPersistentContext').mockImplementation(() => { entered(); return pending; });
+      let replied = false;
+      launching = launchGuidedBrowser(config, 'd4-operation-cap', () => undefined, undefined, {
+        deadlineEpochMs: heldWallNow + 60_000,
+        signal: new AbortController().signal,
+      }).then(value => { replied = true; return value; }, (error: unknown) => { replied = true; return error; });
+      await Promise.race([
+        launchEntered,
+        launching.then(() => { throw new Error('controlled launch did not enter its mock'); }),
+      ]);
+      await vi.advanceTimersByTimeAsync(30_000);
+      await new Promise<void>(resolve => { setImmediate(resolve); });
+      // A blanket TIMEOUT exemption, or marking every timer, would incorrectly reply here.
+      expect(replied).toBe(false);
+      rejectLaunch(new Error('controlled capped launch settled'));
+      const failure = await launching;
+      expect(failure).toBeInstanceOf(GuidedLaunchFailure);
+      expect(failure).toMatchObject({ message: 'CONTEXT_LOST', cause: { message: 'TIMEOUT' }, phase: 'PROCESS' });
+      expect(await readdir(root)).toEqual([]);
+      await (failure as GuidedLaunchFailure).close();
+      await (failure as GuidedLaunchFailure).close();
+    } finally {
+      rejectLaunch(new Error('controlled cap cleanup'));
+      try {
+        if (launching !== undefined) {
+          const result = await launching;
+          if (result instanceof GuidedLaunchFailure) await result.close();
+        }
+        expect(await readdir(root)).toEqual([]);
+        if (fakeTimersInstalled) expect(vi.getTimerCount()).toBe(0);
+      } finally {
+        vi.useRealTimers();
+        vi.restoreAllMocks();
+        vi.unstubAllEnvs();
+      }
+    }
+  });
+});

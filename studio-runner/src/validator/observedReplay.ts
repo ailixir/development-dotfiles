@@ -2,6 +2,7 @@ import { deriveSnapshotMaps } from './observedSnapshots.js';
 import { effectiveGraph, historicalVersion, validateMaterializationHistory, validateIncrementalHistory } from './observedHistory.js';
 import { validatePublishedArtifactGraph, validateRecordedTarget } from '../executor/observedReplay.js';
 import { OBSERVED_CONTRACT_VERSION } from '../versions.js';
+import { qualifiedLocator, type QualifiedObservation } from './qualifiedLabel.js';
 import type { Execute3, Artifact3, BuildIdentity, PreparationFact, AcceptedTranslationPlan, Guard, HistoricalBinding, InputRecipe, LearnedPlan, Policy4, ReplayAction, Transfer, ValidationBasis, ValidationRequest, ValidationVerdict, ObservedJob, Scope, TrustedPolicy } from '../executor/observedOperations.js';
 import { OBSERVED_LIMITS, OBSERVED_PROFILE, assertBuild, assertProfile, boundedObserved, canonicalObserved, canonicalOrigin, demand, equalsOriginalTargetIntent, ObservedRefusal, equalObserved, hashObserved, validateObserved, validateTrustedPolicy } from './observedReferencePolicy.js';
 export interface ObservedHashes {
@@ -120,6 +121,19 @@ function selectedOriginalLocator(b:ValidationBasis,p:PreparationFact,ob:Accepted
     demand('locator'in p.proposal.target,'OPERATION_MISMATCH');same(p.proposal.target.locator,selected.meaning.locator,'OPERATION_MISMATCH');
     used.add(capture.observationHash);
     return selected.meaning.locator;
+}
+/**
+ * Round 057: without a human choice, a qualified obligation (non-null scopeIntent) must resolve the
+ * same way admission did: the proposed node is the only node of that name in that region, and its
+ * locator is one of its hints and unique in the evidence observation. The effective obligation then
+ * has the accepted-choice shape. The witness path always wins (it throws or returns first).
+ */
+function qualifiedOriginalLocator(p:PreparationFact,ob:AcceptedTranslationPlan['obligations'][number],observations:Map<string,ValidationBasis['observations'][number]>):Extract<Guard['target'],{kind:'element'}>['locator']|null {
+    if(ob.scopeIntent===null)return null;
+    const entry=p.observationHash===null?undefined:observations.get(p.observationHash);demand(entry,'EVIDENCE_MISMATCH');
+    const target=p.proposal.target;
+    demand(!('kind' in target)&&target.documentId===entry.observation.documentId&&target.generation===entry.observation.generation,'OPERATION_MISMATCH');
+    return qualifiedLocator(entry.observation as QualifiedObservation,ob,target) as Extract<Guard['target'],{kind:'element'}>['locator'];
 }
 export function deriveObservedArtifact(raw: unknown): DerivedObserved {
     const b = validateObserved<ValidationBasis>('replay-validation#/definitions/ValidationBasis', raw, OBSERVED_LIMITS.basis);
@@ -243,7 +257,7 @@ export function deriveObservedArtifact(raw: unknown): DerivedObserved {
         demand(page === ('kind' in proposal.target && proposal.target.kind === 'page'), 'OPERATION_MISMATCH');
         demand(secretFill === ('kind' in proposal.target && proposal.target.kind === 'passwordControl'), 'REFERENCE_MISMATCH');
         const locator = 'locator' in proposal.target ? proposal.target.locator : null;
-        const selected=selectedOriginalLocator(b,p,ob,observations,usedObservations);
+        const selected=selectedOriginalLocator(b,p,ob,observations,usedObservations)??qualifiedOriginalLocator(p,ob,observations);
         const effective=selected?{...ob,targetIntent:selected.kind==='role'?selected.name:selected.value,selectedLocator:selected}:ob;
         if(locator)demand(equalsOriginalTargetIntent(locator.kind==='role'?locator.name:locator.value,effective.targetIntent),'OPERATION_MISMATCH');
         const operationHash = hashObserved({ coordinate: l.coordinate, origin: e.origin, locator, operation: proposal.operation });

@@ -82,6 +82,8 @@ describe('computeAdmission', () => {
   });
 });
 
+
+
 describe('append-only ledger', () => {
   it('appends dated decisions with a digest chain and refuses a rewritten earlier entry', () => {
     const path = join(dir, 'ledger.json');
@@ -208,7 +210,7 @@ describe('stop rule (80 percent of the allocation, or the first hard-gate hit)',
     // No recorded proposals and no usage: the session total, as before.
     expect(recorded().record({ inputTokens: null, outputTokens: null, modelProposals: null })).toMatchObject({ costBasis: 'reserved-ceiling', spentUsd: 1 });
     // Reported usage still wins.
-    expect(recorded().record({ inputTokens: 200, outputTokens: 0, modelProposals: 50 })).toMatchObject({ costBasis: 'reported', spentUsd: 0.2 });
+    expect(recorded().record({ inputTokens: 200, outputTokens: 0, modelProposals: 50 })).toMatchObject({ costBasis: 'PUBLIC_BUDGET_COUNTERS', spentUsd: 0.2 });
   });
 
   it('resuming needs a new dated ledger entry: a STOPPED latest entry keeps the guard shut', () => {
@@ -250,5 +252,19 @@ describe('B7 proposal measurement (a local fixture run can refute, never confirm
   it('does not confirm anything when the fixture needs the floor or fewer', () => {
     expect(measureProposals([doc(6, 2048)]).verdict).toBe('NOT_REFUTED_LOCALLY_NOT_CONFIRMED');
     expect(measureProposals([doc(24, 2048)]).verdict).toBe('NOT_REFUTED_LOCALLY_NOT_CONFIRMED');
+  });
+});
+
+describe('group5: later hard facts share the existing protective stop latch', () => {
+  it('retains a budget stop plus a later hard fact without charging a session twice', () => {
+    for (const fact of [{ leak: true }, { falsePass: true }]) {
+      const stop = createStopRule({ allocationUsd: 10, price: { pInPerMTok: 1000, pOutPerMTok: 0 }, reservedCeiling: { input: 10_000, output: 100 } });
+      stop.record({ inputTokens: 8000, outputTokens: 0 });
+      const legacyStop: { observeHardGate?: ReturnType<typeof createStopRule>['observeHardGate'] } = stop;
+      legacyStop.observeHardGate?.(fact);
+      expect(stop.state().stopped).toBe('STOPPED_HARD_GATE'); // Old latch remains STOPPED_BUDGET_80: semantic RED, not absent-method credit.
+      expect(stop.state()).toMatchObject({ sessions: 1, spentUsd: 8, observedReasons: ['STOPPED_BUDGET_80', 'STOPPED_HARD_GATE'] });
+      expect(() => stop.record({ inputTokens: 1, outputTokens: 1 })).toThrow('SESSION_AFTER_STOP');
+    }
   });
 });

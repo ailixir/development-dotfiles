@@ -33,11 +33,16 @@ export function parseWireJson(bytes: Uint8Array): unknown {
       }
       if (character === '[') {
         index++; whitespace(); const result: unknown[] = []; if (text[index] === ']') { index++; return result; }
-        for (;;) { result.push(value(depth+1)); whitespace(); const separator=text[index++]; if(separator===']')return result; if(separator!==',')throw new Error(); }
+        for (;;) {
+          result.push(value(depth+1)); whitespace(); const separator=text[index++];
+          if(separator===']')return result; if(separator!==',')throw new Error();
+        }
       }
-      for (const [literal,result] of [['true',true],['false',false],['null',null]] as const) if (text.startsWith(literal,index)) { index+=literal.length; return result; }
+      for (const [literal,result] of [['true',true],['false',false],['null',null]] as const)
+        if (text.startsWith(literal,index)) { index+=literal.length; return result; }
       const match = /^-?(?:0|[1-9][0-9]*)/u.exec(text.slice(index)); if (!match) throw new Error();
-      index+=match[0].length; const number=Number(match[0]); if(!Number.isSafeInteger(number)||Object.is(number,-0))throw new Error(); return number;
+      index+=match[0].length; const number=Number(match[0]);
+      if(!Number.isSafeInteger(number)||Object.is(number,-0))throw new Error(); return number;
     };
     const result=value(0); whitespace(); if(index!==text.length)throw new Error(); return result;
   } catch { throw new Error('SCHEMA'); }

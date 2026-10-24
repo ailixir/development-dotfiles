@@ -34,7 +34,7 @@ export interface CorpusCase {
   fixture: { kind: string; mode?: string; server?: string; serverPin?: Pin; namespaceBase?: string } | null;
   expectedOutcome: Pin | null;
   oracle: { kind: string; endpoint: string; independentOf: string[]; mutationControls: string[]; noSideEffect: boolean };
-  rs1: { isRs1Case: boolean; valueLocations: { value: string; elementKind: string; reachableByGrant: boolean }[]; assertTextLocations: { value: string; elementKind: string }[] };
+  rs1: { isRs1Case: boolean | null; state?: string; valueLocations: { value: string; elementKind: string; reachableByGrant: boolean }[]; assertTextLocations: { value: string; elementKind: string }[] };
   [extra: string]: unknown;
 }
 export interface CorpusManifest {
@@ -49,7 +49,7 @@ export interface GateArithmetic { classPCases: number; repetitions: number; plan
 export declare function gateArithmetic(classPCases: number, repetitions: number, thresholdPct?: number): GateArithmetic;
 export declare function sessionPlan(manifest: { cases: { repetitions: number; modelSessionsPerRepetition?: number }[] }): { runs: number; sessions: number; contingencySessions: number };
 export declare function validateCorpusManifest(manifest: unknown, options?: { root?: string; repoRoot?: string | null; checkFiles?: boolean }): {
-  errors: string[]; counts: { P: number; F: number; N: number; total: number; blockedExternal: number; rs1Cases: number } | null; gate: GateArithmetic | null; plan?: { runs: number; sessions: number; contingencySessions: number };
+  errors: string[]; counts: { P: number; F: number; N: number; total: number; blockedExternal: number; rs1Cases: number; rs1KnownLocalCases: number; rs1UnknownStagingCases: number } | null; gate: GateArithmetic | null; plan?: { runs: number; sessions: number; contingencySessions: number };
 };
 export declare function manifestDigest(manifest: unknown): string;
 export declare function freezeManifest(path: string, options?: { now?: Date; root?: string; repoRoot?: string | null }): CorpusManifest;
@@ -76,29 +76,52 @@ export declare function scanCanaries(input: { texts: Record<string, string>; sec
   leaks: number; findings: { label: string; canaryIndex: number; canarySha256Prefix: string; hits: number }[]; positiveCanaryPresent: boolean | null; positiveCanaryOk: boolean; scannedLabels: number;
 };
 
+export type CauseField = 'rs1NonScalarReadGaps' | 'authoredEchoUnobservableTargets' | 'focusMutationRefusedFills';
+export type AccountingScope = 'gateP' | 'creditedAllClasses' | 'allAttempts';
+export interface RunIdentity { caseId: string | null; rep: number | null; attempt: number | null }
+export interface CauseAssessment extends RunIdentity { status: 'VERIFIED' | 'UNKNOWN'; evidenceSha256: string | null; manifestSha256: string | null }
+export interface BudgetUsage { basis: 'PUBLIC_BUDGET_COUNTERS'; modelProposals: number | null; inputTokens: number | null; outputTokens: number | null }
+export interface LearnSession { phase: 'base' | 'incremental'; sessionId: string; session?: ObservedSession; observationComplete?: boolean; usage: BudgetUsage; hardGates: { falsePass: boolean; secretOrPiiLeak: number }; budgetCharge?: { amountUsd: number; basis: string }; oracle?: OutcomeVerdict }
+export interface CauseAnnotation extends RunIdentity { rawOrdinal: number; rawRecordSha256: string; manifestSha256: string | null; causes: Record<CauseField, { count: number; events: JsonObject[]; assessment: CauseAssessment }> }
+export interface CauseOverlay { rawRunsSha256: string; annotations: CauseAnnotation[] }
+export interface ClosedCauseReview extends RunIdentity { kind: 'STUDIO_OBS_009_CLOSED_CAUSE_REVIEW'; rawRunsSha256: string; rawOrdinal: number; rawRecordSha256: string; manifestSha256: string | null; field: CauseField; events: JsonObject[]; scope: { complete: boolean; observationEvidenceSha256: string; justificationCode: 'COMPLETE_REVIEWED_SCOPE' | 'PARTIAL_REVIEWED_SCOPE'; stepTextSha256: string | null; expectedOutcomeSha256: string | null; valueLocationsSha256: string } }
+export interface ReviewDocument<T = JsonObject> { sha256: string; fileText: string; value: T }
+export interface ReviewAdoption { kind: 'INDEPENDENT_BENCHMARK_CAUSE_ADOPTION'; status: 'ADOPTED'; rawRunsSha256: string; overlaySha256: string; manifestSha256: string | null; executionReceiptSha256: string; ledgerSha256: string; independentOfAuthor: boolean; originalExecutionAndConfigurationReviewed: boolean; originalIntervalHistoryReviewed?: boolean; intervalLedgerSha256?: string; accepted: { rawOrdinal: number; field: CauseField; evidenceSha256: string }[] }
+export interface ExecutionReceipt { kind: 'STUDIO_OBS_009_EXECUTION_RECEIPT'; mode: RunMode; startedAt: string; finishedAt?: string; intervalLedgerSha256?: string | null; manifestSha256: string | null; rawRunsSha256: string; ledgerSha256: string; admissionSeq: number; admissionEntrySha256: string; configurationSha256: string }
+export interface ReviewInput { rawRunsText: string; overlayText: string; overlay: CauseOverlay; reviews: ReviewDocument<ClosedCauseReview>[]; adoption: ReviewDocument<ReviewAdoption> | null; execution: ReviewDocument<ExecutionReceipt> | null; ledger: ReviewDocument<AdmissionLedger> | null; intervalLedger?: ReviewDocument<AdmissionLedger> | null; inputFileSha256?: Record<string, string> }
+export interface CauseSummary { unit: 'classified-events'; confirmedTotal: number; total: number | null; runsCounted: number; verifiedRuns: number; unknownRuns: number; items: JsonObject[]; unknownIdentities: RunIdentity[]; affectedRuns: RunIdentity[]; fullPlannedRuns?: number; runnablePlannedRuns?: number; missingRuns?: string[]; blockedUnrun?: string[] }
+export interface ChargeMetric { total: number | null; knownSubtotal: number; complete: boolean; knownSessions: number; unknownSessions: number; unknownSessionIdentities: (RunIdentity & { phase: string; sessionId: string })[]; p50: number | null; p95: number | null }
+export interface ChargeSummary { basis: 'PUBLIC_BUDGET_COUNTERS'; logicalAttempts: number; knownStartedSessions: number | null; knownSessionReferences: number; duplicateSessionIds: string[]; unknownAttempts: RunIdentity[]; proposals: ChargeMetric; input: ChargeMetric; output: ChargeMetric; knownConservativeChargeSubtotalUsd: number | null; logicalCounterClaims: Record<string, { knownSubtotal: number; knownAttempts: number; unknownAttemptIdentities: RunIdentity[]; basis: string }>; protectiveStopCharges: { knownSubtotalUsd: number; totalUsd: number | null; complete: boolean; unknownSessions: number; unresolvedPotentialStarts: number; bases: string[] }; conservativeChargeUsd: number | null; actualWireCalls: null; actualProviderInputTokens: null; actualProviderOutputTokens: null; actualBilledCostUsd: null; actualEvidence: string }
 export interface RunRecord {
   caseId: string; rep: number; attempt: number; mode: RunMode; manifestSha256: string | null; runStartedAt: string; runFinishedAt: string;
   sessionId?: string; session?: ObservedSession; oracle?: OutcomeVerdict; infrastructureFailure: string | null;
-  usage?: { modelProposals: number | null; inputTokens: number | null; outputTokens: number | null };
+  causeAssessment?: Record<CauseField, CauseAssessment>;
+  learnSessionsComplete?: boolean; learnSessions?: LearnSession[];
+  usage?: { basis?: 'PUBLIC_BUDGET_COUNTERS'; modelProposals: number | null; inputTokens: number | null; outputTokens: number | null };
   secretOrPiiLeak?: number; rs1NonScalarReadGaps: number; authoredEchoUnobservableTargets: number; focusMutationRefusedFills: number;
+  /** canaryObservation is one closed local-scope row; absent/invalid coverage never establishes zero. */
   details?: Record<string, JsonObject[]>; incremental?: JsonObject;
 }
 export declare function validateRunRecord(run: unknown, manifest: CorpusManifest): string[];
 export interface Price { pInPerMTok: number; pOutPerMTok: number; source?: string | null }
 export interface Benchmark {
-  kind: string; label: string; manifestSha256: string | null; comparisonClaim: string; admissionStatus: string | null;
-  gate: { verdict: string; reasons: string[]; classP: { casesPlanned: number; casesRunnable: number; runsCredited: number; completions: number; failedRuns: number; rate: number | null; thresholdPct: number; fullArithmetic: GateArithmetic; runnableArithmetic: GateArithmetic }; blockedUnrun: string[] };
-  hardGates: { falsePasses: number; secretOrPiiLeaks: number };
+  schemaVersion: number; kind: string; label: string; manifestSha256: string | null; comparisonClaim: string; admissionStatus: string | null;
+  gate: { scope: string; verdict: string; reasons: string[]; classP: { casesPlanned: number; casesRunnable: number; runsCredited: number; completions: number; failedRuns: number; rate: number | null; thresholdPct: number; fullArithmetic: GateArithmetic; runnableArithmetic: GateArithmetic }; blockedUnrun: string[] };
+  hardGates: { falsePasses: number; secretOrPiiLeaks: number; falsePassRuns: RunIdentity[]; leakRuns: RunIdentity[] };
+  reviewProvenance: JsonObject; evidenceStatus: string; requiredActualEvidence: string[];
+  canaryObservation?: { scope: 'LOCAL_CONSUMED_PUBLIC_HTTP_AND_DECLARED_TEXTS_ONLY'; complete: boolean; knownLeakRuns: number; totalLeakRuns: number | null; unknownRuns: RunIdentity[]; globalWireComplete: null };
+  corpusInspection: { knownLocalCaseIds: string[]; confirmedRs1CaseIds: string[]; unknownStagingCaseIds: string[]; knownLocalCount: number; confirmedRs1CaseCount: number; unknownStagingCount: number; globalRs1Total: number | null; disclosure: string };
   classFN: { runs: number; correct: number };
   denominatorLedger: { plannedRuns: number; creditedRuns: number; infrastructureFailures: JsonObject[]; missingRuns: string[]; blockedUnrunCases: string[]; problems: { caseId: string | null; rep: number | null; code: string }[] };
-  accounting: Record<'rs1NonScalarReadGaps' | 'authoredEchoUnobservableTargets' | 'focusMutationRefusedFills', { total: number; runsCounted: number; items: JsonObject[] }>;
-  latency: { p50Ms: number | null; p95Ms: number | null; samples: number; denominator: number };
-  modelCalls: { total: number; p50: number | null; p95: number | null; samples: number; denominator: number };
-  tokens: { input: number | null; output: number | null; denominator: number; complete: boolean };
-  costUsd: { total: number | null; basis: string; denominator: number };
+  accounting: Record<CauseField, Record<AccountingScope, CauseSummary>>;
+  charges: Record<AccountingScope, ChargeSummary>;
+  latency: { basis: string; missingSamples: number; p50Ms: number | null; p95Ms: number | null; samples: number; denominator: number };
+  modelCalls: { total: number | null; basis: string; proposals: ChargeMetric; p50: number | null; p95: number | null; samples: number; denominator: number };
+  tokens: { input: number | null; output: number | null; denominator: number; complete: boolean; basis: string };
+  costUsd: { total: number | null; conservativeChargeUsd: number | null; basis: string; denominator: number };
   incremental: JsonObject[];
 }
-export declare function buildBenchmark(input: { manifest: CorpusManifest; runs: RunRecord[]; mode: RunMode; generatedAt?: string; admission?: JsonObject | null; price?: Price | null }): Benchmark;
+export declare function buildBenchmark(input: { manifest: CorpusManifest; runs: RunRecord[]; mode: RunMode; generatedAt?: string; admission?: JsonObject | null; price?: Price | null; reviewInput?: ReviewInput | null; root?: string; repoRoot?: string }): Benchmark;
 export declare function scoreReplayStability(input: { replays: { ok: boolean; artifactHash: string }[]; required?: number; thresholdPct?: number; label?: string }): {
   label: string; required: number; executed: number; completed: number; completionRate: number | null; thresholdPct: number; distinctArtifactHashes: number; pass: boolean; verdict: string;
 };
@@ -131,12 +154,20 @@ export declare function appendAdmission(path: string, decision: AdmissionDecisio
 export declare function guardStart(input: { ledger: AdmissionLedger; manifestSha256: string | null; purpose?: string; now?: Date }): AdmissionEntry;
 export declare function createStopRule(input: { allocationUsd: number; price: Price; stopFraction?: number; reservedCeiling: { input: number; output: number }; perCallCeiling?: { input: number; output: number } | null }): {
   record(session: { inputTokens: number | null; outputTokens: number | null; modelProposals?: number | null; falsePass?: boolean; leak?: boolean }): { stop: boolean; reason: string | null; spentUsd: number; costBasis: string };
-  nextSessionAllowed(): boolean; state(): { sessions: number; spentUsd: number; stopped: string | null; stopThresholdUsd: number };
+  observeHardGate(facts: { falsePass?: boolean; leak?: boolean }): { stop: boolean; reason: string | null; spentUsd: number };
+  nextSessionAllowed(): boolean; state(): { observedReasons: string[]; sessions: number; spentUsd: number; stopped: string | null; stopThresholdUsd: number };
 };
+
+/** Numeric PUT tokens; the driver rejects nonpositive, unsafe or nonnumeric values. */
+export interface DraftRevisionTuple { sourceRevision: number; configurationRevision: number }
+export interface DraftSnapshot extends DraftRevisionTuple { id: string }
 
 export interface StudioApiClient {
   createDraft(name: string, authoring: { request: JsonObject }): Promise<{ id: string; sourceRevision: number | string; configurationRevision: number | string }>;
-  updateDraft(id: string, name: string, authoring: { request: JsonObject }): Promise<{ id: string; sourceRevision: number | string; configurationRevision: number | string }>;
+  /** Full decoded successful body, captured before the driver validates its identity/revisions. */
+  readDraft(id: string): Promise<unknown>;
+  /** Validates only the explicit PUT input tuple; response validation follows privacy capture. */
+  updateDraft(id: string, name: string, authoring: { request: JsonObject }, revisions: DraftRevisionTuple): Promise<unknown>;
   startSession(draft: { id: string; sourceRevision: number | string; configurationRevision: number | string }, extra?: JsonObject): Promise<{ session: { sessionId: string; state: string; counters?: JsonObject } }>;
   readSession(id: string): Promise<{ session: { sessionId: string; state: string; counters?: JsonObject } }>;
   readClarification(id: string): Promise<{ clarificationId: string; generation: number } | null>;
@@ -167,6 +198,8 @@ export declare function hostExistingFixture(kind: 'guided-dataflow' | 'secret-lo
 export declare function runBenchmark(input: {
   manifest: CorpusManifest; mode: RunMode; client: StudioApiClient; ledger?: AdmissionLedger | null; price?: Price | null; root?: string; repoRoot?: string;
   select?: string[] | null; plantedSecrets?: Record<string, string>; driveOptions?: DriveOptions; scripts?: Record<string, { client?: StudioApiClient; expected?: ExpectedOutcome }>;
+  /** Test dependencies are accepted only in HARNESS_SELF_TEST; defaults remain the production hosts. */
+  selfTestHosts?: Partial<{ startCorpusPages: typeof startCorpusPages; hostExistingFixture: typeof hostExistingFixture }> | null;
 }): Promise<{ runs: RunRecord[]; benchmark: Benchmark }>;
 export declare function repoRootFrom(root?: string): string;
 

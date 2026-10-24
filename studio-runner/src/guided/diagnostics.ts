@@ -9,9 +9,13 @@ export function redactFailure(error:unknown,knownValues:readonly string[]|Redact
   const redactor='redact' in knownValues?knownValues:createRedactor(knownValues);
   const text=error instanceof Error?redactor.redact(error.name)+': '+redactor.redact(error.message):'Unknown error: '+typeof error;
   // Scalar redaction precedes interpolation; re-scrub any variant spanning the safe fields.
-  const redacted=redactor.redact(text).replace(/\s+/gu,' ').replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/gu,'�').trim();
+  const redacted=redactor.redact(text).replace(/\s+/gu,' ')
+    .replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/gu,'�').trim();
   let bytes=0,bounded='';
-  for(const character of redacted){const length=Buffer.byteLength(character);if(bytes+length>2048 || Array.from(bounded).length>=2048)break;bounded+=character;bytes+=length;}
+  for(const character of redacted){
+    const length=Buffer.byteLength(character);if(bytes+length>2048 || Array.from(bounded).length>=2048)break;
+    bounded+=character;bytes+=length;
+  }
   return bounded||'Unknown error';
 }
 /**
@@ -31,7 +35,10 @@ const ERRNO_CODE = /^E[A-Z0-9]{2,31}$/u;
 const PROCESS_EXIT = /process did exit: exitCode=(-?\d{1,3}|null), signal=(SIG[A-Z0-9]{2,10}|null)/u;
 const TIMEOUT = /Timeout \d{1,7}ms exceeded/u;
 const MAX_LINKS = 6;
-interface CauseLink { name: string; code?: string; errno?: string; phase?: string; loss?: string; kind?: string; exitCode?: number | null; signal?: string | null }
+interface CauseLink {
+  name: string; code?: string; errno?: string; phase?: string; loss?: string; kind?: string;
+  exitCode?: number | null; signal?: string | null
+}
 /** One link of a cause chain as fixed labels only. Free text is classified here, never echoed. */
 function describeLink(error: unknown): CauseLink {
   if (!(error instanceof Error)) return { name: 'NonError' };
@@ -69,21 +76,27 @@ export function describeStartFailure(error: unknown, facts: StartRefusalFacts): 
     if (current === undefined) break;
   }
   const operation = facts.operation === 'assign' || facts.operation === 'context' ? facts.operation : 'other';
-  return 'GUIDED_START_FAILED ' + JSON.stringify({ operation, session: hash(facts.sessionId).slice(0, 16), elapsedMs: Math.max(0, Math.round(facts.elapsedMs)), links }) + '\n';
+  return 'GUIDED_START_FAILED ' + JSON.stringify({
+    operation, session: hash(facts.sessionId).slice(0, 16), elapsedMs: Math.max(0, Math.round(facts.elapsedMs)), links
+  }) + '\n';
 }
 
 /** Bounded, non-authoritative sidecar. Consumption/recovery never reads this file. */
 export class GuidedDiagnostics {
   private records=0;private bytes=0;
   readonly path:string;
-  constructor(private readonly directory:string,sessionId:string,private readonly maxRecords=200,private readonly maxBytes=262144){this.path=join(directory,hash(sessionId)+'.diagnostic.jsonl');}
+  constructor(private readonly directory:string,sessionId:string,private readonly maxRecords=200,private readonly maxBytes=262144){
+    this.path=join(directory,hash(sessionId)+'.diagnostic.jsonl');
+  }
   async record(identity:DiagnosticIdentity,error:unknown,knownValues:readonly string[]|Redactor,stderr:(text:string)=>void):Promise<string>{
     const errorMessage=redactFailure(error,knownValues);
     const line=JSON.stringify({...identity,errorMessage})+'\n',bytes=Buffer.byteLength(line);
     if(this.records>=this.maxRecords || this.bytes+bytes>this.maxBytes)return errorMessage;
     this.records++;this.bytes+=bytes;
     try{stderr(errorMessage+'\n');}catch{/* Diagnostic delivery never changes the verdict. */}
-    try{await mkdir(this.directory,{recursive:true,mode:0o700});await appendFile(this.path,line,{mode:0o600,flag:'a'});}catch{/* No authority or replay state is stored here. */}
+    try{
+      await mkdir(this.directory,{recursive:true,mode:0o700});await appendFile(this.path,line,{mode:0o600,flag:'a'});
+    }catch{/* No authority or replay state is stored here. */}
     return errorMessage;
   }
 }

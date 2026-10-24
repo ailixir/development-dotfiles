@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
+import { Buffer } from 'node:buffer';
 // eslint-disable-next-line no-restricted-imports -- Fixed evaluation self-test executable and file paths; no model input.
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
 import { validateManifest } from './oracle.mjs';
 import { buildReport, renderReport, reportExitCode } from './report.mjs';
 import {
-  appendAdmission, computeAdmission, emptyLedger, freezeManifest, guardStart, loadManifest, measureProposals, oracleMutationControl,
+  appendAdmission, buildBenchmark, canonicalJson, computeAdmission, emptyLedger, freezeManifest, guardStart, loadManifest, measureProposals, oracleMutationControl, sha256Hex,
   repoRootFrom, resolveInside, runBenchmark, validateCorpusManifest, verifyLedger, AdmissionError, createPublicApiClient, OBSERVED_AUTHORING_DIR,
 } from './observed-authoring/evaluate.mjs';
 
@@ -120,21 +122,74 @@ async function main() {
     out(measureProposals(docs));
     return 0;
   }
+  if (command === 'benchmark-report') {
+    // Offline only. No client, provider call or admission append; original execution facts are immutable.
+    if (!output) throw new Error('benchmark-report requires a fresh directory');
+    const config = JSON.parse(await readFile(input, 'utf8'));
+    const manifestPath = resolve(config.manifest ?? MANIFEST);
+    const manifest = loadManifest(manifestPath);
+    const validation = validateCorpusManifest(manifest, { root: config.corpusRoot ?? dirname(manifestPath), repoRoot: repoRootFrom() });
+    if (validation.errors.length > 0) throw new Error(`MANIFEST_INVALID:${validation.errors.slice(0, 5).join(' | ')}`);
+    const readPinned = async (reference) => {
+      if (!reference || typeof reference.path !== 'string' || !/^[a-f0-9]{64}$/u.test(reference.sha256 ?? '')) throw new Error('review input reference');
+      const fileText = await readFile(reference.path, 'utf8');
+      if (Buffer.byteLength(fileText) > 8_000_000 || sha256Hex(fileText) !== reference.sha256) throw new Error('review input hash');
+      return { fileText, sha256: reference.sha256 };
+    };
+    const readDocument = async (reference) => {
+      if (reference === undefined || reference === null) return null;
+      const pinned = await readPinned(reference);
+      return { ...pinned, value: JSON.parse(pinned.fileText) };
+    };
+    const raw = await readPinned(config.rawRuns);
+    const annotations = await readPinned(config.causeAnnotations);
+    const runs = raw.fileText.split(/\r?\n/u).filter((line) => line.trim() !== '').map((line) => JSON.parse(line));
+    const mode = runs.length > 0 && runs.every((run) => run.mode === 'HARNESS_SELF_TEST') ? 'HARNESS_SELF_TEST' : 'D_C';
+    if (config.mode !== undefined && config.mode !== mode) throw new Error('review cannot promote execution mode');
+    const reviewInput = {
+      rawRunsText: raw.fileText, overlayText: annotations.fileText, overlay: JSON.parse(annotations.fileText),
+      reviews: await Promise.all((config.reviews ?? []).map(readDocument)),
+      adoption: await readDocument(config.independentQaAdoption), execution: await readDocument(config.originalExecution), ledger: await readDocument(config.admissionLedger), intervalLedger: await readDocument(config.intervalAdmissionLedger),
+      inputFileSha256: { rawRuns: raw.sha256, causeAnnotations: annotations.sha256 },
+    };
+    const benchmark = buildBenchmark({ manifest, runs, mode, reviewInput, root: config.corpusRoot ?? dirname(manifestPath), repoRoot: repoRootFrom() });
+    await mkdir(output, { recursive: false });
+    await writeFile(`${output}/benchmark.json`, `${JSON.stringify(benchmark, null, 2)}\n`, { flag: 'wx' });
+    await writeFile(`${output}/input-bindings.json`, `${JSON.stringify(benchmark.reviewProvenance, null, 2)}\n`, { flag: 'wx' });
+    return benchmark.gate.verdict === 'GATE_PASS' ? 0 : benchmark.gate.verdict === 'GATE_FAIL' ? 1 : 2;
+  }
   if (command === 'benchmark') {
     // Live D_C run. Refused unless the ledger's latest entry is ADMITTED for exactly this manifest.
     const config = JSON.parse(await readFile(input, 'utf8'));
     if (!output) throw new Error('benchmark requires a new evidence directory');
     const ledgerPath = config.admissionLedger;
-    const ledger = ledgerPath && existsSync(ledgerPath) ? JSON.parse(readFileSync(ledgerPath, 'utf8')) : emptyLedger();
+    const ledgerText = ledgerPath && existsSync(ledgerPath) ? readFileSync(ledgerPath, 'utf8') : canonicalJson(emptyLedger());
+    const ledger = JSON.parse(ledgerText);
     const token = process.env.STUDIO_EVAL_API_TOKEN;
     if (!token) throw new Error('Evaluation identity unavailable');
     const manifest = loadManifest(config.manifest ?? MANIFEST);
     // Refuse before anything is created or contacted: no evidence directory, no client, no API call.
-    guardStart({ ledger, manifestSha256: manifest.manifestSha256 });
+    const validation = validateCorpusManifest(manifest, { root: dirname(resolve(config.manifest ?? MANIFEST)), repoRoot: repoRootFrom() });
+    if (validation.errors.length > 0) throw new Error(`MANIFEST_INVALID:${validation.errors.slice(0, 5).join(' | ')}`);
+    const startedAt = new Date().toISOString();
+    const originalAdmission = guardStart({ ledger, manifestSha256: manifest.manifestSha256, now: new Date(startedAt) });
+    if (ledgerPath && sha256Hex(readFileSync(ledgerPath, 'utf8')) !== sha256Hex(ledgerText)) throw new AdmissionError('LEDGER_CHANGED_BEFORE_START');
     const client = createPublicApiClient({ baseUrl: config.apiBaseUrl, token, csiId: config.csiId, environmentId: config.environmentId, applicationId: config.applicationId });
     await mkdir(output, { recursive: false });
     const { runs, benchmark } = await runBenchmark({ manifest, mode: 'D_C', client, ledger, repoRoot: repoRootFrom() });
-    await writeFile(`${output}/runs.jsonl`, `${runs.map((r) => JSON.stringify(r)).join('\n')}\n`, { flag: 'wx' });
+    const rawRunsText = `${runs.map((r) => JSON.stringify(r)).join('\n')}\n`;
+    await writeFile(`${output}/runs.jsonl`, rawRunsText, { flag: 'wx' });
+    // Actual future measurement only: preserve the prior snapshot and capture append-only history after
+    // the original end. These unreviewed bytes do not themselves authenticate complete interval history.
+    const finishedAt = new Date().toISOString();
+    const intervalLedgerText = ledgerPath && existsSync(ledgerPath) ? readFileSync(ledgerPath, 'utf8') : null;
+    const execution = { kind: 'STUDIO_OBS_009_EXECUTION_RECEIPT', mode: 'D_C', startedAt, finishedAt,
+      intervalLedgerSha256: intervalLedgerText === null ? null : sha256Hex(intervalLedgerText), manifestSha256: manifest.manifestSha256, rawRunsSha256: sha256Hex(rawRunsText),
+      ledgerSha256: sha256Hex(ledgerText), admissionSeq: originalAdmission.seq, admissionEntrySha256: sha256Hex(canonicalJson(originalAdmission)),
+      configurationSha256: sha256Hex(canonicalJson({ enforcedCaps: originalAdmission.enforcedCaps, pinned: originalAdmission.pinned })), observationComplete: runs.every((run) => (run.details?.driverObservations ?? []).length === 0), status: 'RAW_EMITTED_UNREVIEWED' };
+    await writeFile(`${output}/admission-ledger.json`, ledgerText, { flag: 'wx' });
+    if (intervalLedgerText !== null) await writeFile(`${output}/admission-ledger-interval.json`, intervalLedgerText, { flag: 'wx' });
+    await writeFile(`${output}/execution.json`, `${JSON.stringify(execution, null, 2)}\n`, { flag: 'wx' });
     await writeFile(`${output}/benchmark.json`, `${JSON.stringify(benchmark, null, 2)}\n`, { flag: 'wx' });
     return benchmark.gate.verdict === 'GATE_PASS' ? 0 : benchmark.gate.verdict === 'GATE_FAIL' ? 1 : 2;
   }
@@ -143,6 +198,7 @@ async function main() {
     '  validate-manifest FILE | oracle-self-test | summarize FILE [OUT_JSON] [OUT_MD]      (compile-era oracle/report layer)',
     '  validate-corpus [FILE] | freeze-corpus [FILE] | corpus-mutation-control [FILE]       (observed-authoring corpus)',
     '  admission-record LEDGER [--create] [--purpose P] [--no-manifest] --planned-proposals N --contingency F (--input-bytes-per-call N | --input-token-cap N) --plan-basis TEXT [--measured FILE] [--price-in --price-out --price-source --headroom --headroom-source --allocation] | admission-guard LEDGER [MANIFEST]',
+    '  benchmark-report CONFIG NEW_DIR (offline original JSONL + cause-only overlay + original admission + independent review; no calls)',
     '  b7 EVIDENCE_JSON... | benchmark CONFIG NEW_EVIDENCE_DIR                              (benchmark refuses without an ADMITTED ledger entry)',
     '',
   ].join('\n'));

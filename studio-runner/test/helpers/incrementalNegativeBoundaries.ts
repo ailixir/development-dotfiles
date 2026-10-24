@@ -220,7 +220,7 @@ export const negativeBoundaries:readonly NegativeBoundary[]=[
       {
         "pointer": "/authority/authenticatedReceipt",
         "remove": false,
-        "oldHash": "56bac6e5433f92ff8fce8c834c3d269e8d3d862e3a879817cdf886795323ab2d",
+        "oldHash": "d1b397f54de9b3fa0148b4d622daa835f4e221d31a6bb5c2e4c74325641af620",
         "newHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
       }
     ],
@@ -273,8 +273,8 @@ export const negativeBoundaries:readonly NegativeBoundary[]=[
       {
         "pointer": "/expectedArtifact/replayPolicy/publicationEvidenceHash",
         "remove": false,
-        "oldHash": "7500a8cceb2953574f29bc7920463462e207386a66ad349ce03545a114d70e1a",
-        "newHash": "644c2163d21337cd07049d035eaeb451c8223143ae0c251be4db418992a24c03"
+        "oldHash": "22f9e666b335d09b4aca07655ddb7a74dca4386e087c5f610c0d1084f6c044ec",
+        "newHash": "9004488f4cd9b9057a9cda4f4f354077797de1b87428114c1b9176b153c92581"
       }
     ],
     "requiredBackendCompanion": "Validate coherent positive request first, pass exact mutated expectedArtifact into actual validateObservedRequest with recomputed genuine request basisHash/build/profile; assert ok:false/errorCode OPERATION_MISMATCH or applicable closed shape refusal. Java must compare independently derived full candidate and exercise production commit reject where the original tier requires it. Never assert a valid basis itself must throw.",
@@ -289,7 +289,7 @@ export const negativeBoundaries:readonly NegativeBoundary[]=[
       {
         "pointer": "/expectedArtifact/replayPolicy/publicationEvidenceHash",
         "remove": false,
-        "oldHash": "7500a8cceb2953574f29bc7920463462e207386a66ad349ce03545a114d70e1a",
+        "oldHash": "22f9e666b335d09b4aca07655ddb7a74dca4386e087c5f610c0d1084f6c044ec",
         "newHash": "2f7a155fd43698e8125bc76cc86c050ddeb1ebe070aacc3ebda3fb24bdcab9a9"
       }
     ],
@@ -375,7 +375,7 @@ export const negativeBoundaries:readonly NegativeBoundary[]=[
       {
         "pointer": "/expectedArtifact",
         "remove": true,
-        "oldHash": "023a74abb72c95a84f2a01e70c9bcc273ff2a8211807b520e10f787db0d35d3c",
+        "oldHash": "5b4902b40d5ea7b783519d9ccfb5e3ebdeb1622d7c5792acd69dda682b579cbf",
         "newHash": null
       }
     ],
@@ -401,7 +401,7 @@ export const negativeBoundaries:readonly NegativeBoundary[]=[
       {
         "pointer": "/expectedArtifact",
         "remove": true,
-        "oldHash": "5d01f5fd79e511c2bf22aadd13fb504b006e46e5e3af3808a061358d8182e9ce",
+        "oldHash": "2b949f79a06956f593eefa2b4a98d3328344eb82cd46a07fe55a781104766ff0",
         "newHash": null
       }
     ],
@@ -430,7 +430,7 @@ export const negativeBoundaries:readonly NegativeBoundary[]=[
       {
         "pointer": "/expectedArtifact",
         "remove": true,
-        "oldHash": "023a74abb72c95a84f2a01e70c9bcc273ff2a8211807b520e10f787db0d35d3c",
+        "oldHash": "5b4902b40d5ea7b783519d9ccfb5e3ebdeb1622d7c5792acd69dda682b579cbf",
         "newHash": null
       }
     ],
@@ -451,13 +451,13 @@ export const negativeBoundaries:readonly NegativeBoundary[]=[
       {
         "pointer": "/authority/authenticatedReceipt",
         "remove": false,
-        "oldHash": "eaf5480235ce4c3812cda1a41c4ee1b709cb3e0a1d7b382ab35a173a75812100",
+        "oldHash": "6f756bfffec8d948d1acf8af961ebce47462f1d946d758d4423439db1189e4c3",
         "newHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
       },
       {
         "pointer": "/expectedArtifact",
         "remove": true,
-        "oldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+        "oldHash": "00d015fd8409ce48f0dc51fbcaa341ef99fd9c7a686720d33b339286e42bc82f",
         "newHash": null
       }
     ],
@@ -484,7 +484,7 @@ export const negativeBoundaries:readonly NegativeBoundary[]=[
       {
         "pointer": "/expectedArtifact",
         "remove": true,
-        "oldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+        "oldHash": "00d015fd8409ce48f0dc51fbcaa341ef99fd9c7a686720d33b339286e42bc82f",
         "newHash": null
       }
     ],
@@ -511,7 +511,7 @@ export const negativeBoundaries:readonly NegativeBoundary[]=[
       {
         "pointer": "/expectedArtifact",
         "remove": true,
-        "oldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+        "oldHash": "00d015fd8409ce48f0dc51fbcaa341ef99fd9c7a686720d33b339286e42bc82f",
         "newHash": null
       }
     ],
@@ -538,7 +538,7 @@ export const negativeBoundaries:readonly NegativeBoundary[]=[
       {
         "pointer": "/expectedArtifact",
         "remove": true,
-        "oldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+        "oldHash": "00d015fd8409ce48f0dc51fbcaa341ef99fd9c7a686720d33b339286e42bc82f",
         "newHash": null
       }
     ],
@@ -565,7 +565,7 @@ export const negativeBoundaries:readonly NegativeBoundary[]=[
       {
         "pointer": "/expectedArtifact",
         "remove": true,
-        "oldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+        "oldHash": "00d015fd8409ce48f0dc51fbcaa341ef99fd9c7a686720d33b339286e42bc82f",
         "newHash": null
       }
     ],
@@ -593,7 +593,7 @@ export const negativeBoundaries:readonly NegativeBoundary[]=[
       {
         "pointer": "/expectedArtifact",
         "remove": true,
-        "oldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+        "oldHash": "00d015fd8409ce48f0dc51fbcaa341ef99fd9c7a686720d33b339286e42bc82f",
         "newHash": null
       }
     ],
@@ -620,7 +620,7 @@ export const negativeBoundaries:readonly NegativeBoundary[]=[
       {
         "pointer": "/expectedArtifact",
         "remove": true,
-        "oldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+        "oldHash": "00d015fd8409ce48f0dc51fbcaa341ef99fd9c7a686720d33b339286e42bc82f",
         "newHash": null
       }
     ],

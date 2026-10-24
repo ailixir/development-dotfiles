@@ -126,7 +126,10 @@ describe('KL-015-D5 the close paths of launchGuidedBrowser (source pins; the uni
 
   it('closes a started browser only through the two-stage helper, and hands the runtime its terminate and its orderly verdict', () => {
     expect(launch.match(/guidedCloseStages\(/gu)).toHaveLength(1);
-    expect(launch).toContain('graceful: () => acquired.close()');
+    expect(launch).toContain('graceful: () => { gracefulStarted = true; return acquired.close(); }');
+    // R065: the recorder is spared by the hard stage only after a graceful stage began; every other teardown kills it with the rest.
+    expect(launch).toContain('gracefulStarted?[scratchDirectory]:[scratchDirectory,recording?.dir]');
+    expect(launch).toContain('finalizeRecording,');
     expect(launch).toContain('terminate: stages.terminate');
     expect(launch).toContain('orderlyClosed: stages.orderlyClosed');
     // Scratch is removed once, from the one place the hard teardown ends.

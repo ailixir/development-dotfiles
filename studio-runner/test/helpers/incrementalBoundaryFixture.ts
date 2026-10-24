@@ -85,7 +85,7 @@ export function incrementalBoundaryFixture():BoundaryParent {
   b.bootstrap.contextRevision=1;b.bootstrap.materializationRevision=1;b.bootstrap.inputsHash=b.authoredInputsHash;b.bootstrap.allocationHash=boundaryHash([]);
   b.configurationReferences=[];b.sourceSelections=[];b.allocations=[];b.producers=[];b.consumerEdges=[];b.bindings=[];b.transfers=[];
   b.translationRevision='2';
-  b.translationPlan={sourceReferences:[ref],needs:[],obligations:b.sourceSteps.map((step,index)=>({obligationId:uuid(1001+index),stepId:step.stepId,occurrence:0,operationKind:index===0?'navigate':'click',targetIntent:index===0?'page':'Proceed',referenceIndex:index===0?0:null,needId:null,predicate:null}))};
+  b.translationPlan={sourceReferences:[ref],needs:[],obligations:b.sourceSteps.map((step,index)=>({obligationId:uuid(1001+index),stepId:step.stepId,occurrence:0,operationKind:index===0?'navigate':'click',targetIntent:index===0?'page':'Proceed',scopeIntent:null,referenceIndex:index===0?0:null,needId:null,predicate:null}))};
   const inc=need(b.incrementalEvidence);inc.firstSuffixAcceptance.previousPlanRevision=1;inc.firstSuffixAcceptance.planRevision=2;
   b.preparations=[];b.actions=[];b.observations=[];b.obligationAssociations=[];
   const origin='https://orders.example.test';

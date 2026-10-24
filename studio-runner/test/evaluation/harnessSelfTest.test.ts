@@ -7,10 +7,10 @@
  */
 import { describe, expect, it } from 'vitest';
 import {
-  runBenchmark, mutateObservation, idealObservation, SELF_TEST_LABEL,
-  type CorpusManifest, type ExpectedOutcome, type JsonObject, type StudioApiClient,
+  runBenchmark, driveIncremental, createPublicApiClient, createStopRule, buildBenchmark, mutateObservation, idealObservation, gateArithmetic, sessionPlan, manifestDigest, validateCorpusManifest, repoRootFrom, sha256Hex, SELF_TEST_LABEL,
+  type CorpusManifest, type ExpectedOutcome, type JsonObject, type StudioApiClient, type RunRecord,
 } from '../../evaluation/observed-authoring/evaluate.mjs';
-import { expectedOf, frozenManifest } from './observedCorpus.js';
+import { expectedOf, frozenManifest, readJson, syntheticRuns, reviewedInput, must } from './observedCorpus.js';
 
 const manifest = frozenManifest();
 const PASSWORD = 'planted-selftest-password-5521';
@@ -50,6 +50,7 @@ function scriptedApi(plans: (name: string) => Plan) {
       log.push(`createDraft ${name}`);
       return Promise.resolve({ id: `t${String(n)}`, sourceRevision: 1, configurationRevision: 1 });
     },
+    readDraft: (id) => Promise.resolve({ id, sourceRevision: 1, configurationRevision: 1 }),
     updateDraft: (id, name) => { log.push(`updateDraft ${name}`); return Promise.resolve({ id, sourceRevision: 2, configurationRevision: 1 }); },
     startSession: async (draft, extra) => {
       const d = drafts.get(draft.id);
@@ -97,6 +98,557 @@ const idealPlan = (expected: ExpectedOutcome, mutate: Parameters<typeof effectsF
   terminal: expected.session.terminal[0] ?? 'SUCCEEDED', published: expected.session.published, ...(expected.session.failureCodes?.[0] === undefined ? {} : { failureCode: expected.session.failureCodes[0] }),
   effects: effectsFor(expected, mutate),
 });
+
+interface RevisionRequest { method: string; url: string; body: unknown; authorization: string | null }
+
+/** The real public client with in-memory HTTP replies: transport never calls fetch or opens a host. */
+function revisionApi(options: { readResponse?: unknown; updateResponse?: unknown; conflict?: boolean; readUnavailable?: boolean; onRequest?: (method: string) => void } = {}) {
+  const requests: RevisionRequest[] = [];
+  const client = createPublicApiClient({
+    baseUrl: 'http://127.0.0.1/api/v1/studio', token: 'unit-transport-token', csiId: '60406', environmentId: 'dev', applicationId: 'unit-app',
+    transport: (url, init) => {
+      const method = init.method ?? 'GET';
+      if (url.pathname !== '/api/v1/studio/tests/memory' || !['GET', 'PUT'].includes(method)) return Promise.reject(new Error('Unexpected unit request'));
+      const body: unknown = typeof init.body === 'string' ? JSON.parse(init.body) : undefined;
+      requests.push({ method, url: url.toString(), body, authorization: new Headers(init.headers).get('authorization') });
+      options.onRequest?.(method);
+      const status = method === 'GET' && options.readUnavailable ? 503 : method === 'PUT' && options.conflict ? 409 : 200;
+      const response = status === 503 ? { code: 'UNAVAILABLE' } : status === 409 ? { error: 'STALE_REVISION' }
+        : method === 'GET' ? 'readResponse' in options ? options.readResponse : { id: 'memory', sourceRevision: 7, configurationRevision: 11 }
+          : 'updateResponse' in options ? options.updateResponse : { id: 'memory', sourceRevision: 17, configurationRevision: 19 };
+      return Promise.resolve(new Response(JSON.stringify(response), { status, headers: { 'content-type': 'application/json' } }));
+    },
+  });
+  return { client, requests };
+}
+
+/** Group5 uses only memory receipts and scripted/injected replies: no host, fetch, browser, model or backend. */
+async function memoryIncremental(options: { stopAfterBase?: boolean; failedBase?: boolean; leakedBase?: boolean; lateLeak?: boolean; unconfirmedSuffixStart?: boolean; missing?: 'baseProposal' | 'suffixProposal' | 'baseInput' | 'suffixOutput'; draftRead?: unknown; draftUpdate?: unknown; draftConflict?: boolean; draftReadUnavailable?: boolean } = {}) {
+  const entry = entryOf(manifest, 'incremental-edit-step-4');
+  const events: JsonObject[] = []; const order: string[] = []; const finalized = new Set<string>(); let starts = 0;
+  const startedDrafts: Parameters<StudioApiClient['startSession']>[0][] = [];
+  const revision = revisionApi({
+    readResponse: 'draftRead' in options ? options.draftRead : { id: 'memory', sourceRevision: 7, configurationRevision: 11 },
+    updateResponse: 'draftUpdate' in options ? options.draftUpdate : { id: 'memory', sourceRevision: 17, configurationRevision: 19, ...(options.lateLeak ? { diagnostics: 'unit-canary-secret' } : {}) },
+    conflict: options.draftConflict === true, readUnavailable: options.draftReadUnavailable === true,
+    onRequest: (method) => { order.push(method === 'GET' ? 'read-draft' : 'update'); },
+  });
+  const counters: JsonObject[] = [
+    { modelProposals: 10, modelInputTokens: 100, modelOutputTokens: 20 },
+    { modelProposals: 3, modelInputTokens: 40, modelOutputTokens: 5 },
+  ];
+  if (options.missing === 'baseProposal') Object.assign(counters[0] ?? {}, { modelProposals: null });
+  if (options.missing === 'suffixProposal') Object.assign(counters[1] ?? {}, { modelProposals: null });
+  if (options.missing === 'baseInput') Object.assign(counters[0] ?? {}, { modelInputTokens: null });
+  if (options.missing === 'suffixOutput') Object.assign(counters[1] ?? {}, { modelOutputTokens: null });
+  const client: StudioApiClient = {
+    createDraft: () => Promise.resolve({ id: 'memory', sourceRevision: 1, configurationRevision: 1 }),
+    readDraft: (id) => revision.client.readDraft(id),
+    updateDraft: (id, name, authoring, revisions) => revision.client.updateDraft(id, name, authoring, revisions),
+    startSession: (draft) => {
+      startedDrafts.push({ ...draft });
+      starts += 1; order.push(`start-${String(starts)}`);
+      if (starts === 2 && options.unconfirmedSuffixStart) return Promise.reject(new Error('unit start observation unavailable'));
+      events.push({ type: 'receipt.post', body: starts === 1 ? 'base-reference-value' : 'fresh-current-session-reference' });
+      return Promise.resolve({ session: { sessionId: `m${String(starts)}`, state: 'PREPARING' } });
+    },
+    readSession: (id) => Promise.resolve({ session: { sessionId: id, state: id === 'm1' && options.failedBase ? 'FAILED' : 'SUCCEEDED', counters: counters[Number(id.slice(1)) - 1] ?? {} } }),
+    readResult: (id) => Promise.resolve({ publication: { status: finalized.has(id) ? 'PUBLISHED' : 'PENDING', receipt: finalized.has(id) ? { revisionId: 'memory-revision' } : null },
+      failure: options.failedBase && id === 'm1' ? { code: 'BUDGET_EXCEEDED' } : null,
+      explanation: { steps: Array.from({ length: 10 }, (_v, i) => ({ number: i + 1, learnedFromThisRun: i >= 3, reusedFrom: i < 3 ? { revisionId: 'memory-revision', stepId: String(i) } : null })) } }),
+    finalize: (id) => { finalized.add(id); order.push(`finalize-${id}`); return Promise.resolve({}); },
+    readClarification: () => Promise.resolve(null), clarify: () => Promise.reject(new Error('unexpected clarification')), cancel: () => Promise.resolve({}),
+    execute: () => Promise.resolve({ executionId: 'unused' }), readExecution: () => Promise.resolve({ status: 'PASSED' }),
+  };
+  const stop = createStopRule({ allocationUsd: options.stopAfterBase ? 125 : 1_000_000_000, price: { pInPerMTok: 1_000_000, pOutPerMTok: 0 }, reservedCeiling: { input: 1000, output: 1000 } });
+  const record = stop.record.bind(stop);
+  stop.record = (session) => { order.push(`charge-${String(stop.state().sessions + 1)}`); return record(session); };
+  const run = await driveIncremental({ manifest, entry, expected: expectedOf(entry), caseFile: readJson(entry.stepText?.path ?? '') as JsonObject,
+    client, receipts: { mark: () => events.length, since: (cursor) => ({ actions: events.slice(cursor), views: [] }) }, switchSourceValue: () => { order.push('switch'); },
+    vars: {}, mode: 'HARNESS_SELF_TEST', stopRule: stop, ...FAST, secretCanaries: ['unit-canary-secret'],
+    extraTexts: options.leakedBase ? () => Promise.resolve({ closedUnit: 'unit-canary-secret' }) : null });
+  return { run, starts, stop, order, requests: revision.requests, startedDrafts };
+}
+
+describe('group5: pure two-session and missing-charge controls', () => {
+  it('sums base10/100/20 plus suffix3/40/5 and charges each real learn once in order', async () => {
+    const { run, starts, stop, order } = await memoryIncremental();
+    expect(run.usage?.modelProposals).toBe(13); // Defining old semantic RED: suffix-only3.
+    expect(run.usage).toEqual({ basis: 'PUBLIC_BUDGET_COUNTERS', modelProposals: 13, inputTokens: 140, outputTokens: 25 });
+    expect(starts).toBe(2); expect(stop.state().sessions).toBe(2);
+    expect(order).toEqual(['start-1', 'charge-1', 'finalize-m1', 'read-draft', 'switch', 'update', 'start-2', 'charge-2', 'finalize-m2']);
+    expect(run.learnSessions?.map((session) => session.phase)).toEqual(['base', 'incremental']);
+    expect(run.incremental).toMatchObject({ logicalStatus: 'COMPLETE', suffixStarted: true, notCompletedBecause: null });
+    expect(run.oracle).toMatchObject({ correct: true, falseSuccess: false });
+    const report = buildBenchmark({ manifest, runs: [run], mode: 'HARNESS_SELF_TEST', price: { pInPerMTok: 1, pOutPerMTok: 2 } });
+    expect(report.charges.allAttempts).toMatchObject({ logicalAttempts: 1, knownStartedSessions: 2, proposals: { total: 13 }, input: { total: 140 }, output: { total: 25 } });
+    expect(report.modelCalls.total).toBeNull(); expect(report.costUsd.total).toBeNull(); expect(report.costUsd.conservativeChargeUsd).toBeCloseTo(0.00019);
+  });
+
+  it.each([
+    { label: 'budget', options: { stopAfterBase: true }, reason: 'STOPPED_BUDGET_80', terminal: 'SUCCEEDED' },
+    { label: 'failed base', options: { failedBase: true }, reason: 'BASE_NOT_SUCCEEDED', terminal: 'FAILED' },
+    { label: 'base leak', options: { leakedBase: true }, reason: 'STOPPED_HARD_GATE', terminal: 'SUCCEEDED' },
+  ])('starts no suffix after $label, retaining one truthful partial session without a fabricated false pass', async ({ options, reason, terminal }) => {
+    const { run, starts, stop } = await memoryIncremental(options);
+    expect(starts).toBe(1); // Old budget/leak source starts the suffix; no missing-method RED.
+    expect(stop.state().sessions).toBe(1);
+    expect(run.usage).toMatchObject({ modelProposals: 10, inputTokens: 100, outputTokens: 20 });
+    expect(run.learnSessions).toHaveLength(1); expect(run.learnSessions?.[0]?.session?.terminal).toBe(terminal);
+    expect(run.session).toMatchObject({ terminal, published: false });
+    expect(run.incremental).toMatchObject({ logicalStatus: 'INCOMPLETE', suffixStarted: false, notCompletedBecause: reason });
+    expect(run.oracle).toEqual({ correct: false, falseSuccess: false, failures: ['incremental-not-completed'] });
+    expect(run.learnSessionsComplete).toBe(true);
+    if (reason === 'STOPPED_HARD_GATE') expect(run.secretOrPiiLeak).toBeGreaterThan(0);
+    expect(JSON.stringify(run)).not.toContain('unit-canary-secret');
+  });
+
+  it('keeps missing base/suffix counters, unknown histories and empty populations incomplete', async () => {
+    const empty = buildBenchmark({ manifest, runs: [], mode: 'HARNESS_SELF_TEST' });
+    expect(empty.modelCalls.total).toBeNull(); // Old reduction reports0 for no observations.
+    expect(empty.charges.allAttempts.proposals).toMatchObject({ total: null, knownSubtotal: 0, complete: false });
+    for (const missing of ['baseProposal', 'suffixProposal', 'baseInput', 'suffixOutput'] as const) {
+      const { run, stop } = await memoryIncremental({ missing });
+      const report = buildBenchmark({ manifest, runs: [run], mode: 'HARNESS_SELF_TEST', price: { pInPerMTok: 1, pOutPerMTok: 2 } });
+      expect(stop.state().sessions).toBe(2);
+      if (missing.endsWith('Proposal')) expect(report.charges.allAttempts.proposals).toMatchObject({ total: null, knownSubtotal: missing === 'baseProposal' ? 3 : 10, unknownSessions: 1 });
+      else expect(report.tokens.complete).toBe(false);
+      expect(report.modelCalls.total).toBeNull(); expect(report.costUsd.total).toBeNull(); expect(report.costUsd.conservativeChargeUsd).toBeNull();
+      const unknown: RunRecord = { ...structuredClone(run), learnSessionsComplete: false };
+      expect(buildBenchmark({ manifest, runs: [unknown], mode: 'HARNESS_SELF_TEST' }).charges.allAttempts.proposals.total).toBeNull();
+    }
+    const interrupted = await memoryIncremental({ unconfirmedSuffixStart: true });
+    expect(interrupted.run.learnSessions).toHaveLength(1);
+    expect(interrupted.run.learnSessions?.[0]?.session?.terminal).toBe('SUCCEEDED');
+    expect(interrupted.run.learnSessionsComplete).toBe(false);
+    expect(interrupted.run.incremental).toMatchObject({ logicalStatus: 'INCOMPLETE', notCompletedBecause: null });
+    expect(interrupted.run.incremental?.suffixStarted).toBeUndefined(); // UNKNOWN, never a false not-started assertion.
+    expect(interrupted.run.oracle).toMatchObject({ correct: false, falseSuccess: false });
+    expect(interrupted.stop.state().sessions).toBe(2); // One known session plus one conservative potential-start charge.
+    const interruptedReport = buildBenchmark({ manifest, runs: [interrupted.run], mode: 'HARNESS_SELF_TEST' });
+    expect(interruptedReport.charges.allAttempts.proposals).toMatchObject({ total: null, knownSubtotal: 10 });
+    expect(interruptedReport.charges.allAttempts.protectiveStopCharges).toMatchObject({ totalUsd: null, knownSubtotalUsd: 1100, unresolvedPotentialStarts: 1 });
+    const { run } = await memoryIncremental();
+    const noStart: RunRecord = { ...run, oracle: { correct: false, falseSuccess: false, failures: ['not-started'] }, incremental: { logicalStatus: 'INCOMPLETE', suffixStarted: false, notCompletedBecause: null }, usage: { basis: 'PUBLIC_BUDGET_COUNTERS', modelProposals: 0, inputTokens: 0, outputTokens: 0 }, learnSessions: [], learnSessionsComplete: true };
+    delete noStart.session; delete noStart.sessionId;
+    expect(buildBenchmark({ manifest, runs: [noStart], mode: 'HARNESS_SELF_TEST' }).charges.allAttempts.proposals.total).toBe(0);
+  });
+
+  it('latches a late update leak after the base charge without a suffix or a second charge', async () => {
+    const { run, starts, stop } = await memoryIncremental({ lateLeak: true });
+    expect(starts).toBe(1);
+    expect(stop.state()).toMatchObject({ sessions: 1, stopped: 'STOPPED_HARD_GATE' });
+    expect(run.incremental).toMatchObject({ suffixStarted: false, logicalStatus: 'INCOMPLETE' });
+    expect(run.secretOrPiiLeak).toBeGreaterThan(0);
+    expect(run.details?.stopObservations).toContainEqual({ phase: 'base', reason: 'STOPPED_HARD_GATE' });
+    expect(JSON.stringify(run)).not.toContain('unit-canary-secret');
+  });
+});
+
+describe('FR06-01: current draft revision transport and capture', () => {
+  it('FR06-01 sends current numeric PUT tokens after authored fields and retains full successful bodies', async () => {
+    const read = { id: 'memory', sourceRevision: 7, configurationRevision: 11, diagnostics: 'read-marker' };
+    const written = { id: 'memory', sourceRevision: 17, configurationRevision: 19, diagnostics: 'write-marker' };
+    const { client, requests } = revisionApi({ readResponse: read, updateResponse: written });
+    expect(await client.readDraft('memory')).toEqual(read);
+    expect(await client.updateDraft('memory', 'edited', { request: { authoringSchemaVersion: 2, steps: [], sourceRevision: 500, configurationRevision: 900 } }, { sourceRevision: 7, configurationRevision: 11 })).toEqual(written);
+    expect(requests).toEqual([
+      { method: 'GET', url: 'http://127.0.0.1/api/v1/studio/tests/memory', body: undefined, authorization: 'Bearer unit-transport-token' },
+      { method: 'PUT', url: 'http://127.0.0.1/api/v1/studio/tests/memory', body: { name: 'edited', csiId: '60406', environment: 'dev', authoringSchemaVersion: 2, steps: [], sourceRevision: 7, configurationRevision: 11 }, authorization: 'Bearer unit-transport-token' },
+    ]);
+  });
+
+  const invalid = [
+    { label: 'missing', value: undefined }, { label: 'null', value: null }, { label: 'string', value: '7' },
+    { label: 'zero', value: 0 }, { label: 'negative', value: -1 }, { label: 'fraction', value: 1.5 },
+    { label: 'unsafe', value: Number.MAX_SAFE_INTEGER + 1 },
+  ];
+  it.each((['sourceRevision', 'configurationRevision'] as const).flatMap((field) => invalid.map((entry) => ({ field, ...entry }))))(
+    'FR06-01 refuses $label $field before PUT without coercing the revision or adding a session', async ({ field, value }) => {
+      const direct = revisionApi();
+      const revisions = { sourceRevision: 7, configurationRevision: 11 };
+      // Model a malformed external JS caller without hiding the boundary behind an any cast.
+      Object.defineProperty(revisions, field, { value });
+      await expect(direct.client.updateDraft('memory', 'edited', { request: {} }, revisions)).rejects.toThrow('Invalid draft revisions');
+      expect(direct.requests).toHaveLength(0);
+      const { run, starts, stop, requests } = await memoryIncremental({ draftRead: { id: 'memory', sourceRevision: 7, configurationRevision: 11, [field]: value } });
+      expect(requests.map((request) => request.method)).toEqual(['GET']);
+      expect(starts).toBe(1); expect(stop.state().sessions).toBe(1);
+      expect(run.usage).toMatchObject({ modelProposals: 10, inputTokens: 100, outputTokens: 20 });
+      expect(run.incremental).toMatchObject({ logicalStatus: 'INCOMPLETE', suffixStarted: false });
+      expect(run.oracle).toMatchObject({ correct: false, falseSuccess: false });
+    },
+  );
+
+  it('FR06-01 preserves the largest safe numeric input without stringifying or rounding it', async () => {
+    const { client, requests } = revisionApi();
+    await client.updateDraft('memory', 'edited', { request: {} }, { sourceRevision: Number.MAX_SAFE_INTEGER, configurationRevision: Number.MAX_SAFE_INTEGER });
+    expect(requests[0]?.body).toMatchObject({ sourceRevision: 9007199254740991, configurationRevision: 9007199254740991 });
+  });
+
+  it('FR06-01 fetches after base publication and uses that tuple for PUT and the PUT response for suffix start', async () => {
+    const { run, starts, stop, order, requests, startedDrafts } = await memoryIncremental();
+    expect(order).toEqual(['start-1', 'charge-1', 'finalize-m1', 'read-draft', 'switch', 'update', 'start-2', 'charge-2', 'finalize-m2']);
+    expect(requests.map((request) => request.method)).toEqual(['GET', 'PUT']);
+    expect(requests[1]?.body).toMatchObject({ sourceRevision: 7, configurationRevision: 11 });
+    expect(startedDrafts).toEqual([{ id: 'memory', sourceRevision: 1, configurationRevision: 1 }, { id: 'memory', sourceRevision: 17, configurationRevision: 19 }]);
+    expect(starts).toBe(2); expect(stop.state().sessions).toBe(2);
+    expect(run.oracle).toMatchObject({ correct: true, falseSuccess: false });
+    expect(run.usage).toMatchObject({ modelProposals: 13, inputTokens: 140, outputTokens: 25 });
+  });
+
+  it.each([{ phase: 'GET', puts: 0 }, { phase: 'PUT', puts: 1 }])(
+    'FR06-01 refuses a mismatched draft identity from $phase without a suffix or retry', async ({ phase, puts }) => {
+      const wrong = { id: 'different-draft', sourceRevision: 7, configurationRevision: 11 };
+      const { run, starts, stop, requests } = await memoryIncremental(phase === 'GET' ? { draftRead: wrong } : { draftUpdate: wrong });
+      expect(requests.filter((request) => request.method === 'GET')).toHaveLength(1);
+      expect(requests.filter((request) => request.method === 'PUT')).toHaveLength(puts);
+      expect(starts).toBe(1); expect(stop.state().sessions).toBe(1);
+      expect(run.incremental).toMatchObject({ logicalStatus: 'INCOMPLETE', suffixStarted: false });
+      expect(run.oracle).toMatchObject({ correct: false, falseSuccess: false });
+    },
+  );
+
+  it('FR06-01 propagates one HTTP409 and records one incomplete base without reloading, retrying or charging twice', async () => {
+    const direct = revisionApi({ conflict: true });
+    await expect(direct.client.updateDraft('memory', 'edited', { request: {} }, { sourceRevision: 7, configurationRevision: 11 })).rejects.toMatchObject({ status: 409, code: 'STALE_REVISION' });
+    expect(direct.requests.map((request) => request.method)).toEqual(['PUT']);
+    const { run, starts, stop, requests } = await memoryIncremental({ draftConflict: true });
+    expect(requests.map((request) => request.method)).toEqual(['GET', 'PUT']);
+    expect(starts).toBe(1); expect(stop.state().sessions).toBe(1);
+    expect(run.learnSessions).toHaveLength(1); expect(run.learnSessions?.[0]?.budgetCharge).toMatchObject({ amountUsd: 100 });
+    expect(run.usage).toMatchObject({ modelProposals: 10, inputTokens: 100, outputTokens: 20 });
+    expect(run.incremental).toMatchObject({ logicalStatus: 'INCOMPLETE', suffixStarted: false });
+    expect(run.oracle).toEqual({ correct: false, falseSuccess: false, failures: ['incremental-not-completed'] });
+  });
+
+  it('FR06-01 stops after an unavailable GET without PUT or a fabricated suffix charge', async () => {
+    const { run, starts, stop, requests } = await memoryIncremental({ draftReadUnavailable: true });
+    expect(requests.map((request) => request.method)).toEqual(['GET']);
+    expect(starts).toBe(1); expect(stop.state().sessions).toBe(1);
+    expect(run.incremental).toMatchObject({ logicalStatus: 'INCOMPLETE', suffixStarted: false });
+    expect(run.usage).toMatchObject({ modelProposals: 10, inputTokens: 100, outputTokens: 20 });
+    expect(run.oracle?.correct).toBe(false);
+  });
+
+  it('FR06-01 scans a valid current-draft response canary before any suffix and redacts the run record', async () => {
+    const { run, starts, stop, requests } = await memoryIncremental({ draftRead: { id: 'memory', sourceRevision: 7, configurationRevision: 11, diagnostics: 'unit-canary-secret' } });
+    expect(requests.map((request) => request.method)).toEqual(['GET', 'PUT']);
+    expect(starts).toBe(1); expect(stop.state()).toMatchObject({ sessions: 1, stopped: 'STOPPED_HARD_GATE' });
+    expect(run.secretOrPiiLeak).toBeGreaterThan(0);
+    expect(run.incremental).toMatchObject({ logicalStatus: 'INCOMPLETE', suffixStarted: false });
+    expect(JSON.stringify(run)).not.toContain('unit-canary-secret');
+  });
+
+  it.each([{ phase: 'GET', puts: 0 }, { phase: 'PUT', puts: 1 }])(
+    'FR06-01 captures malformed-revision plus canary $phase JSON before rejecting it and preserves the attempted write fact', async ({ phase, puts }) => {
+      const malformed = { id: 'memory', sourceRevision: 'not-a-numeric-revision', configurationRevision: 11, diagnostics: 'unit-canary-secret' };
+      const { run, starts, stop, requests } = await memoryIncremental(phase === 'GET' ? { draftRead: malformed } : { draftUpdate: malformed });
+      expect(requests.filter((request) => request.method === 'GET')).toHaveLength(1);
+      expect(requests.filter((request) => request.method === 'PUT')).toHaveLength(puts);
+      expect(starts).toBe(1); expect(stop.state()).toMatchObject({ sessions: 1, stopped: 'STOPPED_HARD_GATE' });
+      expect(run.learnSessions).toHaveLength(1);
+      expect(run.secretOrPiiLeak).toBeGreaterThan(0);
+      expect(run.incremental).toMatchObject({ logicalStatus: 'INCOMPLETE', suffixStarted: false });
+      expect(run.oracle).toMatchObject({ correct: false });
+      expect(run.usage).toMatchObject({ modelProposals: 10, inputTokens: 100, outputTokens: 20 });
+      expect(JSON.stringify(run)).not.toContain('unit-canary-secret');
+    },
+  );
+
+  it('FR06-01 treats an unsafe successful PUT response as an attempted write with no suffix or retry', async () => {
+    const { run, starts, stop, requests } = await memoryIncremental({ draftUpdate: { id: 'memory', sourceRevision: Number.MAX_SAFE_INTEGER + 1, configurationRevision: 19 } });
+    expect(requests.map((request) => request.method)).toEqual(['GET', 'PUT']);
+    expect(starts).toBe(1); expect(stop.state().sessions).toBe(1);
+    expect(run.incremental).toMatchObject({ logicalStatus: 'INCOMPLETE', suffixStarted: false });
+    expect(run.oracle).toMatchObject({ correct: false, falseSuccess: false });
+  });
+});
+
+
+interface WireOptions {
+  failureAt?: 'get' | 'put' | 'start'; failStartNumber?: 1 | 2; response?: (owner: number) => Response | Promise<Response>;
+  resultCode?: string;
+  echo?: () => string; terminal?: 'SUCCEEDED' | 'FAILED'; onFinalize?: () => void;
+}
+
+/** Actual shared public-client identity; every transport request is handled in memory. */
+function wireHarness(options: WireOptions = {}) {
+  const requests: { method: string; path: string }[] = [];
+  const states = new Map<number, { starts: number; finalized: Set<string>; events: JsonObject[] }>();
+  const state = (owner: number) => {
+    let value = states.get(owner);
+    if (value === undefined) { value = { starts: 0, finalized: new Set(), events: [] }; states.set(owner, value); }
+    return value;
+  };
+  const json = (body: unknown) => new Response(JSON.stringify(body), { headers: { 'content-type': 'application/json' } });
+  const client = createPublicApiClient({
+    baseUrl: 'http://127.0.0.1/api/v1/studio', token: 'unit-wire-token', csiId: '60406', environmentId: 'dev', applicationId: 'unit-wire-app',
+    transport: async (url, init) => {
+      const method = init.method ?? 'GET'; const path = url.pathname.replace('/api/v1/studio', '');
+      requests.push({ method, path });
+      const body: unknown = typeof init.body === 'string' ? JSON.parse(init.body) : null;
+      const fields: JsonObject = body !== null && typeof body === 'object' ? Object.fromEntries(Object.entries(body)) : {};
+      if (path === '/tests' && method === 'POST') {
+        const owner = Number(/r([123])$/u.exec(String(fields.name))?.[1] ?? '1');
+        state(owner); return json({ id: `wire-${String(owner)}`, sourceRevision: 1, configurationRevision: 1 });
+      }
+      if (path === '/guided-sessions' && method === 'POST') {
+        const owner = Number(String(fields.testId).split('-')[1]); const current = state(owner); current.starts += 1;
+        current.events.push({ type: 'receipt.post', body: current.starts === 1 ? 'base-reference-value' : 'fresh-current-session-reference' });
+        if (options.failureAt === 'start' && current.starts === (options.failStartNumber ?? 1)) return await options.response?.(owner) ?? json(null);
+        return json({ session: { sessionId: `ws-${String(owner)}-${String(current.starts)}`, state: 'PREPARING' } });
+      }
+      const draft = /^\/tests\/wire-(\d)$/u.exec(path);
+      if (draft) {
+        const owner = Number(draft[1]);
+        if (method === 'GET') return options.failureAt === 'get' ? await options.response?.(owner) ?? json(null) : json({ id: `wire-${String(owner)}`, sourceRevision: 7, configurationRevision: 11 });
+        if (method === 'PUT') return options.failureAt === 'put' ? await options.response?.(owner) ?? json(null) : json({ id: `wire-${String(owner)}`, sourceRevision: 17, configurationRevision: 19 });
+      }
+      const guided = /^\/guided-sessions\/(ws-(\d)-(\d))(?:\/(result|finalize))?$/u.exec(path);
+      if (guided) {
+        const id = guided[1] ?? ''; const owner = Number(guided[2]); const number = Number(guided[3]); const current = state(owner);
+        if (guided[4] === 'finalize') { current.finalized.add(id); options.onFinalize?.(); return json({}); }
+        if (guided[4] === 'result') return json({ publication: { status: current.finalized.has(id) ? 'PUBLISHED' : 'PENDING', receipt: current.finalized.has(id) ? { revisionId: 'wire-revision' } : null },
+          failure: options.resultCode === undefined ? null : { code: options.resultCode }, explanation: { steps: Array.from({ length: 10 }, (_v, i) => ({ number: i + 1, learnedFromThisRun: i >= 3, reusedFrom: i < 3 ? { revisionId: 'wire-revision', stepId: String(i) } : null })) } });
+        return json({ session: { sessionId: id, state: options.terminal ?? 'SUCCEEDED', counters: { modelProposals: number === 1 ? 10 : 3, modelInputTokens: number === 1 ? 100 : 40, modelOutputTokens: number === 1 ? 20 : 5 } }, ...(options.echo ? { diagnostics: options.echo() } : {}) });
+      }
+      throw new Error('Unexpected in-memory wire route');
+    },
+  });
+  const run = async (owner = 1, canaries: string[] = ['unit-wire-canary'], extraTexts: (() => Promise<Record<string, string>>) | null = null) => {
+    const entry = entryOf(manifest, 'incremental-edit-step-4'); const current = state(owner);
+    const stop = createStopRule({ allocationUsd: 1_000_000_000, price: { pInPerMTok: 1_000_000, pOutPerMTok: 0 }, reservedCeiling: { input: 1000, output: 1000 } });
+    const record = await driveIncremental({ manifest, entry, expected: expectedOf(entry), caseFile: readJson(entry.stepText?.path ?? '') as JsonObject,
+      client, rep: owner, receipts: { mark: () => current.events.length, since: (cursor) => ({ actions: current.events.slice(cursor), views: [] }) },
+      switchSourceValue: () => undefined, vars: {}, mode: 'HARNESS_SELF_TEST', stopRule: stop, ...FAST, secretCanaries: canaries, extraTexts });
+    return { run: record, stop, starts: current.starts };
+  };
+  return { client, requests, run };
+}
+
+function deferred<T>() {
+  let release: (value: T) => void = () => { throw new Error('Unit gate not initialized'); };
+  const promise = new Promise<T>((resolve) => { release = resolve; });
+  return { promise, release };
+}
+
+function allLocalUnitManifest() {
+  const local = structuredClone(manifest); local.cases = local.cases.filter((entry) => entry.status === 'READY_LOCAL');
+  local.gate = { ...local.gate, ...gateArithmetic(local.cases.filter((entry) => entry.class === 'P').length, 3, local.gate.completionThresholdPct) };
+  local.sessionPlan = sessionPlan(local); local.manifestSha256 = manifestDigest(local);
+  return local;
+}
+
+describe('WIRE-OBS18: consumed response coverage without raw retention', () => {
+  it.each([
+    { label: 'HTTP non2xx JSON', response: () => new Response(JSON.stringify({ code: 'STALE_REVISION', diagnostics: 'unit-wire-canary' }), { status: 409 }) },
+    { label: 'malformed JSON', response: () => new Response('{invalid unit-wire-canary') },
+    { label: 'over-bound tail', response: () => new Response('x'.repeat(2_000_001) + 'unit-wire-canary') },
+  ])('WIRE-OBS18 inspects $label before rejection without suffix or a second base charge', async ({ response }) => {
+    const api = wireHarness({ failureAt: 'get', response }); const { run, stop, starts } = await api.run();
+    expect(run.secretOrPiiLeak).toBeGreaterThan(0);
+    expect(run.details?.canaryObservation?.[0]).toMatchObject({ publicHttp: 'COMPLETE', inspectionConfiguration: 'COMPLETE' });
+    expect(run.details?.canaryFindings).toContainEqual(expect.objectContaining({ label: 'publicHttp' }));
+    expect(starts).toBe(1); expect(stop.state()).toMatchObject({ sessions: 1, stopped: 'STOPPED_HARD_GATE' });
+    expect(api.requests.filter((r) => r.method === 'GET' && r.path === '/tests/wire-1')).toHaveLength(1);
+    expect(api.requests.filter((r) => r.method === 'PUT')).toHaveLength(0);
+    expect(run.incremental).toMatchObject({ logicalStatus: 'INCOMPLETE', suffixStarted: false });
+    expect(run.usage).toMatchObject({ modelProposals: 10, inputTokens: 100, outputTokens: 20 });
+    expect(JSON.stringify(run)).not.toContain('unit-wire-canary');
+  });
+
+  it('WIRE-OBS18 keeps the exact UTF16 size boundary and successful current-draft flow', async () => {
+    const seed = JSON.stringify({ id: 'wire-1', sourceRevision: 7, configurationRevision: 11, padding: '' });
+    const text = seed.replace('"padding":""', `"padding":"${'x'.repeat(2_000_000 - seed.length)}"`);
+    expect(text.length).toBe(2_000_000);
+    const api = wireHarness({ failureAt: 'get', response: () => new Response(text) }); const { run, starts, stop } = await api.run();
+    expect(starts).toBe(2); expect(stop.state().sessions).toBe(2); expect(run.oracle?.correct).toBe(true);
+    expect(run.details?.canaryObservation?.[0]).toMatchObject({ publicHttp: 'COMPLETE', inspectionConfiguration: 'COMPLETE' });
+  });
+
+  it.each([
+    { body: JSON.stringify({ code: { detail: 'unit-wire-canary' }, error: 'unit-wire-canary' }), message: 'Studio API refused the request', status: 400 },
+    { body: '{invalid unit-wire-canary', message: 'Studio API returned invalid JSON', status: 200 },
+  ])('WIRE-OBS18 standalone errors keep only fixed diagnostics for $status', async ({ body, message, status }) => {
+    const api = wireHarness({ failureAt: 'get', response: () => new Response(body, { status }) });
+    try { await api.client.readDraft('wire-1'); throw new Error('Expected unit refusal'); }
+    catch (failure) {
+      expect(failure).toBeInstanceOf(Error);
+      if (!(failure instanceof Error)) throw new Error('Expected fixed error');
+      expect(failure.message).toBe(message); expect(failure.stack).not.toContain('unit-wire-canary');
+      expect(JSON.stringify(failure)).not.toContain('unit-wire-canary'); expect(Object.hasOwn(failure, 'cause')).toBe(false);
+    }
+  });
+
+  it('WIRE-OBS18 never serializes an unknown successful failure-code value', async () => {
+    const api = wireHarness({ terminal: 'FAILED', resultCode: 'unit-wire-canary' }); const { run } = await api.run();
+    expect(run.secretOrPiiLeak).toBeGreaterThan(0); expect(run.session?.failureCode).toBeNull();
+    expect(JSON.stringify(run)).not.toContain('unit-wire-canary');
+  });
+
+  it('WIRE-OBS18 body-read failure stays unknown and sanitizes its error', async () => {
+    const api = wireHarness({ failureAt: 'get', response: () => { const response = new Response('unused'); response.text = () => Promise.reject(new Error('unit-wire-canary')); return response; } });
+    const { run, starts, stop } = await api.run();
+    expect(starts).toBe(1); expect(stop.state().sessions).toBe(1);
+    expect(run.details?.canaryObservation?.[0]).toMatchObject({ publicHttp: 'UNAVAILABLE' });
+    const report = buildBenchmark({ manifest, runs: [run], mode: 'HARNESS_SELF_TEST' });
+    expect(report.canaryObservation).toMatchObject({ complete: false, totalLeakRuns: null, globalWireComplete: null });
+    expect(JSON.stringify(run)).not.toContain('unit-wire-canary');
+  });
+
+  it('WIRE-OBS18 interruption collects the configured text hook once for the new failed stage', async () => {
+    let failed = false; let collections = 0;
+    const api = wireHarness({ failureAt: 'get', response: () => { failed = true; return new Response('{}', { status: 409 }); } });
+    const { run, stop } = await api.run(1, ['unit-wire-canary'], () => { collections += 1; return Promise.resolve(failed ? { backendLog: 'unit-wire-canary' } : {}); });
+    expect(collections).toBe(3); expect(stop.state().sessions).toBe(1);
+    expect(run.secretOrPiiLeak).toBeGreaterThan(0); expect(run.details?.canaryFindings).toContainEqual(expect.objectContaining({ label: 'backendLog' }));
+    expect(JSON.stringify(run)).not.toContain('unit-wire-canary');
+  });
+
+  it('WIRE-OBS18 collector failure keeps prior hits, unknown scope and one existing charge without retry', async () => {
+    let collections = 0; const api = wireHarness();
+    const { run, stop, starts } = await api.run(1, ['unit-wire-canary'], () => { collections += 1; if (collections > 1) return Promise.reject(new Error('unit-wire-canary')); return Promise.resolve({ backendLog: 'unit-wire-canary' }); });
+    expect(collections).toBe(2); expect(starts).toBe(1); expect(stop.state().sessions).toBe(1);
+    expect(run.secretOrPiiLeak).toBeGreaterThan(0); expect(run.details?.canaryObservation?.[0]).toMatchObject({ extraTexts: 'UNAVAILABLE' });
+    expect(buildBenchmark({ manifest, runs: [run], mode: 'HARNESS_SELF_TEST' }).canaryObservation?.totalLeakRuns).toBeNull();
+    expect(JSON.stringify(run)).not.toContain('unit-wire-canary');
+  });
+
+  it('WIRE-OBS18 scans valid supplied strings even when another field is invalid', async () => {
+    let collections = 0; const api = wireHarness();
+    const { run, stop } = await api.run(1, ['unit-wire-canary'], () => {
+      collections += 1; const texts: Record<string, string> = { backendLog: 'unit-wire-canary' };
+      Object.defineProperty(texts, 'invalid', { enumerable: true, value: 42 }); return Promise.resolve(texts);
+    });
+    expect(collections).toBe(1); expect(stop.state().sessions).toBe(1); expect(run.secretOrPiiLeak).toBeGreaterThan(0);
+    expect(run.details?.canaryObservation?.[0]).toMatchObject({ extraTexts: 'UNAVAILABLE' });
+    expect(JSON.stringify(run)).not.toContain('unit-wire-canary');
+  });
+
+  it.each([1, 2] as const)('WIRE-OBS18 charges unacknowledged start $0 before latching the hard stop', async (start) => {
+    const api = wireHarness({ failureAt: 'start', failStartNumber: start, response: () => new Response('{unit-wire-canary') }); const { run, stop } = await api.run();
+    expect(stop.state()).toMatchObject({ sessions: start, stopped: 'STOPPED_HARD_GATE' });
+    expect(run.learnSessions).toHaveLength(start - 1); expect(run.learnSessionsComplete).toBe(false);
+    expect(run.usage).toMatchObject({ modelProposals: null, inputTokens: null, outputTokens: null });
+    if (start === 2) expect(run.incremental?.suffixStarted).toBeUndefined(); else expect(run.incremental?.suffixStarted).toBe(false);
+    expect(run.details?.unresolvedSessionCharges).toHaveLength(1); expect(run.secretOrPiiLeak).toBeGreaterThan(0);
+    expect(JSON.stringify(run)).not.toContain('unit-wire-canary');
+  });
+
+  it('WIRE-OBS18 isolates interleaved drivers sharing one actual public client through cleanup', async () => {
+    const enteredA = deferred<undefined>(); const enteredB = deferred<undefined>(); const releaseA = deferred<undefined>(); const releaseB = deferred<undefined>();
+    const api = wireHarness({ failureAt: 'get', response: async (owner) => {
+      if (owner === 1) { enteredA.release(undefined); await releaseA.promise; return new Response(JSON.stringify({ diagnostic: 'owned-A-canary' }), { status: 409 }); }
+      enteredB.release(undefined); await releaseB.promise; return new Response(JSON.stringify({ diagnostic: 'owned-A-canary owned-B-canary' }), { status: 409 });
+    } });
+    const a = api.run(1, ['owned-A-canary']); const b = api.run(2, ['owned-B-canary']);
+    await Promise.all([enteredA.promise, enteredB.promise]); releaseA.release(undefined); const first = await a;
+    releaseB.release(undefined); const second = await b;
+    expect(first.run.details?.canaryFindings).toContainEqual(expect.objectContaining({ label: 'publicHttp', canarySha256Prefix: sha256Hex('owned-A-canary').slice(0, 12) }));
+    expect(second.run.details?.canaryFindings).toContainEqual(expect.objectContaining({ label: 'publicHttp', canarySha256Prefix: sha256Hex('owned-B-canary').slice(0, 12) }));
+    expect(second.run.details?.canaryFindings?.some((finding) => finding.canarySha256Prefix === sha256Hex('owned-A-canary').slice(0, 12))).toBe(false);
+    expect(JSON.stringify([first.run, second.run])).not.toContain('owned-A-canary'); expect(JSON.stringify([first.run, second.run])).not.toContain('owned-B-canary');
+  });
+
+  it('WIRE-OBS18 preserves a mutable generated-client override instead of silently rebinding it away', async () => {
+    const api = wireHarness(); let overrides = 0;
+    api.client.readDraft = () => { overrides += 1; return Promise.resolve({ id: 'wrong', sourceRevision: 7, configurationRevision: 11 }); };
+    const { run, starts } = await api.run(); expect(overrides).toBe(1); expect(starts).toBe(1);
+    expect(api.requests.some((request) => request.method === 'GET' && request.path.startsWith('/tests/'))).toBe(false);
+    expect(run.details?.canaryObservation?.[0]).toMatchObject({ publicHttp: 'UNOBSERVABLE' });
+  });
+
+  it('WIRE-OBS18 preserves an override installed while an observed run is awaiting publication', async () => {
+    let change: () => void = () => undefined; let overrides = 0;
+    const api = wireHarness({ onFinalize: () => { change(); } });
+    change = () => { api.client.readDraft = () => { overrides += 1; return Promise.resolve({ id: 'wrong', sourceRevision: 7, configurationRevision: 11 }); }; };
+    const { run } = await api.run(); expect(overrides).toBe(1);
+    expect(api.requests.some((request) => request.method === 'GET' && request.path.startsWith('/tests/'))).toBe(false);
+    expect(run.details?.canaryObservation?.[0]).toMatchObject({ publicHttp: 'UNOBSERVABLE' });
+  });
+
+  it.each([{ label: 'empty', values: [] }, { label: 'empty string', values: [''] }, { label: 'uninspectable', values: ['\ud800'] }])(
+    'WIRE-OBS18 marks $label inspection unavailable without a known absence claim', async ({ values }) => {
+      const api = wireHarness({ failureAt: 'get', response: () => new Response('{}', { status: 409 }) }); const { run } = await api.run(1, values);
+      expect(run.details?.canaryObservation?.[0]).toMatchObject({ inspectionConfiguration: 'UNAVAILABLE' });
+      expect(buildBenchmark({ manifest, runs: [run], mode: 'HARNESS_SELF_TEST' }).canaryObservation?.totalLeakRuns).toBeNull();
+    },
+  );
+
+  it('WIRE-OBS18 keeps known valid hits when another operator entry is invalid', async () => {
+    const values = ['unit-wire-canary', 'invalid']; Object.defineProperty(values, '1', { value: 42 });
+    const api = wireHarness({ failureAt: 'get', response: () => new Response(JSON.stringify({ diagnostic: 'unit-wire-canary' }), { status: 409 }) }); const { run } = await api.run(1, values);
+    expect(run.secretOrPiiLeak).toBeGreaterThan(0); expect(run.details?.canaryObservation?.[0]).toMatchObject({ inspectionConfiguration: 'UNAVAILABLE' });
+    expect(JSON.stringify(run)).not.toContain('unit-wire-canary');
+  });
+
+  it.each(['missing row', 'unavailable body', 'unavailable configuration', 'earlier excluded attempt'])(
+    'WIRE-OBS18 prevents an otherwise passing full population from laundering $0', (variant) => {
+      const local = allLocalUnitManifest(); expect(validateCorpusManifest(local, { repoRoot: repoRootFrom() }).errors).toEqual([]);
+      const clean = syntheticRuns(local, { mode: 'D_C' });
+      const score = (runs: RunRecord[]) => buildBenchmark({ manifest: local, runs, mode: 'D_C', reviewInput: reviewedInput(local, runs) });
+      expect(score(clean).gate.verdict).toBe('GATE_PASS');
+      const runs = structuredClone(clean); const target = must(runs[0]);
+      if (variant === 'missing row') delete target.details?.canaryObservation;
+      else if (variant === 'earlier excluded attempt') {
+        const prior = structuredClone(target); prior.infrastructureFailure = 'HOST_PORT_COLLISION'; must(prior.details?.canaryObservation?.[0]).publicHttp = 'UNAVAILABLE';
+        target.attempt = 2; runs.unshift(prior);
+      } else must(target.details?.canaryObservation?.[0])[variant === 'unavailable body' ? 'publicHttp' : 'inspectionConfiguration'] = 'UNAVAILABLE';
+      const reported = score(runs); expect(reported.gate.classP.completions).toBeGreaterThanOrEqual(reported.gate.classP.runnableArithmetic.minCompletions);
+      expect(reported.gate.verdict).not.toBe('GATE_PASS'); expect(reported.canaryObservation).toMatchObject({ complete: false, totalLeakRuns: null, globalWireComplete: null });
+      expect(reported.denominatorLedger.problems).toContainEqual(expect.objectContaining({ code: 'RUN_CANARY_OBSERVATION_UNAVAILABLE' }));
+    },
+  );
+
+  it.each(['default-generated', 'replacement-list', 'selected-password', 'invalid-operator', 'scalar-operator'])(
+    'WIRE-OBS18 binds the actual secret-login password in the real loop with $0 and closes fake hosts', async (variant) => {
+      let currentPassword = ''; let fixtureCloses = 0; let pageCloses = 0; const passwords: string[] = [];
+      const scalarOperator = 'scalar-operator-unit-canary';
+      const api = wireHarness({ terminal: 'FAILED', echo: () => `${currentPassword} ${variant === 'selected-password' ? '' : passwords.at(-2) ?? ''} ${variant === 'scalar-operator' ? scalarOperator : ''}` });
+      const hosts: NonNullable<Parameters<typeof runBenchmark>[0]['selfTestHosts']> = {
+        startCorpusPages: () => Promise.resolve({ pagesVersion: 'unit', origin: 'http://127.0.0.1:1', fixtureOrigin: () => 'http://127.0.0.1:1', pageKeys: () => [], receipts: () => [], reset: () => undefined, close: () => { pageCloses += 1; return Promise.resolve(); } }),
+        hostExistingFixture: (kind, options) => {
+          if (kind !== 'secret-login' || typeof options?.password !== 'string') throw new Error('Unexpected unit fixture');
+          currentPassword = options.password; passwords.push(currentPassword);
+          return Promise.resolve({ origin: 'http://127.0.0.1:1', receipts: { mark: () => 0, since: () => ({ actions: [], views: [] }) }, close: () => { fixtureCloses += 1; return Promise.resolve(); } });
+        },
+      };
+      const operators = ['operator-only']; if (variant === 'invalid-operator') Object.defineProperty(operators, '0', { value: 42 });
+      const planted = { d1: 'selected-unit-password' }; const prior = structuredClone(planted);
+      const driveOptions = { ...FAST, ...(variant === 'default-generated' ? {} : { secretCanaries: operators }) };
+      // Deliberately invalid runtime input while retaining the declared public option type.
+      if (variant === 'scalar-operator') Object.defineProperty(driveOptions, 'secretCanaries', { value: scalarOperator });
+      const { runs, benchmark } = await runBenchmark({ manifest, mode: 'HARNESS_SELF_TEST', client: api.client, select: ['D1-login-secret-fixture'], selfTestHosts: hosts,
+        ...(variant === 'selected-password' ? { plantedSecrets: planted } : {}), driveOptions });
+      expect(runs.length).toBeGreaterThan(0); expect(passwords).toHaveLength(runs.length); expect(fixtureCloses).toBe(runs.length); expect(pageCloses).toBe(1);
+      expect(runs.every((run) => (run.secretOrPiiLeak ?? 0) > 0)).toBe(true); expect(runs.every((run) => run.learnSessions?.length === 1)).toBe(true);
+      for (const password of passwords) expect(JSON.stringify({ runs, benchmark })).not.toContain(password);
+      if (variant !== 'selected-password') for (const [index, run] of runs.entries()) {
+        for (const earlier of passwords.slice(0, index)) expect(run.details?.canaryFindings?.some((finding) => finding.canarySha256Prefix === sha256Hex(earlier).slice(0, 12))).toBe(false);
+      }
+      if (variant !== 'selected-password') expect(new Set(passwords).size).toBe(passwords.length); else expect(passwords.every((password) => password === planted.d1)).toBe(true);
+      expect(planted).toEqual(prior); expect(benchmark.gate.verdict).toBe('NOT_EVIDENCE'); expect(benchmark.modelCalls.total).toBeNull();
+      if (variant === 'invalid-operator' || variant === 'scalar-operator') {
+        expect(runs[0]?.details?.canaryObservation?.[0]).toMatchObject({ inspectionConfiguration: 'UNAVAILABLE' });
+        expect(benchmark.canaryObservation).toMatchObject({ complete: false, totalLeakRuns: null, globalWireComplete: null });
+        expect(benchmark.gate.verdict).not.toBe('GATE_PASS');
+      }
+      if (variant === 'scalar-operator') {
+        expect(runs[0]?.details?.canaryFindings).toContainEqual(expect.objectContaining({ canarySha256Prefix: sha256Hex(must(passwords[0])).slice(0, 12) }));
+        expect(runs[0]?.details?.canaryFindings).toContainEqual(expect.objectContaining({ canarySha256Prefix: sha256Hex(scalarOperator).slice(0, 12) }));
+        expect(JSON.stringify({ runs, benchmark })).not.toContain(scalarOperator);
+      }
+    },
+  );
+
+  it('WIRE-OBS18 refuses self-test host overrides in D_C before ledger, host or API work', async () => {
+    let hosts = 0; const api = wireHarness();
+    await expect(runBenchmark({ manifest, mode: 'D_C', client: api.client, selfTestHosts: { startCorpusPages: () => { hosts += 1; return Promise.reject(new Error('Unexpected host')); } } })).rejects.toMatchObject({ code: 'SELF_TEST_HOSTS_FORBIDDEN' });
+    expect(hosts).toBe(0); expect(api.requests).toHaveLength(0);
+  });
+});
+
 const entryOf = (m: CorpusManifest, id: string) => m.cases.find((c) => c.id === id) ?? (() => { throw new Error(id); })();
 const FAST = { pollMs: 0, pause: () => Promise.resolve() };
 
@@ -121,7 +673,7 @@ describe('harness self-test: the driver and the oracle against the real fixture 
       expect(Date.parse(run.runStartedAt)).toBeGreaterThan(Date.parse(manifest.manifestFrozenAt ?? ''));
       expect(run.manifestSha256).toBe(manifest.manifestSha256);
       expect([run.rs1NonScalarReadGaps, run.authoredEchoUnobservableTargets, run.focusMutationRefusedFills]).toEqual([0, 0, 0]);
-      expect(run.usage).toEqual({ modelProposals: 4, inputTokens: 9000, outputTokens: 800 });
+      expect(run.usage).toEqual({ basis: 'PUBLIC_BUDGET_COUNTERS', modelProposals: 4, inputTokens: 9000, outputTokens: 800 });
     }
   });
 

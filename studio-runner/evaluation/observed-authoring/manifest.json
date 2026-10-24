@@ -3,39 +3,68 @@
   "kind": "STUDIO_OBSERVED_AUTHORING_BENCHMARK_MANIFEST",
   "story": "STUDIO-OBS-009",
   "ac": "AC-7",
-  "classification": "HARNESS_PREPARATION_NOT_D_C_EVIDENCE",
+  "classification": "METADATA_ADOPTION_CANDIDATE_NOT_D_C_EVIDENCE",
   "executionStatus": "NOT_RUN",
   "comparisonClaim": "NONE_NO_COMPARISON_TO_20261004",
   "authoredBy": "@dev (Dex) EP lane draft from Quinn t0-qa-20261017 B1/B5/B6; @qa review PENDING",
-  "manifestFrozenAt": "2026-10-18T16:38:51.221Z",
-  "manifestSha256": "e4785112885541c03f7ebed2b08bdc878a183d8e692b62140fa4491560df285b",
-  "freezeNote": "Frozen at preparation so the self-test can prove manifestFrozenAt < runStartedAt. @qa re-reviews the step texts and expected outcomes before T4; any edit re-freezes and changes manifestSha256, which voids a prior budget admission.",
+  "manifestFrozenAt": "2026-10-21T13:34:23.444Z",
+  "manifestSha256": "ef3cac512987faeece662a0c423c1b943eb742862f4584813c8747dd70e707d6",
+  "freezeNote": "Pending actual source/corpus QA and re-freeze in its own authorized window. Old e4785112 admissions/refusals remain historical and do not admit this candidate. No provider/staging/headroom fact is supplied.",
   "rulings": {
     "B1": {
       "state": "RECORDED_BY_PO",
       "ref": "STUDIO-OBS-009 story, AC-7 interpretation note: ported means re-authored ports"
     },
     "B2": {
-      "state": "RECOMMENDED_NOT_RULED",
-      "ref": "prep t0-questions B2; story \"Not decided by @po in this pass\"",
-      "adopted": "class-P-only denominator is used as the working definition; a different ruling changes only gate.classPCases"
+      "state": "ADOPTED_INTERNAL_INTERPRETATION",
+      "refs": {
+        "po": {
+          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/proposal.md",
+          "sha256": "85506e3d68cccc2da280b9da694889721b8cfcc9f9740e1ef75cc89a00990615"
+        },
+        "architect": {
+          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/architect-review/review.md",
+          "sha256": "b602698e59bce4242fc691377cd6ef83991639c403ff8d5da4274604a4159a2e"
+        }
+      },
+      "adopted": "All25 workflows remain; classP19x3=57/floor52, blocked staging51/floor46 at bestPARTIAL. F/N earn no completion; hard gates cover every supplied attempt."
     },
     "B3": {
-      "state": "RECOMMENDED_NOT_RULED",
-      "ref": "prep t0-questions B3",
-      "adopted": "E3-iframe is class N"
+      "state": "ADOPTED_INTERNAL_INTERPRETATION",
+      "refs": {
+        "po": {
+          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/proposal.md",
+          "sha256": "85506e3d68cccc2da280b9da694889721b8cfcc9f9740e1ef75cc89a00990615"
+        },
+        "architect": {
+          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/architect-review/review.md",
+          "sha256": "b602698e59bce4242fc691377cd6ef83991639c403ff8d5da4274604a4159a2e"
+        }
+      },
+      "adopted": "E3 remainsN at the unsupported iframe capability boundary. No false pass observed is not correct-refusal quality or successful iframe support."
     },
     "B5": {
-      "state": "MODE_DECLARED",
-      "adopted": "mixedVisible for D3 and both incremental cases; no exact-mode case in class P; the optional N-RS1 case is NOT added (PO option, undecided)"
+      "state": "CORPUS_DESIGN_DISCLOSURE_ADOPTED",
+      "refs": {
+        "po": {
+          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/proposal.md",
+          "sha256": "85506e3d68cccc2da280b9da694889721b8cfcc9f9740e1ef75cc89a00990615"
+        },
+        "architect": {
+          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/architect-review/review.md",
+          "sha256": "b602698e59bce4242fc691377cd6ef83991639c403ff8d5da4274604a4159a2e"
+        }
+      },
+      "adopted": "D3 and both unchanged incremental cases use mixedVisible. No optional N-RS1 is added. Exact-mode non-scalar reads are not exercised. D2/E1 remain uninspected UNKNOWN, not a global confirmed zero; real required unambiguous RS1 reads remainP."
     },
     "B6": {
       "state": "IMPLEMENTED_LOCALLY",
       "adopted": "receipts oracle per case, expected outcome hashed, four mutation controls per oracle"
     },
     "B7": {
-      "state": "MEASUREMENT_RECORDED_SEPARATELY",
-      "ref": "execution-20261018/ep/b7-proposals.json; MODEL-SIZING ruling still owed (@architect + @pm)"
+      "state": "MODEL_SIZING_SECTION10_ADOPTED_MEASUREMENTS_PENDING",
+      "ref": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/model-sizing/ruling-draft.md section10 (adopted T-1 through T-6)",
+      "adopted": "Actual measurement/first-learn limit remains pendingT4. Existing per-CSI exclusion, conservative classification and changed-limits repetition1 recalibration remain. No limits identity or measured capacity invented."
     },
     "B8": {
       "state": "UNKNOWN",
@@ -67,6 +96,21 @@
       "path": "docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/summary.json",
       "base": "repo",
       "sha256": "8dbef6112745292c16b8714b2087ac70696ceb95d4455781c9dfd9515785a053"
+    },
+    "evaluator": {
+      "path": "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+      "base": "repo",
+      "sha256": "b9c95ddcee770fe1b88ea56587627f7bb5c6dc461c9687df08229a786244a518"
+    },
+    "evaluationCli": {
+      "path": "studio-runner/evaluation/cli.mjs",
+      "base": "repo",
+      "sha256": "8a119c26eb16ed19cd5f1a5a46ed07a9d13eeb2f6e2a951dd2dc3d854795bcad"
+    },
+    "corpusPageServer": {
+      "path": "studio-runner/evaluation/observed-authoring/pages/server.mjs",
+      "base": "repo",
+      "sha256": "81d1673989f20ba236b5fb6a774ba33da87192983dd87956157227e1b3936d30"
     }
   },
   "cases": [
@@ -1681,7 +1725,7 @@
         "noSideEffect": false
       },
       "rs1": {
-        "isRs1Case": false,
+        "isRs1Case": null,
         "valueLocations": [],
         "assertTextLocations": [],
         "state": "UNKNOWN_UNTIL_STAGING_PAGES_ARE_READ",
@@ -1919,7 +1963,7 @@
         "noSideEffect": false
       },
       "rs1": {
-        "isRs1Case": false,
+        "isRs1Case": null,
         "valueLocations": [],
         "assertTextLocations": [],
         "state": "UNKNOWN_UNTIL_STAGING_PAGES_ARE_READ",
@@ -1988,7 +2032,7 @@
       "id": "E3-iframe",
       "block": "enterprise",
       "class": "N",
-      "classBasis": "enterprise block; B3 RECOMMENDED class N (collector marks iframe as an unsupported surface), not ruled",
+      "classBasis": "enterprise negative capability-boundary caseN; collector marks iframe unsupported, not successful iframe automation",
       "status": "READY_LOCAL",
       "blockedBy": null,
       "repetitions": 3,
@@ -2040,7 +2084,7 @@
         "assertTextLocations": [],
         "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
       },
-      "ruling": "B3: recommended class N (collector treats iframe as an unsupported surface); NOT ruled by @po/@architect"
+      "ruling": "Adopted PO85506e3d / architectb602698e: no false pass observed, not correct-refusal quality."
     },
     {
       "id": "E4-virtualised-list",
@@ -2268,5 +2312,14 @@
         "basis": "[I] RS-1 is the AC-7 obligation: a value the workflow must READ (carry) that lives only in a non-scalar element no governed grant reaches. Authored-literal assertions are listed separately and are decided by the T4 observation, not by this mark. Pages are not edited to avoid it."
       }
     }
-  ]
+  ],
+  "pendingActualFacts": {
+    "independentCodeAndCorpusAdoption": "UNBOUND",
+    "newFreezeAndDigest": "UNBOUND",
+    "newOriginalExecutionAdmission": "UNBOUND",
+    "providerModelPricesThoughtsBillingHeadroom": "UNBOUND",
+    "stagingPagesOraclesVault": "UNBOUND",
+    "U13SecurityPrivacyHumanProofs": "UNBOUND",
+    "actualProviderUsageAndBilledCost": "UNBOUND"
+  }
 }

@@ -50,6 +50,21 @@ describe('KL-015-D5 the two-stage guided close',()=>{
     // The grace is also well below the runner socket timeout (30 s) and inside the start reserve it must never exceed.
     expect(GUIDED_CLOSE_GRACE_MS).toBeLessThanOrEqual(GUIDED_START_RESERVE_MS);
   });
+  it('R065 gracefulFulfilledWithin: true when the graceful stage fulfils after the grace but inside the bound; false past the bound or on rejection; never starts anything',async()=>{
+    vi.useFakeTimers();let finish:()=>void=()=>undefined;
+    const graceful=vi.fn(()=>new Promise<void>(resolve=>{finish=resolve;}));const hard=vi.fn(()=>Promise.resolve());
+    const stages=guidedCloseStages({graceful,hard});
+    await expect(stages.gracefulFulfilledWithin(10)).resolves.toBe(false); // before close(): nothing to wait for
+    const closed=stages.close();await vi.advanceTimersByTimeAsync(GUIDED_CLOSE_GRACE_MS);await closed;
+    expect(hard).toHaveBeenCalledOnce();expect(stages.orderlyClosed()).toBe(false);
+    const late=stages.gracefulFulfilledWithin(15_000);await vi.advanceTimersByTimeAsync(4_000);finish();await expect(late).resolves.toBe(true);
+    expect(hard).toHaveBeenCalledOnce();expect(stages.orderlyClosed()).toBe(false); // the stop-reply verdict is not rewritten
+    const never=guidedCloseStages({graceful:()=>new Promise<void>(()=>undefined),hard:()=>Promise.resolve()});
+    const c2=never.close();await vi.advanceTimersByTimeAsync(GUIDED_CLOSE_GRACE_MS);await c2;
+    const bounded=never.gracefulFulfilledWithin(5_000);await vi.advanceTimersByTimeAsync(5_000);await expect(bounded).resolves.toBe(false);
+    const failed=guidedCloseStages({graceful:()=>Promise.reject(new Error('x')),hard:()=>Promise.resolve()});await failed.close();
+    await expect(failed.gracefulFulfilledWithin(5_000)).resolves.toBe(false);
+  });
   it('U1 a graceful close that never settles: terminate runs exactly once at the grace, close waits for it, and it is not orderly',async()=>{
     vi.useFakeTimers();let release:()=>void=()=>undefined;
     const graceful=vi.fn(()=>new Promise<void>(()=>undefined));const hard=vi.fn(()=>new Promise<void>(resolve=>{release=resolve;}));const closing=vi.fn();

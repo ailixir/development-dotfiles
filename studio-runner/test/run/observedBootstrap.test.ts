@@ -17,3 +17,43 @@ it('does not extend the absolute deadline across sequential startup work',async(
 it('rejects abort, asynchronous failure and expiry after late work without accepting a page',async()=>{const controller=new AbortController();controller.abort();await expect(boundedStartup(()=>Promise.resolve('no'),Date.now()+50,controller.signal)).rejects.toThrow('CANCELLED');await expect(boundedStartup(()=>Promise.reject(new Error('probe failed')),Date.now()+50)).rejects.toThrow('probe failed');
   const next=new AbortController();let done:(value:string)=>void=()=>undefined;const wait=boundedStartup(()=>new Promise<string>(r=>{done=r;}),Date.now()+50,next.signal);await Promise.resolve();const rejected=wait.catch((e:unknown)=>e instanceof Error?e.message:'bad');next.abort();expect(await rejected).toBe('CANCELLED');done('late');
 });
+
+it('keeps a strictly earlier operation cap final even when work completes before the absolute deadline', async () => {
+  let complete: (value: string) => void = () => undefined;
+  let observed: Promise<unknown> | undefined;
+  vi.useFakeTimers();
+  try {
+    const deadline = Date.now() + 60_000;
+    let accepted = false;
+    const pending = boundedStartup(() => new Promise<string>(resolve => { complete = resolve; }), deadline, undefined, 30_000);
+    observed = pending.then(value => { accepted = true; return value; }, (error: unknown) => error);
+    await Promise.resolve();
+    await vi.advanceTimersByTimeAsync(30_000);
+    const capError = await observed;
+    expect(capError).toBeInstanceOf(Error);
+    expect(capError).toMatchObject({ message: 'TIMEOUT' });
+    expect(accepted).toBe(false);
+    complete('late but before the whole deadline');
+    await Promise.resolve();
+    expect(await observed).toBe(capError);
+    expect(accepted).toBe(false);
+    expect(vi.getTimerCount()).toBe(0);
+  } finally {
+    complete('unit cleanup');
+    try { if (observed !== undefined) await observed; }
+    finally { vi.useRealTimers(); }
+  }
+});
+
+it('preserves a rejected Error("TIMEOUT") identity and own-property shape', async () => {
+  vi.useFakeTimers();
+  try {
+    const ordinary = new Error('TIMEOUT');
+    const originalKeys = Reflect.ownKeys(ordinary);
+    const received = await boundedStartup(() => Promise.reject(ordinary), Date.now() + 50)
+      .then(() => undefined, (error: unknown) => error);
+    expect(received).toBe(ordinary);
+    expect(Reflect.ownKeys(ordinary)).toEqual(originalKeys);
+    expect(vi.getTimerCount()).toBe(0);
+  } finally { vi.useRealTimers(); }
+});

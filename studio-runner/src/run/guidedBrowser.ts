@@ -23,7 +23,7 @@ export interface GuidedRecordingRequest {
 /**
  * The whole guided start is bounded by one budget (STUDIO-OBS-015 REL-001/D4, architect ruling
  * `aria-d4-launch-deadline-ruling01`). The backend gives up on a runner call after 15 s
- * (`GuidedRunnerClient.transportDeadline`, hard-coded; `delayed-state-design.md:108`: "a 15-second
+ * (`HttpRunnerDispatchClient.transportDeadline`, hard-coded; `delayed-state-design.md:108`: "a 15-second
  * HTTP ceiling"). The runner keeps a 3 s reserve inside it for teardown, the lifecycle callback and
  * the reply, so a start that cannot finish is refused with a closed `CONTEXT_LOST` while the backend
  * is still listening, instead of holding the single worker slot for Playwright's 180 s launch
@@ -44,6 +44,14 @@ export const GUIDED_START_BUDGET_MS = GUIDED_START_TRANSPORT_CEILING_MS - GUIDED
  * could drift above the backend's ceiling. A healthy recorded close must finish well inside it (fixtures case H measures it).
  */
 export const GUIDED_CLOSE_GRACE_MS = 3_000;
+
+/**
+ * How long the recording's own finalization may take AFTER the stop has been answered (STUDIO-OBS-009 round 065).
+ * The 3 s grace above bounds the stop reply, not the webm: Playwright's ffmpeg writes the Duration and the Cues only when it
+ * exits on its own, and a SIGKILL before that leaves a file Chrome reports as `duration === Infinity`. The wait happens in the
+ * recording settlement, which the stop never waits for, and it ends well inside the backend's `settle-grace` (default 2 min).
+ */
+export const GUIDED_RECORDING_FINALIZE_MS = 15_000;
 
 /**
  * The start budget as the launcher sees it (the replay `request.startup` shape). `deadlineEpochMs` is
@@ -85,8 +93,15 @@ export interface GuidedCloseStagesPorts {
  * `terminate()` is the hard stage on its own, memoised, and shared with `close()`. Both memoise their promise, so a repeat call
  * returns the same settlement and a rejection (a survivor) is never retried.
  */
-export function guidedCloseStages(ports: GuidedCloseStagesPorts, graceMs: number = GUIDED_CLOSE_GRACE_MS): Pick<GuidedBrowser, 'close'> & { readonly terminate: () => Promise<void>; readonly orderlyClosed: () => boolean } {
+export function guidedCloseStages(
+  ports: GuidedCloseStagesPorts, graceMs: number = GUIDED_CLOSE_GRACE_MS
+): Pick<GuidedBrowser, 'close'> & {
+  readonly terminate: () => Promise<void>; readonly orderlyClosed: () => boolean;
+  /** True iff the graceful stage FULFILLED (at any time, however late) within `boundMs` of this call. Never starts or stops anything. */
+  readonly gracefulFulfilledWithin: (boundMs: number) => Promise<boolean>;
+} {
   let orderly = false;
+  let gracefulSettlement: Promise<boolean> | null = null;
   let terminating: Promise<void> | null = null;
   let closing: Promise<void> | null = null;
   const terminate = (): Promise<void> => {
@@ -97,7 +112,7 @@ export function guidedCloseStages(ports: GuidedCloseStagesPorts, graceMs: number
     ports.onClosing?.();
     const closeOnce = async (): Promise<void> => {
       let timer: ReturnType<typeof setTimeout> | undefined;
-      const resolvedInTime = ports.graceful().then(() => true, () => false);
+      const resolvedInTime = (gracefulSettlement = ports.graceful().then(() => true, () => false));
       const expired = new Promise<boolean>((resolve) => { timer = setTimeout(() => { resolve(false); }, Math.max(1, graceMs)); });
       try {
         // Only a close that resolved inside the grace is orderly. One that resolves later cannot change the verdict.
@@ -109,7 +124,13 @@ export function guidedCloseStages(ports: GuidedCloseStagesPorts, graceMs: number
     closing ??= closeOnce();
     return closing;
   };
-  return { close, terminate, orderlyClosed: () => orderly };
+  const gracefulFulfilledWithin = async (boundMs: number): Promise<boolean> => {
+    if (gracefulSettlement === null) return false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const expired = new Promise<boolean>((resolve) => { timer = setTimeout(() => { resolve(false); }, Math.max(1, boundMs)); });
+    try { return await Promise.race([gracefulSettlement, expired]); } finally { if (timer) clearTimeout(timer); }
+  };
+  return { close, terminate, orderlyClosed: () => orderly, gracefulFulfilledWithin };
 }
 
 /** Private capability; instantiated only in the actual guided worker. */
@@ -144,6 +165,13 @@ export interface GuidedBrowser {
    * webm on context close). `null` when the context was not recorded or produced no file.
    */
   readonly recordedVideo?: () => Promise<string | null>;
+  /**
+   * Waits for the recorder to finish the webm after {@link close} has returned, for at most `boundMs`. `true` iff the browser's
+   * own `context.close()` fulfilled in that time, i.e. the recorder exited on its own and wrote the Duration and the Cues; on
+   * `false` it has SIGKILLed whatever is still writing the recording, so the file is a salvaged prefix. Optional: a browser
+   * without a recorder has nothing to finish.
+   */
+  readonly finalizeRecording?: (boundMs: number) => Promise<boolean>;
   /**
    * The same recorded {@link BrowserHandle} type the observed replay adapter consumes
    * (`observedReplayAdapter.ts`), over this session's single page and recording (AC-1 parity;

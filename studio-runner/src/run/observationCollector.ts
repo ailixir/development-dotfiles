@@ -143,7 +143,7 @@ export function installObservationCollector(options: CollectorOptions, priorInve
   };
   const eligibleSource=(element:Element,checkLabelControl=true):boolean=>{const state=eligibility(element,checkLabelControl);return !state.hidden&&!state.hard;};
   // Narrow text extraction: at most 32 nodes/two inline levels, never whole-subtree textContent.
-  const boundedText = (element: Element, omittedControl: Element | null = null, ownControlName = false): string => {
+  const boundedText = (element: Element, omittedControl: Element | null = null, ownControlName = false, followLabelControl = true): string => {
     let seen = 0;
     let text = '';
     const visit = (node: Node, depth: number): boolean => {
@@ -164,13 +164,13 @@ export function installObservationCollector(options: CollectorOptions, priorInve
       if (nodeStyle.content && !['none', 'normal', '""'].includes(nodeStyle.content)) return false;
       const generated = (pseudo: string) => getComputedStyle(node, pseudo).content;
       if ([generated('::before'), generated('::after')].some(content => content && !['none', 'normal', '""'].includes(content))) return false;
-      if (!eligibleSource(node) || !visible(node) || node.childNodes.length > 32) return false;
+      if (!eligibleSource(node, followLabelControl) || !visible(node) || node.childNodes.length > 32) return false;
       if (separatesText) text += ' ';
       for (let index = 0; index < node.childNodes.length; index++) if (!visit(node.childNodes.item(index), depth + 1)) return false;
       if (separatesText) text += ' ';
       return text.length <= 512;
     };
-    return eligibleSource(element) && visit(element, 0) ? normalizeName(bounded(text)) : '';
+    return eligibleSource(element, followLabelControl) && visit(element, 0) ? normalizeName(bounded(text)) : '';
   };
   const visible = (element: Element) => {
     const style = getComputedStyle(element);
@@ -367,14 +367,21 @@ export function installObservationCollector(options: CollectorOptions, priorInve
           const labelledBy = bounded(element.getAttribute('aria-labelledby'));
           let name = '';
           let ambiguous = false;
+          // A password's own label is hard only because its control is the password (the label cannot be exported or lent
+          // to another control). The password's name still has to be KNOWN to the local resolver: a competitor of unknown
+          // name made every `textbox` role hint and every label hint on the page unmatchable (W48, Username + Password
+          // forms). The text stays in the local resolution/acquisition records and is never emitted: a password input is
+          // `blocked` above, so it never becomes an exported node.
+          const ownPassword = element instanceof HTMLInputElement && element.type === 'password';
+          const labelEligible = (label: Element): boolean => eligibleSource(label, !ownPassword);
           if (labelledBy) {
             const ids = Array.from(new Set(labelledBy.split(' ').filter(Boolean)));
             if (ids.length > 8) ambiguous = true;
             else for (const id of ids) {
               const label = (element.getRootNode() as Document | ShadowRoot).getElementById(id);
               // A relation never transports its raw DOM ID; only safe observed label text.
-              if (!label || !eligibleSource(label) || !visible(label)) { ambiguous = true; break; }
-              const text = label.hasAttribute('aria-label') || label.hasAttribute('aria-labelledby') ? '' : boundedText(label, element);
+              if (!label || !labelEligible(label) || !visible(label)) { ambiguous = true; break; }
+              const text = label.hasAttribute('aria-label') || label.hasAttribute('aria-labelledby') ? '' : boundedText(label, element, false, !ownPassword);
               if (!text) { ambiguous = true; break; }
               labelElements.push(label); labelNames.push(text); name += `${name ? ' ' : ''}${text}`;
             }
@@ -387,8 +394,8 @@ export function installObservationCollector(options: CollectorOptions, priorInve
             if (associated.length > 8) ambiguous = true;
             else for (let index = 0; index < associated.length; index++) {
               const label = associated.item(index);
-              if (!eligibleSource(label) || !visible(label) || label.hasAttribute('aria-label') || label.hasAttribute('aria-labelledby')) { ambiguous = true; break; }
-              const text = boundedText(label, element);
+              if (!labelEligible(label) || !visible(label) || label.hasAttribute('aria-label') || label.hasAttribute('aria-labelledby')) { ambiguous = true; break; }
+              const text = boundedText(label, element, false, !ownPassword);
               if (!text) { ambiguous = true; break; }
               labelElements.push(label); labelNames.push(text);
             }

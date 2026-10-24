@@ -145,42 +145,29 @@ describe('10.18a — blocked criteria, recorded as skipped and never passed', ()
     );
   });
 
-  describe('Not skips — pointers, so nothing is counted twice', () => {
-    it.skip(
-      'AC-17 IS NOT THIS STORY’S and is not a skip here. @po moved it to story 10.19 at wave-6 validation: ' +
-        'it depends on sibling story 10.15, it is blocked on ED-06/SPK-02 either way, 10.19’s depends_on ' +
-        'already lists both 10.15 and 10.18, and it duplicated story 10.15’s AC-19b ("deployment owner ' +
-        '10.18, integrated proof 10.19"). Recorded in the manifest under 10.19’s inherited_deferrals. ' +
-        'This entry exists so a reader looking for AC-17 finds the pointer rather than concluding it was ' +
-        'dropped. Dependency assumption D-3 is CLOSED.',
-      () => {
-        throw new Error('unreachable: this is a pointer, not a criterion');
-      },
-    );
+  // Historical pointer group: Not skips — pointers, so nothing is counted twice
+    // R-40 historical pointer (not a skipped criterion):
+    // AC-17 IS NOT THIS STORY’S and is not a skip here. @po moved it to story 10.19 at wave-6 validation: 
+    // it depends on sibling story 10.15, it is blocked on ED-06/SPK-02 either way, 10.19’s depends_on 
+    // already lists both 10.15 and 10.18, and it duplicated story 10.15’s AC-19b ("deployment owner 
+    // 10.18, integrated proof 10.19"). Recorded in the manifest under 10.19’s inherited_deferrals. 
+    // This entry exists so a reader looking for AC-17 finds the pointer rather than concluding it was 
+    // dropped. Dependency assumption D-3 is CLOSED.
 
-    it.skip(
-      'Story 10.14’s AC-26 is DISCHARGED, not re-opened. It was recorded "skipped, never passed" in a merged ' +
-        'story for want of an architect’s ruling on promoting RunnerEvidence.partial to required. ADR-002 §20 ' +
-        'is that ruling and story 10.18a landed the edit; 10.14’s own checkbox is left exactly as it merged, ' +
-        'on the standing rule that a merged, gated story is not re-opened to close a deferral a later ruling ' +
-        'unblocked.',
-      () => {
-        throw new Error('unreachable: this is a pointer, not a criterion');
-      },
-    );
+    // R-40 historical pointer (not a skipped criterion):
+    // Story 10.14’s AC-26 is DISCHARGED, not re-opened. It was recorded "skipped, never passed" in a merged 
+    // story for want of an architect’s ruling on promoting RunnerEvidence.partial to required. ADR-002 §20 
+    // is that ruling and story 10.18a landed the edit; 10.14’s own checkbox is left exactly as it merged, 
+    // on the standing rule that a merged, gated story is not re-opened to close a deferral a later ruling 
+    // unblocked.
 
-    it.skip(
-      'AC-13a, AC-16a, AC-18, AC-19a, AC-20, AC-21a, AC-22 and AC-23a are STORY 10.18b’s and are IMPLEMENTED, ' +
-        'not deferred: the streaming Ingress, CORS coherence, the envFrom key-validity check, ' +
-        'the three bypass closures with their permit companions, ' +
-        'the runbook disclosures, the CSRF finding, the measured backend baseline and the kill switch. This ' +
-        'entry was a forward pointer when 10.18a shipped; it is kept, corrected, so that a reader comparing ' +
-        'the two halves’ skip counts is not left thinking the edge half deferred its own scope.',
-      () => {
-        throw new Error('unreachable: this is a pointer, not a criterion');
-      },
-    );
-  });
+    // R-40 historical pointer (not a skipped criterion):
+    // AC-13a, AC-16a, AC-18, AC-19a, AC-20, AC-21a, AC-22 and AC-23a are STORY 10.18b’s and are IMPLEMENTED, 
+    // not deferred: the streaming Ingress, CORS coherence, the envFrom key-validity check, 
+    // the three bypass closures with their permit companions, 
+    // the runbook disclosures, the CSRF finding, the measured backend baseline and the kill switch. This 
+    // entry was a forward pointer when 10.18a shipped; it is kept, corrected, so that a reader comparing 
+    // the two halves’ skip counts is not left thinking the edge half deferred its own scope.
 });
 
 /**
@@ -293,15 +280,10 @@ describe('10.18b — blocked criteria, recorded as skipped and never passed', ()
     );
   });
 
-  describe('Not a skip — resolved configuration-delivery pointer', () => {
-    it.skip(
-      'AC-18 is resolved: test/deployment/envfrom-keys.test.ts is green across all value sets. ' +
-        'The chart converts dotted configOverrides keys to Spring-compatible environment names and ' +
-        'fails rendering on invalid or colliding names. This historical pointer remains to show that ' +
-        'the earlier red escalation was closed rather than allowlisted.',
-      () => {
-        throw new Error('unreachable: this is a pointer, not a criterion');
-      },
-    );
-  });
+  // Historical pointer group: Not a skip — resolved configuration-delivery pointer
+    // R-40 historical pointer (not a skipped criterion):
+    // AC-18 is resolved: test/deployment/envfrom-keys.test.ts is green across all value sets. 
+    // The chart converts dotted configOverrides keys to Spring-compatible environment names and 
+    // fails rendering on invalid or colliding names. This historical pointer remains to show that 
+    // the earlier red escalation was closed rather than allowlisted.
 });
