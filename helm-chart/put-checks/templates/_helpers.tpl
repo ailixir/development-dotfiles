@@ -691,6 +691,8 @@ nginx.ingress.kubernetes.io/use-regex nginx.ingress.kubernetes.io/proxy-bufferin
 {{/* Additional config outranks packaged ${ENV_ALIAS:default} placeholders. Keep chart-owned
      controls on their dedicated values/Secret path, including nested/relaxed key spellings. */}}
 {{- define "put-checks.springConfig.validateProperties" -}}
+{{/* Current studio.gateway facts emitted from studioGateway.* are reserved together with the
+     credentials placeholder alias; the old compile spellings remain denied below. */}}
 {{- $protected := list
   "springprofilesactive" "springconfigimport" "springconfiglocation" "springconfigadditionallocation"
   "checkscorsallowedorigins" "checkscoreservicebaseurl"
@@ -708,6 +710,9 @@ nginx.ingress.kubernetes.io/use-regex nginx.ingress.kubernetes.io/proxy-bufferin
   "studiosecretsvaulthashicorpmount" "studiosecretsvaulthashicorppathtemplate" "studiosecretsvaulthashicorpvaluekey"
   "studiosecretsvaulthashicorptokenfile" "studiosecretsvaulthashicorpconnecttimeout"
   "studiosecretsvaulthashicorprequesttimeout" "studiosecretsvaulthashicorpmaxresponsebytes"
+  "studiogatewayprovider" "studiogatewayendpoint" "studiogatewayproject"
+  "studiogatewaylocation" "studiogatewaymodel" "studiogatewaycredentialsmode"
+  "studiogatewaycredentialsserviceaccountkeyfile" "studiogatewaycredentialskeyfile"
   "studiocompilegatewayprovider" "studiocompilegatewayendpoint" "studiocompilegatewayproject"
   "studiocompilegatewaylocation" "studiocompilegatewaymodel" "studiocompilegatewaycredentialsmode"
   "studiocompilegatewaycredentialsserviceaccountkeyfile"

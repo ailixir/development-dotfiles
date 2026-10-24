@@ -147,6 +147,8 @@ ${BOLD}Environment:${NC}
                                 (both generated per session when unset)
   STUDIO_GATEWAY_PROVIDER       guided translation provider: disabled (local default)
                                 or vertex (needs endpoint, project, location)
+  STUDIO_RUNNER_TLS_*           complete explicit runner/backend TLS files (see tools/LOCAL_TLS.md)
+                                otherwise ephemeral local TLS is generated per launch
 EOF
   exit 0
 }
@@ -288,6 +290,19 @@ printf "${NC}"
 
 BACKEND_PORT="${DEV_BACKEND_PORT:-8080}"
 VITE_PORT="${DEV_FRONTEND_PORT:-5173}"
+RUNNER_PORT="${DEV_STUDIO_RUNNER_PORT:-8090}"
+# Prepare/validate the one local identity chain BEFORE touching any target port. A partial
+# operator configuration must not be mixed with generated keys, or stop an existing service.
+if [ "$BACKEND" = true ] && [ "$STUDIO_RUNNER" = true ]; then
+  umask 077
+  new_token() { openssl rand -hex 32 2>/dev/null || node -e "process.stdout.write(require('crypto').randomBytes(32).toString('hex'))"; }
+  export STUDIO_RUNNER_SERVICE_TOKEN="${STUDIO_RUNNER_SERVICE_TOKEN:-$(new_token)}"
+  export STUDIO_CALLBACK_SERVICE_TOKEN="${STUDIO_CALLBACK_SERVICE_TOKEN:-$(new_token)}"
+  RUNNER_WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/put-checks-studio-runner.XXXXXX")"
+  DEV_BACKEND_PORT="$BACKEND_PORT" DEV_STUDIO_RUNNER_PORT="$RUNNER_PORT" \
+    node "$ROOT_DIR/tools/studio-local-tls.mjs" prepare "$RUNNER_WORK_DIR"
+  source "$RUNNER_WORK_DIR/tls-environment.sh"
+fi
 # The Vite proxy forwards the browser's Origin, and the backend's CORS list (application.yml) only
 # names the default dev ports — a non-default frontend port would get 403 "Invalid CORS request"
 # on every POST.
@@ -335,13 +350,9 @@ fi
 # values from here. The runner's environment is enumerated (`env -i`), as in the chart and in
 # StudioCoRunIT: its config loader refuses any unknown STUDIO_RUNNER_* key, and the backend's
 # STUDIO_RUNNER_BASE_URL / STUDIO_RUNNER_SERVICE_TOKEN exported below are exactly such keys.
-RUNNER_PORT="${DEV_STUDIO_RUNNER_PORT:-8090}"
 if [ "$BACKEND" = true ] && [ "$STUDIO_RUNNER" = true ]; then
   RUNNER_DIR="$ROOT_DIR/studio-runner"
-  new_token() { openssl rand -hex 32 2>/dev/null || node -e "process.stdout.write(require('crypto').randomBytes(32).toString('hex'))"; }
-  export STUDIO_RUNNER_SERVICE_TOKEN="${STUDIO_RUNNER_SERVICE_TOKEN:-$(new_token)}"
-  export STUDIO_CALLBACK_SERVICE_TOKEN="${STUDIO_CALLBACK_SERVICE_TOKEN:-$(new_token)}"
-  export STUDIO_RUNNER_BASE_URL="http://127.0.0.1:${RUNNER_PORT}"
+  export STUDIO_RUNNER_BASE_URL="https://127.0.0.1:${RUNNER_PORT}"
   # The Studio pages are gated on the UI_TEST source, which is off by default (application-local.yml).
   export CHECKS_SOURCE_UI_TEST="${CHECKS_SOURCE_UI_TEST:-true}"
   # Local Studio uses the real Vertex path. Missing project, endpoint, location, or credentials
@@ -360,7 +371,6 @@ if [ "$BACKEND" = true ] && [ "$STUDIO_RUNNER" = true ]; then
   log "Building studio-runner…"
   (cd "$RUNNER_DIR" && npm run build >/dev/null)
 
-  RUNNER_WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/put-checks-studio-runner.XXXXXX")"
   mkdir -p "$RUNNER_WORK_DIR/objects"
   # The local backend reads the exact directory the runner writes. This makes recording playback
   # and manifest recovery the real path in local development, not two unrelated local stores.
@@ -368,36 +378,30 @@ if [ "$BACKEND" = true ] && [ "$STUDIO_RUNNER" = true ]; then
   export STUDIO_EVIDENCE_DIRECTORY="$RUNNER_WORK_DIR/objects"
   # scratch/ is a CHILD of the work dir on purpose: the runner removes its scratch root on exit.
   (
-    cd "$RUNNER_DIR" && exec env -i \
-      PATH="$PATH" HOME="$HOME" TMPDIR="$RUNNER_WORK_DIR" \
-      ${PLAYWRIGHT_BROWSERS_PATH:+PLAYWRIGHT_BROWSERS_PATH="$PLAYWRIGHT_BROWSERS_PATH"} \
-      STUDIO_RUNNER_HOST=127.0.0.1 \
-      STUDIO_RUNNER_PORT="$RUNNER_PORT" \
-      STUDIO_RUNNER_POOL_SIZE=1 \
-      STUDIO_RUNNER_SERVICE_IDENTITY="$STUDIO_RUNNER_SERVICE_TOKEN" \
-      STUDIO_RUNNER_CALLBACK_IDENTITY="$STUDIO_CALLBACK_SERVICE_TOKEN" \
-      STUDIO_RUNNER_CALLBACK_BASE_URL="http://127.0.0.1:${BACKEND_PORT}" \
-      STUDIO_RUNNER_SCRATCH_DIR="$RUNNER_WORK_DIR/scratch" \
-      STUDIO_RUNNER_OBJECT_STORE_PROVIDER=local \
-      STUDIO_RUNNER_OBJECT_STORE_DIR="$RUNNER_WORK_DIR/objects" \
-      node dist/main.js >"$RUNNER_WORK_DIR/studio-runner.log" 2>&1
+    cd "$RUNNER_DIR" && exec env -i PATH="$PATH" HOME="$HOME" \
+      node "$ROOT_DIR/tools/studio-local-tls.mjs" run "$RUNNER_WORK_DIR" \
+      >"$RUNNER_WORK_DIR/studio-runner.log" 2>&1
   ) &
   RUNNER_PID=$!
   log "studio-runner PID: $RUNNER_PID (log: $RUNNER_WORK_DIR/studio-runner.log)"
 
+  RUNNER_READY=false
   for i in $(seq 1 30); do
-    if curl -sf -H "Authorization: Bearer $STUDIO_RUNNER_SERVICE_TOKEN" \
-        "http://127.0.0.1:${RUNNER_PORT}/health" >/dev/null 2>&1; then
+    if node "$ROOT_DIR/tools/studio-local-tls.mjs" health "$RUNNER_WORK_DIR" >/dev/null 2>&1; then
       ok "studio-runner healthy on :${RUNNER_PORT}"
+      RUNNER_READY=true
       break
     fi
     if ! kill -0 "$RUNNER_PID" 2>/dev/null; then
-      err "studio-runner exited during startup — last lines of its log:"
-      tail -20 "$RUNNER_WORK_DIR/studio-runner.log" >&2 || true
+      err "studio-runner exited during startup (private log: $RUNNER_WORK_DIR/studio-runner.log)"
       exit 1
     fi
     sleep 1
   done
+  if [ "$RUNNER_READY" != true ]; then
+    err "studio-runner did not pass mutual-TLS readiness; stopping this local launch"
+    exit 1
+  fi
 fi
 
 # ── Start Backend ──────────────────────────────────────────────────
@@ -470,7 +474,7 @@ if [ "$BACKEND" = true ]; then
     ok "Profile:    dev (3 CSIs, 15 checks, ~450 execution results)"
   fi
   if [ -n "$RUNNER_PID" ]; then
-    ok "Runner:     http://127.0.0.1:${RUNNER_PORT} (Studio runs dispatch here)"
+    ok "Runner:     https://127.0.0.1:${RUNNER_PORT} (mutual TLS; Studio runs dispatch here)"
     if [ "${STUDIO_GATEWAY_PROVIDER}" = "disabled" ]; then
       ok "Translate:  disabled (no model provider; set STUDIO_GATEWAY_PROVIDER=vertex)"
     else
