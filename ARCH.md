@@ -34,6 +34,7 @@ The current implementation is a **frontend-only micro-frontend module** designed
    - Built as a Module Federation remote module exposing `./Module`
    - Integrates with PUT Platform Shell via `@put/core-components` package
    - Complete UI implementation for all features: Check Builder, Checks Studio, Dashboards, Reports
+   - UI tests appear in All Checks as a frontend view of `GET /studio/tests` (merged client-side, deduplicated by id with the UI test winning) on the `ui-tests` routes; they remain a separate Studio aggregate with no `checks` rows. The backend link of UI tests to checks (Flow 2) is deferred and must land without route or screen changes. See [Studio architecture §7](docs/architecture/studio-execution.md#7-scheduling-and-platform-integration)
    - Adaptive layout system that detects standalone vs federated deployment modes
 
 2. **Mock Backend (MSW - Mock Service Worker):**
@@ -388,7 +389,7 @@ The physical primary key is `(id, started_at)` after the existing V7 migration. 
 
 New unpartitioned ledger with globally unique execution identity and the history partition locator. Owns persistent execute idempotency, claim leases/deadlines, attempt/admission identity, runner sequence, snapshot revision and known manifest key. Admission is exclusive; an ambiguous browser attempt is never automatically replayed. Pending/running/finalization recovery is required in V1.
 
-Studio target field definitions and migration requirements are maintained in [Studio architecture §8](docs/architecture/studio-execution.md#8-data-model--api-contracts); do not copy its DDL into a second target schema here. Existing Flyway migrations describe the deployed schema until forward-only migrations implement the target. Studio SSE uses persisted snapshots across API replicas; no broker or sticky session is required. Scheduled/unified UI_TEST dashboard/report integration follows V1.
+Studio target field definitions and migration requirements are maintained in [Studio architecture §8](docs/architecture/studio-execution.md#8-data-model--api-contracts); do not copy its DDL into a second target schema here. Existing Flyway migrations describe the deployed schema until forward-only migrations implement the target. Studio SSE uses persisted snapshots across API replicas; no broker or sticky session is required. The frontend lists UI tests in All Checks from `GET /studio/tests` on the `ui-tests` routes, and UI tests stay a separate Studio aggregate with no `checks` rows. The backend link of UI tests to checks (Flow 2) and unified UI_TEST dashboard/report integration are deferred; see [Studio architecture §7](docs/architecture/studio-execution.md#7-scheduling-and-platform-integration).
 
 ### **7.2. Supporting Tables**
 

@@ -1,8 +1,8 @@
 import { CANCELLED_ERROR_CODE, type ExecutionStatus } from '@/types/studio/studioTypes';
 
 /**
- * How an execution outcome is named on every Studio surface: the Studio page, the Tests page and
- * the Runs page.
+ * How an execution outcome is named on every Studio surface: the Studio editor, the UI test detail
+ * page and its Runs tab, and All Checks.
  *
  * The vocabulary is the backend's own, `PENDING | RUNNING | PASSED | FAILED | ERROR`. The terminal
  * set comes from `TERMINAL_EXECUTION_STATUSES` in the contract types. The one refinement is a

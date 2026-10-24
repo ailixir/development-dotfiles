@@ -98,23 +98,22 @@ The module exposes `./ChecksModule` via Module Federation and integrates with th
 ### Core Check Types
 1. **Basic Checks:** HTTP/HTTPS endpoints, TCP port connectivity
 2. **Integration Checks:** Splunk queries, Grafana metrics, ITRS samplers, AppDynamics health rules
-3. **UI Test Checks:** No-code browser automation with "Checks Studio"
+3. **UI Test Checks:** No-code browser automation with "Checks Studio". UI tests are checks: All Checks lists them, Create Check → UI Test creates them, and each has a detail page (Overview and Runs).
 
 ### Checks Studio (UI Testing)
 **Philosophy:** "From Checklist to Reality" - users write plain English steps and watch video proof of execution.
 
-**Three-Panel Interface:**
+**Two-Panel Interface** (opened from a UI test):
 - Left: Test steps in numbered list format
-- Middle: Control panel with "Run Test" button and live logs
-- Right: Video playback synchronized with test steps
+- Right: Run and proof: "Run Test" button, live logs and video playback synchronized with test steps
 
 ### Navigation Structure
 ```
 📁 Checks Module
 ├── 🏠 Dashboard - Health overview
-├── 📋 All Checks - Check management  
-├── ➕ Create Check - New check builder
-├── 🎬 Checks Studio - UI testing
+├── 📋 All Checks - Check management, including UI tests
+│   └── UI test - Overview and Runs; opens Studio
+├── ➕ Create Check - New check builder (including UI Test)
 └── 📊 Reports - Analytics & reporting
 ```
 
@@ -145,7 +144,7 @@ backend/src/main/resources/db/migration/     # Flyway forward-only SQL
 ## Development Rules
 
 ### Accessibility Scope
-- **Functional must-haves only, no WCAG target** (user decision 2026-10-17; `docs/architecture/ADR-SC-006-accessibility-scope-functional-only.md`, rule `.claude/rules/accessibility-scope.md`). Do not add screen-reader, live-region, keyboard-shortcut, reduced-motion, axe/contrast or a11y-review work. Keep focus behaviour that is part of a flow, visible labels, the responsive layout, and the existing WCAG audit green as a regression guard only.
+- **Functional must-haves only, no WCAG target** (user decision 2026-10-17; `docs/architecture/ADR-SC-006-accessibility-scope-functional-only.md`, rule `.claude/rules/accessibility-scope.md`). Do not add screen-reader, live-region, keyboard-shortcut, reduced-motion, axe/contrast or a11y-review work. Keep focus behaviour that is part of a flow, visible labels, and the responsive layout. The WCAG audit regression guard was removed by user decision 2026-10-23; no WCAG or axe work is done.
 
 ### Code Quality
 - **TypeScript:** Strict mode enabled, no `any` types without justification

@@ -1,0 +1,42 @@
+{
+  "recordedAt": "2026-10-24T03:03:24.881Z",
+  "task": "STUDIO-UNIFY-001.4 / 4.2 (NFR-02)",
+  "command": "pnpm run build (frontend/, webpack production)",
+  "result": "exit 0",
+  "baseline": "implementation/baseline.json (task 1.1)",
+  "entryAssets": [
+    {
+      "asset": "main",
+      "file": "main.48d88bcd61dce55868d1.js",
+      "baselineBytes": 9656,
+      "finalBytes": 9636,
+      "deltaBytes": -20
+    },
+    {
+      "asset": "remoteEntry.js",
+      "file": "remoteEntry.js",
+      "baselineBytes": 8428,
+      "finalBytes": 8407,
+      "deltaBytes": -21
+    }
+  ],
+  "initialEntryTotalBytes": 18043,
+  "underInitialBudget500KB": true,
+  "lazyChunks": "The UI test detail page and All Checks are lazy route chunks (React.lazy in App.tsx), not part of the initial entry.",
+  "sizeWarningAssets": [
+    {
+      "file": "789.baf35b95f6b145175f90.chunk.js",
+      "size": "3.88 MiB"
+    },
+    {
+      "file": "79.b451454ec6f0fb4dab6a.chunk.js",
+      "size": "540 KiB"
+    },
+    {
+      "file": "170.9de47158fcdb04b2ed1f.chunk.js",
+      "size": "3.83 MiB"
+    }
+  ],
+  "fcp": "not measured",
+  "note": "Webpack warns on three large shared/vendor chunks (>500 KiB), as in the baseline; they are lazily loaded, not entry assets."
+}

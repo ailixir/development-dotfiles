@@ -1,0 +1,9 @@
+Scan S4 (task 4.1), run from frontend/ on 2026-10-23 after the leftover cleanups:
+
+
+
+Command:
+! (grep -rnE "/checks/studio|path=\"studio|[}'\"\`]/studio/runs|['\"\`]/studio/tests/:id|path: '/studio'|CreateTestDialog|StudioTestsPage|StudioRunsPage|StudioListLayout|useUrlListState|useStudioTests|navigationConfig|UiTestConfig|LAST_RUN_FILTER_LABELS" src e2e | grep -v "citi/put/checks/studio")
+
+Output: (empty) — no /checks/studio reference, no studio/runs literal, no old test-local route shape, no path="studio...", and none of the removed module names remain in frontend/src or frontend/e2e.
+Leftovers removed in this story (flagged by the story .3 independent review): App.tsx federated reports route missing space (path="reports"element=); "Tests page"/"Runs page" doc comments in src/types/studio/studioTypes.ts and src/components/studio/run/executionStatus.ts.

@@ -118,7 +118,7 @@ const App: React.FC = () => {
           <Route path="runs" element={<UiTestRunsTab />} />
           <Route path="runs/:executionId" element={<UiTestRunsTab />} />
         </Route>
-        <Route path="reports"element={<FeatureGate featureKey="REPORTS"><ReportsHome /></FeatureGate>} />
+        <Route path="reports" element={<FeatureGate featureKey="REPORTS"><ReportsHome /></FeatureGate>} />
         <Route path="reports/new" element={<FeatureGate featureKey="REPORTS"><ReportBuilder /></FeatureGate>} />
         <Route path="reports/:id" element={<FeatureGate featureKey="REPORTS"><ReportDetailsPage /></FeatureGate>} />
         <Route path="reports/:id/edit" element={<FeatureGate featureKey="REPORTS"><ReportBuilder /></FeatureGate>} />

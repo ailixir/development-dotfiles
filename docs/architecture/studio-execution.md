@@ -17,10 +17,10 @@ The editor, polling UI, video player and backend CRUD exist. Compilation, real e
 | Capability | V1 | Later / excluded |
 |---|---|---|
 | Authoring | CSI-scoped English steps, variables/secret references, confirmed TypeScript artifact | No runtime AI or hand-written English translator; Python export retired |
-| Execution | On demand, Chromium, one page, initially one run per pod and 1–2 runner replicas | Scheduling, larger pools, other browsers, iframe/popup/multi-page workflows |
+| Execution | On demand, Chromium, one page, initially one run per pod and 1–2 runner replicas; Studio scheduling implemented, off by default (§7) | Larger pools, other browsers, iframe/popup/multi-page workflows |
 | Progress | SSE current-state snapshots with GET recovery/fallback | Lossless event replay, WebSockets and live video |
 | Evidence | Native webm, private storage/download, attempted-step seek, 30-day expiry | Screenshots, transcoding and public video URLs |
-| Platform integration | Studio history and last-run summaries by CSI | Unified UI_TEST catalog/application-component/dashboard/report projections |
+| Platform integration | Studio history and last-run summaries by CSI; UI tests listed in All Checks as a frontend view of `GET /studio/tests` on the `ui-tests` routes (§7) | Backend link of UI tests to checks (Flow 2), application-component/dashboard/report projections, generic scheduling integration |
 
 Unsupported workflows must be explained before confirmation where detectable and fail explicitly otherwise. Pilot applications must support the approved single-page login flow; enterprise MFA is not assumed to work.
 
@@ -226,13 +226,19 @@ An authenticated ambient session/gateway route is required for `<video>` and dow
 
 For each attempted step persist `offsetMs` (start on recording timeline) and `durationMs`. Use a monotonic runner clock and calibrate its origin against the pinned recorder's first frames. V1 acceptance target: seek within 500 ms of the visible step start on the controlled fixture, including initial navigation and failure cases; validate this target in staging before claiming it for real applications. Clicking a wait/assertion seeks its start, not necessarily the later instant its condition becomes true. `SKIPPED` steps have null timing and disabled seek. No synthetic index-times-ten mapping remains.
 
-## 7. Scheduling and platform integration (post-V1)
+## 7. Scheduling and platform integration
 
 Legacy `ui_tests.schedule`/status fields remain nonoperational. STUDIO-SCHED-001 implements the post-V1 scheduling extension through dedicated typed schedule/activation/occurrence records, server recurrence, and the existing Studio acceptance/readiness/authorization/quota/dispatch ledger. The producer defaults off and production grants remain release gated. See [ADR-003](ADR-003-studio-test-scheduling.md), the [approved specification](../stories/STUDIO-SCHED-001/spec/spec.md), and [operations](../specs/studio/scheduling/operations.md). Scheduled work never compiles implicitly; due readiness refusals explicitly record `COMPILE_REQUIRED`. Ambiguous UI attempts never enter generic automatic retry.
 
 STUDIO-SCHED-002 consolidates recurring check/Studio production under shared `SchedulingCoordinator`/`SchedulingTargetWorker` and `CronRecurrence`, with existing `CronDispatcher` and `StudioScheduledTarget` adapters. See [ADR-004](ADR-004-shared-check-scheduling.md). Catalog executors and Studio acceptance/ledger/runner remain domain-owned; no public contract or storage change is implied.
 
-V1 owns Studio history and last-run summaries by CSI. The association between `UI_TEST` checks and Studio definitions, application/component metadata, and unified dashboard/report projections must be specified in the later integration story; updating a Studio row alone does not populate those views. Preserve optional `checkId` in history for that integration. Scheduling and unified reporting controls must not imply that an unsupported path is operational in V1.
+V1 owns Studio history and last-run summaries by CSI.
+
+**Catalog view (frontend only).** All Checks lists UI tests as a client-side view. The frontend makes a single availability-gated `GET /studio/tests` call (at most 100 tests), merges the result into the checks list, deduplicates by id with the UI test winning, and orders by `createdAt`. UI test rows use the `ui-tests/:id`, `ui-tests/:id/runs` and `ui-tests/:id/studio` routes. This adds no backend endpoint, schema or behaviour.
+
+**Separate aggregates.** A UI test stays a Studio aggregate. No `checks` rows exist for UI tests; the frontend view above is the only place the two lists meet.
+
+**Flow 2 (deferred).** The backend link of UI tests to checks, and the association between `UI_TEST` checks and Studio definitions, application/component metadata and unified dashboard/report projections, must be specified in the later integration story; updating a Studio row alone does not populate those views. Flow 2 must land without changing the `ui-tests` routes, the screens or the Create Check flow, which the type-segmented routes, the id dedupe and the single path helpers allow. Preserve optional `checkId` in history for that integration. Scheduling and unified reporting controls must not imply that an unsupported path is operational.
 
 ## 8. Data model & API contracts
 

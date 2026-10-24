@@ -575,7 +575,8 @@ export interface StudioErrorResponse {
 
 /**
  * The terminal outcomes, in one place. Every Studio surface that decides whether a run has ended
- * (the Studio page, the Tests page, the Runs page) reads this set rather than keeping its own.
+ * (the Studio editor, the UI test detail page and its Runs tab, All Checks) reads this set rather
+ * than keeping its own.
  */
 export const TERMINAL_EXECUTION_STATUSES: readonly ExecutionStatus[] = [
   'PASSED',

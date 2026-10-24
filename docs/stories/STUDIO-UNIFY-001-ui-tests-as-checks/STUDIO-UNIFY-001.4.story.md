@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Story ID | STUDIO-UNIFY-001.4 |
-| Status | **Ready** |
+| Status | **Done** |
 | Epic | STUDIO-UNIFY-001-ui-tests-as-checks — UI tests as checks (Flow 1, frontend-only), increment 4 of 4 |
 | Depends on | STUDIO-UNIFY-001.3 |
 | Dependency notes | Needs story .3 Done. Plan subtasks 4.1 and 4.6 depend on 3.20; 4.2 compares against the baseline that story .1 records (1.1). Nothing follows this story. |
@@ -135,7 +135,7 @@ No baseline move is expected in this story. Task 4.6 checks that `docs/qa/access
 
 The 7 tasks below map 1:1 to plan subtasks 4.1–4.7 (`plan/implementation.yaml`, phase-4). Task commands run from `frontend/`; the doc paths in them are relative to that directory (`../PRD.md`). Use **pnpm only**. The "Plan notes" under each task are copied from the plan and are part of the task. Tick a box only when its verification passes. Tasks 4.5 and 4.6 are manual verifications: record the reviewer's result in the Dev Agent Record.
 
-- [ ] **4.1** Scan for leftover Studio routes and removed modules and record the result
+- [x] **4.1** Scan for leftover Studio routes and removed modules and record the result
   - Service: infra. Covers: FR-27, AC-26.
   - Files: `docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/implementation/leftover-scan.txt`
   - Depends on: 3.20
@@ -148,7 +148,7 @@ The 7 tasks below map 1:1 to plan subtasks 4.1–4.7 (`plan/implementation.yaml`
     and import paths are deliberately not matched (CRIT-19). Any hit becomes its own subtask of at most 3
     files: remove it, then re-scan. Write the scan output (expected: empty) to leftover-scan.txt.
 
-- [ ] **4.2** Compare the initial bundle with the phase-1 baseline (NFR-02)
+- [x] **4.2** Compare the initial bundle with the phase-1 baseline (NFR-02)
   - Service: infra. Covers: NFR-02.
   - Files: `docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/implementation/bundle-check.json`
   - Depends on: 1.1, 4.1
@@ -156,7 +156,7 @@ The 7 tasks below map 1:1 to plan subtasks 4.1–4.7 (`plan/implementation.yaml`
   - Plan notes:
     Record the same entry-asset sizes as 1.1. The initial bundle must stay under 500 KB; the detail page is a lazy chunk. FCP is recorded as not measured.
 
-- [ ] **4.3** Update PRD.md for the two-panel Studio, Studio scheduling status, the V1 catalog view and the removed compile wording (D5)
+- [x] **4.3** Update PRD.md for the two-panel Studio, Studio scheduling status, the V1 catalog view and the removed compile wording (D5)
   - Service: infra. Covers: FR-29, AC-28.
   - Files: `PRD.md`
   - Verify (from `frontend/`):
@@ -167,25 +167,25 @@ The 7 tasks below map 1:1 to plan subtasks 4.1–4.7 (`plan/implementation.yaml`
     L76; L78; L90-L99; L111; L115 (catalog view in V1 as a frontend view; other projections stay Later);
     L128, L158, L229. L121 is unchanged. Re-read the lines first.
 
-- [ ] **4.4** Update CLAUDE.md and its AGENTS.md mirror (two-panel Studio; nav tree with UI tests under Checks and no Studio entry)
+- [x] **4.4** Update CLAUDE.md and its AGENTS.md mirror (two-panel Studio; nav tree with UI tests under Checks and no Studio entry)
   - Service: infra. Covers: FR-29, AC-28, DC-21.
   - Files: `CLAUDE.md`, `AGENTS.md`
   - Verify (from `frontend/`): `! grep -nE "Three-Panel|Checks Studio - UI testing" ../CLAUDE.md ../AGENTS.md`
   - Plan notes:
     CLAUDE.md L101-117 and AGENTS.md L100-117. The stack versions are out of scope.
 
-- [ ] **4.5** Update studio-execution.md and ARCH.md for the frontend UI_TEST catalog view, separate aggregates and Flow 2 deferral
+- [x] **4.5** Update studio-execution.md and ARCH.md for the frontend UI_TEST catalog view, separate aggregates and Flow 2 deferral
   - Service: infra. Covers: FR-29, AC-28.
   - Files: `docs/architecture/studio-execution.md`, `ARCH.md`
   - Verify (manual): Review against AC-28. studio-execution.md: L20 and L229 (scheduling status); L23 and L235 (catalog view on the ui-tests routes, separate aggregates, Flow 2 deferred). ARCH.md: L36 and L391 (G11). M5 at L198 and the compile-era API lines stay as they are.
 
-- [ ] **4.6** Check studio-wcag-audit.md for consistency with the increment 1-3 records (consistency only, no new baseline)
+- [-] **4.6** (REMOVED, user decision 2026-10-23: no WCAG work; studio-wcag-audit.md is history only) Check studio-wcag-audit.md for consistency with the increment 1-3 records (consistency only, no new baseline)
   - Service: infra. Covers: FR-28, FR-29, AC-27, AC-28.
   - Files: `docs/qa/accessibility/studio-wcag-audit.md`
   - Depends on: 3.20
   - Verify (manual): The document lists five ChecksStudioPage surfaces. It carries the dated records from 1.10/1.33 (if the baseline moved), 2.12 and 3.11, and no record or surface beyond them. pnpm exec vitest run src/test/a11y/studioWcagAudit.test.tsx passes, and git diff --exit-code on axe-results.json is clean.
 
-- [ ] **4.7** Run the final gate (type-check, lint, all touched suites, removed-route scan, WCAG guard)
+- [x] **4.7** Run the final gate (type-check, lint, all touched suites, removed-route scan, WCAG guard)
   - Service: infra. Covers: AC-09, AC-26, AC-27, AC-28, NFR-09.
   - Files: `docs/qa/accessibility/axe-results.json`
   - Depends on: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6
@@ -261,6 +261,9 @@ CON-01 frontend-only: no backend, API, schema or Flyway change. CON-03 one path,
 |---|---|---|---|
 | 2026-10-23 | 0.1.0 | Draft created from the approved spec (Spec Pipeline critique round 4: APPROVED, 4.38), requirements.json and plan revision 4, phase-4. ClickUp sync not performed (F1). | River (@sm) |
 | 2026-10-23 | 0.1.1 | Validated GO (8/10) — Status: Draft → Ready. Tasks match plan revision 4 phase-4 1:1; F2 (AC-26 leftovers) placement confirmed; F3 AC-28 QA verification judged adequate. Starts only after story .3 is Done. | Pax (@po) |
+| 2026-10-23 | 0.2.0 | Status: Ready → InProgress (story .3 Done). Executed as Lean work item STUDIO-UNIFY-001.4. Task 4.6 and the WCAG parts of 4.7 removed (user decision "We dont need WCAG, ignore/remove all accessibility tasks"). | Claude Code (@dev role) |
+| 2026-10-23 | 0.3.0 | Status: InProgress → InReview. Tasks 4.1–4.7 done (4.6 removed); File List and Dev Agent Record filled; handed to the independent Lean review. | Claude Code (@dev role) |
+| 2026-10-23 | 0.4.0 | Status: InReview → Done. Independent Lean review PASS (AC-26, AC-28, DOD); Lean acceptance recorded. | Quinn (@qa, aiox-qa subagent) |
 
 ## PO Validation (2026-10-23)
 
@@ -288,20 +291,33 @@ CON-01 frontend-only: no backend, API, schema or Flyway change. CON-03 one path,
 
 ### Agent Model Used
 
-_Populated by @dev during implementation._
+Coordinator and Lean builder: Claude Code main session (Opus 5.5, session 651237b1-faeb-45bb-9d2b-d4fa4eb9a3e7): 4.1 (scan S4 and leftover cleanups), 4.2 (bundle comparison), 4.7 (gate via Lean bound checks). Contributors: aiox-dev subagents on Sonnet 5.5, effort high, in parallel: PRD.md (4.3), CLAUDE.md + AGENTS.md (4.4), studio-execution.md + ARCH.md (4.5). Run under AIOX Lean Delivery (work item STUDIO-UNIFY-001.4).
 
 ### Debug Log References
 
-_Populated by @dev during implementation._
+~/.aiox-lean/put-checks-ui-studio/STUDIO-UNIFY-001.4/ (binding, contract, logs incl. final-build-2.log).
 
 ### Completion Notes
 
-_Populated by @dev during implementation._
+- User decision "We dont need WCAG, ignore/remove all accessibility tasks": task 4.6 removed; `studio-wcag-audit.md` and `axe-results.json` not edited (history). CLAUDE.md/AGENTS.md accessibility line now records that the WCAG audit guard was removed.
+- 4.1: scan S4 empty (recorded in `implementation/leftover-scan.txt`). Leftovers removed: `App.tsx` federated reports route missing space; "Tests page"/"Runs page" doc comments in `studioTypes.ts` and `executionStatus.ts` (both flagged by the story .3 review).
+- 4.2: initial entry `main` 9,636 B (baseline 9,656 B, −20 B), `remoteEntry.js` 8,407 B (baseline 8,428 B, −21 B); total 18,043 B, under the 500 KB budget; detail page and All Checks are lazy chunks; FCP not measured (`implementation/bundle-check.json`).
+- 4.3: beyond the D5 list, PRD L87 and the L108 "Authoring and trust" row also lost their compile/confirm wording (they contradicted the new text; task 4.3 is "the removed compile wording"). PRD L121 byte-identical. Remaining "compil|confirm" hits are the ordinary verb (L56), the success-metric heading (L220) and the new "no compile or confirm step" statements.
+- 4.4: CLAUDE.md and AGENTS.md mirrored: two-panel Studio, nav tree with UI tests under All Checks and no Studio entry, Create Check includes UI Test.
+- 4.5: studio-execution.md §7 heading drops "(post-V1)"; the one inbound anchor link in `docs/specs/studio/scheduling/architecture.md` L7 was repointed (one-line, outside this story's File List scope but required by the heading change). `STUDIO-SCHED-001 implements the post-V1 scheduling extension` (studio-execution.md L231) left as historical wording.
+- No application behaviour change (only a whitespace fix in App.tsx and two comments). CodeRabbit not run (unavailable on host).
 
 ### File List
 
-_Empty until implementation. @dev lists only files this story creates, modifies or deletes._
+Created: `docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/implementation/leftover-scan.txt`, `implementation/bundle-check.json`.
+
+Modified: `PRD.md`; `CLAUDE.md`; `AGENTS.md`; `ARCH.md`; `docs/architecture/studio-execution.md`; `docs/specs/studio/scheduling/architecture.md` (anchor link only); `frontend/src/App.tsx` (whitespace); `frontend/src/types/studio/studioTypes.ts` (comment); `frontend/src/components/studio/run/executionStatus.ts` (comment); this story file.
 
 ## QA Results
 
-_Populated by @qa._
+**Verdict: PASS** (independent AIOX Lean review, 2026-10-23). Reviewer: aiox-qa subagent (Sonnet 5.5, effort high; execution 651237b1:a8603000d462b3a0f), fresh context, read-only, independent of all authors. Candidate `592cb8d7a15ca5b7b26715619aeecba4b06f2c01e30d5da179ac629a174bf783`; Lean acceptance recorded (engineering acceptance only). Payload: `~/.aiox-lean/put-checks-ui-studio/STUDIO-UNIFY-001.4/review-1.json`.
+
+- All 3 criteria PASS: AC-26 (increment 4 leftovers), AC-28 (D5 documents, read line by line by content; the studio-wcag-audit.md clause removed by user decision), DOD.
+- Bound checks on the same candidate: type-check; lint 0 errors; Vitest `src/pages` 402/402, `src/components`, hooks + navigation + routes; route scan S4 empty. Reviewer re-ran S4 and checked bundle-check.json against baseline.json (entry −41 B, 18043 B total, under 500 KB).
+- Non-blocking findings: (1) `docs/specs/studio/scheduling/architecture.md` L7 still says "PRD lines 78, 111 and 115 classify Studio scheduling as post-V1", now outdated (planning-proposal doc outside D5; only the anchor was in scope); (2) `docs/architecture/studio-execution.md` L19 Authoring row ("confirmed TypeScript artifact") and the nearby "before confirmation" sentence keep compile-era wording outside the AC-28 line list. Both are follow-up wording fixes.
+- Not run: CodeRabbit (unavailable on host).
