@@ -27,6 +27,8 @@ import {
   MenuItem,
   Tooltip,
   Badge,
+  Breadcrumbs,
+  Link,
   useTheme,
   alpha,
   CircularProgress,
@@ -59,8 +61,7 @@ import {
 import OnboardingCoach from '@/components/studio/OnboardingCoach';
 import { useDispatch } from 'react-redux';
 import { useAppSelector } from '@/store';
-import { selectIsSourceEnabled } from '@store/slices/sourcesSlice';
-import { selectIsFeatureEnabled } from '@store/slices/featuresSlice';
+import { useUiTestAvailability } from '@/hooks/useUiTestAvailability';
 import { setExecutionLogs, setAllStepResults, setExecuting, setCurrentStep as setCurrentStepAction, clearLogs } from '@store/slices/studioSlice';
 import { formatLogTime, toStudioLogLines } from '@/utils/studio/logTime';
 import {
@@ -81,7 +82,7 @@ import {
   type ExecutionSubscription,
   type TransportStatus,
 } from '@/services/api/studioTransportWiring';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link as RouterLink, useLocation, useNavigate, useParams } from 'react-router-dom';
 import SecretInput from '@/components/studio/SecretInput';
 import {
   useStudioCapabilities,
@@ -90,6 +91,7 @@ import {
 import {
   ExecutionProgressView,
   RunControl,
+  type RunControlProps,
   executionStatusLabel,
   executionStatusTone,
   type LearnFromRequest,
@@ -118,6 +120,8 @@ import { saveErrorMessage } from './saveErrorMessage';
 import { declareInsertedSecret, toContractVariables, variableDeclarationIssue, type EditableVariable, type VariableDeclarationIssue } from './secretDeclaration';
 import { StudioScheduleDialog } from '@/components/studio/scheduling/StudioScheduleDialog';
 import { StudioScheduleSummary } from '@/components/studio/scheduling/StudioScheduleSummary';
+import { STUDIO_TEST_ENVIRONMENTS } from '@/components/studio/tests/testListPresentation';
+import { runDetailsPath } from '@/components/studio/runs/runLinks';
 
 
 function toEditableVariables(variables: StudioVariable[] | null | undefined): EditableVariable[] {
@@ -227,6 +231,29 @@ export interface ChecksStudioPageProps {
   readonly guidedOptions?: UseGuidedSessionOptions;
 }
 
+/** The message for a route id the caller cannot read, or that is not a test (FR-25: 403 and 400 read the same). */
+export const TEST_NOT_AVAILABLE_MESSAGE = "This UI test doesn't exist or you don't have access";
+
+/** A read of `GET /tests/{id}` that no author could ever see: forbidden, or a malformed id. */
+function isUnavailableTestRead(error: unknown): boolean {
+  const status = (error as { response?: { status?: number } } | null)?.response?.status;
+  return status === 403 || status === 400;
+}
+
+/**
+ * A list answer that still carries the test the editor has open. The list is a page of tests; the
+ * selected one is read by id and may not be on it, and a reload must never drop it.
+ */
+function keepSelected(
+  list: TestDraftHeader[],
+  previous: TestDraftHeader[] | null,
+  selectedId: string | null,
+): TestDraftHeader[] {
+  const kept = selectedId ? previous?.find((test) => test.id === selectedId) : undefined;
+  if (!kept || list.some((test) => test.id === kept.id)) return list;
+  return [kept, ...list];
+}
+
 /** Where "Insert reference" puts a token: the step being edited last, or the "Add a test step" field. */
 type InsertTarget = { readonly kind: 'new' } | { readonly kind: 'step'; readonly stepId: string };
 
@@ -236,6 +263,8 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
   const [scenarios, setScenarios] = useState<TestDraftHeader[] | null>(null);
   const [scenariosError, setScenariosError] = useState<string | null>(null);
   const [scenariosLoading, setScenariosLoading] = useState<boolean>(true);
+  /** The route's test read answered 403 or 400 (FR-25): one message, nothing selected, nothing to run. */
+  const [testUnavailable, setTestUnavailable] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
   const isRunning = useAppSelector((s: any) => s.studio.isExecuting);
   const currentStep = useAppSelector((s: any) => s.studio.currentStep);
@@ -315,7 +344,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
   const draftStepIds = useMemo(() => testSteps.map((step) => step.id), [testSteps]);
   /** The last snapshot the API returned, rendered by `ExecutionProgressView` (AC-18, AC-19). */
   const [snapshot, setSnapshot] = useState<ExecutionSnapshot | null>(null);
-  /** Programmatic run requests: `?autorun=1` and the terminal-error surface's re-run. */
+  /** The terminal-error surface's "Run again". Never `?autorun=1`, which has its own request below. */
   const [runRequest, setRunRequest] = useState(0);
   const [saveSnack, setSaveSnack] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
   /** A `409` from `PUT /tests/{id}`. Cleared by a successful save or by reloading the test. */
@@ -401,6 +430,61 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
   }, [draft, environment, selectedScenario, testSteps, variablesList]);
 
   /**
+   * DC-01, `?autorun=1` consumed once (spec §7.2). The parameter is read when the editor mounts on a
+   * route id and is removed from the history entry with a replace navigation *before* anything is
+   * requested, so a reload, or Back to that entry, can never ask for a second run. The request itself
+   * is armed only after the draft of the route id is in the editor (so "has steps" is known) and is
+   * then served or dropped once by `RunControl` when its gate settles. Any author activity before
+   * that, a route change or an unmount drops it, and so does a failed test read, which never arms it.
+   */
+  const autorunWanted = useRef(Boolean(params.id) && new URLSearchParams(location.search).get('autorun') === '1');
+  const autorunBaseline = useRef<{
+    steps: AuthoringStep[];
+    variables: EditableVariable[];
+    environment: string;
+  } | null>(null);
+  const [autorunRequest, setAutorunRequest] = useState<NonNullable<RunControlProps['autorunRequest']> | null>(null);
+  const dropAutorun = useCallback(() => {
+    autorunWanted.current = false;
+    autorunBaseline.current = null;
+    setAutorunRequest(null);
+  }, []);
+
+  useEffect(() => {
+    if (!autorunWanted.current) return;
+    const query = new URLSearchParams(location.search);
+    query.delete('autorun');
+    const search = query.toString();
+    navigate(
+      { pathname: location.pathname, search: search ? `?${search}` : '', hash: location.hash },
+      { replace: true },
+    );
+    // Once, on mount: the URL it reads is the one the editor was opened with.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!autorunWanted.current) return;
+    if (!draft || draft.id !== params.id || selectedScenario !== draft.id) return;
+    autorunWanted.current = false;
+    autorunBaseline.current = { steps: testSteps, variables: variablesList, environment };
+    setAutorunRequest({ token: 1, testId: draft.id });
+  }, [draft, environment, params.id, selectedScenario, testSteps, variablesList]);
+
+  useEffect(() => {
+    const baseline = autorunBaseline.current;
+    if (autorunRequest === null || baseline === null) return;
+    if (
+      baseline.steps !== testSteps ||
+      baseline.variables !== variablesList ||
+      baseline.environment !== environment ||
+      newStep !== ''
+    ) {
+      dropAutorun();
+    }
+  }, [autorunRequest, dropAutorun, environment, newStep, testSteps, variablesList]);
+
+  /**
    * VAL-036: text typed in "Add a test step" but not yet added. Save and Run add it as a step
    * first, so the author never runs (or saves) a checklist without the step they just wrote.
    */
@@ -477,44 +561,55 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
     setDraft(updated);
   }, []);
 
-  // Load drafts from the real `GET /studio/tests` API. Fixtures are test-only and never install a
-  // browser service worker or replace this page's transport at runtime.
+  /**
+   * The editor is always the test the URL names (D7, DC-19). It reads `GET /studio/tests/{id}` for the
+   * route id and selects that test and nothing else: there is no "first test of the list" fallback.
+   * The list is read afterwards, only to give the header merge its neighbours, and a list that does
+   * not carry the route's test (it is a page) leaves it selected. Fixtures are test-only and never
+   * install a browser service worker or replace this page's transport at runtime.
+   */
   useEffect(() => {
     let mounted = true;
+    const urlId = params.id;
+    if (!urlId) {
+      // A test-only mount: no test is selected and no Studio request is sent (nothing is runnable).
+      setScenarios([]);
+      setScenariosLoading(false);
+      return () => { mounted = false; };
+    }
+    latestSelectionRef.current = urlId;
     (async () => {
       setScenariosLoading(true);
       setScenariosError(null);
+      setTestUnavailable(false);
+      try {
+        const detail = await studioApi.getTest(urlId);
+        // A route change while the read was in flight owns the page now (see the detector below).
+        if (!mounted || latestSelectionRef.current !== urlId) return;
+        setScenarios([detail]);
+        setSelectedScenario(urlId);
+        // The list carries no step IDs; the single read does, and the editor is built on it.
+        loadDraftIntoEditor(detail);
+      } catch (e: any) {
+        if (!mounted || latestSelectionRef.current !== urlId) return;
+        if (isUnavailableTestRead(e)) {
+          latestSelectionRef.current = null;
+          setTestUnavailable(true);
+        } else {
+          setScenariosError(e?.message || 'Failed to load the test');
+        }
+        setScenariosLoading(false);
+        return;
+      }
       try {
         const res = await studioApi.listTests();
-        if (!mounted) return;
-        const list = res.data;
-        setScenarios(list);
-        const urlId = params.id;
-        const query = new URLSearchParams(location.search);
-        const autorun = query.get('autorun') === '1';
-        let chosen = list?.[0];
-        if (urlId) {
-          const byId = list?.find((t) => t.id === urlId);
-          if (byId) chosen = byId;
-        }
-        if (chosen) {
-          setSelectedScenario(chosen.id);
-          latestSelectionRef.current = chosen.id;
-          // The list carries no step IDs; the single read does, and the editor is built on it.
-          const detail = await studioApi.getTest(chosen.id);
-          if (!mounted) return;
-          loadDraftIntoEditor(detail);
-          if (autorun) {
-            // Routed through `RunControl`, so the deep link is governed by the same server
-            // readiness predicate as the button and cannot start a run the server would refuse.
-            setRunRequest((token) => token + 1);
-          }
-        }
+        if (!mounted || latestSelectionRef.current !== urlId) return;
+        setScenarios((previous) => keepSelected(res.data, previous, urlId));
       } catch (e: any) {
-        if (!mounted) return;
+        if (!mounted || latestSelectionRef.current !== urlId) return;
         setScenariosError(e?.message || 'Failed to load scenarios');
       } finally {
-        if (mounted) setScenariosLoading(false);
+        if (mounted && latestSelectionRef.current === urlId) setScenariosLoading(false);
       }
     })();
     return () => { mounted = false; };
@@ -526,7 +621,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
     setScenariosError(null);
     try {
       const res = await studioApi.listTests();
-      setScenarios(res.data);
+      setScenarios((previous) => keepSelected(res.data, previous, latestSelectionRef.current));
     } catch (e: any) {
       setScenariosError(e?.message || 'Failed to load scenarios');
     } finally {
@@ -651,6 +746,11 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
     try { localStorage.setItem('studio:coachStep', String(coachStep)); } catch { /* storage unavailable: the coach just restarts */ }
   }, [coachStep]);
 
+  /**
+   * Opens the test named by the route id. It reads `GET /tests/{id}` whether or not the list carries
+   * the id (the list is a page), merges the answer into the list and selects it. Until the answer
+   * arrives nothing is selected, so the previous test is neither shown nor runnable under the new id.
+   */
   const handleScenarioSelect = (scenarioId: string) => {
     // AC-13: a scenario switch performed **while a stream is open** must leave no connection
     // behind. Counted at the server, not by trusting this line.
@@ -664,57 +764,69 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
     setFocusRequest(null);
     setReferenceRefusal(null);
     dispatch(setExecuting(false));
-    setSelectedScenario(scenarioId);
     latestSelectionRef.current = scenarioId;
-    const scenario = scenarios?.find(s => s.id === scenarioId);
-    if (scenario) {
-      // The previous draft's steps must not stay on screen while the next one is read.
-      setDraft(null);
-      setTestSteps([]);
-      dispatch(setCurrentStepAction(0));
-      dispatch(setAllStepResults([] as any));
-      dispatch(clearLogs());
-      studioApi.getTest(scenarioId).then(
-        (detail) => {
-          if (latestSelectionRef.current === scenarioId) loadDraftIntoEditor(detail);
-        },
-        (error: unknown) => {
-          if (latestSelectionRef.current !== scenarioId) return;
-          const message = (error as { message?: string })?.message;
-          setSaveSnack({ open: true, message: message || 'Failed to load the test', severity: 'error' });
-        },
-      );
-    }
+    setSelectedScenario(null);
+    setTestUnavailable(false);
+    setScenariosError(null);
+    // The previous draft's steps must not stay on screen while the next one is read.
+    setDraft(null);
+    setTestSteps([]);
+    setVariablesList([]);
+    setEnvironment('');
+    dispatch(setCurrentStepAction(0));
+    dispatch(setAllStepResults([] as any));
+    dispatch(clearLogs());
+    setScenariosLoading(true);
+    studioApi.getTest(scenarioId).then(
+      (detail) => {
+        if (latestSelectionRef.current !== scenarioId) return;
+        setScenarios((previous) => [detail, ...(previous ?? []).filter((test) => test.id !== detail.id)]);
+        setSelectedScenario(scenarioId);
+        loadDraftIntoEditor(detail);
+        setScenariosLoading(false);
+      },
+      (error: unknown) => {
+        if (latestSelectionRef.current !== scenarioId) return;
+        setScenariosLoading(false);
+        if (isUnavailableTestRead(error)) {
+          latestSelectionRef.current = null;
+          setTestUnavailable(true);
+          return;
+        }
+        const message = (error as { message?: string })?.message;
+        setSaveSnack({ open: true, message: message || 'Failed to load the test', severity: 'error' });
+      },
+    );
   };
 
   /**
    * Story 10.11b, AC-13 — the scenario switch, made reachable.
    *
-   * `handleScenarioSelect` already existed and already did the right thing; nothing in the rendered
-   * tree called it, so the route (`/checks/studio/:id`, `App.tsx:114`) — which is this app's own way
-   * of choosing a draft — changed without the page noticing. A stream opened for one draft would
-   * have outlived the switch to another, which is precisely the accumulation AC-13 counts at the
-   * server.
+   * `handleScenarioSelect` does the right thing for a switch, and nothing in the rendered tree calls
+   * it, so the route (`ui-tests/:id/studio`) — which is this app's own way of choosing a test —
+   * changes without the page noticing. A stream opened for one test would have outlived the switch to
+   * another, which is precisely the accumulation AC-13 counts at the server.
    *
    * **`SCEN-1`, from @qa's gate.** The trigger is the route **changing**, not the route *differing
    * from the selection*. Those are not the same predicate: a reload of the list can leave the
-   * selection on one draft while the route still carries another id, and a "differs from" test
+   * selection on one test while the route still carries another id, and a "differs from" test
    * fires there and snaps the selection **back**, overwriting `testSteps`. `lastRouteId` is what
    * makes this a change detector, and it is the whole of the remedy.
+   *
+   * An id the list does not carry is read by id (STUDIO-UNIFY-001, DC-19): the list is only a page,
+   * so it cannot decide which test the route names.
    */
   const lastRouteId = useRef<string | undefined>(params.id);
   useEffect(() => {
     const next = params.id;
     if (next === lastRouteId.current) return;
-    if (!next || !scenarios) return;
-    // An id the list does not carry is not consumed: a later reload may bring it, and until then
-    // the route change has not happened as far as this page is concerned.
-    if (!scenarios.some((scenario) => scenario.id === next)) return;
     lastRouteId.current = next;
-    if (next === selectedScenario) return;
+    // A route change drops an autorun request that was waiting for the previous id (DC-01).
+    dropAutorun();
+    if (!next) return;
     handleScenarioSelect(next);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.id, scenarios, selectedScenario]);
+  }, [params.id]);
 
   /** The recording can be sought only when the panel has mounted one (AC-4's gate, AC-8). */
   const hasPlayableRecording =
@@ -731,7 +843,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
   /**
    * Saves the open draft with `PUT /tests/{id}` (Studio v1, D9).
    *
-   * Save never creates a test: a draft is created once, on the Tests page, and every later save
+   * Save never creates a test: a draft is created once, from Create Check, and every later save
    * updates that one row. The request carries the `sourceRevision` and `configurationRevision` this
    * page last read, so the server refuses a save made over a newer version with `409
    * STALE_REVISION` instead of overwriting it. The CSI is the draft's own and is never defaulted:
@@ -1055,6 +1167,26 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
             <Science aria-hidden="true" />
           </Avatar>
           <Box minWidth={0}>
+            <Breadcrumbs separator="›">
+              <Link
+                component={RouterLink}
+                to="/checks/all"
+                underline="hover"
+                color="inherit"
+                variant="body2"
+                onClick={(event: React.MouseEvent) => {
+                  // The same leave guard as the in-page back; the sidebar and browser Back stay unguarded.
+                  if (!isDirty) return;
+                  event.preventDefault();
+                  requestNavigation(() => navigate('/checks/all'));
+                }}
+              >
+                All Checks
+              </Link>
+              <Typography variant="body2" color="text.primary" noWrap data-testid="studio-breadcrumb-current">
+                {selectedScenarioData?.name ?? 'Checks Studio'}
+              </Typography>
+            </Breadcrumbs>
             <Button
               size="small"
               variant="text"
@@ -1067,6 +1199,9 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
               {selectedScenarioData?.name ?? 'Checks Studio'}
             </Typography>
             <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+              {selectedScenarioData && (
+                <Chip size="small" variant="outlined" label={`CSI ${selectedScenarioData.csiId}`} data-testid="studio-csi" />
+              )}
               {environment && <Chip size="small" variant="outlined" label={environment} />}
               <Chip
                 size="small"
@@ -1123,6 +1258,8 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
             onSaveBeforeRun={saveDraft}
             hasSteps={testSteps.length > 0 || hasPendingStep}
             runRequest={runRequest}
+            autorunRequest={autorunRequest}
+            onAutorunSettled={dropAutorun}
             onAccepted={(executionId) => {
               setRightTab('proof');
               beginRun(executionId);
@@ -1141,7 +1278,13 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
       </Paper>
       {selectedScenarioData && <Box sx={{ mb: 2 }}><StudioScheduleSummary testId={selectedScenarioData.id}
         refreshToken={`${selectedScenarioData.sourceRevision}:${selectedScenarioData.configurationRevision}:${selectedScenarioData.confirmedRevisionId ?? ''}`} /></Box>}
-      <StudioScheduleDialog test={scheduleOpen ? selectedScenarioData : null} dirty={isDirty || hasPendingStep} onClose={() => setScheduleOpen(false)} />
+      <StudioScheduleDialog
+        test={scheduleOpen ? selectedScenarioData : null}
+        dirty={isDirty || hasPendingStep}
+        // Until the Runs page moves under the UI test (increment 2), a run opens on the Runs page.
+        runHref={(executionId) => runDetailsPath('/checks/studio/runs', executionId)}
+        onClose={() => setScheduleOpen(false)}
+      />
 
       {/* VAL-038: Run's outcome alerts, full width so the header keeps its title and actions. */}
       <Box
@@ -1188,6 +1331,11 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                       <Typography variant="caption" color="text.secondary">Updated: {new Date((selectedScenarioData.updatedAt || selectedScenarioData.createdAt) as string).toLocaleString()}</Typography>
                     )}
                   </Stack>
+                ) : testUnavailable ? (
+                  <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1}>
+                    <Typography variant="body2" data-testid="studio-test-unavailable">{TEST_NOT_AVAILABLE_MESSAGE}</Typography>
+                    <Button size="small" variant="contained" onClick={() => navigate('/checks/studio/tests')}>Open Tests</Button>
+                  </Stack>
                 ) : (
                   <Stack direction="row" alignItems="center" justifyContent="space-between">
                     <Typography variant="body2">No test selected.</Typography>
@@ -1209,7 +1357,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                     onChange={(event) => setEnvironment(event.target.value)}
                     sx={{ flex: '1 1 260px', minWidth: 0 }}
                   >
-                    {['Development', 'Staging', 'Production'].map((option) => (
+                    {STUDIO_TEST_ENVIRONMENTS.map((option) => (
                       <MenuItem key={option} value={option}>{option}</MenuItem>
                     ))}
                   </TextField>
@@ -1933,10 +2081,17 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
   );
 };
 
+/**
+ * The editor's outer gate (DC-18). `'off'` shows the unavailable state; `'pending'` (sources or
+ * features not fetched yet) shows the editor's own "Loading test…" text and mounts nothing, so no
+ * Studio request is sent; `'on'` mounts the editor.
+ */
 const ChecksStudioPage: React.FC<ChecksStudioPageProps> = (props) => {
-  const uiTestEnabled = useAppSelector(selectIsSourceEnabled('UI_TEST'));
-  const studioFeatureEnabled = useAppSelector(selectIsFeatureEnabled('STUDIO'));
-  if (!uiTestEnabled || !studioFeatureEnabled) return <StudioUnavailable />;
+  const availability = useUiTestAvailability();
+  if (availability === 'off') return <StudioUnavailable />;
+  if (availability === 'pending') {
+    return <Typography variant="body2" color="text.secondary">Loading test…</Typography>;
+  }
   return <ChecksStudioPageInner {...props} />;
 };
 

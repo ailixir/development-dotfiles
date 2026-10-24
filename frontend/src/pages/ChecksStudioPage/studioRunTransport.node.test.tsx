@@ -378,48 +378,49 @@ describe('AC-13: no subscription accumulates', () => {
 });
 
 describe('SCEN-1 (@qa gate): the route effect is a change detector, not a difference detector', () => {
-  it('SCN-TERMINAL-EVIDENCE-SETTLED: a selection set while the route stands still is not snapped back, and its steps survive', async () => {
-    // The state this reproduces is **exactly** the create-scenario state @qa filed: the selection
-    // holds one draft that the list carries, the route holds a *different* draft that the list also
-    // carries, and nothing navigated. `handleCreateNewScenario` produces it by setting
-    // `selectedScenario` to the new id while the route keeps the old one; here the reload control
-    // produces it by bringing the route's draft into a list that did not have it. Same predicate
-    // inputs, and this one is reachable from the rendered surface — the create dialog is not:
-    // `setShowNewScenarioDialog(true)` has no call site in the page.
+  it('SCN-TERMINAL-EVIDENCE-SETTLED: a list reload under a route that has not moved does not snap the selection, and its steps survive', async () => {
+    // Since STUDIO-UNIFY-001 the route names the test and the editor reads it by id, whether or not
+    // the list carries it. The page the list serves is a different one. A reload then brings the
+    // route's test into the list, and later drops it again. The route has not moved, so the selection
+    // and the authored steps must stay exactly what the user was looking at.
     listedDrafts = [draftA];
     const { rtl, renderAt } = await loadApp(api().baseUrl);
     try {
       renderAt(uiTestEditorPath(draftB.id));
 
-      // The route names draftB, but the list does not carry it, so the page settles on draftA.
-      await rtl.screen.findByRole('heading', { level: 1, name: draftA.name }, { timeout: 10000 });
-      await rtl.screen.findByText(`Test Steps (${draftA.steps.length})`, undefined, {
+      // The route names draftB, and the list does not carry it: it is read by id, not replaced by
+      // the first test of the list.
+      await rtl.screen.findByRole('heading', { level: 1, name: draftB.name }, { timeout: 10000 });
+      await rtl.screen.findByText(`Test Steps (${draftB.steps.length})`, undefined, {
         timeout: 10000,
       });
+      expect(rtl.screen.queryByRole('heading', { level: 1, name: draftA.name })).toBeNull();
 
-      // The list changes beneath a route that has not moved.
-      listedDrafts = [draftA, draftB];
-      const reload = await rtl.screen.findByRole('button', { name: /refresh test information/i });
-      await rtl.act(async () => {
-        reload.click();
-        await new Promise((resolve) => setTimeout(resolve, 400));
-      });
-      await until(
-        () => api().countOf('GET', '/api/v1/studio/tests') >= 2,
-        'the reload to be observed at the server',
-      );
-      await rtl.act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 400));
-      });
+      for (const listed of [[draftA, draftB], [draftA]]) {
+        listedDrafts = listed;
+        const reloadsBefore = api().countOf('GET', '/api/v1/studio/tests');
+        const reload = await rtl.screen.findByRole('button', { name: /refresh test information/i });
+        await rtl.act(async () => {
+          reload.click();
+          await new Promise((resolve) => setTimeout(resolve, 400));
+        });
+        await until(
+          () => api().countOf('GET', '/api/v1/studio/tests') > reloadsBefore,
+          'the reload to be observed at the server',
+        );
+        await rtl.act(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 400));
+        });
 
-      // Nothing snapped. The selection and the authored steps are the ones the user was looking at.
-      expect(rtl.screen.queryByText(draftB.name)).toBeNull();
-      expect(rtl.screen.queryByRole('heading', { level: 1, name: draftA.name })).not.toBeNull();
-      expect(
-        rtl.screen.queryByText(`Test Steps (${draftA.steps.length})`),
-        'the step list was overwritten by the route’s draft',
-      ).not.toBeNull();
-      expect(rtl.screen.queryByText(`Test Steps (${draftB.steps.length})`)).toBeNull();
+        // Nothing snapped. The selection and the authored steps are the ones the route names.
+        expect(rtl.screen.queryByRole('heading', { level: 1, name: draftA.name })).toBeNull();
+        expect(rtl.screen.queryByRole('heading', { level: 1, name: draftB.name })).not.toBeNull();
+        expect(
+          rtl.screen.queryByText(`Test Steps (${draftB.steps.length})`),
+          'the step list was overwritten by another test’s draft',
+        ).not.toBeNull();
+        expect(rtl.screen.queryByText(`Test Steps (${draftA.steps.length})`)).toBeNull();
+      }
     } finally {
       rtl.cleanup();
     }

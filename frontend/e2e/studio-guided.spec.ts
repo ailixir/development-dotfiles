@@ -182,7 +182,7 @@ const GUIDED_START = (candidate: Request) =>
 
 /** Opens the Studio editor on a draft that the list holds. */
 async function openDraft(page: Page, id: string): Promise<void> {
-  await page.goto(`/checks/studio/${id}`);
+  await page.goto(`/checks/ui-tests/${id}/studio`);
   // The editor is built from the single read, so a step row means the draft is loaded.
   await expect(stepEditor(page, 1)).toBeVisible();
 }

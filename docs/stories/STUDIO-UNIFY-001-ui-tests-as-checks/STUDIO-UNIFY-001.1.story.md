@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Story ID | STUDIO-UNIFY-001.1 |
-| Status | **InProgress** |
+| Status | **Done** |
 | Epic | STUDIO-UNIFY-001-ui-tests-as-checks — UI tests as checks (Flow 1, frontend-only), increment 1 of 4 |
 | Depends on | none |
 | Dependency notes | No story precedes this one. The plan is not yet approved for execution (`plan/implementation.yaml`: `status: pending`, `executionAuthorized: false`, `approvalRequiredBeforeExecution: true`), so the user approves the plan and @po validates this story (Draft → Ready) before @dev starts. Stories .2, .3 and .4 follow in strict order. |
@@ -148,8 +148,8 @@ This story moves the guard in one way only: surfaces 3–7 of `studioWcagAudit.t
 - Supporting: @ux-design-expert on request, for layout or interaction questions only (no accessibility review, ADR-SC-006); @devops only for a later, separately authorised push or PR. @dev does not push.
 
 **Quality Gate Tasks**
-- [ ] Pre-Commit (@dev): run the configured CodeRabbit review before marking the story complete. The CLI is WSL-based; if it is unavailable, record that it was not run, apply the configured graceful degradation, and do an independent manual diff review. Never claim a run that did not happen.
-- [ ] Independent review (@qa): implementation evidence, the link walk, route scan S1, and the WCAG guard record.
+- [x] Pre-Commit (@dev) — CodeRabbit NOT RUN (no CLI/WSL on this host); graceful degradation: independent Lean review is the manual diff review. Original text: run the configured CodeRabbit review before marking the story complete. The CLI is WSL-based; if it is unavailable, record that it was not run, apply the configured graceful degradation, and do an independent manual diff review. Never claim a run that did not happen.
+- [x] Independent review (@qa): implementation evidence, the link walk, route scan S1 (WCAG guard record removed by user decision). PASS, see QA Results.
 - [ ] Pre-PR (@devops): only if a PR is later authorised. No PR is implied here.
 
 **Self-Healing Configuration** (`.claude/rules/coderabbit-integration.md`)
@@ -228,7 +228,7 @@ The 33 tasks below map 1:1 to plan subtasks 1.1–1.33 (`plan/implementation.yam
     (path '/checks/ui-tests/:id/studio'). It optionally accepts initial search and a nav handle for
     route-change tests. A mount change only.
 
-- [ ] **1.6** Re-mount the run-gate, evidence and step-timeout editor suites on a route id
+- [x] **1.6** Re-mount the run-gate, evidence and step-timeout editor suites on a route id
   - Service: frontend. Covers: FR-06, NFR-09.
   - Files: `frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx`, `frontend/src/pages/ChecksStudioPage/pageEvidence.test.tsx`, `frontend/src/pages/ChecksStudioPage/pageStepTimeout.test.tsx`
   - Depends on: 1.5
@@ -243,7 +243,7 @@ The 33 tasks below map 1:1 to plan subtasks 1.1–1.33 (`plan/implementation.yam
     draft…") to name Create Check, the only create path from this increment (CRIT-23a). These suites stay
     green before and after 1.11.
 
-- [ ] **1.7** Re-mount the authoring, save/stop and replay/reference editor suites on a route id
+- [x] **1.7** Re-mount the authoring, save/stop and replay/reference editor suites on a route id
   - Service: frontend. Covers: FR-06, NFR-09.
   - Files: `frontend/src/pages/ChecksStudioPage/pageAuthoringUx.test.tsx`, `frontend/src/pages/ChecksStudioPage/pageSaveAndStop.test.tsx`, `frontend/src/pages/ChecksStudioPage/pageReplayAndReferences.test.tsx`
   - Depends on: 1.5
@@ -252,7 +252,7 @@ The 33 tasks below map 1:1 to plan subtasks 1.1–1.33 (`plan/implementation.yam
     pnpm exec vitest run src/pages/ChecksStudioPage/pageAuthoringUx.test.tsx src/pages/ChecksStudioPage/pageSaveAndStop.test.tsx src/pages/ChecksStudioPage/pageReplayAndReferences.test.tsx
     ```
 
-- [ ] **1.8** Re-mount the incremental-recording, guided-run and bootstrap-shape suites on a route id
+- [x] **1.8** Re-mount the incremental-recording, guided-run and bootstrap-shape suites on a route id
   - Service: frontend. Covers: FR-06, NFR-09.
   - Files: `frontend/src/pages/ChecksStudioPage/pageIncrementalRecording.test.tsx`, `frontend/src/pages/ChecksStudioPage/pageGuidedRun.test.tsx`, `frontend/src/test/pageBootstrapShape.test.tsx`
   - Depends on: 1.5
@@ -267,7 +267,7 @@ The 33 tasks below map 1:1 to plan subtasks 1.1–1.33 (`plan/implementation.yam
     and nav.go at L1024 uses uiTestEditorPath(needsRelearnDraft.id). pageBootstrapShape keeps its
     fail-open intent; only its editor mount changes. replayFailure.test.tsx is not touched (G6).
 
-- [ ] **1.9** Move the transport test's test-local routes ('/studio/tests/:id' and no-id '/studio') onto the new editor path
+- [x] **1.9** Move the transport test's test-local routes ('/studio/tests/:id' and no-id '/studio') onto the new editor path
   - Service: frontend. Covers: FR-06, NFR-09.
   - Files: `frontend/src/pages/ChecksStudioPage/studioRunTransport.node.test.tsx`
   - Depends on: 1.5
@@ -291,7 +291,7 @@ The 33 tasks below map 1:1 to plan subtasks 1.1–1.33 (`plan/implementation.yam
     studio-wcag-audit.md: "mount changed to a route id (D7), no surface added". If it does not move,
     leave both docs untouched.
 
-- [ ] **1.11** Make ChecksStudioPage always load the route-id test by GET /studio/tests/{id} and delete the no-id list[0] fallback
+- [x] **1.11** Make ChecksStudioPage always load the route-id test by GET /studio/tests/{id} and delete the no-id list[0] fallback
   - Service: frontend. Covers: FR-06, FR-25, AC-06, AC-07.
   - Files: `frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx`, `frontend/src/pages/ChecksStudioPage/pageLoadById.test.tsx`
   - Depends on: 1.6, 1.7, 1.8, 1.9, 1.10
@@ -318,7 +318,7 @@ The 33 tasks below map 1:1 to plan subtasks 1.1–1.33 (`plan/implementation.yam
     Tests: an id beyond page 1 on load and on route change; reload keeps the selection; 403 and 400; a
     no-id mount sends no request and no run.
 
-- [ ] **1.12** Consume autorun once at a bounded gate settle via a capabilities-settled signal and a dedicated autorun request (DC-01, G9)
+- [x] **1.12** Consume autorun once at a bounded gate settle via a capabilities-settled signal and a dedicated autorun request (DC-01, G9)
   - Service: frontend. Covers: FR-13, NFR-05, AC-29.
   - Files: `frontend/src/components/studio/run/useRunGate.ts`, `frontend/src/components/studio/run/RunControl.tsx`, `frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx`
   - Depends on: 1.11
@@ -338,7 +338,7 @@ The 33 tasks below map 1:1 to plan subtasks 1.1–1.33 (`plan/implementation.yam
     Remove the autorun use of setRunRequest (L507-511). The bound comes from apiClient (about 90.6 s worst
     case).
 
-- [ ] **1.13** Add the AC-29 autorun tests (each readiness, settle, drop-on-activity) and the capabilitiesSettled gate test
+- [x] **1.13** Add the AC-29 autorun tests (each readiness, settle, drop-on-activity) and the capabilitiesSettled gate test
   - Service: frontend. Covers: AC-29, FR-13.
   - Files: `frontend/src/pages/ChecksStudioPage/pageAutorun.test.tsx`, `frontend/src/components/studio/run/runGate.test.tsx`
   - Depends on: 1.12
@@ -367,7 +367,7 @@ The 33 tasks below map 1:1 to plan subtasks 1.1–1.33 (`plan/implementation.yam
     StudioTestsPage host (L173) passes the /checks/studio/runs/{id} builder. The dialog test passes
     runHref in its renders (L27, L56, L233) and keeps its Runs-page href assertions.
 
-- [ ] **1.15** Frame the editor (breadcrumb, back to the Tests page, read-only CSI chip, UAT option, editor-hosted dialog links to the Runs page run)
+- [x] **1.15** Frame the editor (breadcrumb, back to the Tests page, read-only CSI chip, UAT option, editor-hosted dialog links to the Runs page run)
   - Service: frontend. Covers: FR-07, FR-08, FR-01, FR-24, AC-08, AC-09, AC-01, AC-23.
   - Files: `frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx`, `frontend/src/pages/ChecksStudioPage/pageFraming.test.tsx`
   - Depends on: 1.11, 1.14, 1.3
@@ -454,7 +454,7 @@ The 33 tasks below map 1:1 to plan subtasks 1.1–1.33 (`plan/implementation.yam
   - Plan notes:
     It has no test file of its own (FR-27).
 
-- [ ] **1.21** Add ui-tests/:id/studio and remove studio/:id and the bare studio route in both trees, with a per-tree route test
+- [x] **1.21** Add ui-tests/:id/studio and remove studio/:id and the bare studio route in both trees, with a per-tree route test
   - Service: frontend. Covers: FR-05, FR-27, CON-09, AC-06, AC-26.
   - Files: `frontend/src/App.tsx`, `frontend/src/App.routes.test.tsx`
   - Depends on: 1.11
@@ -492,7 +492,7 @@ The 33 tasks below map 1:1 to plan subtasks 1.1–1.33 (`plan/implementation.yam
   - Plan notes:
     CommandPalette NAV_ITEMS L12-18 and DashboardPage L753. The entries are absent while availability is 'pending' or 'off'. Retargeted again in 3.8.
 
-- [ ] **1.25** Remove the legacy UI_TEST picker branches from Create/Review and the stale uiTest check-type field
+- [x] **1.25** Remove the legacy UI_TEST picker branches from Create/Review and the stale uiTest check-type field
   - Service: frontend. Covers: FR-04, AC-05.
   - Files: `frontend/src/pages/CreateCheckPage/CreateCheckPage.tsx`, `frontend/src/components/checks/wizard/ReviewStep.tsx`, `frontend/src/types/checks/checkTypes.ts`
   - Verify (from `frontend/`):
@@ -504,13 +504,13 @@ The 33 tasks below map 1:1 to plan subtasks 1.1–1.33 (`plan/implementation.yam
     CreateCheckPage: L85, L90-127, L160, L209, L276, L296-310, and the availableUITests prop. ReviewStep:
     L185-205 and L258-263. checkTypes.ts: L64-73. 'UI_TEST' stays in the CheckType union.
 
-- [ ] **1.26** Delete the legacy UiTestConfig picker component, its test and its barrel export
+- [x] **1.26** Delete the legacy UiTestConfig picker component, its test and its barrel export
   - Service: frontend. Covers: FR-04, FR-27, AC-05.
   - Files: `frontend/src/components/checks/wizard/configs/UiTestConfig.tsx`, `frontend/src/components/checks/wizard/configs/UiTestConfig.test.tsx`, `frontend/src/components/checks/wizard/configs/index.ts`
   - Depends on: 1.25
   - Verify (from `frontend/`): `pnpm run type-check && pnpm exec eslint src/components/checks/wizard/configs`
 
-- [ ] **1.27** Drop the deleted UiTestConfig path from the referencePicker static-source scan
+- [x] **1.27** Drop the deleted UiTestConfig path from the referencePicker static-source scan
   - Service: frontend. Covers: FR-04.
   - Files: `frontend/src/components/studio/references/referencePicker.test.tsx`
   - Depends on: 1.26
@@ -518,7 +518,7 @@ The 33 tasks below map 1:1 to plan subtasks 1.1–1.33 (`plan/implementation.yam
   - Plan notes:
     L610 (K3).
 
-- [ ] **1.28** Gate the UI Test type card on derived availability (both flags) and disable it on the edit page
+- [x] **1.28** Gate the UI Test type card on derived availability (both flags) and disable it on the edit page
   - Service: frontend. Covers: FR-01, FR-24, AC-23, AC-30.
   - Files: `frontend/src/components/checks/wizard/CheckTypeSelector.tsx`
   - Depends on: 1.3, 1.8
@@ -528,7 +528,7 @@ The 33 tasks below map 1:1 to plan subtasks 1.1–1.33 (`plan/implementation.yam
     disabledTypes prop serves edit/:id. pageBootstrapShape mounts this selector under a fail-open store
     and must stay green.
 
-- [ ] **1.29** Add the Create Check UI Test one-form branch with the environment-chosen rule, ?type preselect and derived switch-off
+- [x] **1.29** Add the Create Check UI Test one-form branch with the environment-chosen rule, ?type preselect and derived switch-off
   - Service: frontend. Covers: FR-01, FR-02, FR-03, FR-24, AC-01, AC-02, AC-03, AC-04, AC-23, AC-30.
   - Files: `frontend/src/components/checks/wizard/UiTestCreateForm.tsx`, `frontend/src/pages/CreateCheckPage/CreateCheckPage.tsx`
   - Depends on: 1.2, 1.3, 1.4, 1.25, 1.28
@@ -553,7 +553,7 @@ The 33 tasks below map 1:1 to plan subtasks 1.1–1.33 (`plan/implementation.yam
     - ?type=UI_TEST is held while 'pending', applied when 'on', and ignored when 'off'.
     - A UI_TEST type is reset on 'off'.
 
-- [ ] **1.30** Add Create Check UI Test component tests (one form, precedence, preselect, switch-off incl. late sources, create and errors)
+- [x] **1.30** Add Create Check UI Test component tests (one form, precedence, preselect, switch-off incl. late sources, create and errors)
   - Service: frontend. Covers: AC-01, AC-02, AC-03, AC-04, AC-05, AC-23, AC-30.
   - Files: `frontend/src/pages/CreateCheckPage/CreateCheckPage.uiTest.test.tsx`
   - Depends on: 1.29
@@ -572,7 +572,7 @@ The 33 tasks below map 1:1 to plan subtasks 1.1–1.33 (`plan/implementation.yam
     - Sources arriving disabled after the first render.
     - No picker on any type.
 
-- [ ] **1.31** Move the MSW E2E specs that open the editor by URL to ui-tests/{id}/studio
+- [x] **1.31** Move the MSW E2E specs that open the editor by URL to ui-tests/{id}/studio
   - Service: frontend. Covers: FR-05, NFR-09.
   - Files: `frontend/e2e/studio-variables.spec.ts`, `frontend/e2e/studio-guided.spec.ts`
   - Depends on: 1.21
@@ -584,7 +584,7 @@ The 33 tasks below map 1:1 to plan subtasks 1.1–1.33 (`plan/implementation.yam
   - Plan notes:
     studio-variables L104, L174, L233-234; studio-guided L185 (G1). The evidence directory is a temp directory, not the repo.
 
-- [ ] **1.32** Rewrite the real-backend authoring E2E to start from Create Check -> UI Test
+- [x] **1.32** Rewrite the real-backend authoring E2E to start from Create Check -> UI Test
   - Service: frontend. Covers: FR-01, FR-02, NFR-08.
   - Files: `frontend/e2e/studio-authoring-real-backend.spec.ts`
   - Depends on: 1.29, 1.21
@@ -593,7 +593,7 @@ The 33 tasks below map 1:1 to plan subtasks 1.1–1.33 (`plan/implementation.yam
     L128-150 go to /checks/create?type=UI_TEST and then "Create and open Studio". The L151 id parse reads
     the segment before /studio.
 
-- [ ] **1.33** Run the phase-1 gate (type-check, lint, WCAG guard, touched suites, removed-route scan for the bare and id studio routes)
+- [x] **1.33** Run the phase-1 gate (type-check, lint, WCAG guard, touched suites, removed-route scan for the bare and id studio routes)
   - Service: infra. Covers: FR-27, FR-28, NFR-09, CON-04, AC-09, AC-26, AC-27.
   - Files: `docs/qa/accessibility/axe-results.json`, `docs/qa/accessibility/studio-wcag-audit.md`
   - Depends on: 1.10, 1.13, 1.15, 1.17, 1.19, 1.20, 1.22, 1.23, 1.24, 1.27, 1.30, 1.31
@@ -801,6 +801,8 @@ CON-01 frontend-only, no backend, API, schema or Flyway change. CON-02 `ChecksSt
 | 2026-10-23 | 0.1.1 | Validated GO (9/10) — Status: Draft → Ready. Tasks match plan revision 4 phase-1 1:1; F3 and F4 placements confirmed; F7 (CRIT-27) does not block. @dev starts only after the user approves the plan (C-1). | Pax (@po) |
 | 2026-10-23 | 0.2.0 | Status: Ready → InProgress. User approved plan revision 4 (sha256 f2c9b274…) by instructing "start the stories we wrote a couple hours ago for STUDIO-UNIFY" after selecting AIOX Lean Delivery; executed as Lean work item STUDIO-UNIFY-001.1 (builder: Claude Code main session 651237b1, aiox-dev subagents as contributors). | Claude Code (@dev role) |
 | 2026-10-23 | 0.2.1 | User decision: "We dont need WCAG, ignore/remove all accessibility tasks". AC-27 and task 1.10 removed; WCAG parts of 1.1 and 1.33 dropped; `studioWcagAudit.test.tsx` deleted and the axe assertion in `StudioScheduleDialog.test.tsx` removed; `docs/qa/accessibility/` left as history. Supersedes the audit-guard clause of ADR-SC-006 for this epic. | Claude Code (@dev role) |
+| 2026-10-23 | 0.3.0 | Status: InProgress → InReview. All remaining tasks done (1.10 removed); File List and Dev Agent Record filled; handed to the independent Lean review. | Claude Code (@dev role) |
+| 2026-10-23 | 1.0.0 | Independent Lean review PASS (14/14 criteria, 3 non-blocking findings); Lean acceptance recorded. Status: InReview → Done. | aiox-qa verdict, recorded by Claude Code coordinator |
 
 ## PO Validation (2026-10-23)
 
@@ -828,20 +830,38 @@ CON-01 frontend-only, no backend, API, schema or Flyway change. CON-02 `ChecksSt
 
 ### Agent Model Used
 
-_Populated by @dev during implementation._
+Coordinator and Lean builder: Claude Code main session (Opus 5.5, session 651237b1-faeb-45bb-9d2b-d4fa4eb9a3e7). Contributors: aiox-dev subagents on Sonnet 5.5, effort high: wave 1b foundations (1.2-1.5), 2a editor test re-mount (1.6-1.9), 2b schedule dialog and Tests/Runs pages (1.14, 1.16-1.20), 2c nav and entry points (1.22-1.24), 2d Create Check (1.25-1.30), 3 editor chain (1.11-1.13, 1.15, 1.21, 1.31, 1.32). Run under AIOX Lean Delivery (work item STUDIO-UNIFY-001.1; state outside the repo under ~/.aiox-lean/put-checks-ui-studio/).
 
 ### Debug Log References
 
-_Populated by @dev during implementation._
+Lean work record and check logs: ~/.aiox-lean/put-checks-ui-studio/STUDIO-UNIFY-001.1/ (binding.json, contract.json, logs/). Wave plan: ~/.aiox-lean/put-checks-ui-studio/WAVES.md.
 
 ### Completion Notes
 
-_Populated by @dev during implementation._
+- User decisions applied mid-run (2026-10-23): plan revision 4 approved by "start the stories…"; "We dont need WCAG, ignore/remove all accessibility tasks" removed AC-27, task 1.10 and the WCAG parts of 1.1 and 1.33; `studioWcagAudit.test.tsx` deleted and the axe test in `StudioScheduleDialog.test.tsx` removed; `docs/qa/accessibility/` untouched (history).
+- 1.1: bundle baseline only (`implementation/baseline.json`; build exit 0).
+- 1.28: the UI_TEST card label is now "UI Test (Checks Studio)" (spec §6, AC-01).
+- 1.15: the breadcrumb "All Checks" link also goes through the leave guard when the draft is dirty; CSI chip reads `CSI {id}` (no name lookup in the editor).
+- 1.11: selection is atomic: nothing is selected until `GET /studio/tests/{id}` answers; the list read is best-effort for the header merge. `studioRunTransport.node.test` SCEN-1 was rewritten because it asserted the removed fallback (contradicted AC-06); `pageEvidence` "No run history" now mounts on the id it serves.
+- 1.31: `studio-guided.spec.ts` passes (msw, 8/8). `studio-variables.spec.ts` URL strings are updated but it was not run: it is guarded to Node v24.20.0 plus `CHECKS_VARIABLES354_EXECUTION=authorized` and a notice SHA (host has Node v23.10.0).
+- 1.32: not run: no backend. `pnpm run type-check` and `tsc -p e2e/tsconfig.json` pass.
+- CodeRabbit: not run (no CLI, no WSL on this macOS host); the independent Lean review is the documented manual fallback.
+- Pre-existing, out of scope: `src/components/providers/realStudioStartup.test.ts` fails on the uncommitted `dev.sh` (excluded from the bound check); `SecretInput`/`StudioRunsPage` timing tests are load-sensitive (pass in isolation; checks capped at 4 workers).
+- A separate session committed and pushed in-progress snapshots of this story's files at 21:05-21:09 (fd6586b03 and neighbours); this run made no commit.
 
 ### File List
 
-_Empty until implementation. @dev lists only files this story creates, modifies or deletes._
+Created: `frontend/src/components/studio/uiTestPaths.ts`, `uiTestPaths.test.ts`; `frontend/src/hooks/useUiTestAvailability.ts`, `useUiTestAvailability.test.tsx`; `frontend/src/components/studio/tests/newTestRequest.ts`, `newTestRequest.test.ts`; `frontend/src/test/renderStudioAt.tsx`; `frontend/src/pages/ChecksStudioPage/pageLoadById.test.tsx`, `pageAutorun.test.tsx`, `pageFraming.test.tsx`; `frontend/src/App.routes.test.tsx`; `frontend/src/utils/navigation/navigationSetup.test.ts`; `frontend/src/components/home/entryPoints.test.tsx`; `frontend/src/components/checks/wizard/UiTestCreateForm.tsx`; `frontend/src/pages/CreateCheckPage/CreateCheckPage.uiTest.test.tsx`; `docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/implementation/baseline.json`.
+
+Modified: `frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx`, `pageRunGate.test.tsx`, `pageEvidence.test.tsx`, `pageStepTimeout.test.tsx`, `pageAuthoringUx.test.tsx`, `pageSaveAndStop.test.tsx`, `pageReplayAndReferences.test.tsx`, `pageIncrementalRecording.test.tsx`, `pageGuidedRun.test.tsx`, `studioRunTransport.node.test.tsx`; `frontend/src/test/pageBootstrapShape.test.tsx`; `frontend/src/components/studio/run/useRunGate.ts`, `RunControl.tsx`, `runGate.test.tsx`; `frontend/src/App.tsx`; `frontend/src/components/studio/scheduling/StudioScheduleDialog.tsx`, `StudioScheduleDialog.test.tsx`, `scheduleProvenance.test.tsx`; `frontend/src/pages/StudioTestsPage/StudioTestsPage.tsx`, `StudioTestsPage.test.tsx`; `frontend/src/components/studio/tests/testListPresentation.ts`, `TestRow.tsx`; `frontend/src/pages/StudioRunsPage/StudioRunsPage.tsx`, `StudioRunsPage.test.tsx`; `frontend/src/components/studio/runs/runLinks.ts`, `runSnapshots.test.ts`; `frontend/src/components/layout/ChecksLayout/ChecksLayout.tsx`, `LayoutProvider/LayoutProvider.tsx`; `frontend/src/utils/navigation/navigationSetup.ts`; `frontend/src/components/home/CommandPalette.tsx`; `frontend/src/pages/DashboardPage/DashboardPage.tsx`; `frontend/src/pages/CreateCheckPage/CreateCheckPage.tsx`; `frontend/src/components/checks/wizard/ReviewStep.tsx`, `CheckTypeSelector.tsx`, `configs/index.ts`; `frontend/src/types/checks/checkTypes.ts`; `frontend/src/components/studio/references/referencePicker.test.tsx`; `frontend/e2e/studio-variables.spec.ts`, `studio-guided.spec.ts`, `studio-authoring-real-backend.spec.ts`; `.claude/rules/accessibility-scope.md`; this story file.
+
+Deleted: `frontend/src/components/studio/tests/CreateTestDialog.tsx`; `frontend/src/utils/constants/navigationConfig.ts`; `frontend/src/components/checks/wizard/configs/UiTestConfig.tsx`, `UiTestConfig.test.tsx`; `frontend/src/test/a11y/studioWcagAudit.test.tsx`.
 
 ## QA Results
 
-_Populated by @qa._
+**Verdict: PASS** (independent AIOX Lean review, 2026-10-23). Reviewer: aiox-qa subagent (Sonnet 5.5, effort high; execution 651237b1:a04dfdbb15df75029), fresh context, read-only, independent of all authors. Candidate `473fdac7e53e7bfd1b8afe2323b3d8f19e66c6487d25a08b264b7fde8d0e5c1b`; Lean acceptance recorded (engineering acceptance only; not merge or release). Full payload: `~/.aiox-lean/put-checks-ui-studio/STUDIO-UNIFY-001.1/review-1.json`.
+
+- All 14 criteria PASS: AC-01, AC-02, AC-03, AC-04, AC-05, AC-06, AC-07, AC-08, AC-09, AC-23, AC-26, AC-29, AC-30, DOD (AC-27 removed by user decision).
+- Bound checks on the same candidate: type-check; lint 0 errors; Vitest editor 178/178, components 740/740 (pre-existing `realStudioStartup.test.ts` excluded), pages/routes/hooks/mocks 403/403; route scan S1 exit 0; Playwright msw `studio-guided` 8/8. Reviewer independently re-ran 8 files / 117 tests (pass) and S1.
+- Not run: `studio-variables.spec.ts` (Node v24.20.0 + authorization guard), real-backend E2E (no backend), CodeRabbit (unavailable on host).
+- Non-blocking findings: (1) small visual edits in `ChecksStudioPage.tsx` (save chip transition, Environment label shrink, Snackbar anchor, "No logs are available.") are not in this story's File List; they first appear in the other session's snapshot commit fd6586b03 and may predate this story. (2) Schedule-dialog run links hard-code the `/checks` base (as the plan prescribes); a standalone `/*` mount would fall to home. (3) `autorun` is read only at editor mount; an in-app navigation to another test's `?autorun=1` while the editor stays mounted would neither run nor strip it (no increment-1 link does this; relevant to story .2's "Run in Studio").

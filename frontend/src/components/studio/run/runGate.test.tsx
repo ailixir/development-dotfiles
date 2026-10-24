@@ -1,6 +1,6 @@
 import React from 'react';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import fs from 'node:fs';
@@ -21,6 +21,7 @@ import type { TestDetailDto, TestDto } from '@/types/studio/studioTypes';
 import type { GuidedStartRefusal, GuidedStartRequest } from '@/types/studio/studioGuidedTypes';
 import { guidedCopy } from '@/components/studio/guided/guidedNarratives';
 import { RunControl, RUN_LABEL, type RunControlProps } from './RunControl';
+import { useRunGate } from './useRunGate';
 import { EXECUTE_CONFLICT_NARRATIVES } from './executeRefusals';
 import { LEARNED_READY_LABEL } from './runEnablement';
 
@@ -909,5 +910,243 @@ describe('story 10.51 RETIRED guard (relocated by STUDIO-OBS-012B)', () => {
     const real = GUARDED_MODULES.flatMap((file) => moduleSpecifiers(fs.readFileSync(file, 'utf8')));
     expect(real).toContain('@/types/studio/studioTypes');
     expect(real).toContain('@mui/material');
+  });
+});
+
+
+/**
+ * STUDIO-UNIFY-001.1, tasks 1.12 and 1.13 (DC-01, AC-29): the capabilities-settled signal and the
+ * dedicated autorun request. `autorunRequest` is separate from `runRequest`, so "Run again" is
+ * unchanged, and it is evaluated once: when the gate's own read has completed and the capabilities
+ * read has settled (answered or failed), it is served if Run is runnable and dropped if not.
+ */
+describe('DC-01: capabilitiesSettled, and the autorun request evaluated once at the settle', () => {
+  const capabilitiesBody = (canManage: boolean) => ({
+    enabled: false,
+    canManage,
+    availableExecutionPrincipals: [],
+    localAuthorizationOnly: true,
+    policy: null,
+  });
+
+  /** A capabilities answer the test releases by hand, or one that fails. */
+  function serveCapabilities(kind: 'allowed' | 'denied' | 'fails', { held = false }: { held?: boolean } = {}) {
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    studioMockServer.use(
+      http.get(`${STUDIO_BASE}/tests/:id/schedule/capabilities`, async () => {
+        if (held) await gate;
+        return kind === 'fails'
+          ? HttpResponse.json({ error: 'NOT_FOUND', message: 'No' }, { status: 404 })
+          : HttpResponse.json(capabilitiesBody(kind === 'allowed'));
+      }),
+      http.post(`${STUDIO_BASE}/tests/:id/execute`, () =>
+        HttpResponse.json({ executionId: '77777777-7777-7777-7777-777777777779', status: 'PENDING' }, { status: 202 }),
+      ),
+    );
+    return { release };
+  }
+
+  const request = (testId: string, token = 1) => ({ token, testId });
+
+  describe('useRunGate().capabilitiesSettled', () => {
+    it('is false while the capabilities read is pending and true once it answers', async () => {
+      const capabilities = serveCapabilities('allowed', { held: true });
+      studioMockServer.use(http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fixtureDetail(readyDraft))));
+      const { result } = renderHook(() => useRunGate(readyDraft.id));
+
+      await waitFor(() => expect(result.current.readDone).toBe(true));
+      expect(result.current.capabilitiesSettled).toBe(false);
+      expect(result.current.executePermission).toBe('unknown');
+
+      await act(async () => capabilities.release());
+      await waitFor(() => expect(result.current.capabilitiesSettled).toBe(true));
+      expect(result.current.executePermission).toBe('allowed');
+    });
+
+    it('is true after a failed read too, with the permission still unknown', async () => {
+      serveCapabilities('fails');
+      studioMockServer.use(http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fixtureDetail(readyDraft))));
+      const { result } = renderHook(() => useRunGate(readyDraft.id));
+
+      await waitFor(() => expect(result.current.capabilitiesSettled).toBe(true));
+      expect(result.current.executePermission).toBe('unknown');
+    });
+
+    it('is true when the answer says canManage false', async () => {
+      serveCapabilities('denied');
+      studioMockServer.use(http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fixtureDetail(readyDraft))));
+      const { result } = renderHook(() => useRunGate(readyDraft.id));
+
+      await waitFor(() => expect(result.current.capabilitiesSettled).toBe(true));
+      expect(result.current.executePermission).toBe('denied');
+    });
+
+    it('resets when the test id changes, and is settled for the new id only when its read settles', async () => {
+      const capabilities = serveCapabilities('allowed');
+      studioMockServer.use(
+        http.get(`${STUDIO_BASE}/tests/:id`, ({ params }) =>
+          HttpResponse.json(fixtureDetail(params.id === unlearnedDraft.id ? unlearnedDraft : readyDraft)),
+        ),
+      );
+      const { result, rerender } = renderHook(({ id }) => useRunGate(id), { initialProps: { id: readyDraft.id } });
+      await waitFor(() => expect(result.current.capabilitiesSettled).toBe(true));
+
+      // The next id's capabilities answer is held, so a leftover `true` would show.
+      const second = serveCapabilities('allowed', { held: true });
+      rerender({ id: unlearnedDraft.id });
+      expect(result.current.capabilitiesSettled).toBe(false);
+      await waitFor(() => expect(result.current.readDone).toBe(true));
+      expect(result.current.capabilitiesSettled).toBe(false);
+      await act(async () => second.release());
+      await waitFor(() => expect(result.current.capabilitiesSettled).toBe(true));
+      capabilities.release();
+    });
+
+    it('is false with no test id', () => {
+      const { result } = renderHook(() => useRunGate(null));
+      expect(result.current.capabilitiesSettled).toBe(false);
+      expect(result.current.readDone).toBe(false);
+    });
+  });
+
+  describe('RunControl autorunRequest', () => {
+    it('is served once when the gate has settled and Run is runnable, and settles the page', async () => {
+      serveCapabilities('allowed');
+      const onAutorunSettled = vi.fn();
+      const view = serve(fixtureDetail(readyDraft), { autorunRequest: request(readyDraft.id), onAutorunSettled });
+
+      await waitFor(() => expect(executeRequests()).toHaveLength(1));
+      expect(onAutorunSettled).toHaveBeenCalledTimes(1);
+      // A fresh object with the same token (the page re-renders) is not a second request.
+      view.rerender(
+        <RunControl testId={readyDraft.id} autorunRequest={request(readyDraft.id)} onAutorunSettled={onAutorunSettled} />,
+      );
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(executeRequests()).toHaveLength(1);
+    });
+
+    it('waits for the capabilities read: nothing is sent before it settles, one execute after', async () => {
+      const capabilities = serveCapabilities('allowed', { held: true });
+      serve(fixtureDetail(readyDraft), { autorunRequest: request(readyDraft.id) });
+
+      const control = await settledControl();
+      await waitFor(() => expect(control).not.toBeDisabled());
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      expect(executeRequests()).toHaveLength(0);
+
+      await act(async () => capabilities.release());
+      await waitFor(() => expect(executeRequests()).toHaveLength(1));
+    });
+
+    it('a capabilities read that fails leaves the permission unknown and still runs, once', async () => {
+      serveCapabilities('fails');
+      serve(fixtureDetail(readyDraft), { autorunRequest: request(readyDraft.id) });
+
+      await waitFor(() => expect(executeRequests()).toHaveLength(1));
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(executeRequests()).toHaveLength(1);
+    });
+
+    it('is dropped when canManage is false, and the existing caption explains why', async () => {
+      serveCapabilities('denied');
+      serve(fixtureDetail(readyDraft), { autorunRequest: request(readyDraft.id) });
+
+      expect(await screen.findByTestId('run-not-permitted')).toBeInTheDocument();
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(executeRequests()).toHaveLength(0);
+    });
+
+    it('is dropped for a LEARNING test and does not fire later when it becomes READY', async () => {
+      serveCapabilities('allowed');
+      const startLearn = startLearnSpy();
+      let served: TestDetailDto = fixtureDetail(learningDraft);
+      studioMockServer.use(http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(served)));
+      const view = render(
+        <RunControl testId={learningDraft.id} startLearn={startLearn} autorunRequest={request(learningDraft.id)} />,
+      );
+      await settledControl();
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      expect(executeRequests()).toHaveLength(0);
+
+      served = { ...fixtureDetail(readyDraft), id: learningDraft.id };
+      view.rerender(
+        <RunControl
+          testId={learningDraft.id}
+          refreshToken={1}
+          startLearn={startLearn}
+          autorunRequest={request(learningDraft.id)}
+        />,
+      );
+      await waitFor(() => expect(screen.getByRole('button', { name: RUN_LABEL }).getAttribute('data-run-mode')).toBe('replay'));
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      expect(executeRequests()).toHaveLength(0);
+      expect(startLearn).not.toHaveBeenCalled();
+    });
+
+    it('is dropped when the draft has no steps, and the first typed step does not fire it', async () => {
+      serveCapabilities('allowed');
+      const view = serve(fixtureDetail(readyDraft), { hasSteps: false, autorunRequest: request(readyDraft.id) });
+      await settledControl();
+      expect(await screen.findByTestId('run-blocked-reason')).toBeInTheDocument();
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      expect(executeRequests()).toHaveLength(0);
+
+      view.rerender(
+        <RunControl testId={readyDraft.id} hasSteps autorunRequest={request(readyDraft.id)} startLearn={startLearnSpy()} />,
+      );
+      await waitFor(() => expect(screen.getByRole('button', { name: RUN_LABEL })).not.toBeDisabled());
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      expect(executeRequests()).toHaveLength(0);
+    });
+
+    it('an UNLEARNED test with steps starts exactly one guided session and no execute', async () => {
+      serveCapabilities('allowed');
+      const startLearn = startLearnSpy();
+      studioMockServer.use(http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fixtureDetail(unlearnedDraft))));
+      render(<RunControl testId={unlearnedDraft.id} startLearn={startLearn} autorunRequest={request(unlearnedDraft.id)} />);
+
+      await waitFor(() => expect(startLearn).toHaveBeenCalledTimes(1));
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(startLearn).toHaveBeenCalledTimes(1);
+      expect(executeRequests()).toHaveLength(0);
+    });
+
+    it('waits while the request is armed for another test id', async () => {
+      serveCapabilities('allowed');
+      serve(fixtureDetail(readyDraft), { autorunRequest: request(unlearnedDraft.id) });
+      await settledControl();
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      expect(executeRequests()).toHaveLength(0);
+    });
+
+    it('pressing Run before the settle drops it: one execute, none after the capabilities answer', async () => {
+      const capabilities = serveCapabilities('allowed', { held: true });
+      serve(fixtureDetail(readyDraft), { autorunRequest: request(readyDraft.id) });
+
+      const control = await settledControl();
+      await waitFor(() => expect(control).not.toBeDisabled());
+      await userEvent.click(control);
+      await waitFor(() => expect(executeRequests()).toHaveLength(1));
+
+      await act(async () => capabilities.release());
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      expect(executeRequests()).toHaveLength(1);
+    });
+
+    it('"Run again" (runRequest) is unchanged: each new token runs once, with or without an autorun', async () => {
+      serveCapabilities('allowed');
+      const view = serve(fixtureDetail(readyDraft), { autorunRequest: request(readyDraft.id), isRunning: false });
+      await waitFor(() => expect(executeRequests()).toHaveLength(1));
+
+      // The page shows the accepted run, it ends, and the gate is released (VAL-039); then "Run again".
+      view.rerender(<RunControl testId={readyDraft.id} isRunning />);
+      view.rerender(<RunControl testId={readyDraft.id} isRunning={false} runRequest={1} />);
+      await waitFor(() => expect(executeRequests()).toHaveLength(2));
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(executeRequests()).toHaveLength(2);
+    });
   });
 });

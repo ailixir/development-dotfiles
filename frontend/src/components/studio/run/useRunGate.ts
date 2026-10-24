@@ -125,6 +125,17 @@ export type ExecutePermission = 'allowed' | 'denied' | 'unknown';
 export interface RunGateState {
   readonly test: TestDetailDto | null;
   readonly executePermission: ExecutePermission;
+  /**
+   * True once the capabilities read for the current test has settled, answered or failed (STUDIO-UNIFY-001,
+   * DC-01). `executePermission` reads `'unknown'` both while that read is pending and after it failed,
+   * so it cannot say which; this can. It is false again as soon as the test id changes.
+   */
+  readonly capabilitiesSettled: boolean;
+  /**
+   * True once the first read of the current test has completed, with a test or with a failure. False
+   * for a test id whose read has not completed, however long ago another id's did.
+   */
+  readonly readDone: boolean;
   readonly loading: boolean;
   readonly loadError: string | null;
   /** The Run mode for the draft's declared state (`replay`, `learn`, `relearn` or `busy`). */
@@ -241,6 +252,10 @@ export function useRunGate(
   const [phase, setPhase] = useState<RunPhase>('idle');
   const [preparationMessage, setPreparationMessage] = useState<string | null>(null);
   const [executePermission, setExecutePermission] = useState<ExecutePermission>('unknown');
+  /** The test id whose capabilities read has settled (keyed by id, so a stale render never reads `true`). */
+  const [capabilitiesSettledFor, setCapabilitiesSettledFor] = useState<string | null>(null);
+  /** The test id whose first read has completed. */
+  const [readDoneFor, setReadDoneFor] = useState<string | null>(null);
   const [learnBlock, setLearnBlock] = useState<LearnStartBlock | null>(null);
 
   /**
@@ -302,17 +317,21 @@ export function useRunGate(
     setLoadError(null);
     setRefusal(null);
     setLearnBlock(null);
+    // A new test id has not completed its first read; a refresh of the same id keeps what it had.
+    setReadDoneFor((previous) => (previous === testId ? previous : null));
     const load = async (initial: boolean) => {
       try {
         const body = await studioApi.getTest(testId);
         if (!current) return;
         setTest(body);
         setLoading(false);
+        setReadDoneFor(testId);
       } catch (error: unknown) {
         if (!current) return;
         if (initial) setTest(null);
         setLoadError(readFailure(error).message || 'Could not read this test');
         setLoading(false);
+        setReadDoneFor(testId);
       }
     };
 
@@ -338,6 +357,7 @@ export function useRunGate(
   useEffect(() => {
     let current = true;
     setExecutePermission('unknown');
+    setCapabilitiesSettledFor(null);
     if (!testId) {
       return () => {
         current = false;
@@ -346,11 +366,15 @@ export function useRunGate(
     studioSchedulesApi
       .capabilities(testId)
       .then((capabilities) => {
-        if (!current || typeof capabilities?.canManage !== 'boolean') return;
-        setExecutePermission(capabilities.canManage ? 'allowed' : 'denied');
+        if (!current) return;
+        if (typeof capabilities?.canManage === 'boolean') {
+          setExecutePermission(capabilities.canManage ? 'allowed' : 'denied');
+        }
+        setCapabilitiesSettledFor(testId);
       })
       .catch(() => {
-        // Unknown, not denied: the read is advisory and the server decides on execute.
+        // Unknown, not denied: the read is advisory and the server decides on execute. It has settled.
+        if (current) setCapabilitiesSettledFor(testId);
       });
     return () => {
       current = false;
@@ -538,6 +562,8 @@ export function useRunGate(
   return {
     test,
     executePermission,
+    capabilitiesSettled: testId !== null && capabilitiesSettledFor === testId,
+    readDone: testId !== null && readDoneFor === testId,
     loading,
     loadError,
     mode,

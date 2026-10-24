@@ -101,7 +101,7 @@ async function capture(page: Page, label: string): Promise<void> {
   await once.close();
   const url = new URL(page.url());
   expect(url.origin).toBe(APP);
-  expect(url.pathname).toBe(`/checks/studio/${ID}`);
+  expect(url.pathname).toBe(`/checks/ui-tests/${ID}/studio`);
   const dialog = page.getByRole('dialog', { name: 'Variables', exact: true });
   await expect.poll(() => dialog.evaluate(node => {
     for (let current: Element | null = node; current; current = current.parentElement) {
@@ -171,7 +171,7 @@ for (const variant of [
         if (url.origin !== APP || prohibited) {
           refused.push(`${route.request().method()} ${url.origin}${url.pathname}`);
           await route.abort('blockedbyclient');
-        } else if (route.request().resourceType() === 'document' && url.pathname === `/checks/studio/${ID}`) {
+        } else if (route.request().resourceType() === 'document' && url.pathname === `/checks/ui-tests/${ID}/studio`) {
           // Root-scoped test-only HTML projection: never fetch a Google font/preconnect origin.
           const response = await route.fetch({ maxRedirects: 0, timeout: 10_000 });
           expect(response.status()).toBe(200);
@@ -230,8 +230,8 @@ for (const variant of [
       expect((await request.delete(`${PROXY}/__test/requests`)).status()).toBe(200);
       const browserCatalog = page.waitForResponse(r => r.request().method() === 'GET' && new URL(r.url()).pathname === '/api/v1/studio/tests');
       const browserDetail = page.waitForResponse(r => r.request().method() === 'GET' && new URL(r.url()).pathname === DRAFT);
-      await page.goto(`${APP}/checks/studio/${ID}`);
-      await expect(page).toHaveURL(`${APP}/checks/studio/${ID}`);
+      await page.goto(`${APP}/checks/ui-tests/${ID}/studio`);
+      await expect(page).toHaveURL(`${APP}/checks/ui-tests/${ID}/studio`);
       const loadedCatalog = (await (await browserCatalog).json()) as TestPage;
       expect(loadedCatalog.data.some(row => row.id === ID && row.name === before.name)).toBe(true);
       expect(await (await browserDetail).json()).toEqual(before);

@@ -74,6 +74,17 @@ export interface RunControlProps {
    */
   readonly runRequest?: number;
   /**
+   * `?autorun=1`, as its own request so "Run again" (`runRequest`) is unchanged (STUDIO-UNIFY-001,
+   * DC-01). It is evaluated **once**, when the gate has read the test, its capabilities read has
+   * settled (answered or failed) and the page has armed it with the draft's steps known. At that
+   * moment it is served if Run is runnable and dropped if not; it never waits for a later change
+   * (a learn ending, a refresh, a first typed step). A press of Run or Stop, a learn-from or "Run
+   * again" request before then drops it too. `testId` names the test it was armed for.
+   */
+  readonly autorunRequest?: { readonly token: number; readonly testId: string } | null;
+  /** The autorun request was served or dropped: the page forgets it. */
+  readonly onAutorunSettled?: () => void;
+  /**
    * Where the refusal alerts render (VAL-038). The control sits in the page
    * header, and a full alert there squeezes the title and pushes the actions around, so the page
    * gives it a full-width slot below the header. Without one the alerts render under the button.
@@ -120,6 +131,8 @@ export const RunControl: React.FC<RunControlProps> = ({
   onSaveBeforeRun,
   refreshToken,
   runRequest = 0,
+  autorunRequest = null,
+  onAutorunSettled,
   alertsContainer,
   startLearn,
   guidedStartRefusal = null,
@@ -178,12 +191,42 @@ export const RunControl: React.FC<RunControlProps> = ({
     return () => onPreparingChange?.(false);
   }, [gate.executeInFlight, isRunning, onPreparingChange]);
 
+  /**
+   * The autorun token last served or dropped. A user activation (Run, Stop, a re-run, a learn-from)
+   * marks the pending token consumed, so nothing is sent for it afterwards.
+   */
+  const settledAutorun = useRef(0);
+  const autorunTokenRef = useRef(autorunRequest?.token ?? 0);
+  autorunTokenRef.current = autorunRequest?.token ?? autorunTokenRef.current;
+  const dropAutorun = () => {
+    if (autorunTokenRef.current > settledAutorun.current) {
+      settledAutorun.current = autorunTokenRef.current;
+      onAutorunSettled?.();
+    }
+  };
+  const onAutorunSettledRef = useRef(onAutorunSettled);
+  onAutorunSettledRef.current = onAutorunSettled;
+  useEffect(() => {
+    if (autorunRequest === null || autorunRequest.token <= settledAutorun.current) return;
+    // Armed for another test (the route moved on): the page drops it; nothing is consumed here.
+    if (autorunRequest.testId !== testId) return;
+    // Not settled yet: the test read and the capabilities read must both have answered or failed.
+    if (gate.loading || !gate.readDone || !gate.capabilitiesSettled) return;
+    settledAutorun.current = autorunRequest.token;
+    onAutorunSettledRef.current?.();
+    if (!runnable || isRunning) return;
+    setLearnBlocked(false);
+    gate.run();
+  }, [autorunRequest, testId, gate, runnable, isRunning]);
+
   const servedRunRequest = useRef(0);
   useEffect(() => {
     if (runRequest <= servedRunRequest.current || !runnable || isRunning) return;
     servedRunRequest.current = runRequest;
+    dropAutorun();
     setLearnBlocked(false);
     gate.run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runRequest, runnable, isRunning, gate]);
 
   const servedLearnRequest = useRef(0);
@@ -192,12 +235,14 @@ export const RunControl: React.FC<RunControlProps> = ({
     // The token is consumed either way, so a request dropped while unreadable never fires later,
     // when the session reads: nothing starts on its own (W5-11).
     servedLearnRequest.current = learnRequest.token;
+    dropAutorun();
     if (sessionUnreadable) {
       setLearnBlocked(true);
       return;
     }
     setLearnBlocked(false);
     gate.learnFrom(learnRequest.request);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [learnRequest, isRunning, sessionUnreadable, gate]);
 
   const stopLabel = isStopping ? STOPPING_LABEL : STOP_LABEL;
@@ -273,6 +318,7 @@ export const RunControl: React.FC<RunControlProps> = ({
         }
         color={isRunning ? 'error' : 'success'}
         onClick={() => {
+          dropAutorun();
           if (isRunning) {
             onStop?.();
             return;

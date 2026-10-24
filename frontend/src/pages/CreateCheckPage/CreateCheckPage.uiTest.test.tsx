@@ -1,6 +1,5 @@
-import React from 'react';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { act, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
@@ -81,7 +80,12 @@ function serveCsi() {
     http.get(`${API_BASE}/csi`, () =>
       HttpResponse.json({ data: registeredCsis, page: 0, size: 20, totalElements: registeredCsis.length, totalPages: 1 }),
     ),
-    // Any Studio request other than the create is a failure of the 'no Studio request' rule.
+  );
+}
+
+/** Records any Studio request. Registered first in each test, so a test's own handler wins over it. */
+function recordStudioRequests() {
+  studioMockServer.use(
     http.all(`${API_BASE}/studio/*`, ({ request }) => {
       studioRequests.push(`${request.method} ${new URL(request.url).pathname}`);
       return HttpResponse.json({}, { status: 500 });
@@ -131,6 +135,9 @@ function renderPage(options: { url?: string; store?: Store; availability?: 'on' 
 
 const nameField = () => screen.getByRole('textbox', { name: /name/i });
 const environmentField = () => screen.getByRole('combobox', { name: /environment/i });
+// The regular Basic Information step labels its Environment select without linking the label, so find it by its label text.
+const regularEnvironmentField = () =>
+  within(screen.getAllByText(/^Environment/)[0].closest('.MuiFormControl-root') as HTMLElement).getByRole('combobox');
 const createButton = () => screen.getByRole('button', { name: 'Create and open Studio' });
 
 const cardRoot = () => screen.getByText(UI_TEST_CARD).closest('.MuiCard-root') as HTMLElement;
@@ -145,6 +152,11 @@ async function chooseSystem() {
   await waitForCsis();
   await user.click(screen.getByRole('combobox', { name: /System \(CSI\)/i }));
   await user.click(await screen.findByRole('option', { name: '178672: Payments' }, WAIT));
+}
+
+async function chooseRegularSystem() {
+  await user.click(await screen.findByRole('combobox', { name: /csi entity/i }, WAIT));
+  await user.click(await screen.findByRole('option', { name: '178672 - Payments' }, WAIT));
 }
 
 async function chooseEnvironment(environment: string) {
@@ -175,6 +187,7 @@ beforeEach(() => {
   createCalls = [];
   studioRequests = [];
   localStorage.clear();
+  recordStudioRequests();
 });
 afterEach(() => {
   studioMockServer.resetHandlers();
@@ -258,7 +271,8 @@ describe('Create Check -> UI Test: the one form (AC-01)', { timeout: 20_000 }, (
 
     expect(screen.getByText('Choose the system this test belongs to.')).toBeInTheDocument();
     expect(createButton()).toBeDisabled();
-    await user.click(createButton());
+    // A disabled button cannot be pressed; the click is dispatched anyway to prove that no request follows.
+    fireEvent.click(createButton());
     expect(createCalls).toHaveLength(0);
   });
 
@@ -277,7 +291,6 @@ describe('Create Check -> UI Test: environment precedence (AC-30)', { timeout: 2
   it('the card sets Development over a stored HTTP/Staging draft; UAT is kept; switching back keeps the fields', async () => {
     seedDraft(httpDraft);
     renderPage();
-    await waitForCsis();
     // The stored draft is restored: the four-step stepper is on screen with its name.
     expect(await screen.findByDisplayValue('Draft name')).toBeInTheDocument();
     expect(screen.getByText('Check Configuration')).toBeInTheDocument();
@@ -296,7 +309,7 @@ describe('Create Check -> UI Test: environment precedence (AC-30)', { timeout: 2
     expect(screen.getByRole('textbox', { name: /check name/i })).toHaveValue('Draft name');
     expect(screen.getByRole('textbox', { name: /description/i })).toHaveValue('Draft description');
     expect(screen.getByRole('combobox', { name: /csi entity/i })).toHaveValue('178672 - Payments');
-    expect(screen.getByRole('combobox', { name: /environment/i })).toHaveTextContent('UAT');
+    expect(regularEnvironmentField()).toHaveTextContent('UAT');
     expect(screen.queryByRole('button', { name: 'Create and open Studio' })).toBeNull();
     expect(screen.getByRole('button', { name: 'Next' })).toBeInTheDocument();
 
@@ -583,7 +596,7 @@ describe('Create Check: no Studio test picker on any type (AC-05)', { timeout: 3
     async (card) => {
       renderPage();
       await user.click(screen.getByText(card));
-      await chooseSystem();
+      await chooseRegularSystem();
       await user.click(await screen.findByRole('textbox', { name: /check name/i }));
       await user.paste('Some check');
 
@@ -599,7 +612,7 @@ describe('Create Check: no Studio test picker on any type (AC-05)', { timeout: 3
   it('the Review step has no UI-test-picker section', async () => {
     renderPage();
     await user.click(screen.getByText('HTTP/HTTPS Check'));
-    await chooseSystem();
+    await chooseRegularSystem();
     await user.click(await screen.findByRole('textbox', { name: /check name/i }));
     await user.paste('Some check');
     await user.click(screen.getByRole('button', { name: 'Next' }));

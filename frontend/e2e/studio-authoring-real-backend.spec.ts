@@ -124,19 +124,17 @@ test('create a draft, then add, edit and reorder steps and save: step IDs stay s
   test.setTimeout(120_000);
   const name = `E2E D5 authoring smoke ${new Date().toISOString().replace(/[:.]/g, '-')}`;
 
-  await test.step('create the draft from the tests list', async () => {
-    await page.goto('/checks/studio/tests');
-    // An empty list shows "Create Test" twice (header and empty state); either opens the dialog.
-    await page.getByRole('button', { name: 'Create Test' }).first().click();
-    const dialog = page.getByRole('dialog');
-    await expect(dialog.getByRole('heading', { name: 'New UI Test' })).toBeVisible();
-    await dialog.getByRole('textbox', { name: 'Name' }).fill(name);
+  await test.step('create the draft from Create Check, UI Test', async () => {
+    // The only create path: the UI Test card of Create Check (the Studio "Create Test" dialog is gone).
+    await page.goto('/checks/create?type=UI_TEST');
+    await expect(page.getByRole('button', { name: 'Create and open Studio' })).toBeVisible();
+    await page.getByRole('textbox', { name: /^Name/ }).fill(name);
 
     // Wait for the registry to load, then make sure a system is chosen.
-    const system = dialog.getByRole('combobox', { name: /System \(CSI\)/ });
-    await expect(dialog.getByText('Loading available systems…')).toHaveCount(0);
+    const system = page.getByRole('combobox', { name: /System \(CSI\)/ });
+    await expect(page.getByText('Loading available systems…')).toHaveCount(0);
     await expect(
-      dialog.getByText('No systems are available for new tests.'),
+      page.getByText('No systems are available for new tests.'),
       'the CSI registry is empty; see the preconditions test',
     ).toHaveCount(0);
     const chosen = (await system.innerText()).replace(/[\u200b\s]/g, '');
@@ -144,11 +142,12 @@ test('create a draft, then add, edit and reorder steps and save: step IDs stay s
       await system.click();
       await page.getByRole('option').first().click();
     }
-    await expect(dialog.getByText('The test will be saved under this system.')).toBeVisible();
+    await expect(page.getByText('The test will be saved under this system.')).toBeVisible();
 
-    await dialog.getByRole('button', { name: 'Create', exact: true }).click();
-    await page.waitForURL(/\/checks\/studio\/[0-9a-f-]{36}$/i);
-    createdId = new URL(page.url()).pathname.split('/').pop() ?? null;
+    await page.getByRole('button', { name: 'Create and open Studio' }).click();
+    await page.waitForURL(/\/checks\/ui-tests\/[0-9a-f-]{36}\/studio$/i);
+    // The id is the path segment before "/studio".
+    createdId = new URL(page.url()).pathname.split('/').slice(-2, -1)[0] ?? null;
     expect(createdId).toMatch(UUID);
     await expect(page.getByText('Add your first step')).toBeVisible();
   });

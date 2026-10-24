@@ -260,7 +260,8 @@ describe('round 067 D6: the "Previous run" chip follows the run', () => {
       ),
       http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fixtureDetail(unlearnedDraft))),
     );
-    renderPage();
+    // The editor shows the test its URL names, so it mounts on the id the fixture serves.
+    renderStudioAt(unlearnedDraft.id, <ChecksStudioPage />, { wrapper: StoreProvider });
     await waitFor(() => expect(screen.getByTestId('test-last-run-status')).toHaveTextContent('No run history'));
   }, 15000);
 });
